@@ -8,44 +8,22 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'g-teal': {
-                            DEFAULT: '#0d9488',
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            200: '#99f6e4',
-                            300: '#5eead4',
-                            400: '#2dd4bf',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59',
-                            900: '#134e4a',
-                        },
-                        'g-amber': {
-                            DEFAULT: '#f59e0b',
-                            400: '#fbbf24',
-                            500: '#f59e0b',
-                            600: '#d97706',
-                        },
-                        'g-surface': {
-                            DEFAULT: '#0f172a',
-                            50: '#f8fafc',
-                            100: '#f1f5f9',
-                            800: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
+                        'goulburn': {
+                            orange: '#f59e0b',
+                            'orange-hover': '#d97706',
+                            navy: '#1e293b',
+                            'navy-light': '#334155',
                         }
                     },
                     fontFamily: {
-                        'display': ['Space Grotesk', 'sans-serif'],
-                        'body': ['Inter', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
                     }
                 }
             }
@@ -53,170 +31,151 @@
     </script>
 
     <style>
-        :root {
-            --g-teal: #0d9488;
-            --g-teal-light: #14b8a6;
-            --g-amber: #f59e0b;
-            --g-surface: #0f172a;
-            --g-surface-light: #1e293b;
-            --g-text: #e2e8f0;
-            --g-text-muted: #94a3b8;
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--g-surface);
-            color: var(--g-text);
+            background-color: #fafafa;
         }
-
-        .font-display {
-            font-family: 'Space Grotesk', sans-serif;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #0d9488 0%, #f59e0b 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .g-surface {
-            background-color: rgba(30, 41, 59, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
-        }
-
-        .g-btn-primary {
-            background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+        
+        .btn-primary {
+            background-color: #f59e0b;
             color: white;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
-
-        .g-btn-primary:hover {
-            background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 30px -10px rgba(13, 148, 136, 0.5);
+        
+        .btn-primary:hover {
+            background-color: #d97706;
         }
-
-        .card-hover {
-            transition: all 0.3s ease;
+        
+        .btn-secondary {
+            background-color: #1e293b;
+            color: white;
+            transition: all 0.2s ease;
         }
-
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.25);
-            border-color: rgba(13, 148, 136, 0.3);
+        
+        .btn-secondary:hover {
+            background-color: #334155;
         }
-
+        
+        .card {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s ease;
+        }
+        
+        .card:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 4px 20px -4px rgba(245, 158, 11, 0.15);
+        }
+        
+        .stat-card {
+            background-color: white;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+        }
+        
         .feature-icon {
-            background: linear-gradient(135deg, rgba(13, 148, 136, 0.2) 0%, rgba(20, 184, 166, 0.1) 100%);
+            background-color: #fff7ed;
+            color: #f59e0b;
         }
-
-        .glow-teal {
-            box-shadow: 0 0 40px -10px rgba(13, 148, 136, 0.3);
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
         }
-
-        .animate-pulse-slow {
-            animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-<body class="min-h-screen bg-g-surface-950 text-slate-200 font-body">
+<body class="min-h-screen flex flex-col">
     
     <!-- Navigation -->
-    <nav class="border-b border-slate-800/50 bg-g-surface/80 backdrop-blur-xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 bg-gradient-to-br from-g-teal to-g-teal-500 rounded-lg flex items-center justify-center shadow-lg shadow-g-teal/20">
-                        <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                <a href="/" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-goulburn-orange rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-lg">g</span>
                     </div>
-                    <span class="font-display font-bold text-xl text-white tracking-tight">goulburn<span class="text-g-teal-500">.ai</span></span>
+                    <span class="font-semibold text-xl text-gray-900">goulburn<span class="text-goulburn-orange">.ai</span></span>
+                </a>
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+                    <a href="#" class="hover:text-gray-900 transition-colors">Explore</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">Case Studies</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">Docs</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">API</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">Sign In</a>
                 </div>
-                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-                    <a href="#" class="hover:text-white transition-colors duration-200">Overview</a>
-                    <a href="#" class="hover:text-white transition-colors duration-200">Integration</a>
-                    <a href="#" class="hover:text-white transition-colors duration-200">Documentation</a>
-                    <a href="#" class="text-g-teal-400 font-semibold">Partner Demo</a>
-                </div>
-                <button class="px-5 py-2.5 g-btn-primary rounded-lg text-sm font-semibold">
-                    Get API Key
+                <button class="px-5 py-2 btn-primary rounded-lg text-sm font-semibold">
+                    Get Started
                 </button>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-b from-g-teal/10 via-transparent to-transparent"></div>
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-96 bg-g-teal/5 blur-3xl rounded-full pointer-events-none"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
-            <div class="text-center max-w-3xl mx-auto">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-g-teal/10 border border-g-teal/30 text-g-teal-400 text-xs font-semibold tracking-wide uppercase mb-8">
-                    <span class="w-2 h-2 bg-g-teal-400 rounded-full animate-pulse"></span>
-                    Live Partner Environment
-                </div>
-                
-                <h1 class="font-display text-5xl md:text-7xl font-bold text-white mb-6 leading-[1.1] tracking-tight">
-                    Partner <span class="gradient-text">Integration</span> Demo
-                </h1>
-                
-                <p class="text-lg md:text-xl text-slate-400 mb-10 leading-relaxed max-w-2xl mx-auto font-light">
-                    Experience how goulburn.ai seamlessly integrates with your platform. 
-                    Test our APIs, explore webhooks, and simulate real-world verification scenarios.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button onclick="startDemo()" class="px-8 py-4 g-btn-primary rounded-xl font-display font-semibold text-base flex items-center justify-center gap-2 group">
-                        <span>Launch Interactive Demo</span>
-                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200"></i>
-                    </button>
-                    <button class="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-display font-semibold text-base transition-all duration-200 border border-slate-700 hover:border-slate-600">
-                        View Documentation
-                    </button>
-                </div>
+    <section class="bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-goulburn-orange text-xs font-semibold mb-6">
+                <span class="w-2 h-2 bg-goulburn-orange rounded-full"></span>
+                Live Partner Environment
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Partner <span class="text-goulburn-orange">Integration</span> Demo
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                Experience how goulburn.ai seamlessly integrates with your platform. 
+                Test our APIs, explore webhooks, and simulate real-world scenarios.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="startDemo()" class="px-8 py-3 btn-primary rounded-lg font-semibold flex items-center justify-center gap-2">
+                    <span>Launch Interactive Demo</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+                <button class="px-8 py-3 btn-secondary rounded-lg font-semibold">
+                    View Documentation
+                </button>
             </div>
         </div>
     </section>
 
     <!-- Demo Dashboard -->
-    <section id="demoDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+    <section id="demoDashboard" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden flex-1">
         <div class="grid lg:grid-cols-3 gap-6">
             
             <!-- API Playground -->
             <div class="lg:col-span-2 space-y-6">
-                <div class="g-surface rounded-2xl p-6 glow-teal">
+                <div class="card rounded-xl p-6">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 feature-icon rounded-xl flex items-center justify-center border border-g-teal/20">
-                                <i data-lucide="terminal" class="w-5 h-5 text-g-teal-400"></i>
+                            <div class="w-10 h-10 feature-icon rounded-lg flex items-center justify-center">
+                                <i data-lucide="terminal" class="w-5 h-5"></i>
                             </div>
                             <div>
-                                <h3 class="font-display font-semibold text-white text-lg">API Playground</h3>
-                                <p class="text-sm text-slate-500">Test endpoints in real-time</p>
+                                <h3 class="font-semibold text-gray-900">API Playground</h3>
+                                <p class="text-sm text-gray-500">Test endpoints in real-time</p>
                             </div>
                         </div>
-                        <select class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-g-teal focus:ring-1 focus:ring-g-teal/50 font-mono">
+                        <select class="bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:border-goulburn-orange">
                             <option>Production</option>
                             <option>Sandbox</option>
                         </select>
                     </div>
                     
                     <!-- Code Editor -->
-                    <div class="bg-slate-950 rounded-xl p-5 font-mono text-sm mb-5 border border-slate-800 shadow-inner">
-                        <div class="flex items-center gap-2 mb-4 text-slate-600 text-xs select-none">
-                            <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
-                            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
-                            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
-                            <span class="ml-3 text-slate-500">request.js</span>
+                    <div class="code-block rounded-lg p-4 font-mono text-sm mb-4 overflow-x-auto">
+                        <div class="flex items-center gap-2 mb-3 text-gray-500 text-xs">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                            <span class="ml-2 text-gray-400">request.js</span>
                         </div>
-                        <div class="text-slate-300 leading-relaxed text-sm overflow-x-auto">
+                        <div class="text-sm leading-relaxed">
                             <span class="text-purple-400">const</span> <span class="text-blue-400">response</span> = <span class="text-purple-400">await</span> <span class="text-yellow-400">fetch</span>(<span class="text-green-400">'https://api.goulburn.ai/v1/verify'</span>, {<br>
                             &nbsp;&nbsp;method: <span class="text-green-400">'POST'</span>,<br>
                             &nbsp;&nbsp;headers: {<br>
@@ -228,138 +187,132 @@
                         </div>
                     </div>
                     
-                    <button onclick="runSimulation()" class="w-full py-3.5 bg-g-teal/10 hover:bg-g-teal/20 border border-g-teal/50 text-g-teal-400 rounded-xl font-display font-semibold transition-all duration-200 flex items-center justify-center gap-2 group hover:shadow-lg hover:shadow-g-teal/10">
-                        <i data-lucide="play" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
+                    <button onclick="runSimulation()" class="w-full py-2.5 bg-orange-50 hover:bg-orange-100 text-goulburn-orange border border-orange-200 rounded-lg font-semibold text-sm transition-colors flex items-center justify-center gap-2">
+                        <i data-lucide="play" class="w-4 h-4"></i>
                         <span>Run Simulation</span>
                     </button>
                 </div>
 
                 <!-- Response Log -->
-                <div class="g-surface rounded-2xl p-6">
-                    <h3 class="font-display font-semibold text-white mb-4 flex items-center gap-2 text-lg">
-                        <i data-lucide="activity" class="w-5 h-5 text-g-teal-400"></i>
+                <div class="card rounded-xl p-6">
+                    <h3 class="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-goulburn-orange"></i>
                         Response Log
                     </h3>
-                    <div id="responseLog" class="space-y-2 max-h-56 overflow-y-auto font-mono text-sm pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                        <div class="text-slate-500 text-sm italic py-4 text-center">Click "Run Simulation" to see API responses...</div>
+                    <div id="responseLog" class="space-y-2 max-h-48 overflow-y-auto font-mono text-sm">
+                        <div class="text-gray-400 text-sm italic">Click "Run Simulation" to see API responses...</div>
                     </div>
                 </div>
             </div>
 
             <!-- Partner Stats -->
-            <div class="space-y-5">
-                <div class="g-surface rounded-2xl p-6 card-hover">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center border border-g-amber/20">
-                            <i data-lucide="zap" class="w-6 h-6 text-g-amber"></i>
+            <div class="space-y-4">
+                <div class="stat-card rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600">
+                            <i data-lucide="zap" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-sm text-slate-500 font-medium">API Latency</p>
-                            <p class="text-3xl font-display font-bold text-white" id="latency">24ms</p>
+                            <p class="text-sm text-gray-500">API Latency</p>
+                            <p class="text-2xl font-bold text-gray-900" id="latency">24ms</p>
                         </div>
                     </div>
-                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div class="bg-g-amber h-2 rounded-full transition-all duration-500" style="width: 15%"></div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-amber-500 h-2 rounded-full transition-all duration-500" style="width: 15%"></div>
                     </div>
                 </div>
 
-                <div class="g-surface rounded-2xl p-6 card-hover">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center border border-g-teal/20">
-                            <i data-lucide="check-circle" class="w-6 h-6 text-g-teal-400"></i>
+                <div class="stat-card rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-sm text-slate-500 font-medium">Success Rate</p>
-                            <p class="text-3xl font-display font-bold text-white" id="successRate">99.9%</p>
+                            <p class="text-sm text-gray-500">Success Rate</p>
+                            <p class="text-2xl font-bold text-gray-900" id="successRate">99.9%</p>
                         </div>
                     </div>
-                    <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                        <div class="bg-g-teal-500 h-2 rounded-full transition-all duration-500" style="width: 99%"></div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full transition-all duration-500" style="width: 99%"></div>
                     </div>
                 </div>
 
-                <div class="g-surface rounded-2xl p-6 card-hover">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center border border-blue-500/20">
-                            <i data-lucide="users" class="w-6 h-6 text-blue-400"></i>
+                <div class="stat-card rounded-xl p-5">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
+                            <i data-lucide="users" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-sm text-slate-500 font-medium">Active Agents</p>
-                            <p class="text-3xl font-display font-bold text-white" id="activeAgents">1,284</p>
+                            <p class="text-sm text-gray-500">Active Agents</p>
+                            <p class="text-2xl font-bold text-gray-900" id="activeAgents">1,284</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-2 text-sm text-g-teal-400 font-medium">
+                    <div class="flex items-center gap-2 text-sm text-green-600">
                         <i data-lucide="trending-up" class="w-4 h-4"></i>
                         <span>+12% this week</span>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="relative overflow-hidden rounded-2xl p-6 text-white">
-                    <div class="absolute inset-0 bg-gradient-to-br from-g-teal to-g-teal-700"></div>
-                    <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-50"></div>
-                    <div class="relative z-10">
-                        <h3 class="font-display font-semibold text-lg mb-2">Ready to integrate?</h3>
-                        <p class="text-sm text-white/80 mb-5 leading-relaxed">Get your API credentials and start building in minutes.</p>
-                        <button class="w-full py-3 bg-white/15 hover:bg-white/25 rounded-xl text-sm font-semibold transition-all duration-200 backdrop-blur-sm border border-white/20 hover:border-white/30">
-                            Request Access
-                        </button>
-                    </div>
+                <div class="bg-gradient-to-br from-goulburn-orange to-orange-600 rounded-xl p-5 text-white">
+                    <h3 class="font-semibold mb-1">Ready to integrate?</h3>
+                    <p class="text-sm text-white/80 mb-4">Get your API credentials and start building in minutes.</p>
+                    <button class="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-semibold transition-colors">
+                        Request Access
+                    </button>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Grid -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-        <div class="text-center mb-16">
-            <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-5 tracking-tight">Partner Capabilities</h2>
-            <p class="text-slate-400 text-lg max-w-2xl mx-auto font-light">Everything you need to integrate goulburn.ai into your platform</p>
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 flex-1">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-gray-900 mb-3">Partner Capabilities</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Everything you need to integrate goulburn.ai into your platform</p>
         </div>
         
         <div class="grid md:grid-cols-3 gap-6">
-            <div class="g-surface rounded-2xl p-8 card-hover group cursor-pointer">
-                <div class="w-14 h-14 feature-icon rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-g-teal/20">
-                    <i data-lucide="webhook" class="w-7 h-7 text-g-teal-400"></i>
+            <div class="card rounded-xl p-6 group cursor-pointer">
+                <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="webhook" class="w-6 h-6"></i>
                 </div>
-                <h3 class="font-display font-semibold text-white text-xl mb-3">Real-time Webhooks</h3>
-                <p class="text-slate-400 leading-relaxed">Instant notifications for agent verification events, status changes, and security alerts delivered to your endpoints.</p>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Real-time Webhooks</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Instant notifications for agent verification events, status changes, and security alerts.</p>
             </div>
 
-            <div class="g-surface rounded-2xl p-8 card-hover group cursor-pointer">
-                <div class="w-14 h-14 feature-icon rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-g-teal/20">
-                    <i data-lucide="shield" class="w-7 h-7 text-g-teal-400"></i>
+            <div class="card rounded-xl p-6 group cursor-pointer">
+                <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="shield" class="w-6 h-6"></i>
                 </div>
-                <h3 class="font-display font-semibold text-white text-xl mb-3">Enterprise Security</h3>
-                <p class="text-slate-400 leading-relaxed">SOC 2 compliant infrastructure with end-to-end encryption, audit logging, and zero-trust architecture.</p>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">Enterprise Security</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">SOC 2 compliant infrastructure with end-to-end encryption and audit logging.</p>
             </div>
 
-            <div class="g-surface rounded-2xl p-8 card-hover group cursor-pointer">
-                <div class="w-14 h-14 feature-icon rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 border border-g-amber/20">
-                    <i data-lucide="gauge" class="w-7 h-7 text-g-amber"></i>
+            <div class="card rounded-xl p-6 group cursor-pointer">
+                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="gauge" class="w-6 h-6"></i>
                 </div>
-                <h3 class="font-display font-semibold text-white text-xl mb-3">99.99% Uptime SLA</h3>
-                <p class="text-slate-400 leading-relaxed">Globally distributed infrastructure with automatic failover, redundancy, and sub-50ms response times.</p>
+                <h3 class="font-semibold text-gray-900 text-lg mb-2">99.99% Uptime SLA</h3>
+                <p class="text-gray-600 text-sm leading-relaxed">Globally distributed infrastructure with automatic failover and redundancy.</p>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-slate-800/50 bg-g-surface-950 mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gradient-to-br from-g-teal to-g-teal-600 rounded-lg flex items-center justify-center">
-                        <i data-lucide="shield-check" class="w-4 h-4 text-white"></i>
-                    </div>
-                    <span class="font-display font-bold text-lg text-white">goulburn.ai</span>
+    <footer class="bg-white border-t border-gray-200 py-8 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-goulburn-orange rounded flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">g</span>
                 </div>
-                <p class="text-slate-600 text-sm">© 2026 goulburn.ai — Partner Demo Environment</p>
-                <div class="flex gap-8 text-slate-500 text-sm font-medium">
-                    <a href="#" class="hover:text-g-teal-400 transition-colors duration-200">Privacy</a>
-                    <a href="#" class="hover:text-g-teal-400 transition-colors duration-200">Terms</a>
-                    <a href="#" class="hover:text-g-teal-400 transition-colors duration-200">Support</a>
-                </div>
+                <span class="font-semibold text-gray-900">goulburn.ai</span>
+            </div>
+            <p class="text-gray-400 text-sm">© 2026 goulburn.ai — Partner Demo Environment</p>
+            <div class="flex gap-6 text-gray-500 text-sm">
+                <a href="#" class="hover:text-goulburn-orange transition-colors">Privacy</a>
+                <a href="#" class="hover:text-goulburn-orange transition-colors">Terms</a>
+                <a href="#" class="hover:text-goulburn-orange transition-colors">Support</a>
             </div>
         </div>
     </footer>
@@ -368,59 +321,60 @@
         lucide.createIcons();
 
         function startDemo() {
-            const dashboard = document.getElementById('demoDashboard');
-            dashboard.classList.remove('hidden');
-            dashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('demoDashboard').classList.remove('hidden');
+            document.getElementById('demoDashboard').scrollIntoView({ behavior: 'smooth' });
             startMetricsSimulation();
         }
 
         function runSimulation() {
             const log = document.getElementById('responseLog');
-            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const timestamp = new Date().toLocaleTimeString();
             
             const scenarios = [
-                { status: 'success', message: 'Agent verified successfully', code: 200, color: 'text-g-teal-400' },
-                { status: 'success', message: 'Webhook delivered to endpoint', code: 200, color: 'text-g-teal-400' },
-                { status: 'warning', message: 'Rate limit approaching (80%)', code: 429, color: 'text-g-amber' },
-                { status: 'success', message: 'Token refreshed automatically', code: 200, color: 'text-g-teal-400' },
-                { status: 'success', message: 'Audit log recorded', code: 201, color: 'text-g-teal-400' }
+                { status: 'success', message: 'Agent verified successfully', code: 200 },
+                { status: 'success', message: 'Webhook delivered to endpoint', code: 200 },
+                { status: 'warning', message: 'Rate limit approaching (80%)', code: 429 },
+                { status: 'success', message: 'Token refreshed automatically', code: 200 }
             ];
             
             const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            const colors = {
+                success: 'text-green-600',
+                warning: 'text-amber-600',
+                error: 'text-red-600'
+            };
             
-            // Clear initial message if present
+            // Clear initial message
             if (log.children.length === 1 && log.children[0].classList.contains('italic')) {
                 log.innerHTML = '';
             }
             
             const entry = document.createElement('div');
-            entry.className = 'flex items-center gap-3 text-sm p-3 rounded-lg bg-slate-900/50 border border-slate-800 animate-pulse';
-            entry.style.animation = 'fadeIn 0.3s ease-out';
+            entry.className = 'flex items-center gap-3 text-sm p-2 rounded bg-gray-50 fade-in';
             entry.innerHTML = `
-                <span class="text-slate-600 font-mono text-xs">${timestamp}</span>
-                <span class="${scenario.color} font-mono font-semibold text-xs">[${scenario.code}]</span>
-                <span class="text-slate-300">${scenario.message}</span>
+                <span class="text-gray-400 font-mono text-xs">${timestamp}</span>
+                <span class="${colors[scenario.status]} font-mono font-medium">${scenario.code}</span>
+                <span class="text-gray-700">${scenario.message}</span>
             `;
             
             log.insertBefore(entry, log.firstChild);
             
-            // Keep only last 10 entries
-            while (log.children.length > 10) {
+            // Keep only last 8 entries
+            while (log.children.length > 8) {
                 log.removeChild(log.lastChild);
             }
             
-            // Update metrics randomly
-            document.getElementById('latency').textContent = Math.floor(Math.random() * 40 + 15) + 'ms';
-            document.getElementById('activeAgents').textContent = (1284 + Math.floor(Math.random() * 100)).toLocaleString();
+            // Update metrics
+            document.getElementById('latency').textContent = Math.floor(Math.random() * 50 + 10) + 'ms';
+            document.getElementById('activeAgents').textContent = (1284 + Math.floor(Math.random() * 50)).toLocaleString();
         }
 
         function startMetricsSimulation() {
             setInterval(() => {
-                if (Math.random() > 0.6) {
-                    const latency = Math.floor(Math.random() * 35 + 15);
-                    document.getElementById('latency').textContent = latency + 'ms';
+                if (Math.random() > 0.7) {
+                    document.getElementById('latency').textContent = Math.floor(Math.random() * 30 + 15) + 'ms';
                 }
-            }, 3000);
+            }, 2000);
         }
     </script>
 </body>
