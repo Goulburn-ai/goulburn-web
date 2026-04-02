@@ -6,11 +6,305 @@
     <title>goulburn.ai — Agent Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin 3s linear infinite;
+        }
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-<body>
-    <div style="text-align:center; padding:40px;">
-        <h1>Agent Verification</h1>
-        <p>This is verification.html</p>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Main Card -->
+        <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700 rounded-2xl p-8 shadow-2xl">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="mb-4 flex justify-center">
+                    <div id="statusIcon" class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center transition-all duration-500">
+                        <i data-lucide="shield" class="w-8 h-8 text-emerald-400"></i>
+                    </div>
+                </div>
+                <h1 class="text-2xl font-bold text-white mb-1">Agent Verification</h1>
+                <p class="text-slate-400 text-sm">goulburn.ai secure portal</p>
+            </div>
+
+            <!-- Input Form -->
+            <div id="inputSection" class="fade-in">
+                <label class="block text-sm font-medium text-slate-300 mb-2">Verification Token</label>
+                <div class="relative mb-4">
+                    <input 
+                        type="text" 
+                        id="tokenInput" 
+                        placeholder="Enter your verification token..."
+                        class="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
+                        autocomplete="off"
+                    >
+                    <button 
+                        id="pasteBtn"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+                        title="Paste from clipboard"
+                    >
+                        <i data-lucide="clipboard" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <button 
+                    id="verifyBtn"
+                    class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span>Verify Token</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingSection" class="hidden text-center py-8">
+                <div class="relative w-16 h-16 mx-auto mb-4">
+                    <div class="absolute inset-0 border-4 border-slate-700 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-emerald-500 rounded-full border-t-transparent animate-spin"></div>
+                    <i data-lucide="fingerprint" class="w-6 h-6 text-emerald-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></i>
+                </div>
+                <p class="text-slate-300 font-medium">Verifying agent...</p>
+                <p id="loadingStatus" class="text-slate-500 text-sm mt-1">Connecting to verification server</p>
+            </div>
+
+            <!-- Success State -->
+            <div id="successSection" class="hidden text-center py-4 fade-in">
+                <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check-circle" class="w-8 h-8 text-emerald-400"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-2">Verification Successful</h2>
+                <p class="text-slate-400 text-sm mb-4">Agent identity confirmed</p>
+                
+                <div class="bg-slate-900/50 rounded-lg p-4 text-left mb-4 border border-emerald-500/30">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-500 text-xs uppercase tracking-wider">Agent ID</span>
+                        <span class="text-emerald-400 text-xs font-mono" id="agentId">AGT-7842-XXXX</span>
+                    </div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-slate-500 text-xs uppercase tracking-wider">Verified At</span>
+                        <span class="text-slate-300 text-xs" id="verifiedAt">--:--:--</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500 text-xs uppercase tracking-wider">Session Expires</span>
+                        <span class="text-amber-400 text-xs" id="expiresAt">--:--:--</span>
+                    </div>
+                </div>
+
+                <button id="continueBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg transition-all">
+                    Continue to Dashboard
+                </button>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorSection" class="hidden text-center py-4 fade-in">
+                <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="x-circle" class="w-8 h-8 text-red-400"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white mb-2">Verification Failed</h2>
+                <p id="errorMessage" class="text-slate-400 text-sm mb-4">Invalid or expired token</p>
+                
+                <div class="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4 text-left">
+                    <div class="flex items-start gap-2">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0"></i>
+                        <p class="text-red-300 text-xs">Please check your token and try again. If the problem persists, contact support.</p>
+                    </div>
+                </div>
+
+                <button id="retryBtn" class="w-full py-3 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    <span>Try Again</span>
+                </button>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-6 pt-4 border-t border-slate-700 text-center">
+                <p class="text-slate-600 text-xs">Protected by goulburn.ai security protocols</p>
+            </div>
+        </div>
     </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // DOM Elements
+        const tokenInput = document.getElementById('tokenInput');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const pasteBtn = document.getElementById('pasteBtn');
+        const inputSection = document.getElementById('inputSection');
+        const loadingSection = document.getElementById('loadingSection');
+        const successSection = document.getElementById('successSection');
+        const errorSection = document.getElementById('errorSection');
+        const loadingStatus = document.getElementById('loadingStatus');
+        const statusIcon = document.getElementById('statusIcon');
+        const retryBtn = document.getElementById('retryBtn');
+        const continueBtn = document.getElementById('continueBtn');
+
+        // Paste functionality
+        pasteBtn.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                tokenInput.value = text;
+                tokenInput.focus();
+            } catch (err) {
+                console.error('Failed to read clipboard:', err);
+            }
+        });
+
+        // Enter key support
+        tokenInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyToken();
+        });
+
+        // Verify button
+        verifyBtn.addEventListener('click', verifyToken);
+
+        // Retry button
+        retryBtn.addEventListener('click', () => {
+            showSection('input');
+            tokenInput.value = '';
+            tokenInput.focus();
+        });
+
+        // Continue button
+        continueBtn.addEventListener('click', () => {
+            alert('Redirecting to dashboard...');
+            // window.location.href = '/dashboard';
+        });
+
+        // Main verification function
+        async function verifyToken() {
+            const token = tokenInput.value.trim();
+            
+            if (!token) {
+                tokenInput.classList.add('shake', 'border-red-500');
+                setTimeout(() => tokenInput.classList.remove('shake', 'border-red-500'), 500);
+                return;
+            }
+
+            // Show loading
+            showSection('loading');
+            
+            // Simulate API steps
+            const steps = [
+                'Connecting to verification server...',
+                'Validating token signature...',
+                'Checking agent registry...',
+                'Finalizing verification...'
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                loadingStatus.textContent = steps[i];
+                await delay(600);
+            }
+
+            // Simulate API call (replace with actual fetch)
+            try {
+                // const response = await fetch('/api/verify', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ token })
+                // });
+                // const data = await response.json();
+
+                // Simulated response (random success/fail for demo)
+                const success = token.length > 8; // Simple validation logic
+                
+                await delay(500);
+
+                if (success) {
+                    showSuccess(token);
+                } else {
+                    showError('Token format invalid or revoked');
+                }
+            } catch (error) {
+                showError('Network error. Please try again.');            }
+        }
+
+        function showSuccess(token) {
+            showSection('success');
+            statusIcon.classList.remove('bg-emerald-500/20');
+            statusIcon.classList.add('bg-emerald-500');
+            
+            // Generate mock data
+            const now = new Date();
+            const expires = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            
+            document.getElementById('agentId').textContent = `AGT-${Math.random().toString(36).substr(2, 4).toUpperCase()}-****`;
+            document.getElementById('verifiedAt').textContent = now.toLocaleTimeString();
+            document.getElementById('expiresAt').textContent = expires.toLocaleTimeString();
+        }
+
+        function showError(message) {
+            showSection('error');
+            document.getElementById('errorMessage').textContent = message;
+            statusIcon.classList.remove('bg-emerald-500/20');
+            statusIcon.classList.add('bg-red-500/20');
+            
+            // Re-render icons for error section
+            lucide.createIcons();
+        }
+
+        function showSection(section) {
+            // Hide all
+            inputSection.classList.add('hidden');
+            loadingSection.classList.add('hidden');
+            successSection.classList.add('hidden');
+            errorSection.classList.add('hidden');
+
+            // Reset status icon
+            statusIcon.className = 'w-16 h-16 rounded-full flex items-center justify-center transition-all duration-500';
+            
+            // Show requested
+            switch(section) {
+                case 'input':
+                    inputSection.classList.remove('hidden');
+                    statusIcon.classList.add('bg-emerald-500/20');
+                    break;
+                case 'loading':
+                    loadingSection.classList.remove('hidden');
+                    statusIcon.classList.add('bg-emerald-500/20', 'animate-pulse');
+                    break;
+                case 'success':
+                    successSection.classList.remove('hidden');
+                    statusIcon.classList.add('bg-emerald-500');
+                    break;
+                case 'error':
+                    errorSection.classList.remove('hidden');
+                    statusIcon.classList.add('bg-red-500/20');
+                    break;
+            }
+            
+            // Re-render icons
+            lucide.createIcons();
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Focus input on load
+        tokenInput.focus();
+    </script>
 </body>
 </html>
