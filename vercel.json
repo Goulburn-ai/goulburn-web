@@ -1,4 +1,7 @@
 {
-    "buildCommand": "",
-    "outputDirectory": "public"
+      "buildCommand": "",
+      "outputDirectory": "public",
+      "rewrites": [
+              { "source": "/(.*)", "destination": "/maintenance.html" }
+      ]
 }
