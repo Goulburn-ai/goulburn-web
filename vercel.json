@@ -1,8 +1,10 @@
 {
-        "buildCommand": "",
-        "outputDirectory": "public",
-        "routes": [
+          "buildCommand": "",
+            "outputDirectory": "public",
+              "routes": [
                   { "src": "/favicon.svg", "dest": "/favicon.svg" },
-                  { "src": "/(.*)", "dest": "/maintenance.html" }
-        ]
-}
+                      { "src": "/preview", "dest": "/index.html" },
+                          { "src": "/preview/(.*)", "dest": "/$1" },
+                              { "src": "/(.*)", "dest": "/maintenance.html" }
+                                ]
+                                }
