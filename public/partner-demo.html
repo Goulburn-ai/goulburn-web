@@ -2,12 +2,306 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Partner Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Demo — goulburn.ai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3);
+        }
+        .feature-icon {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(59, 130, 246, 0.2) 100%);
+        }
+    </style>
 </head>
-<body>
-    <div style="text-align:center; padding:40px;">
-        <h1>Partner Demo</h1>
-        <p>This is partner-demo.html</p>
-    </div>
+<body class="min-h-screen bg-slate-950 text-slate-200">
+    
+    <!-- Navigation -->
+    <nav class="border-b border-slate-800 bg-slate-900/50 backdrop-blur-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-lg flex items-center justify-center">
+                        <i data-lucide="layers" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="font-bold text-xl text-white">goulburn<span class="text-emerald-400">.ai</span></span>
+                </div>
+                <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                    <a href="#" class="hover:text-white transition-colors">Overview</a>
+                    <a href="#" class="hover:text-white transition-colors">Integration</a>
+                    <a href="#" class="hover:text-white transition-colors">Documentation</a>
+                    <a href="#" class="text-emerald-400">Partner Demo</a>
+                </div>
+                <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-medium transition-colors">
+                    Get API Key
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
+            <div class="text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-medium mb-6">
+                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                    Live Partner Environment
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                    Partner <span class="gradient-text">Integration</span> Demo
+                </h1>
+                <p class="text-xl text-slate-400 mb-8 leading-relaxed">
+                    Experience how goulburn.ai seamlessly integrates with your platform. 
+                    Test our APIs, explore webhooks, and simulate real-world scenarios.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="startDemo()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 group">
+                        <span>Launch Interactive Demo</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    <button class="px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-all border border-slate-700">
+                        View Documentation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Dashboard -->
+    <section id="demoDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 hidden">
+        <div class="grid lg:grid-cols-3 gap-6">
+            
+            <!-- API Playground -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 feature-icon rounded-lg flex items-center justify-center">
+                                <i data-lucide="terminal" class="w-5 h-5 text-emerald-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-white">API Playground</h3>
+                                <p class="text-sm text-slate-500">Test endpoints in real-time</p>
+                            </div>
+                        </div>
+                        <select class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1 text-sm text-slate-300 focus:outline-none focus:border-emerald-500">
+                            <option>Production</option>
+                            <option>Sandbox</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Code Editor -->
+                    <div class="bg-slate-950 rounded-xl p-4 font-mono text-sm mb-4 border border-slate-800">
+                        <div class="flex items-center gap-2 mb-3 text-slate-500 text-xs">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            <span class="ml-2">request.js</span>
+                        </div>
+                        <div class="text-slate-300">
+                            <span class="text-purple-400">const</span> <span class="text-blue-400">response</span> = <span class="text-purple-400">await</span> <span class="text-yellow-400">fetch</span>(<span class="text-green-400">'https://api.goulburn.ai/v1/verify'</span>, {<br>
+                            &nbsp;&nbsp;method: <span class="text-green-400">'POST'</span>,<br>
+                            &nbsp;&nbsp;headers: {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-green-400">'Authorization'</span>: <span class="text-green-400">'Bearer sk_live_...'</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-green-400">'Content-Type'</span>: <span class="text-green-400">'application/json'</span><br>
+                            &nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;body: <span class="text-yellow-400">JSON</span>.<span class="text-yellow-400">stringify</span>({ token: <span class="text-green-400">'agt_1234567890'</span> })<br>
+                            });
+                        </div>
+                    </div>
+                    
+                    <button onclick="runSimulation()" class="w-full py-3 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/50 text-emerald-400 rounded-lg font-medium transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="play" class="w-4 h-4"></i>
+                        <span>Run Simulation</span>
+                    </button>
+                </div>
+
+                <!-- Response Log -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="font-semibold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+                        Response Log
+                    </h3>
+                    <div id="responseLog" class="space-y-2 max-h-48 overflow-y-auto">
+                        <div class="text-slate-500 text-sm italic">Click "Run Simulation" to see API responses...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partner Stats -->
+            <div class="space-y-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 feature-icon rounded-lg flex items-center justify-center">
+                            <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">API Latency</p>
+                            <p class="text-2xl font-bold text-white" id="latency">24ms</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2">
+                        <div class="bg-amber-400 h-2 rounded-full" style="width: 15%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 feature-icon rounded-lg flex items-center justify-center">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Success Rate</p>
+                            <p class="text-2xl font-bold text-white" id="successRate">99.9%</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-2">
+                        <div class="bg-emerald-400 h-2 rounded-full" style="width: 99%"></div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 feature-icon rounded-lg flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-slate-500">Active Agents</p>
+                            <p class="text-2xl font-bold text-white" id="activeAgents">1,284</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-emerald-400">
+                        <i data-lucide="trending-up" class="w-4 h-4"></i>
+                        <span>+12% this week</span>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-gradient-to-br from-emerald-600 to-blue-600 rounded-2xl p-6 text-white">
+                    <h3 class="font-semibold mb-2">Ready to integrate?</h3>
+                    <p class="text-sm text-white/80 mb-4">Get your API credentials and start building in minutes.</p>
+                    <button class="w-full py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm">
+                        Request Access
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold text-white mb-4">Partner Capabilities</h2>
+            <p class="text-slate-400 max-w-2xl mx-auto">Everything you need to integrate goulburn.ai into your platform</p>
+        </div>
+        
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover group cursor-pointer">
+                <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="webhook" class="w-6 h-6 text-emerald-400"></i>
+                </div>
+                <h3 class="font-semibold text-white mb-2">Real-time Webhooks</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Instant notifications for agent verification events, status changes, and security alerts.</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover group cursor-pointer">
+                <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="shield" class="w-6 h-6 text-blue-400"></i>
+                </div>
+                <h3 class="font-semibold text-white mb-2">Enterprise Security</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">SOC 2 compliant infrastructure with end-to-end encryption and audit logging.</p>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 card-hover group cursor-pointer">
+                <div class="w-12 h-12 feature-icon rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <i data-lucide="gauge" class="w-6 h-6 text-purple-400"></i>
+                </div>
+                <h3 class="font-semibold text-white mb-2">99.99% Uptime SLA</h3>
+                <p class="text-slate-400 text-sm leading-relaxed">Globally distributed infrastructure with automatic failover and redundancy.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 bg-slate-900/50 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-gradient-to-br from-emerald-500 to-blue-500 rounded flex items-center justify-center">
+                        <i data-lucide="layers" class="w-3 h-3 text-white"></i>
+                    </div>
+                    <span class="font-semibold text-white">goulburn.ai</span>
+                </div>
+                <p class="text-slate-500 text-sm">© 2026 goulburn.ai — Partner Demo Environment</p>
+                <div class="flex gap-6 text-slate-400">
+                    <a href="#" class="hover:text-white transition-colors">Privacy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms</a>
+                    <a href="#" class="hover:text-white transition-colors">Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        function startDemo() {
+            document.getElementById('demoDashboard').classList.remove('hidden');
+            document.getElementById('demoDashboard').scrollIntoView({ behavior: 'smooth' });
+            startMetricsSimulation();
+        }
+
+        function runSimulation() {
+            const log = document.getElementById('responseLog');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const scenarios = [
+                { status: 'success', message: 'Agent verified successfully', code: 200 },
+                { status: 'success', message: 'Webhook delivered to endpoint', code: 200 },
+                { status: 'warning', message: 'Rate limit approaching (80%)', code: 429 },
+                { status: 'success', message: 'Token refreshed automatically', code: 200 }
+            ];
+            
+            const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+            const colors = {
+                success: 'text-emerald-400',
+                warning: 'text-amber-400',
+                error: 'text-red-400'
+            };
+            
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center gap-3 text-sm p-2 rounded bg-slate-800/50 animate-pulse';
+            entry.innerHTML = `
+                <span class="text-slate-500 font-mono text-xs">${timestamp}</span>
+                <span class="${colors[scenario.status]} font-mono">[${scenario.code}]</span>
+                <span class="text-slate-300">${scenario.message}</span>
+            `;
+            
+            log.insertBefore(entry, log.firstChild);
+            
+            // Update metrics randomly
+            document.getElementById('latency').textContent = Math.floor(Math.random() * 50 + 10) + 'ms';
+            document.getElementById('activeAgents').textContent = (1284 + Math.floor(Math.random() * 50)).toLocaleString();
+        }
+
+        function startMetricsSimulation() {
+            setInterval(() => {
+                if (Math.random() > 0.7) {
+                    document.getElementById('latency').textContent = Math.floor(Math.random() * 30 + 15) + 'ms';
+                }
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
