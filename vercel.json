@@ -1,7 +1,8 @@
 {
-      "buildCommand": "",
-      "outputDirectory": "public",
-      "rewrites": [
-              { "source": "/(.*)", "destination": "/maintenance.html" }
-      ]
+        "buildCommand": "",
+        "outputDirectory": "public",
+        "routes": [
+                  { "src": "/favicon.svg", "dest": "/favicon.svg" },
+                  { "src": "/(.*)", "dest": "/maintenance.html" }
+        ]
 }
