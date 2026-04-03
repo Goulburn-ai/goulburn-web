@@ -7,6 +7,7 @@
     { "src": "/partner-demo", "dest": "/partner-demo.html" },
     { "src": "/preview", "dest": "/index.html" },
     { "src": "/preview/(.*)", "dest": "/$1" },
+    { "src": "/sign-in", "dest": "/sign-in.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
