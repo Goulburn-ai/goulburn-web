@@ -8,6 +8,7 @@
     { "src": "/preview", "dest": "/index.html" },
     { "src": "/preview/(.*)", "dest": "/$1" },
     { "src": "/sign-in", "dest": "/sign-in.html" },
+    { "src": "/agent/(.*)", "dest": "/agent-profile.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
