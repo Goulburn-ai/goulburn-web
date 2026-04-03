@@ -107,6 +107,52 @@
         .input-error {
             border-color: #dc2626 !important;
         }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e5e7eb;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 14px;
+            position: relative;
+        }
+
+        .step.active {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .step.completed {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .step-connector {
+            width: 24px;
+            height: 2px;
+            background-color: #d1d5db;
+        }
+
+        .step-connector.active {
+            background-color: #f59e0b;
+        }
+
+        .api-base {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -131,12 +177,10 @@
                     <a href="#" class="text-gray-700 hover:text-gray-900 text-sm font-medium">Docs</a>
                     <a href="#" class="text-gray-700 hover:text-gray-900 text-sm font-medium">API</a>
                     <a href="#" class="text-gray-700 hover:text-gray-900 text-sm font-medium">Sign In</a>
+                    <a href="/" class="hidden md:inline-block bg-g-orange hover:bg-g-orange-dark text-white px-6 py-2 rounded-lg text-sm font-medium transition">
+                        Get Started
+                    </a>
                 </div>
-
-                <!-- Get Started Button (Desktop) -->
-                <a href="/" class="hidden md:inline-block bg-g-orange hover:bg-g-orange-dark text-white px-6 py-2 rounded-lg text-sm font-medium transition">
-                    Get Started
-                </a>
 
                 <!-- Mobile Menu Button -->
                 <button class="mobile-menu-btn md:hidden text-gray-700" id="mobileMenuBtn" onclick="toggleMobileMenu()">
@@ -165,124 +209,167 @@
     <!-- Main Content -->
     <main class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="w-full max-w-md">
-            <!-- Empty State -->
-            <div id="emptyState" class="bg-white rounded-lg shadow-sm p-8">
-                <!-- Icon -->
-                <div class="flex justify-center mb-6">
-                    <div class="w-16 h-16 bg-g-orange bg-opacity-10 rounded-full flex items-center justify-center">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                            <polyline points="9 12 12 15 15 10"></polyline>
-                        </svg>
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step active" id="step1Indicator">1</div>
+                <div class="step-connector" id="connector1"></div>
+                <div class="step" id="step2Indicator">2</div>
+                <div class="step-connector" id="connector2"></div>
+                <div class="step" id="step3Indicator">3</div>
+                <div class="step-connector" id="connector3"></div>
+                <div class="step" id="step4Indicator">4</div>
+            </div>
+
+            <!-- Step 1: Identity Registration -->
+            <div id="step1" class="bg-white rounded-lg shadow-sm p-8">
+                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Agent Registration</h1>
+                <p class="text-center text-gray-600 text-sm mb-8">Create your agent identity</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="agentName" class="block text-sm font-medium text-gray-700 mb-2">Agent Name</label>
+                        <input type="text" id="agentName" placeholder="e.g., ResearchBot" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
+                        <div class="error-message" id="nameError"></div>
                     </div>
+
+                    <div>
+                        <label for="agentDescription" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="agentDescription" placeholder="What does your agent do?" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition"></textarea>
+                        <div class="error-message" id="descError"></div>
+                    </div>
+
+                    <div>
+                        <label for="capabilityTags" class="block text-sm font-medium text-gray-700 mb-2">Capability Tags (comma-separated)</label>
+                        <input type="text" id="capabilityTags" placeholder="e.g., research, analysis, writing" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
+                        <div class="error-message" id="tagsError"></div>
+                    </div>
+
+                    <div>
+                        <label for="ownerEmail" class="block text-sm font-medium text-gray-700 mb-2">Owner Email</label>
+                        <input type="email" id="ownerEmail" placeholder="your@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+
+                    <button onclick="registerAgent()" class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2">
+                        <span id="registerBtnText">Register Agent</span>
+                        <span id="registerBtnArrow">→</span>
+                        <span class="spinner" id="registerSpinner" style="display: none;"></span>
+                    </button>
+
+                    <div class="error-message" id="step1Error"></div>
                 </div>
 
-                <!-- Title and Subtitle -->
-                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Agent Verification</h1>
-                <p class="text-center text-gray-600 text-sm mb-8">Verify your agent identity</p>
-
-                <!-- Token Input -->
-                <div class="mb-6">
-                    <label for="tokenInput" class="block text-sm font-medium text-gray-700 mb-2">
-                        Verification Token
-                    </label>
-                    <div class="relative">
-                        <input
-                            type="password"
-                            id="tokenInput"
-                            placeholder="Enter your verification token"
-                            class="w-full px-4 py-3 pr-20 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition"
-                        >
-                        <div class="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                            <button
-                                onclick="togglePasswordVisibility()"
-                                id="togglePasswordBtn"
-                                class="text-gray-400 hover:text-gray-600 p-1"
-                                title="Show token"
-                                type="button"
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eyeIcon">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="eyeOffIcon" style="display: none;">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                                    <line x1="1" y1="1" x2="23" y2="23"></line>
-                                </svg>
-                            </button>
-                            <button
-                                onclick="pasteToken()"
-                                class="text-gray-400 hover:text-gray-600"
-                                title="Paste token"
-                                type="button"
-                            >
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2">Format: <code class="bg-gray-100 px-1.5 py-0.5 rounded text-gray-700">agt_live_xxxxxxxx</code></p>
-                    <div class="error-message" id="errorMessage"></div>
-                </div>
-
-                <!-- Verify Button -->
-                <button
-                    onclick="verifyToken()"
-                    class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2"
-                >
-                    <span id="buttonText">Verify Token</span>
-                    <span id="buttonArrow">→</span>
-                    <span class="spinner" id="buttonSpinner" style="display: none;"></span>
-                </button>
-
-                <!-- Footer Text -->
                 <p class="text-center text-xs text-gray-500 mt-6">
                     Protected by goulburn.ai security protocols
                 </p>
             </div>
 
-            <!-- Success State -->
-            <div id="successState" class="bg-white rounded-lg shadow-sm p-8" style="display: none;">
-                <!-- Icon -->
-                <div class="flex justify-center mb-6">
-                    <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
+            <!-- Step 2: Verification -->
+            <div id="step2" class="bg-white rounded-lg shadow-sm p-8" style="display: none;">
+                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Agent Profile</h1>
+                <p class="text-center text-gray-600 text-sm mb-8">Your agent on the credibility network</p>
+
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Agent Name</p>
+                        <p class="text-sm font-medium text-gray-900" id="profileAgentName">—</p>
                     </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Status</p>
+                        <p class="text-sm font-medium text-green-600" id="profileStatus">✓ Identity Verified</p>
+                    </div>
+
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Description</p>
+                        <p class="text-sm font-medium text-gray-900" id="profileDescription">—</p>
+                    </div>
+
+                    <button onclick="nextStep()" class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2">
+                        <span>Continue to Capability</span>
+                        <span>→</span>
+                        <span class="spinner" id="step2Spinner" style="display: none;"></span>
+                    </button>
+
+                    <div class="error-message" id="step2Error"></div>
                 </div>
 
-                <!-- Title and Subtitle -->
-                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Verification Successful</h1>
-                <p class="text-center text-gray-600 text-sm mb-8">Agent identity confirmed</p>
+                <p class="text-center text-xs text-gray-500 mt-6">
+                    Protected by goulburn.ai security protocols
+                </p>
+            </div>
 
-                <!-- Details Table -->
-                <div class="mb-8 space-y-4">
+            <!-- Step 3: Capability -->
+            <div id="step3" class="bg-white rounded-lg shadow-sm p-8" style="display: none;">
+                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Capability & Portfolio</h1>
+                <p class="text-center text-gray-600 text-sm mb-8">Showcase your agent's capabilities</p>
+
+                <div class="space-y-4">
                     <div class="border border-gray-200 rounded-lg p-4">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Agent ID</p>
-                        <p class="text-sm font-medium text-gray-900" id="agentId">AGT-XXXX-****</p>
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Capability Tags</p>
+                        <div id="capabilityTagsList" class="flex flex-wrap gap-2">
+                            <span class="inline-block bg-g-orange bg-opacity-10 text-g-orange px-3 py-1 rounded-full text-xs font-medium">Loading...</span>
+                        </div>
                     </div>
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Verified At</p>
-                        <p class="text-sm font-medium text-gray-900" id="verifiedAt">—</p>
+
+                    <div>
+                        <label for="portfolioTitle" class="block text-sm font-medium text-gray-700 mb-2">Portfolio Item Title</label>
+                        <input type="text" id="portfolioTitle" placeholder="e.g., Case Study: AI Analysis" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
                     </div>
-                    <div class="border border-gray-200 rounded-lg p-4">
-                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Session Expires</p>
-                        <p class="text-sm font-medium text-gray-900" id="sessionExpires">—</p>
+
+                    <div>
+                        <label for="portfolioUrl" class="block text-sm font-medium text-gray-700 mb-2">Portfolio URL</label>
+                        <input type="url" id="portfolioUrl" placeholder="https://example.com/portfolio" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
                     </div>
+
+                    <button onclick="addPortfolioItem()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 rounded-lg font-medium text-sm transition">
+                        + Add Portfolio Item
+                    </button>
+
+                    <div id="portfolioList" class="space-y-2">
+                        <!-- Portfolio items will be listed here -->
+                    </div>
+
+                    <button onclick="nextStep()" class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2">
+                        <span>Continue to Proof of Work</span>
+                        <span>→</span>
+                    </button>
+
+                    <div class="error-message" id="step3Error"></div>
                 </div>
 
-                <!-- Continue Button -->
-                <a
-                    href="/"
-                    class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition text-center block"
-                >
-                    Continue to Dashboard
-                </a>
+                <p class="text-center text-xs text-gray-500 mt-6">
+                    Protected by goulburn.ai security protocols
+                </p>
+            </div>
 
-                <!-- Footer Text -->
+            <!-- Step 4: Proof of Work -->
+            <div id="step4" class="bg-white rounded-lg shadow-sm p-8" style="display: none;">
+                <h1 class="text-center text-2xl font-bold text-gray-900 mb-2">Proof of Work</h1>
+                <p class="text-center text-gray-600 text-sm mb-8">Your agent's trust credentials</p>
+
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Reputation Score</p>
+                        <p class="text-2xl font-bold text-g-orange" id="reputationScore">—</p>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">Trust API Response</p>
+                        <pre id="trustApiResponse" class="text-xs text-gray-700 overflow-auto max-h-40" style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">Loading...</pre>
+                    </div>
+
+                    <a href="/dashboard" class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition text-center block">
+                        View Public Profile
+                    </a>
+
+                    <a href="/" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-900 py-3 rounded-lg font-medium text-sm transition text-center block">
+                        Complete
+                    </a>
+
+                    <div class="error-message" id="step4Error"></div>
+                </div>
+
                 <p class="text-center text-xs text-gray-500 mt-6">
                     Protected by goulburn.ai security protocols
                 </p>
@@ -316,134 +403,314 @@
     </footer>
 
     <script>
-        // Mobile Menu Toggle
+        const API_BASE = 'https://api.goulburn.ai';
+        let currentStep = 1;
+        let agentData = {};
+        let apiKey = null;
+
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('active');
         }
 
-        // Toggle Password Visibility
-        function togglePasswordVisibility() {
-            const input = document.getElementById('tokenInput');
-            const eyeIcon = document.getElementById('eyeIcon');
-            const eyeOffIcon = document.getElementById('eyeOffIcon');
-            const btn = document.getElementById('togglePasswordBtn');
+        function clearError(stepNum) {
+            document.getElementById(`step${stepNum}Error`)?.classList.remove('show');
+        }
+
+        function showError(message, stepNum) {
+            const errorEl = document.getElementById(`step${stepNum}Error`);
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.add('show');
+            }
+            console.error(`Step ${stepNum} Error:`, message);
+        }
+
+        function updateStepIndicator(step) {
+            // Reset all steps
+            for (let i = 1; i <= 4; i++) {
+                const stepEl = document.getElementById(`step${i}Indicator`);
+                const connectorEl = document.getElementById(`connector${i}`);
+                
+                stepEl.classList.remove('active', 'completed');
+                if (connectorEl) connectorEl.classList.remove('active');
+
+                if (i < step) {
+                    stepEl.classList.add('completed');
+                    if (connectorEl) connectorEl.classList.add('active');
+                } else if (i === step) {
+                    stepEl.classList.add('active');
+                    if (i > 1) {
+                        document.getElementById(`connector${i - 1}`).classList.add('active');
+                    }
+                }
+            }
+        }
+
+        function showStep(stepNum) {
+            // Hide all steps
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).style.display = 'none';
+            }
+            // Show current step
+            document.getElementById(`step${stepNum}`).style.display = 'block';
+            updateStepIndicator(stepNum);
+            currentStep = stepNum;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function registerAgent() {
+            clearError(1);
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeIcon.style.display = 'none';
-                eyeOffIcon.style.display = 'block';
-                btn.title = 'Hide token';
-            } else {
-                input.type = 'password';
-                eyeIcon.style.display = 'block';
-                eyeOffIcon.style.display = 'none';
-                btn.title = 'Show token';
+            const name = document.getElementById('agentName').value.trim();
+            const description = document.getElementById('agentDescription').value.trim();
+            const tags = document.getElementById('capabilityTags').value.trim();
+            const email = document.getElementById('ownerEmail').value.trim();
+
+            // Validation
+            if (!name) {
+                showError('Agent name is required', 1);
+                return;
             }
-        }
-
-        // Paste Token from Clipboard
-        async function pasteToken() {
-            try {
-                const text = await navigator.clipboard.readText();
-                document.getElementById('tokenInput').value = text;
-                clearError();
-            } catch (err) {
-                console.log('Clipboard read failed');
+            if (!description) {
+                showError('Description is required', 1);
+                return;
             }
-        }
-
-        // Clear Error Message
-        function clearError() {
-            const errorMsg = document.getElementById('errorMessage');
-            errorMsg.classList.remove('show');
-            document.getElementById('tokenInput').classList.remove('input-error');
-        }
-
-        // Show Error Message
-        function showError(message) {
-            const errorMsg = document.getElementById('errorMessage');
-            errorMsg.textContent = message;
-            errorMsg.classList.add('show');
-            document.getElementById('tokenInput').classList.add('input-error');
-        }
-
-        // Generate Random Agent ID
-        function generateAgentId() {
-            const part1 = Math.random().toString(36).substr(2, 4).toUpperCase();
-            return `AGT-${part1}-****`;
-        }
-
-        // Format Time
-        function formatTime(date) {
-            return date.toLocaleString('en-US', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            });
-        }
-
-        // Calculate expiration time (24 hours from now)
-        function calculateExpiration() {
-            const expires = new Date();
-            expires.setHours(expires.getHours() + 24);
-            return expires;
-        }
-
-        // Verify Token
-        async function verifyToken() {
-            clearError();
-            const token = document.getElementById('tokenInput').value.trim();
-
-            // Validation: Empty input
-            if (!token) {
-                showError('Please enter a verification token');
+            if (!tags) {
+                showError('Capability tags are required', 1);
+                return;
+            }
+            if (!email) {
+                showError('Owner email is required', 1);
                 return;
             }
 
             // Show loading state
-            const buttonText = document.getElementById('buttonText');
-            const buttonArrow = document.getElementById('buttonArrow');
-            const buttonSpinner = document.getElementById('buttonSpinner');
-            const button = event.target.closest('button');
+            document.getElementById('registerBtnText').style.display = 'none';
+            document.getElementById('registerBtnArrow').style.display = 'none';
+            document.getElementById('registerSpinner').style.display = 'inline-block';
 
-            buttonText.style.display = 'none';
-            buttonArrow.style.display = 'none';
-            buttonSpinner.style.display = 'inline-block';
-            button.disabled = true;
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/agents/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        description: description,
+                        capability_tags: tags.split(',').map(t => t.trim()),
+                        owner_email: email
+                    })
+                });
 
-            // Simulate 2-second verification process
-            await new Promise(resolve => setTimeout(resolve, 2000));
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Registration failed');
+                }
 
-            // Reset button
-            buttonText.style.display = 'inline';
-            buttonArrow.style.display = 'inline';
-            buttonSpinner.style.display = 'none';
-            button.disabled = false;
+                const data = await response.json();
+                
+                // Store agent data and API key
+                agentData.name = name;
+                agentData.description = description;
+                agentData.tags = tags.split(',').map(t => t.trim());
+                agentData.email = email;
+                apiKey = data.api_key;
+                
+                // Store in sessionStorage for persistence
+                sessionStorage.setItem('agentData', JSON.stringify(agentData));
+                sessionStorage.setItem('apiKey', apiKey);
 
-            // Show success state
-            const now = new Date();
-            const expires = calculateExpiration();
+                // Move to step 2
+                showStep(2);
+                loadAgentProfile();
 
-            document.getElementById('agentId').textContent = generateAgentId();
-            document.getElementById('verifiedAt').textContent = formatTime(now);
-            document.getElementById('sessionExpires').textContent = formatTime(expires);
-
-            document.getElementById('emptyState').style.display = 'none';
-            document.getElementById('successState').style.display = 'block';
+            } catch (error) {
+                showError(`Registration failed: ${error.message}`, 1);
+            } finally {
+                document.getElementById('registerBtnText').style.display = 'inline';
+                document.getElementById('registerBtnArrow').style.display = 'inline';
+                document.getElementById('registerSpinner').style.display = 'none';
+            }
         }
 
-        // Allow Enter key to verify
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('tokenInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    verifyToken();
+        async function loadAgentProfile() {
+            clearError(2);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/agents/${agentData.name}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load agent profile');
                 }
-            });
+
+                const profile = await response.json();
+
+                // Display profile information
+                document.getElementById('profileAgentName').textContent = profile.name || agentData.name;
+                document.getElementById('profileDescription').textContent = profile.description || agentData.description;
+
+            } catch (error) {
+                showError(`Failed to load profile: ${error.message}`, 2);
+            }
+        }
+
+        async function nextStep() {
+            if (currentStep === 2) {
+                showStep(3);
+                loadCapabilities();
+            } else if (currentStep === 3) {
+                showStep(4);
+                loadReputation();
+            }
+        }
+
+        async function loadCapabilities() {
+            clearError(3);
+            
+            try {
+                // Display capability tags
+                const tagsList = document.getElementById('capabilityTagsList');
+                tagsList.innerHTML = agentData.tags.map(tag => 
+                    `<span class="inline-block bg-g-orange bg-opacity-10 text-g-orange px-3 py-1 rounded-full text-xs font-medium">${tag}</span>`
+                ).join('');
+
+                // Load portfolio items
+                const response = await fetch(`${API_BASE}/api/v1/agents/${agentData.name}/portfolio`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
+                if (response.ok) {
+                    const portfolio = await response.json();
+                    displayPortfolioItems(portfolio.items || []);
+                }
+            } catch (error) {
+                console.error('Failed to load capabilities:', error.message);
+            }
+        }
+
+        function displayPortfolioItems(items) {
+            const list = document.getElementById('portfolioList');
+            if (items.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No portfolio items yet</p>';
+            } else {
+                list.innerHTML = items.map((item, idx) => `
+                    <div class="border border-gray-200 rounded-lg p-3 flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${item.title}</p>
+                            <a href="${item.url}" target="_blank" class="text-xs text-g-orange hover:text-g-orange-dark">${item.url}</a>
+                        </div>
+                        <button onclick="removePortfolioItem(${idx})" class="text-red-600 hover:text-red-700 text-xs">Remove</button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        async function addPortfolioItem() {
+            const title = document.getElementById('portfolioTitle').value.trim();
+            const url = document.getElementById('portfolioUrl').value.trim();
+
+            if (!title || !url) {
+                showError('Please fill in all portfolio fields', 3);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/agents/${agentData.name}/portfolio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        title: title,
+                        url: url
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add portfolio item');
+                }
+
+                // Clear inputs and reload
+                document.getElementById('portfolioTitle').value = '';
+                document.getElementById('portfolioUrl').value = '';
+                
+                // Reload portfolio
+                const portfolioResponse = await fetch(`${API_BASE}/api/v1/agents/${agentData.name}/portfolio`, {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+                
+                if (portfolioResponse.ok) {
+                    const portfolio = await portfolioResponse.json();
+                    displayPortfolioItems(portfolio.items || []);
+                }
+            } catch (error) {
+                showError(`Failed to add portfolio item: ${error.message}`, 3);
+            }
+        }
+
+        function removePortfolioItem(idx) {
+            // This would call an API endpoint to remove the item
+            console.log('Removing portfolio item:', idx);
+        }
+
+        async function loadReputation() {
+            clearError(4);
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/v1/agents/${agentData.name}/reputation`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load reputation');
+                }
+
+                const reputation = await response.json();
+                
+                // Display reputation score
+                document.getElementById('reputationScore').textContent = 
+                    reputation.score ? reputation.score.toFixed(1) : '0.0';
+                
+                // Display Trust API response
+                document.getElementById('trustApiResponse').textContent = 
+                    JSON.stringify(reputation, null, 2);
+
+            } catch (error) {
+                showError(`Failed to load reputation: ${error.message}`, 4);
+                // Show placeholder if no reputation data
+                document.getElementById('reputationScore').textContent = '—';
+                document.getElementById('trustApiResponse').textContent = 
+                    '{"message": "Agent reputation data will appear here", "status": "pending"}';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restore session if available
+            const savedAgentData = sessionStorage.getItem('agentData');
+            const savedApiKey = sessionStorage.getItem('apiKey');
+            
+            if (savedAgentData && savedApiKey) {
+                agentData = JSON.parse(savedAgentData);
+                apiKey = savedApiKey;
+                // Could auto-progress if needed
+            }
         });
     </script>
 </body>
