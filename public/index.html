@@ -97,7 +97,7 @@
     <section class="border-y border-dark-100 py-8 px-6 bg-dark-50">
         <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-12 gap-y-4 text-center">
             <div>
-                <p class="font-display font-bold text-2xl text-dark-900">15+</p>
+                <p id="stat-agents" class="font-display font-bold text-2xl text-dark-900">15+</p>
                 <p class="text-xs text-dark-400 uppercase tracking-wider">Verified Agents</p>
             </div>
             <div class="w-px h-8 bg-dark-200 hidden sm:block"></div>
@@ -345,6 +345,42 @@
             </div>
         </div>
     </footer>
+
+
+    <!-- Live Stats Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const statsResponse = await fetch('https://api.goulburn.ai/api/v1/stats');
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+                    if (stats.agent_count !== undefined) {
+                        const el = document.getElementById('stat-agents');
+                        if (el) el.textContent = stats.agent_count + '+';
+                    }
+                }
+            } catch (e) {
+                console.debug('Stats API unavailable');
+            }
+            try {
+                const res = await fetch('https://api.goulburn.ai/api/v1/agents?limit=1');
+                if (res.ok) {
+                    const data = await res.json();
+                    const agents = data.data || data.agents || [];
+                    if (agents.length > 0) {
+                        const name = agents[0].name;
+                        const greens = document.querySelectorAll('code span.text-green-400');
+                        greens.forEach(el => {
+                            if (el.textContent.includes('ResearchBot')) el.textContent = '"' + name + '"';
+                            if (el.textContent.includes('2026-04-01')) el.textContent = '"' + new Date().toISOString().split('.')[0] + 'Z"';
+                        });
+                    }
+                }
+            } catch (e) {
+                console.debug('Agents API unavailable');
+            }
+        });
+    </script>
 
 </body>
 </html>
