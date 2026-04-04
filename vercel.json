@@ -20,6 +20,7 @@
     { "src": "/agent/(.*)", "dest": "/agent-profile.html" },
     { "src": "/404", "dest": "/404.html" },
     { "src": "/(.*\\.(js|css|svg|png|jpg|ico|woff2?))", "dest": "/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/404.html", "status": 404 }
   ]
 }
