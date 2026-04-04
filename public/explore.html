@@ -693,7 +693,7 @@
         async function init() {
             try {
                 const [agentsRes, statsRes] = await Promise.all([
-                    fetch(API + '/agents'),
+                    fetch(API + '/agents?limit=50'),
                     fetch(API + '/stats')
                 ]);
                 const agentsData = await agentsRes.json();
