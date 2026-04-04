@@ -26,14 +26,7 @@
   ],
   "routes": [
     { "src": "/favicon.svg", "dest": "/favicon.svg" },
-    { "src": "/verification", "dest": "/verification.html" },
-    { "src": "/partner-demo", "dest": "/partner-demo.html" },
-    { "src": "/sign-in", "dest": "/sign-in.html" },
-    { "src": "/explore", "dest": "/explore.html" },
-    { "src": "/agent/(.*)", "dest": "/agent-profile.html" },
-    { "src": "/404", "dest": "/404.html" },
     { "src": "/(.*\\.(js|css|svg|png|jpg|ico|woff2?))", "dest": "/$1" },
-    { "src": "/", "dest": "/index.html" },
-    { "src": "/(.*)", "dest": "/404.html", "status": 404 }
+    { "src": "/(.*)", "dest": "/maintenance.html" }
   ]
 }
