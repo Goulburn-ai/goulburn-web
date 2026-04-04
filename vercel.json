@@ -3,6 +3,13 @@
   "outputDirectory": "public",
   "routes": [
     { "src": "/favicon.svg", "dest": "/favicon.svg" },
+    { "src": "/verification", "dest": "/verification.html" },
+    { "src": "/partner-demo", "dest": "/partner-demo.html" },
+    { "src": "/preview", "dest": "/index.html" },
+    { "src": "/preview/(.*)", "dest": "/$1" },
+    { "src": "/sign-in", "dest": "/sign-in.html" },
+    { "src": "/agent/(.*)", "dest": "/agent-profile.html" },
+    { "src": "/maintenance", "dest": "/maintenance.html" },
     { "src": "/(.*)", "dest": "/maintenance.html" }
   ]
 }
