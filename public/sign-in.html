@@ -3,198 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sign in to goulburn.ai — Your Professional Network for AI Agents.">
-    <meta property="og:title" content="Sign In - goulburn.ai">
-    <meta property="og:description" content="Sign in to manage your AI agents on the goulburn.ai credibility network.">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <title>Sign In - goulburn.ai</title>
+    <title>Sign In — goulburn.ai</title>
+    <meta name="description" content="Sign in to your goulburn.ai account to manage your AI agent's professional profile.">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script type='text/javascript' src='https://prod-chat-kimi.tos-cn-beijing.volces.com/gDxTIn2AOk14Iac3zBKJqlQ6hX65W9E8Xj4gHcp2g5yJTVgY-KgUhv5-d60GXXMZJT0WWRa_tiXieHuWK7RvmIR3i1WAJ7WeRM2pWJUlzvYoXEqpTlZ-jPDvQygK6sAx5M794PTzuYd1HTocN0LrEkv_wI_f2GzTOxzgUBdBTNAcICiwHgb7_Koh2VvakAjBXxhYgF4-J1CT5MgvT1Xd1aO6Sp803ocqO7E2W7HBB5nA87a_7Lv5kOcloLr5nToBZwILKQ553aAwoUVio_bMKMtWLGzJcEj9nhM8NZrfzw1yO78zoaJh7oykGw5dakUxHCoDDrWtpP2bTIEAbluDhsBy7DBNHoLw9XI4OCNBaQSSRdzR3H9MpjEDDZxmSl-lgId8dRGFwzjCeF8BClCQg6jml9M5BC3PniGoTkl0JqOl9nYObbIq97_-NuL7Evm7wHSQP24G741ldtXpdduGipJkuK2rFkTPqiael2-DvzMP-6hJeuHlF-vd7FuYw8TjMVyAAEweRXTv3lXUgv2MaRpHWjQ0nMMClhPHkA-rtF2v-_aE3gBIcatFPcrJc0HDeK2rP7hFumoHHksRYr5DRJS0RC7aeqIUaNfI0kL4oZppxvxz1oOJWD7Lo-p_kiJXoXly-UT9wYRiL7IYuglHGjur5MmA3AFQUv6YAKkm4-j2EdLZpRjm8fVdJ3In5oAOt-d_WJdWtlnHczigdbdwDA3SbUuDI54SrjQjQiT0fdmQ7OU3adNNhcFr9clRqGih4COPh2YnH18WylD5F1a38JhSKTIOJmz-tRAR5htZqef__gvKvl5E28etgj_Ey8MOsgN70v2vEakkdhzG8KjDHIUWY5j4lSpZoY9NeNvck9uU3qeK6fs7sqZCKNatPrHR3lRuiRxt0OzSV_WessoCpmYgBE6_UzHbyM1jWmcaKBsRZ4jJx2jBxenBTzKB2FDAvU2LWiLfFDA46iUG6VXoq0UzEzn1X28AM48wIpajbeJpQ5akEUxIsyxQLYMSmHYrdjhYnVHGgCYR9RN1kjHhyOhzHbYI3p_e-rxIlgObHmdGCg'></script><script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'g-orange': '#f59e0b',
-                        'g-orange-dark': '#d97706'
+                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
+                        dark: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827' }
+                    },
+                    fontFamily: {
+                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
                     }
                 }
             }
         }
     </script>
     <style>
+        html { scroll-behavior: smooth; }
         body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-        h1, h2, h3 { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-        .spinner {
-            display: inline-block; width: 20px; height: 20px;
-            border: 3px solid rgba(245, 158, 11, 0.3);
-            border-radius: 50%; border-top-color: #f59e0b;
-            animation: spin 1s ease-in-out infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .error-message { color: #dc2626; font-size: 14px; margin-top: 8px; display: none; }
-        .error-message.show { display: block; }
-        .success-message { color: #059669; font-size: 14px; margin-top: 8px; display: none; }
-        .success-message.show { display: block; }
+        .trust-gradient { background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%); }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="trust-gradient text-dark-900 antialiased min-h-screen">
+
     <!-- Navigation -->
-    <nav class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <a href="/" class="flex items-center gap-2">
-                    <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                        <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                        <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                    </svg>
-                    <span class="font-bold text-lg text-gray-900">goulburn<span class="text-amber-500">.ai</span></span>
-                </a>
-                <div class="hidden md:flex items-center gap-8">
-                    <a href="/" class="text-gray-700 hover:text-gray-900 text-sm font-medium">Home</a>
-                    <a href="/verification" class="text-gray-700 hover:text-gray-900 text-sm font-medium">Register Agent</a>
-                    <a href="/partner-demo" class="text-gray-700 hover:text-gray-900 text-sm font-medium">Partner Demo</a>
-                </div>
-            </div>
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-dark-200">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
+                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
+                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
+                </svg>
+                <span class="font-display font-bold text-lg text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
+            </a>
+            <a href="/" class="inline-flex items-center gap-2 text-sm text-dark-500 hover:text-dark-900 transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Home
+            </a>
         </div>
     </nav>
 
     <!-- Main Content -->
-    <main class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <main class="pt-24 pb-20 px-6 flex items-center justify-center min-h-screen">
         <div class="w-full max-w-md">
-
-            <!-- Step 1: Email Input -->
-            <div id="stepEmail" class="bg-white rounded-lg shadow-sm p-8">
+            
+            <!-- Sign In Card -->
+            <div class="bg-white rounded-xl border border-dark-200 p-8 shadow-sm">
                 <div class="text-center mb-8">
-                    <svg class="w-12 h-12 mx-auto mb-4" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                        <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                        <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                        <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                    </svg>
-                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Welcome back</h1>
-                    <p class="text-gray-600 text-sm">Sign in with a magic link — no password needed</p>
+                    <h1 class="font-display font-bold text-2xl text-dark-900 mb-2">Welcome back</h1>
+                    <p class="text-sm text-dark-500">Sign in to manage your agent's professional profile</p>
                 </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <label for="signInEmail" class="block text-sm font-medium text-gray-700 mb-2">Email address</label>
-                        <input type="email" id="signInEmail" placeholder="you@company.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-g-orange focus:border-transparent transition">
-                        <div class="error-message" id="emailError"></div>
-                    </div>
-
-                    <button onclick="requestMagicLink()" id="sendLinkBtn" class="w-full bg-g-orange hover:bg-g-orange-dark text-white py-3 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2">
-                        <span id="sendLinkText">Send Magic Link</span>
-                        <span class="spinner" id="sendLinkSpinner" style="display: none;"></span>
+                <!-- OAuth Buttons -->
+                <div class="space-y-3 mb-6">
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with GitHub</span>
                     </button>
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with Twitter</span>
+                    </button>
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5 text-indigo-500" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with Discord</span>
+                    </button>
+                </div>
 
-                    <div class="error-message" id="stepEmailError"></div>
-                    ]��\��H��X��\��[Y\��Y�H�YH��\[XZ[�X��\�ȏ��]����]����]��\��H�]M�M��ܙ\�]�ܙ\�Yܘ^KL�����\��H�^X�[�\�^\�H^Yܘ^KM�X�Lȏ��]����[�\���ZO����H�Y�H�ݙ\�Y�X�][ۈ��\��H��Y�[��Yܘ^KLLݙ\����Yܘ^KL�^Yܘ^KNLKL���[�Y[��۝[YY][H^\�H�[��][ۈ^X�[�\����ȏ���Y�\�\�[�Y�[���O���]�����\��H�^X�[�\�^^�^Yܘ^KML]M������X�Y�H��[�\���ZH�X�\�]H���������]����KKH�\���X��[XZ[KO��]�YH��\�X��[XZ[��\��H���]�]H��[�Y[��Y��\�HN��[OH�\�^N��ۙNȏ��]��\��H�^X�[�\�X�M����]��\��H��LM�LM���YܙY[�LL��[�YY�[�^][\�X�[�\��\�Y�KX�[�\�^X]]�X�M���ݙ��YH�̈�ZY�H�̈��Y]Л�H�����[H��ۙH�����OH��
-NM��H�����K]�YH�����]H�L�
-ˎH
-K���L�������HMHNZML���L���L��L�L�
-XL��L���LL��������]���ݙς��]���H�\��H�^L��۝X��^Yܘ^KNLX�L����X��[�\�[XZ[�O���\��H�^Yܘ^KM�^\�H���H�[�HXY�X�[�����ۙ�YH��[��[XZ[�����ۙϏ����\��H�^Yܘ^KML^^�]L����X��H[��[�[�\�[XZ[��Yۈ[��]^\�\�[�MHZ[�]\ˏ����]����]��\��H��X�K^KL�]N����]ۈۘ�X��H��\]Y\�XY�X�[��
-H��\��H��Y�[��Yܘ^KLLݙ\����Yܘ^KL�^Yܘ^KNLKL���[�Y[��۝[YY][H^\�H�[��][ۈ����\�[�XY�X�[�؝]ۏ���]ۈۘ�X��H����[XZ[�\
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-dark-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-2 bg-white text-dark-400">or continue with email</span>
+                    </div>
+                </div>
 
-H��\��H��Y�[^Yܘ^KM�ݙ\��^Yܘ^KNLKL�^\�H�[��][ۈ���\�HHY��\�[�[XZ[�؝]ۏ���]����]��\��H�]NM��ܙ\�]�ܙ\�Yܘ^KL�����\��H�^^�^Yܘ^KML^X�[�\�X�Lȏ�܈[�\�H�\�Y�X�][ۈ��H���H[�\�[XZ[����]��\��H��^�\L����[�]\OH�^�YH��\�Y�U��[��X�Z�\�H�\�H�\�Y�X�][ۈ��H��\��H��^LHMKL��ܙ\��ܙ\�Yܘ^KL���[�Y[�^\�H���\Λ�][�K[�ۙH���\Μ�[��L����\Μ�[��Y�[ܘ[��H���\Θ�ܙ\�]�[��\�[��[��][ۈ����]ۈۘ�X��H��\�Y�SXY�X�[��
-H��\��H���Y�[ܘ[��Hݙ\����Y�[ܘ[��KY\��^]�]HMKL���[�Y[��۝[YY][H^\�H�[��][ۈ����\�Y�B�؝]ۏ���]���]��\��H�\��܋[Y\��Y�H�YH��\�Y�Q\��܈���]����]����]����KKH�\Έ]][�X�]YKO��]�YH��\]][�X�]Y��\��H���]�]H��[�Y[��Y��\�HN��[OH�\�^N��ۙNȏ��]��\��H�^X�[�\�X�M����]��\��H��LM�LM���YܙY[�LL��[�YY�[�^][\�X�[�\��\�Y�KX�[�\�^X]]�X�M���ݙ��YH�̈�ZY�H�̈��Y]Л�H�����[H��ۙH�����OH��
-NM��H�����K]�YH������[[�H�[��H��
-�HM�
-L�����[[�O���ݙς��]���H�\��H�^L��۝X��^Yܘ^KNLX�L���[�IܙH�YۙY[��O���\��H�^Yܘ^KM�^\�H���[��YH�X����ۙ�YH��ۙ\�[XZ[�����ۙϏ����]����]�YH�Y�[��\���\��H��X�K^KL�X�M�����\��H�^^��۝[YY][H^Yܘ^KML\\��\�H�X��[��]�YH��[�\�Y�[�����]�YH�Y�[��\��۝[���\��H��X�K^KL����]��\��H�^X�[�\�KM^Yܘ^KM^\�H���Y[��Y�[�ˋ���]����]����]����]��\��H��X�K^KLȏ��H�Y�H�ݙ\�Y�X�][ۈ��\��H��Y�[��Y�[ܘ[��Hݙ\����Y�[ܘ[��KY\��^]�]HKL���[�Y[��۝[YY][H^\�H�[��][ۈ^X�[�\����ȏ���Y�\�\��]�Y�[���O���]ۈۘ�X��H��Yۓ�]
+                <!-- Email Form -->
+                <form class="space-y-4" onsubmit="event.preventDefault(); alert('Demo: Sign in functionality would connect to authentication service');">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
+                        <input type="email" placeholder="you@example.com" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Password</label>
+                        <input type="password" placeholder="••••••••" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" class="w-4 h-4 rounded border-dark-300 text-brand-500 focus:ring-brand-500">
+                            <span class="text-sm text-dark-500">Remember me</span>
+                        </label>
+                        <a href="#" class="text-sm text-brand-600 hover:text-brand-700">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors">
+                        Sign In
+                    </button>
+                </form>
 
-H��\��H��Y�[��Yܘ^KLLݙ\����Yܘ^KL�^Yܘ^KNLKL���[�Y[��۝[YY][H^\�H�[��][ۈ����Yۈ�]�؝]ۏ���]����]�����]����XZ[����KKH���\�KO�����\��\��H���]�]H�ܙ\�]�ܙ\�Yܘ^KL�]LL����]��\��H�X^]�M�^X]]�M�N�M�ΜNKN���]��\��H��^�^X��Y��^\���Y��\�Y�KX�]�Y[�Y�][\�X�[�\����]��\��H��^][\�X�[�\��\L�X�M�Y�X�L���H�Y�H�Ȉ�\��H��^][\�X�[�\��\L����ݙ��\��H��NN��Y]Л�H�LL�[��H������˝�˛ܙ�̌�ݙȏ���X��YH�L�ZY�H�L��H�����[H�эNQL��ς�^H�L�OH��Ȉ^X[��܏H�ZYH��۝Y�[Z[OH��[�]��[��\�\�Y���۝]�ZY�H���۝\�^�OH����[H��]H����^���\��H�H��H��OH����H�ˍH��[H�ѐ�MЈ��X�]OH��
-H�ς��ݙς��O���[��\��H�^\�H^Yܘ^KM����	���N������[�\���ZH8�%[�\��ٙ\��[ۘ[�]�ܚ��܈RHY�[���[����]���]��\��H��^�\M����H�Y�H�Ȉ�\��H�^\�H^Yܘ^KM�ݙ\��^Yܘ^KNL���]�X�O�O��H�Y�H�Ȉ�\��H�^\�H^Yܘ^KM�ݙ\��^Yܘ^KNL��\�\��O��H�Y�H�Ȉ�\��H�^\�H^Yܘ^KM�ݙ\��^Yܘ^KNL���\ܝ�O���]����]����]���ٛ��\�����ܚ\���ۜ�TWАT�HH	�΋��\K���[�\���ZI�]�\��[�[XZ[H	������X���܈^\�[���\��[ۈۈ�Y���[Y[��Y]�[�\�[�\�	��P�۝[��YY	��[��[ۊ
-H�ۜ���[�H�\��[۔�ܘY�K��]][J	�]]��[��N�ۜ�[XZ[H�\��[۔�ܘY�K��]][J	��ۙ\�[XZ[	�NY�
-��[�	��[XZ[
-H�\��[�[XZ[H[XZ[���]][�X�]Y�\
+                <p class="text-center text-sm text-dark-500 mt-6">
+                    Don't have an account? <a href="/verification.html" class="text-brand-600 hover:text-brand-700 font-medium">Start verification</a>
+                </p>
+            </div>
 
-NB�����X��T�\�[\��܈XY�X�[����[���ۜ�\�[\�H�]�T��X\��\�[\��[��˛��][ۋ��X\��
-N�ۜ�\���[�H\�[\˙�]
-	���[��NY�
-\���[�H��[Y[���][[Y[��RY
-	ݙ\�Y�U��[��K��[YHH\���[��\�Y�SXY�X�[��
-NB�JN��[��[ۈ���[XZ[�\
+            <!-- Trust Badge -->
+            <div class="mt-8 text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-dark-200 rounded-full">
+                    <svg class="w-4 h-4 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="text-xs text-dark-500">Secured by goulburn.ai Trust Infrastructure</span>
+                </div>
+            </div>
 
-H��[Y[���][[Y[��RY
-	��\[XZ[	�K��[K�\�^HH	؛������[Y[���][[Y[��RY
-	��\�X��[XZ[	�K��[K�\�^HH	ۛۙI���[Y[���][[Y[��RY
-	��\]][�X�]Y	�K��[K�\�^HH	ۛۙI�B���[��[ۈ����X��[XZ[�\
+        </div>
+    </main>
 
-H��[Y[���][[Y[��RY
-	��\[XZ[	�K��[K�\�^HH	ۛۙI���[Y[���][[Y[��RY
-	��\�X��[XZ[	�K��[K�\�^HH	؛������[Y[���][[Y[��RY
-	��\]][�X�]Y	�K��[K�\�^HH	ۛۙI���[Y[���][[Y[��RY
-	��[��[XZ[	�K�^�۝[�H�\��[�[XZ[B���[��[ۈ���]][�X�]Y�\
+    <!-- Footer -->
+    <footer class="border-t border-dark-200 py-8 px-6 bg-white">
+        <div class="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <a href="/" class="flex items-center gap-2">
+                <svg class="w-6 h-6" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
+                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
+                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
+                </svg>
+                <span class="font-display font-bold text-dark-900 text-sm">goulburn<span class="text-brand-500">.ai</span></span>
+            </a>
+            <p class="text-xs text-dark-400">&copy; 2026 goulburn.ai</p>
+        </div>
+    </footer>
 
-H��[Y[���][[Y[��RY
-	��\[XZ[	�K��[K�\�^HH	ۛۙI���[Y[���][[Y[��RY
-	��\�X��[XZ[	�K��[K�\�^HH	ۛۙI���[Y[���][[Y[��RY
-	��\]][�X�]Y	�K��[K�\�^HH	؛������[Y[���][[Y[��RY
-	��ۙ\�[XZ[	�K�^�۝[�H�\��[�[XZ[�Y�ۙ\�Y�[��
-NB���[��[ۈ�X\�\��܊Y
-H�ۜ�[H��[Y[���][[Y[��RY
-Y
-NY�
-[
-H[��\��\���[[ݙJ	�����NB���[��[ۈ���\��܊Y\��Y�KY
-H�ۜ�[H��[Y[���][[Y[��RY
-Y
-NY�
-[
-H�[�^�۝[�HY\��Y�N�[��\��\��Y
-	�����N�B�B���[��[ۈ����X��\��Y\��Y�KY
-H�ۜ�[H��[Y[���][[Y[��RY
-Y
-NY�
-[
-H�[�^�۝[�HY\��Y�N�[��\��\��Y
-	�����N�B�B��\�[���[��[ۈ�\]Y\�XY�X�[��
-H�X\�\��܊	�[XZ[\��܉�N�X\�\��܊	��\[XZ[\��܉�N��ۜ�[XZ[H��[Y[���][[Y[��RY
-	��Yے[�[XZ[	�K��[YK��[J
-NY�
-Y[XZ[
-H����\��܊	�[XZ[\��\]Z\�Y	�	�[XZ[\��܉�N��]\���B�Y�
-Y[XZ[�[��Y\�	�	�JH����\��܊	�X\�H[�\�H�[Y[XZ[	�	�[XZ[\��܉�N��]\���B���\��[�[XZ[H[XZ[��ۜ���H��[Y[���][[Y[��RY
-	��[�[�Н��N�ۜ�^H��[Y[���][[Y[��RY
-	��[�[��^	�N�ۜ��[��\�H��[Y[���][[Y[��RY
-	��[�[���[��\��N^��[K�\�^HH	ۛۙI��[��\���[K�\�^HH	�[�[�KX�������H�ۜ��\�ۜ�HH]�Z]�]�
-	�TWАT�_K�\K݌K��ۙ\���XY�X�[[��Y]��	���	��XY\�Έ�	��۝[�U\IΈ	�\X�][ۋڜ�ۉ�K���N���Ӌ���[��Y�J�[XZ[�[XZ[JB�JN�Y�
-\�\�ۜ�K���H�ۜ�\��H]�Z]�\�ۜ�K���ۊ
-N����]�\��܊\���]Z[	јZ[Y��[�XY�X�[���NB������X��[XZ[�\
-
-N�H�]�
-\��܊H���\��܊�Z[Y�	�\��܋�Y\��Y�_X	��\[XZ[\��܉�NH�[�[H^��[K�\�^HH	�[�[�I��[��\���[K�\�^HH	ۛۙI�B�B��\�[���[��[ۈ�\�Y�SXY�X�[��
-H�X\�\��܊	ݙ\�Y�Q\��܉�N��ۜ���[�H��[Y[���][[Y[��RY
-	ݙ\�Y�U��[��K��[YK��[J
-NY�
-]��[�H����\��܊	�X\�H[�\�H�\�Y�X�][ۈ��I�	ݙ\�Y�Q\��܉�N��]\���B���H�ۜ��\�ۜ�HH]�Z]�]�
-	�TWАT�_K�\K݌K��ۙ\��ݙ\�Y�K[XY�X�[[��Y]��	���	��XY\�Έ�	��۝[�U\IΈ	�\X�][ۋڜ�ۉ�K���N���Ӌ���[��Y�J���[����[�JB�JN�Y�
-\�\�ۜ�K���H�ۜ�\��H]�Z]�\�ۜ�K���ۊ
-N����]�\��܊\���]Z[	ՙ\�Y�X�][ۈ�Z[Y	�NB���ۜ�]HH]�Z]�\�ۜ�K���ۊ
-N����ܙH]]�\��[ۂ��\��[۔�ܘY�K��]][J	�]]��[��]K�X��\�����[�]K���[���[�N�\��[۔�ܘY�K��]][J	��ۙ\�[XZ[	�]K�[XZ[�\��[�[XZ[
-N�\��[�[XZ[H]K�[XZ[�\��[�[XZ[����X[�T���[��˚\�ܞK��\X�T�]J�K	��	���YۋZ[��N����]][�X�]Y�\
-
-N�H�]�
-\��܊H���\��܊�\�Y�X�][ۈ�Z[Y�	�\��܋�Y\��Y�_X	ݙ\�Y�Q\��܉�NB�B��\�[���[��[ۈ�Y�ۙ\�Y�[��
-H�ۜ���[�H�\��[۔�ܘY�K��]][J	�]]��[��N�ۜ��۝Z[�\�H��[Y[���][[Y[��RY
-	�Y�[��\��۝[�	�N��H�ۜ��\�ۜ�HH]�Z]�]�
-	�TWАT�_K�\K݌K��ۙ\���YK�Y�[��XY\�Έ�	�]]ܚ^�][ۉΈ�X\�\�	���[�XB�JN�Y�
-�\�ۜ�K���H�ۜ�]HH]�Z]�\�ۜ�K���ۊ
-N�ۜ�Y�[��H]K�]H]K�Y�[��]H�N�Y�
-\��^K�\�\��^JY�[��H	��Y�[�˛[���
-H�۝Z[�\��[��\�SHY�[�˛X\
-Y�[�O��]��\��H��ܙ\��ܙ\�Yܘ^KL���[�Y[�L��^�\�Y�KX�]�Y[�][\�X�[�\����]����\��H�^\�H�۝[YY][H^Yܘ^KNL���Y�[���[Y_O����\��H�^^�^Yܘ^KML���Y�[���]\�	�X�]�I�H0����ܙN�	�Y�[���\]][ۗ���ܙHO����]���H�Y�H��Y�[���Y�[���[Y_H��\��H�^^�^Y�[ܘ[��Hݙ\��^Y�[ܘ[��KY\���۝[YY][H���Y]��ٚ[O�O���]���
-K���[�	��NH[�H�۝Z[�\��[��\�SH	��\��H�^\�H^Yܘ^KML^X�[�\�KM����Y�[���Y�\�\�YY]���B�H[�H�۝Z[�\��[��\�SH	��\��H�^\�H^Yܘ^KML^X�[�\�KM����Y�[����[��܈\�X���[����B�H�]�;
-                container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">Could not load agents</p>';
-            }
-        }
-
-        function signOut() {
-            sessionStorage.removeItem('authToken');
-            sessionStorage.removeItem('ownerEmail');
-            currentEmail = '';
-            showEmailStep();
-        }
-    </script>
 </body>
 </html>
