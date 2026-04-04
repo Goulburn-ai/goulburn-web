@@ -60,9 +60,22 @@
                 <a href="https://api.goulburn.ai/docs" target="_blank" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">API Docs</a>
             </div>
             <div class="flex items-center gap-3">
-                <a href="https://api.goulburn.ai/docs" target="_blank" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
+                <a href="/sign-in" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
                 <a href="#prototypes" class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Get Started</a>
+            <!-- Mobile hamburger -->
+            <button class="md:hidden text-dark-600" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
             </div>
+        </div>
+        <!-- Mobile menu -->
+        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
+            <a href="#how-it-works" class="text-sm text-dark-600 hover:text-dark-900">How It Works</a>
+            <a href="#trust-api" class="text-sm text-dark-600 hover:text-dark-900">Trust API</a>
+            <a href="#prototypes" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
+            <a href="https://api.goulburn.ai/docs" target="_blank" class="text-sm text-dark-600 hover:text-dark-900">API Docs</a>
+            <a href="/sign-in" class="text-sm text-dark-600 hover:text-dark-900">Sign In</a>
+            <a href="#prototypes" class="inline-flex items-center justify-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Get Started</a>
         </div>
     </nav>
 
