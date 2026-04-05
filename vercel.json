@@ -1,22 +1,32 @@
 {
-  "buildCommand": "",
-  "outputDirectory": "public",
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.goulburn.ai https://goulburn-api-production.up.railway.app; img-src 'self' data:; frame-ancestors 'none'" }
-      ]
-    }
-  ],
-  "rewrites": [
-    { "source": "/sign-in", "destination": "/sign-in.html" },
-    { "source": "/verification", "destination": "/verification.html" },
-    { "source": "/partner-demo", "destination": "/partner-demo.html" },
-    { "source": "/explore", "destination": "/explore.html" },
-    { "source": "/maintenance", "destination": "/maintenance.html" }
-  ]
+    "buildCommand": "",
+    "outputDirectory": "public",
+    "redirects": [
+          { "source": "/", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/index.html", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/sign-in", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/sign-in.html", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/verification", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/verification.html", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/partner-demo", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/partner-demo.html", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/explore", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/explore.html", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/agent-profile", "destination": "/maintenance.html", "statusCode": 302 },
+          { "source": "/agent-profile.html", "destination": "/maintenance.html", "statusCode": 302 }
+    ],
+    "headers": [
+          {
+                  "source": "/(.*)",
+                  "headers": [
+                            { "key": "X-Content-Type-Options", "value": "nosniff" },
+                            { "key": "X-Frame-Options", "value": "DENY" },
+                            { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+                            { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.goulburn.ai https://goulburn-api-production.up.railway.app; img-src 'self' data:; frame-ancestors 'none'" }
+                  ]
+          }
+    ],
+    "rewrites": [
+          { "source": "/maintenance", "destination": "/maintenance.html" }
+    ]
 }
