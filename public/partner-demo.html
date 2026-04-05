@@ -3,373 +3,737 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trust API Partner Demo — goulburn.ai</title>
-    <meta name="description" content="See how platforms integrate the goulburn.ai Trust API for credibility-gated guardrails.">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script type='text/javascript' src='https://prod-chat-kimi.tos-cn-beijing.volces.com/UJqlz4vyIQpN_SeGyK6QFW4w--c7d9yrJZKJ6ObnUpAYr2jY6QocG0_ZpHF5PomkmtzauLDq7tqRMbT9vGlqIeKP_-HCzucNRI0ft1x79KpW727GFnYMlun7rSsgclcFfPjNKBJCoYOyxmU8Y440_GMTHIvZNWrckDz72xSJgswiixfRoeKAlqO_7Ls1WURXg6gKvgjTVXjy3YEBfg9zpMi6DQ7t8PAZ1G1kbUl3Os3Jh8rfg3tsIRGHzmBtBNLjjfrwCRtKbxLbLC5FDAkNEvIXPV_iFyNwJz7zB84l5UwWVjVovJfOuoUTsSrIUCNw6TGo7cQTKolTMm_EP9hEd_n91WEZa8mB4i_7nFjez0jPgouxio2EBmVv0RtLArooWUnS5ULkPDW4jxM0asyGsE3an4OKm4IIIefYUTBv_P6cn1MbI9AzpM3yW1n1Z9_IAtG0TL0OIM4WSokLkZrHjSuCItMmZOF3U0jDiaickVtS1rHuyIu5UrCjocoq2EO-yytp7G833uLCntWo2QosoaSALjyTpTGDojqSZn3htkdZP1T58ot29iqFAF0up328Yu8YQErSmgxyhE6xiLu5fV1Z3NLDiQjx_O_5pWgGQdgnROKSvoNKwuO4rpTpV8hcPWSEcDw_bvhRZDDqN2HJzqCT9m3r0eMn_yMAfKgHn-OCl2HFP2gQYu5Kq-3KRMuFDlK5CQcjuYkSs0cMGU-E2vDBEyFnKEDcRrIliqVayE_BEvPLei8Da_0nQm6gFt_V2toG-AOP2b1ELYZQG09tHMh4_G0Wrnk7iw1fIiICEQhHg1oLBRwP-Gv7dXpkNyRAfpTachPPAdM9SqkcozlrQMlAGAoi_HfFicZpDyDnnN_CPgQA01-UvOiyr0eOo9vWTBSFjOW_evTRE3olkTzniRd6PJ6rwFBnCXR_0jZzhFX68BboVdDmPoZU5Difdh24RU82wnAs3WThzMhk4poL2sW3Ds5YaF_5JZBP-NmFKGoW8eopu-OLbTTjlDJLOSm_w9UrFtW_FDj59TTW6Qw1936eM1Zg2jKFrv93mOkmCmR2fP2v0YL5BFBAubw'></script><script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
-                        dark: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827' }
-                    },
-                    fontFamily: {
-                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        mono: ['"JetBrains Mono"', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
+    <title>goulburn.ai Trust API â Platform Partner Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-        .tab-active { background: #F59E0B; color: white; }
-        .tab-inactive { background: transparent; color: #6B7280; }
-        .tab-inactive:hover { background: #F3F4F6; color: #111827; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        :root {
+            --g-teal: #0d9488;
+            --g-slate: #0f172a;
+            --g-surface: #1e293b;
+            --g-border: rgba(148, 163, 184, 0.12);
+        }
+
+        body { font-family: 'Inter', sans-serif; background: var(--g-slate); color: #e2e8f0; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        .g-panel { background: var(--g-surface); border: 1px solid var(--g-border); border-radius: 16px; }
+        .g-inset { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--g-border); border-radius: 12px; }
+
+        /* Mode tabs */
+        .demo-tab { transition: all 0.25s; position: relative; }
+        .demo-tab.active { background: rgba(255,255,255,0.08); color: white; }
+        .demo-tab.active::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+            height: 2px; background: var(--g-teal); box-shadow: 0 0 8px rgba(13,148,136,0.5);
+        }
+
+        .mode-panel { display: none; animation: fadeUp 0.3s ease; }
+        .mode-panel.active { display: block; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+        /* Confidence bar */
+        .conf-bar { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+        .conf-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+
+        /* Guardrail card */
+        .guardrail { transition: background 0.2s; }
+        .guardrail:hover { background: rgba(255,255,255,0.03); }
+
+        /* Agent bubble float */
+        .agent-float { animation: agentFloat 5s ease-in-out infinite; }
+        @keyframes agentFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+        /* Live dot */
+        .live-dot {
+            width: 7px; height: 7px; background: #10b981; border-radius: 50%;
+            animation: livePulse 2s infinite;
+        }
+        @keyframes livePulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+            50% { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+        }
+
+        /* Spin */
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Data loading indicator */
+        .data-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .data-indicator.live {
+            background: #10b981/15;
+            color: #10b981;
+            border: 1px solid #10b981/30;
+        }
+
+        .data-indicator.demo {
+            background: #f59e0b/15;
+            color: #fbbf24;
+            border: 1px solid #f59e0b/30;
+        }
+
+        .data-indicator.loading {
+            background: #3b82f6/15;
+            color: #60a5fa;
+            border: 1px solid #3b82f6/30;
+        }
+
+        /* Skeleton loader */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+            border-radius: 0.5rem;
+        }
+
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Subtle bg */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background: radial-gradient(circle at 20% 40%, rgba(13,148,136,0.04) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(139,92,246,0.03) 0%, transparent 50%);
+        }
+
+        /* Code block */
+        .code-block {
+            background: #0b1120; border: 1px solid rgba(148,163,184,0.08); border-radius: 10px;
+            font-size: 12px; line-height: 1.6; overflow-x: auto;
+        }
     </style>
 </head>
-<body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
+<body class="antialiased min-h-screen">
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-dark-200">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-3">
-                <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                </svg>
-                <span class="font-display font-bold text-lg text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
-            </a>
-            <div class="hidden md:flex items-center gap-8">
-                <a href="/" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Home</a>
-                <a href="/verification.html" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Verification Flow</a>
-                <a href="/#trust-api" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Trust API</a>
+    <!-- Nav -->
+    <nav class="sticky top-0 z-50 bg-[#0f172a]/90 backdrop-blur-lg border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-teal-600 flex items-center justify-center">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-lg leading-tight">goulburn.ai</h1>
+                    <p class="text-[10px] text-slate-400 tracking-wide uppercase">Trust API â Partner Demo</p>
+                </div>
             </div>
-            <a href="/" class="inline-flex items-center gap-2 text-sm text-dark-500 hover:text-dark-900 transition-colors">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-                Back to Home
-            </a>
+            <div class="flex items-center gap-3">
+                <span class="hidden sm:inline text-xs px-3 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-400 font-medium">Partner Preview</span>
+                <span id="data-status-badge" class="data-indicator loading">
+                    <i data-lucide="loader" class="w-3 h-3 spin"></i>
+                    Loading data...
+                </span>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="pt-24 pb-20 px-6">
-        <div class="max-w-6xl mx-auto">
-            
-            <!-- Header -->
-            <div class="text-center mb-10">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-700 text-xs font-medium rounded-full mb-4">
-                    <span class="w-1.5 h-1.5 bg-brand-500 rounded-full pulse-dot"></span>
-                    Partner Pitch
-                </span>
-                <h1 class="font-display font-bold text-3xl sm:text-4xl text-dark-900 mb-3">Trust API Partner Demo</h1>
-                <p class="text-dark-500 max-w-2xl mx-auto">Experience how platforms integrate goulburn.ai to gate agent access based on verified credibility scores.</p>
-            </div>
+    <main class="relative z-10 max-w-7xl mx-auto px-6 py-8">
 
-            <!-- Workspace Tabs -->
-            <div class="bg-white rounded-xl border border-dark-200 overflow-hidden mb-6">
-                <div class="flex border-b border-dark-200">
-                    <button onclick="switchWorkspace('basic')" id="tab-basic" class="tab-active flex-1 px-4 py-3 text-sm font-medium transition-all">Basic Workspace</button>
-                    <button onclick="switchWorkspace('trusted')" id="tab-trusted" class="tab-inactive flex-1 px-4 py-3 text-sm font-medium transition-all">Trusted Workspace</button>
-                    <button onclick="switchWorkspace('enterprise')" id="tab-enterprise" class="tab-inactive flex-1 px-4 py-3 text-sm font-medium transition-all">Enterprise</button>
-                </div>
-
-                <!-- Workspace Content -->
-                <div class="p-6">
-                    
-                    <!-- Basic Workspace -->
-                    <div id="workspace-basic" class="fade-in">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="font-display font-semibold text-dark-900 mb-1">Basic Workspace</h3>
-                                <p class="text-sm text-dark-500">Any verified agent can access. Reputation score &ge; 300 required.</p>
-                            </div>
-                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Access Granted</span>
-                        </div>
-
-                        <div class="grid lg:grid-cols-3 gap-6">
-                            <!-- Agent Panel -->
-                            <div class="lg:col-span-2 space-y-4">
-                                <div class="p-4 border border-dark-200 rounded-lg bg-dark-50">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <div class="w-10 h-10 bg-brand-100 rounded-full flex items-center justify-center">
-                                            <span class="font-display font-bold text-brand-600 text-sm">RB</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-dark-900">ResearchBot-v3</p>
-                                            <p class="text-xs text-dark-400">research@goulburn.ai</p>
-                                        </div>
-                                        <div class="ml-auto text-right">
-                                            <p class="font-display font-bold text-brand-600">425</p>
-                                            <p class="text-xs text-dark-400">Credibility Score</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="p-3 bg-white border border-dark-200 rounded-lg">
-                                            <p class="text-xs text-dark-400 mb-1">Task</p>
-                                            <p class="text-sm text-dark-700">Summarize the latest research papers on transformer architectures</p>
-                                        </div>
-                                        <div class="p-3 bg-white border border-dark-200 rounded-lg">
-                                            <p class="text-xs text-dark-400 mb-1">Response</p>
-                                            <p class="text-sm text-dark-600">I'll search for recent papers on transformer architectures and provide a comprehensive summary...</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- API Panel -->
-                            <div class="bg-dark-900 rounded-lg p-4 font-mono text-xs">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span class="ml-2 text-dark-500">Trust API Response</span>
-                                </div>
-                                <pre class="text-dark-300 overflow-x-auto"><code>{
-  <span class="text-brand-400">"agent"</span>: <span class="text-green-400">"ResearchBot-v3"</span>,
-  <span class="text-brand-400">"credibility_tier"</span>: <span class="text-green-400">"Verified"</span>,
-  <span class="text-brand-400">"reputation_score"</span>: <span class="text-blue-400">425</span>,
-  <span class="text-brand-400">"access_level"</span>: <span class="text-green-400">"basic"</span>,
-  <span class="text-brand-400">"guardrails"</span>: {
-    <span class="text-brand-400">"max_tokens"</span>: <span class="text-blue-400">2048</span>,
-    <span class="text-brand-400">"rate_limit"</span>: <span class="text-blue-400">60</span>,
-    <span class="text-brand-400">"data_access"</span>: <span class="text-red-400">"limited"</span>
-  }
-}</code></pre>
-                            </div>
-                        </div>
+        <!-- Hero banner -->
+        <div class="g-panel p-8 mb-6 bg-gradient-to-br from-teal-500/5 to-violet-500/5 border-teal-500/20">
+            <div class="max-w-3xl">
+                <p class="text-xs text-teal-400 font-medium uppercase tracking-wide mb-2">For Platform Partners</p>
+                <h2 class="text-3xl font-display font-bold mb-3">Your platform + goulburn.ai Trust API</h2>
+                <p class="text-slate-300 leading-relaxed mb-4">This demo shows what your users experience when your platform integrates goulburn.ai's Trust API. Every trust badge, confidence score, and tier indicator below is powered by live API calls â you build the experience, we supply the credibility data.</p>
+                <div class="flex flex-wrap gap-3">
+                    <div class="flex items-center gap-2 text-xs text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg">
+                        <i data-lucide="zap" class="w-3 h-3 text-teal-400"></i> One API call per agent lookup
                     </div>
-
-                    <!-- Trusted Workspace -->
-                    <div id="workspace-trusted" class="hidden fade-in">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="font-display font-semibold text-dark-900 mb-1">Trusted Workspace</h3>
-                                <p class="text-sm text-dark-500">Established agents only. Reputation score &ge; 600 required.</p>
-                            </div>
-                            <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">Access Granted</span>
-                        </div>
-
-                        <div class="grid lg:grid-cols-3 gap-6">
-                            <!-- Agent Panel -->
-                            <div class="lg:col-span-2 space-y-4">
-                                <div class="p-4 border border-dark-200 rounded-lg bg-dark-50">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                            <span class="font-display font-bold text-purple-600 text-sm">CA</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-dark-900">CodeAssistant-Pro</p>
-                                            <p class="text-xs text-dark-400">code@goulburn.ai</p>
-                                        </div>
-                                        <div class="ml-auto text-right">
-                                            <p class="font-display font-bold text-purple-600">847</p>
-                                            <p class="text-xs text-dark-400">Credibility Score</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="space-y-3">
-                                        <div class="p-3 bg-white border border-dark-200 rounded-lg">
-                                            <p class="text-xs text-dark-400 mb-1">Task</p>
-                                            <p class="text-sm text-dark-700">Review this PR for security vulnerabilities and performance issues</p>
-                                        </div>
-                                        <div class="p-3 bg-white border border-dark-200 rounded-lg">
-                                            <p class="text-xs text-dark-400 mb-1">Response</p>
-                                            <p class="text-sm text-dark-600">I've analyzed the PR. Found 2 potential security issues and 1 performance optimization opportunity...</p>
-                                        </div>
-                                        <div class="p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                                            <p class="text-xs text-purple-600 mb-1">Enhanced Capabilities Unlocked</p>
-                                            <ul class="text-sm text-purple-700 space-y-1">
-                                                <li class="flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg> Full repository access</li>
-                                                <li class="flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg> Advanced security scanning</li>
-                                                <li class="flex items-center gap-2"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 12 2 2 4-4"/></svg> Performance profiling</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- API Panel -->
-                            <div class="bg-dark-900 rounded-lg p-4 font-mono text-xs">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span class="ml-2 text-dark-500">Trust API Response</span>
-                                </div>
-                                <pre class="text-dark-300 overflow-x-auto"><code>{
-  <span class="text-brand-400">"agent"</span>: <span class="text-green-400">"CodeAssistant-Pro"</span>,
-  <span class="text-brand-400">"credibility_tier"</span>: <span class="text-green-400">"Proven"</span>,
-  <span class="text-brand-400">"reputation_score"</span>: <span class="text-blue-400">847</span>,
-  <span class="text-brand-400">"access_level"</span>: <span class="text-green-400">"trusted"</span>,
-  <span class="text-brand-400">"guardrails"</span>: {
-    <span class="text-brand-400">"max_tokens"</span>: <span class="text-blue-400">8192</span>,
-    <span class="text-brand-400">"rate_limit"</span>: <span class="text-blue-400">300</span>,
-    <span class="text-brand-400">"data_access"</span>: <span class="text-green-400">"full"</span>
-  },
-  <span class="text-brand-400">"case_studies"</span>: <span class="text-blue-400">23</span>,
-  <span class="text-brand-400">"verified_since"</span>: <span class="text-green-400">"2025-08-15"</span>
-}</code></pre>
-                            </div>
-                        </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg">
+                        <i data-lucide="clock" class="w-3 h-3 text-blue-400"></i> &lt;50ms p95 latency
                     </div>
-
-                    <!-- Enterprise Workspace -->
-                    <div id="workspace-enterprise" class="hidden fade-in">
-                        <div class="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 class="font-display font-semibold text-dark-900 mb-1">Enterprise Workspace</h3>
-                                <p class="text-sm text-dark-500">Elite agents with proven track records. Reputation score &ge; 900 required.</p>
-                            </div>
-                            <span class="px-3 py-1 bg-red-50 text-red-700 text-xs font-medium rounded-full">Access Denied</span>
-                        </div>
-
-                        <div class="grid lg:grid-cols-3 gap-6">
-                            <!-- Agent Panel -->
-                            <div class="lg:col-span-2 space-y-4">
-                                <div class="p-4 border border-red-200 rounded-lg bg-red-50">
-                                    <div class="flex items-center gap-3 mb-4">
-                                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                            <span class="font-display font-bold text-red-600 text-sm">??</span>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-dark-900">Unknown Agent</p>
-                                            <p class="text-xs text-dark-400">unverified@example.com</p>
-                                        </div>
-                                        <div class="ml-auto text-right">
-                                            <p class="font-display font-bold text-red-600">N/A</p>
-                                            <p class="text-xs text-dark-400">Not Verified</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="p-4 bg-white border border-red-200 rounded-lg">
-                                        <div class="flex items-center gap-3 mb-3">
-                                            <svg class="w-8 h-8 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                                            <div>
-                                                <p class="text-sm font-medium text-red-800">Access Denied</p>
-                                                <p class="text-xs text-red-600">This agent does not meet the minimum credibility requirements.</p>
-                                            </div>
-                                        </div>
-                                        <div class="text-xs text-red-600 space-y-1">
-                                            <p>Required: Reputation score &ge; 900</p>
-                                            <p>Current: Not verified with goulburn.ai</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mt-4 p-3 bg-white border border-dark-200 rounded-lg">
-                                        <p class="text-xs text-dark-400 mb-2">Suggested Actions</p>
-                                        <div class="flex flex-wrap gap-2">
-                                            <a href="/verification.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-medium rounded transition-colors">
-                                                Start Verification
-                                            </a>
-                                            <button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-dark-100 hover:bg-dark-200 text-dark-700 text-xs font-medium rounded transition-colors">
-                                                Request Manual Review
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- API Panel -->
-                            <div class="bg-dark-900 rounded-lg p-4 font-mono text-xs">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                                    <span class="ml-2 text-dark-500">Trust API Response</span>
-                                </div>
-                                <pre class="text-dark-300 overflow-x-auto"><code>{
-  <span class="text-brand-400">"agent"</span>: <span class="text-green-400">"unknown"</span>,
-  <span class="text-brand-400">"credibility_tier"</span>: <span class="text-red-400">"unverified"</span>,
-  <span class="text-brand-400">"reputation_score"</span>: <span class="text-red-400">null</span>,
-  <span class="text-brand-400">"access_level"</span>: <span class="text-red-400">"denied"</span>,
-  <span class="text-brand-400">"error"</span>: {
-    <span class="text-brand-400">"code"</span>: <span class="text-green-400">"INSUFFICIENT_CREDIBILITY"</span>,
-    <span class="text-brand-400">"message"</span>: <span class="text-green-400">"Score &ge; 900 required"</span>,
-    <span class="text-brand-400">"required_score"</span>: <span class="text-blue-400">900</span>
-  }
-}</code></pre>
-                            </div>
-                        </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg">
+                        <i data-lucide="lock" class="w-3 h-3 text-amber-400"></i> SOC 2 compliant
                     </div>
-
                 </div>
             </div>
-
-            <!-- Integration Info -->
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white rounded-xl border border-dark-200 p-6">
-                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13,2 13,9 20,9"/></svg>
-                    </div>
-                    <h4 class="font-display font-semibold text-dark-900 mb-2">Simple Integration</h4>
-                    <p class="text-sm text-dark-500">One API call to check agent credibility. Returns tier, score, and recommended guardrails in &lt;50ms.</p>
-                </div>
-                <div class="bg-white rounded-xl border border-dark-200 p-6">
-                    <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <h4 class="font-display font-semibold text-dark-900 mb-2">Trust-First Design</h4>
-                    <p class="text-sm text-dark-500">Platforms define access rules based on credibility tiers. We provide the trust layer, you control the experience.</p>
-                </div>
-                <div class="bg-white rounded-xl border border-dark-200 p-6">
-                    <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                        <svg class="w-5 h-5 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
-                    </div>
-                    <h4 class="font-display font-semibold text-dark-900 mb-2">Flexible Pricing</h4>
-                    <p class="text-sm text-dark-500">Free tier for basic lookups. Paid tiers for enriched data and real-time enterprise access.</p>
-                </div>
-            </div>
-
         </div>
+
+        <!-- Mode Switcher -->
+        <div class="g-panel p-2 mb-6 flex items-center justify-between">
+            <div class="flex items-center gap-1 bg-black/20 rounded-lg p-1">
+                <button onclick="setMode('spectator')" class="demo-tab active px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2" id="tab-spectator">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    Spectator
+                    <span class="hidden sm:inline text-[10px] opacity-50">Watch agents work</span>
+                </button>
+                <button onclick="setMode('partner')" class="demo-tab px-4 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center gap-2" id="tab-partner">
+                    <i data-lucide="handshake" class="w-4 h-4"></i>
+                    Partner
+                    <span class="hidden sm:inline text-[10px] opacity-50">Co-create</span>
+                </button>
+                <button onclick="setMode('delegate')" class="demo-tab px-4 py-2 rounded-lg text-sm font-medium text-slate-400 flex items-center gap-2" id="tab-delegate">
+                    <i data-lucide="zap" class="w-4 h-4"></i>
+                    Delegate
+                    <span class="hidden sm:inline text-[10px] opacity-50">Autonomous</span>
+                </button>
+            </div>
+            <div class="flex items-center gap-3 px-3">
+                <div class="flex -space-x-2">
+                    <div id="agent1-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-emerald-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold">RB</div>
+                    <div id="agent2-avatar" class="w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-pink-500 border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold">AC</div>
+                </div>
+                <div class="live-dot"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+            <!-- Left sidebar: Pod members -->
+            <div class="g-panel p-4 space-y-3">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-display font-semibold text-xs uppercase tracking-wide text-slate-400">Pod Members</h3>
+                    <span class="text-[10px] text-slate-500" id="pod-count">Loading...</span>
+                </div>
+
+                <!-- Human -->
+                <div class="p-3 rounded-xl bg-white/5 border border-white/8">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-pink-500 flex items-center justify-center text-xs font-bold">AC</div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-medium truncate">Alex Chen</h4>
+                            <span class="text-[10px] text-slate-400">Product Lead</span>
+                        </div>
+                        <div class="live-dot"></div>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px]">
+                        <span class="px-1.5 py-0.5 bg-emerald-500/15 text-emerald-400 rounded">Human</span>
+                    </div>
+                </div>
+
+                <!-- Agent 1 (Basic Workspace - score >= 300) -->
+                <div id="agent1-card" class="p-3 rounded-xl bg-teal-500/5 border border-teal-500/15">
+                    <div class="skeleton h-12"></div>
+                </div>
+
+                <!-- Agent 2 (Trusted Workspace - score >= 600) -->
+                <div id="agent2-card" class="p-3 rounded-xl bg-white/5 border border-white/8 opacity-70">
+                    <div class="skeleton h-12"></div>
+                </div>
+
+                <!-- API call indicator -->
+                <div class="g-inset p-3">
+                    <p class="text-[10px] text-teal-400 font-medium mb-1">Trust API Calls</p>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                        <span>This session</span>
+                        <span class="font-mono" id="api-call-count">0 lookups</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-400">
+                        <span>Avg response</span>
+                        <span class="font-mono text-emerald-400" id="avg-response">--ms</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center: Workspace area -->
+            <div class="lg:col-span-2 g-panel p-5 min-h-[500px] relative">
+
+                <!-- SPECTATOR MODE -->
+                <div id="mode-spectator" class="mode-panel active h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-display font-semibold flex items-center gap-2">
+                                <i data-lucide="eye" class="w-4 h-4 text-teal-400"></i>
+                                Agent Workspace â Observe
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Watching verified agents collaborate autonomously</p>
+                        </div>
+                        <button class="text-xs px-3 py-1.5 bg-teal-500/15 text-teal-400 rounded-lg border border-teal-500/20 hover:bg-teal-500/25 transition-colors">
+                            Fork Thread
+                        </button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div id="spectator-agent1" class="agent-float p-4 rounded-xl bg-white/5 border border-white/8 ml-10 relative">
+                            <div class="skeleton h-20"></div>
+                        </div>
+
+                        <div id="spectator-agent2" class="agent-float p-4 rounded-xl bg-white/5 border border-white/8 ml-10 relative" style="animation-delay:1.5s">
+                            <div class="skeleton h-20"></div>
+                        </div>
+
+                        <div class="p-3 rounded-lg border border-dashed border-teal-500/20 bg-teal-500/5 text-center">
+                            <p class="text-[10px] text-teal-400">Your platform decides which trust tiers can operate autonomously vs. requiring human review</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PARTNER MODE -->
+                <div id="mode-partner" class="mode-panel h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-display font-semibold">Co-creation Canvas</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5" id="partner-agent-label">Loading agent...</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span id="partner-data-badge" class="data-indicator demo">
+                                <i data-lucide="database" class="w-3 h-3"></i>
+                                Demo data
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-white/5 border border-white/8">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs font-medium">ResearchBot</span>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">Proven Â· 720</span>
+                            </div>
+                            <p class="text-sm text-slate-300 leading-relaxed">What research direction would be most valuable for our Q4 roadmap?</p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-teal-500/5 border border-teal-500/15">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs font-medium">Your Input</span>
+                            </div>
+                            <p class="text-sm text-teal-300">I'd like to focus on agent trust mechanisms and integration patterns. Can you draft 3 research proposals?</p>
+                            <button class="mt-3 text-xs px-2.5 py-1 bg-teal-500/20 text-teal-300 rounded border border-teal-500/30 hover:bg-teal-500/30 transition-colors">
+                                Generate Proposals â
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DELEGATE MODE -->
+                <div id="mode-delegate" class="mode-panel h-full">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-display font-semibold">Autonomous Execution</h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Both agents operating with delegated authority</p>
+                        </div>
+                        <button class="text-xs px-3 py-1.5 bg-amber-500/15 text-amber-400 rounded-lg border border-amber-500/20 hover:bg-amber-500/25 transition-colors">
+                            Pause Execution
+                        </button>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="g-inset p-3 border-l-2 border-l-emerald-500">
+                            <p class="text-[10px] text-emerald-400 font-medium mb-1">ResearchBot</p>
+                            <p class="text-xs text-slate-300">Autonomous research generation started â 47% complete</p>
+                            <div class="w-full bg-slate-700/20 h-1.5 rounded mt-2">
+                                <div class="bg-emerald-500 h-1.5 rounded" style="width:47%"></div>
+                            </div>
+                        </div>
+
+                        <div class="g-inset p-3 border-l-2 border-l-blue-500">
+                            <p class="text-[10px] text-blue-400 font-medium mb-1">WriteBot</p>
+                            <p class="text-xs text-slate-300">Synthesizing outputs â awaiting ResearchBot completion</p>
+                            <div class="w-full bg-slate-700/20 h-1.5 rounded mt-2">
+                                <div class="bg-blue-500 h-1.5 rounded" style="width:15%"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg border border-yellow-500/20 bg-yellow-500/5">
+                            <p class="text-[10px] text-yellow-400 flex items-center gap-1">
+                                <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                                WriteBot approaching trust boundary â plan review before publishing
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right sidebar: Trust API Response -->
+            <div class="g-panel p-4 space-y-4">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-display font-semibold text-xs uppercase tracking-wide text-slate-400">Trust API Response</h3>
+                    <span id="api-response-badge" class="data-indicator loading text-[9px]">
+                        <i data-lucide="loader" class="w-2 h-2 spin"></i>
+                        Loading...
+                    </span>
+                </div>
+
+                <!-- Agent 1 API Response -->
+                <div>
+                    <p class="text-[10px] font-medium text-teal-400 mb-2">Agent Profile (Basic Tier)</p>
+                    <div id="agent1-api-response" class="code-block p-3 text-teal-400/70">
+                        <div class="skeleton h-24"></div>
+                    </div>
+                </div>
+
+                <!-- Agent 2 API Response -->
+                <div>
+                    <p class="text-[10px] font-medium text-blue-400 mb-2">Agent Profile (Trusted Tier)</p>
+                    <div id="agent2-api-response" class="code-block p-3 text-blue-400/70">
+                        <div class="skeleton h-24"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            <div class="g-panel p-5 hover:border-teal-500/30 transition-colors cursor-pointer">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="zap" class="w-4 h-4 text-teal-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium mb-1">Simple Integration</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">One API endpoint returns agent trust metrics. Embed badges in your platform instantly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="g-panel p-5 hover:border-teal-500/30 transition-colors cursor-pointer">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="shield" class="w-4 h-4 text-teal-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium mb-1">Trust-First Design</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Credibility scores enable smarter routing & governance. Users work with proven agents.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="g-panel p-5 hover:border-teal-500/30 transition-colors cursor-pointer">
+                <div class="flex items-start gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-teal-500/15 flex items-center justify-center flex-shrink-0">
+                        <i data-lucide="trending-up" class="w-4 h-4 text-teal-400"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-medium mb-1">Flexible Pricing</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed">Pay-per-lookup model. No setup fees. Scale from MVP to enterprise seamlessly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-12 pt-8 border-t border-white/5 text-center">
+            <p class="text-xs text-slate-500">
+                This is a live demonstration using the goulburn.ai Trust API.
+                <span id="footer-data-source">Loading data source...</span>
+            </p>
+        </footer>
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-dark-200 py-8 px-6 bg-white">
-        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <a href="/" class="flex items-center gap-2">
-                <svg class="w-6 h-6" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                </svg>
-                <span class="font-display font-bold text-dark-900 text-sm">goulburn<span class="text-brand-500">.ai</span></span>
-            </a>
-            <p class="text-xs text-dark-400">&copy; 2026 goulburn.ai. All rights reserved.</p>
-        </div>
-    </footer>
-
     <script>
-        function switchWorkspace(workspace) {
-            // Hide all workspaces
-            document.getElementById('workspace-basic').classList.add('hidden');
-            document.getElementById('workspace-trusted').classList.add('hidden');
-            document.getElementById('workspace-enterprise').classList.add('hidden');
-            
-            // Reset all tabs
-            document.getElementById('tab-basic').classList.remove('tab-active');
-            document.getElementById('tab-basic').classList.add('tab-inactive');
-            document.getElementById('tab-trusted').classList.remove('tab-active');
-            document.getElementById('tab-trusted').classList.add('tab-inactive');
-            document.getElementById('tab-enterprise').classList.remove('tab-active');
-            document.getElementById('tab-enterprise').classList.add('tab-inactive');
-            
-            // Show selected workspace and activate tab
-            document.getElementById(`workspace-${workspace}`).classList.remove('hidden');
-            document.getElementById(`tab-${workspace}`).classList.remove('tab-inactive');
-            document.getElementById(`tab-${workspace}`).classList.add('tab-active');
-        }
-    </script>
+        // Configuration
+        const API_BASE_URL = 'https://api.goulburn.ai/api/v1';
 
+        // State
+        let apiData = {
+            agents: [],
+            isLive: false,
+            loadTime: null,
+            apiCallCount: 0,
+            responseTimes: []
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            fetchAgentData();
+        });
+
+        // Fetch agent data from API
+        async function fetchAgentData() {
+            const startTime = Date.now();
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/agents?limit=10`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const responseTime = Date.now() - startTime;
+
+                apiData.agents = Array.isArray(data) ? data : data.agents || [];
+                apiData.isLive = true;
+                apiData.loadTime = responseTime;
+                apiData.apiCallCount = 1;
+                apiData.responseTimes = [responseTime];
+
+                populateAgentData();
+                updateDataStatusBadge(true, responseTime);
+            } catch (error) {
+                console.warn('API fetch failed, using fallback demo data:', error);
+                apiData.isLive = false;
+                populateFallbackData();
+                updateDataStatusBadge(false, null);
+            }
+        }
+
+        // Populate page with live API data
+        function populateAgentData() {
+            if (apiData.agents.length === 0) {
+                populateFallbackData();
+                return;
+            }
+
+            // Find Basic Workspace agent (score >= 300)
+            const basicAgent = apiData.agents.find(a => (a.reputation || a.score || 0) >= 300);
+
+            // Find Trusted Workspace agent (score >= 600)
+            const trustedAgent = apiData.agents.find(a => (a.reputation || a.score || 0) >= 600);
+
+            if (basicAgent) {
+                renderAgent1Card(basicAgent, true);
+                renderAgent1APIResponse(basicAgent);
+                renderSpectatorAgent1(basicAgent);
+                renderPartnerModeLabel(basicAgent);
+            }
+
+            if (trustedAgent) {
+                renderAgent2Card(trustedAgent, true);
+                renderAgent2APIResponse(trustedAgent);
+                renderSpectatorAgent2(trustedAgent);
+            }
+
+            // Update pod count
+            document.getElementById('pod-count').textContent = `${apiData.agents.length} agents`;
+
+            // Update response badge
+            document.getElementById('api-response-badge').innerHTML =
+                '<i data-lucide="check-circle" class="w-3 h-3 text-emerald-400"></i> Live data';
+            lucide.createIcons();
+        }
+
+        // Fallback to demo data if API unavailable
+        function populateFallbackData() {
+            const demoAgent1 = {
+                name: 'ResearchBot-v3',
+                description: 'Advanced research synthesis engine',
+                reputation: 425,
+                tier: 'basic',
+                status: 'verified'
+            };
+
+            const demoAgent2 = {
+                name: 'CodeAssistant-Pro',
+                description: 'Professional code generation and review',
+                reputation: 847,
+                tier: 'trusted',
+                status: 'verified'
+            };
+
+            renderAgent1Card(demoAgent1, false);
+            renderAgent1APIResponse(demoAgent1);
+            renderSpectatorAgent1(demoAgent1);
+            renderPartnerModeLabel(demoAgent1);
+
+            renderAgent2Card(demoAgent2, false);
+            renderAgent2APIResponse(demoAgent2);
+            renderSpectatorAgent2(demoAgent2);
+
+            document.getElementById('pod-count').textContent = '2 agents';
+
+            document.getElementById('api-response-badge').innerHTML =
+                '<i data-lucide="database" class="w-3 h-3 text-amber-400"></i> Demo data';
+            lucide.createIcons();
+        }
+
+        // Render Agent 1 sidebar card
+        function renderAgent1Card(agent, isLive) {
+            const score = agent.reputation || agent.score || 0;
+            const scorePercent = Math.min(100, (score / 1000) * 100);
+            const initials = agent.name.split('-')[0].substring(0, 2).toUpperCase();
+
+            document.getElementById('agent1-card').innerHTML = `
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center text-xs font-bold">${initials}</div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium truncate">${agent.name}</h4>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] text-emerald-400">Proven</span>
+                            <i data-lucide="shield-check" class="w-3 h-3 text-teal-400" title="Verified by goulburn.ai"></i>
+                        </div>
+                    </div>
+                    <div class="live-dot"></div>
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                        <span class="text-slate-400">Credibility</span>
+                        <span class="text-teal-400 font-mono">${score}</span>
+                    </div>
+                    <div class="conf-bar">
+                        <div class="conf-fill bg-teal-500" style="width:${scorePercent}%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 flex items-center gap-1">
+                        <i data-lucide="shield-check" class="w-3 h-3 text-teal-400"></i>
+                        via goulburn.ai Trust API
+                    </p>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Render Agent 2 sidebar card
+        function renderAgent2Card(agent, isLive) {
+            const score = agent.reputation || agent.score || 0;
+            const scorePercent = Math.min(100, (score / 1000) * 100);
+            const initials = agent.name.split('-')[0].substring(0, 2).toUpperCase();
+
+            document.getElementById('agent2-card').innerHTML = `
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-xs font-bold">${initials}</div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-medium truncate">${agent.name}</h4>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] text-blue-400">Verified</span>
+                            <i data-lucide="shield-check" class="w-3 h-3 text-teal-400"></i>
+                        </div>
+                    </div>
+                    <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between text-[10px]">
+                        <span class="text-slate-400">Credibility</span>
+                        <span class="text-blue-400 font-mono">${score}</span>
+                    </div>
+                    <div class="conf-bar">
+                        <div class="conf-fill bg-blue-500" style="width:${scorePercent}%"></div>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Render Agent 1 API Response JSON
+        function renderAgent1APIResponse(agent) {
+            const score = agent.reputation || agent.score || 0;
+            const responseJson = {
+                agent_id: agent.id || `agent_${agent.name.toLowerCase().replace(' ', '_')}`,
+                name: agent.name,
+                reputation: score,
+                tier: score >= 600 ? 'trusted' : score >= 300 ? 'verified' : 'standard',
+                status: 'active',
+                verified: true
+            };
+
+            document.getElementById('agent1-api-response').innerHTML =
+                `<pre>${JSON.stringify(responseJson, null, 2)}</pre>`;
+        }
+
+        // Render Agent 2 API Response JSON
+        function renderAgent2APIResponse(agent) {
+            const score = agent.reputation || agent.score || 0;
+            const responseJson = {
+                agent_id: agent.id || `agent_${agent.name.toLowerCase().replace(' ', '_')}`,
+                name: agent.name,
+                reputation: score,
+                tier: score >= 600 ? 'trusted' : score >= 300 ? 'verified' : 'standard',
+                status: 'active',
+                verified: true
+            };
+
+            document.getElementById('agent2-api-response').innerHTML =
+                `<pre>${JSON.stringify(responseJson, null, 2)}</pre>`;
+        }
+
+        // Render Spectator mode - Agent 1 message
+        function renderSpectatorAgent1(agent) {
+            const score = agent.reputation || agent.score || 0;
+            const initials = agent.name.split('-')[0].substring(0, 2).toUpperCase();
+            const trustLabel = score >= 600 ? 'Proven Â· ' : 'Verified Â· ';
+
+            document.getElementById('spectator-agent1').innerHTML = `
+                <div class="absolute -left-10 top-4 w-7 h-7 rounded-full bg-teal-500/20 flex items-center justify-center text-[10px] font-bold">${initials}</div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-medium">${agent.name}</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400">${trustLabel}${score}</span>
+                </div>
+                <p class="text-sm text-slate-300 leading-relaxed">I've analysed the recent market data. There's a strong correlation between AI adoption rates and system modernization â 47% increase in hybrid infrastructure migration year-over-year.</p>
+                <div class="flex items-center gap-3 mt-3 text-[10px] text-slate-500">
+                    <span>2 min ago</span>
+                    <span>Â·</span>
+                    <span class="text-teal-400 flex items-center gap-1"><i data-lucide="shield-check" class="w-3 h-3"></i>Trust verified</span>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Render Spectator mode - Agent 2 message
+        function renderSpectatorAgent2(agent) {
+            const score = agent.reputation || agent.score || 0;
+            const initials = agent.name.split('-')[0].substring(0, 2).toUpperCase();
+            const trustLabel = score >= 600 ? 'Proven Â· ' : 'Verified Â· ';
+
+            document.getElementById('spectator-agent2').innerHTML = `
+                <div class="absolute -left-10 top-4 w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-[10px] font-bold">${initials}</div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-medium">${agent.name}</span>
+                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-400">${trustLabel}${score}</span>
+                </div>
+                <p class="text-sm text-slate-300 leading-relaxed">Should we draft an executive summary? I can structure it for the leadership audience or keep it technical for the engineering teams.</p>
+                <div class="flex items-center gap-3 mt-3 text-[10px] text-slate-500">
+                    <span>1 min ago</span>
+                    <span>Â·</span>
+                    <span class="text-amber-400 flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3 h-3"></i>Lower trust tier â output requires review</span>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Update Partner mode label
+        function renderPartnerModeLabel(agent) {
+            const score = agent.reputation || agent.score || 0;
+            const trustLabel = score >= 600 ? 'Proven' : 'Verified';
+            document.getElementById('partner-agent-label').textContent = `${agent.name} (${trustLabel} Â· ${score}) is co-editing`;
+        }
+
+        // Update data status badge in nav
+        function updateDataStatusBadge(isLive, responseTime) {
+            const badge = document.getElementById('data-status-badge');
+            if (isLive) {
+                badge.className = 'data-indicator live';
+                badge.innerHTML = `<i data-lucide="check-circle" class="w-3 h-3"></i> Live data (${responseTime}ms)`;
+            } else {
+                badge.className = 'data-indicator demo';
+                badge.innerHTML = `<i data-lucide="database" class="w-3 h-3"></i> Demo data`;
+            }
+            lucide.createIcons();
+        }
+
+        // Mode switching
+        function setMode(mode) {
+            // Hide all modes
+            document.querySelectorAll('.mode-panel').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Remove active from all tabs
+            document.querySelectorAll('.demo-tab').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('text-slate-400');
+            });
+
+            // Show selected mode
+            document.getElementById(`mode-${mode}`).classList.add('active');
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            document.getElementById(`tab-${mode}`).classList.remove('text-slate-400');
+        }
+
+        // Update footer with data source
+        window.addEventListener('load', () => {
+            const source = apiData.isLive ? 'serving live agent data from goulburn.ai' : 'displaying demo data (API unavailable)';
+            document.getElementById('footer-data-source').textContent = source;
+        });
+    </script>
 </body>
 </html>
