@@ -1,110 +1,186 @@
-# goulburn.ai Security Configuration
+# Goulburn.ai Secure Admin Backend
 
-## 🚨 CRITICAL: Your API is Currently Vulnerable
+Maximum security backend for the Goulburn.ai admin panel with comprehensive authentication, authorization, and audit logging.
 
-**Exposed admin endpoints (NO AUTHENTICATION):**
-- `POST /api/v1/admin/seed` - Database seeding
-- `POST /api/v1/admin/promote` - Privilege escalation
-- `POST /api/v1/admin/fix-schema` - Schema modification
-- `POST /api/v1/admin/create-owner` - Owner creation
-- `GET /api/v1/admin/db-schema` - Database structure leak
-- `POST /api/v1/owners/admin-login` - Admin authentication
+## Security Features
 
-## 📁 Files Included
+### 1. Backend Authentication
+- Username/password authentication with bcrypt hashing
+- Session-based authentication with secure tokens
+- Session timeout (30 minutes of inactivity)
+- IP-based session binding
 
-| File | Purpose |
-|------|---------|
-| `secure_main.py` | Secure FastAPI app with auth & rate limiting |
-| `security_middleware.py` | Security headers & logging middleware |
-| `requirements-security.txt` | Required security dependencies |
-| `.env.example` | Environment variables template |
-| `SECURITY_SETUP.md` | Complete setup guide |
-| `railway.json` | Railway deployment config |
+### 2. Real TOTP 2FA
+- Time-based One-Time Password (TOTP) using pyotp
+- Compatible with Google Authenticator, Authy, etc.
+- 30-second time window with 1-step drift tolerance
 
-## ⚡ Quick Start (5 minutes)
+### 3. Rate Limiting
+- IP-based rate limiting (5 requests per minute for login)
+- Account lockout after 5 failed attempts (15 minutes)
+- Prevents brute force and dictionary attacks
 
-### 1. Generate Secrets
+### 4. HTTPS Enforcement
+- HSTS headers with preload
+- Secure cookie settings
+- SSL/TLS certificate support
 
-```bash
-python3 << 'EOF'
-import secrets
-print(f"ADMIN_TOKEN={secrets.token_urlsafe(32)}")
-print(f"JWT_SECRET_KEY={secrets.token_hex(32)}")
-EOF
-```
+### 5. Audit Logging
+- Comprehensive audit trail of all admin actions
+- Redis-backed persistent logging
+- Last 10,000 entries retained
+- Includes timestamp, IP, user agent, action, and result
 
-### 2. Set Railway Variables
+### 6. IP Whitelisting
+- Optional IP-based access control
+- Configurable via environment variables
+- Empty whitelist allows all IPs (development mode)
 
-Go to [Railway Dashboard](https://railway.app) → Your Project → Variables:
+## Quick Start
 
-```
-ADMIN_TOKEN=<generated-admin-token>
-JWT_SECRET_KEY=<generated-jwt-secret>
-ENVIRONMENT=production
-```
-
-### 3. Add Redis (for rate limiting)
-
-Railway Dashboard → New → Database → Redis
-
-### 4. Update Your Code
-
-Replace your `main.py` with `secure_main.py`:
+### 1. Install Dependencies
 
 ```bash
-cp main.py main.py.backup  # Backup
-cp secure_main.py main.py   # Use secure version
+cd admin-backend
+pip install -r requirements.txt
 ```
 
-### 5. Deploy
+### 2. Configure Environment
 
 ```bash
-git add .
-git commit -m "Add security: auth, rate limiting, hidden admin docs"
-git push
+cp .env.example .env
+# Edit .env with your secure values
 ```
 
-## ✅ Security Checklist
+### 3. Generate TOTP Secret (Production)
 
-After deployment, verify:
+```python
+import pyotp
+secret = pyotp.random_base32()
+print(f"TOTP Secret: {secret}")
+print(f"Setup URL: {pyotp.totp.TOTP(secret).provisioning_uri(name='admin@goulburn.ai', issuer_name='Goulburn Admin')}")
+```
+
+### 4. Start Redis
 
 ```bash
-# 1. Admin endpoints hidden from docs
-curl https://api.goulburn.ai/openapi.json | grep admin
-# Should return NOTHING
-
-# 2. Admin endpoints require auth
-curl -X POST https://api.goulburn.ai/api/v1/admin/seed
-# Should return: {"detail":"Not authenticated"}
-
-# 3. With token works
-curl -X POST https://api.goulburn.ai/api/v1/admin/seed \
-  -H "Authorization: Bearer $ADMIN_TOKEN"
-# Should work (or return other error if no seed needed)
-
-# 4. Rate limiting active
-for i in {1..70}; do
-  curl -s -o /dev/null -w "%{http_code}\n" https://api.goulburn.ai/api/v1/agents
-done
-# Should see 429 after ~60 requests
+redis-server
 ```
 
-## 🔒 What Gets Fixed
+### 5. Run the Server
 
-| Issue | Before | After |
-|-------|--------|-------|
-| Admin docs visible | ✅ Anyone can see | ❌ Hidden |
-| Admin endpoints public | ✅ No auth needed | 🔒 Requires token |
-| Rate limiting | ❌ None | ✅ 60/min public, 10/min admin |
-| CORS | ❌ Any origin | ✅ goulburn.ai only |
-| Security headers | ❌ None | ✅ XSS, CSP, etc. |
+```bash
+# Development
+python main.py
 
-## 📞 Need Help?
+# Production with SSL
+SSL_KEYFILE=/path/to/privkey.pem SSL_CERTFILE=/path/to/fullchain.pem python main.py
+```
 
-1. Read `SECURITY_SETUP.md` for detailed instructions
-2. Check FastAPI docs: https://fastapi.tiangolo.com/tutorial/security/
-3. Railway docs: https://docs.railway.app/
+## API Endpoints
 
----
+### Authentication
 
-**⚠️ IMPORTANT:** Do this ASAP. Your admin endpoints are currently public.
+| Endpoint | Method | Rate Limit | Description |
+|----------|--------|------------|-------------|
+| `/api/v1/admin/auth/login` | POST | 5/min | Step 1: Username/password |
+| `/api/v1/admin/auth/verify-2fa` | POST | 10/min | Step 2: TOTP verification |
+| `/api/v1/admin/auth/logout` | POST | - | Invalidate session |
+
+### Admin Operations (Require 2FA Session)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/admin/dashboard` | GET | Dashboard statistics |
+| `/api/v1/admin/agents` | GET | List all agents |
+| `/api/v1/admin/agents/{id}/action` | POST | Perform agent action |
+| `/api/v1/admin/audit-log` | GET | View audit log |
+| `/api/v1/admin/session` | GET | Current session info |
+
+## Authentication Flow
+
+```
+┌─────────┐     POST /login      ┌─────────┐
+│  Client │ ───────────────────> │  Server │
+│         │  {username, password}│         │
+│         │ <─────────────────── │         │
+│         │  {session_token,     │         │
+│         │   requires_2fa: true}│         │
+│         │                      │         │
+│         │     POST /verify-2fa │         │
+│         │ ───────────────────> │         │
+│         │  {session_token,     │         │
+│         │   totp_code}         │         │
+│         │ <─────────────────── │         │
+│         │  {success: true}     │         │
+└─────────┘                      └─────────┘
+```
+
+## Security Headers
+
+All responses include:
+- `Strict-Transport-Security`: HSTS with preload
+- `Content-Security-Policy`: Restrictive CSP
+- `X-Frame-Options`: DENY (clickjacking protection)
+- `X-XSS-Protection`: 1; mode=block
+- `X-Content-Type-Options`: nosniff
+- `Referrer-Policy`: strict-origin-when-cross-origin
+- `Permissions-Policy`: Restricted feature access
+
+## Demo Credentials
+
+**Username:** `admin`
+**Password:** `goulburn2025!`
+
+For 2FA setup, check the server logs for the TOTP secret and QR code URL.
+
+## Production Deployment
+
+### 1. Update Credentials
+```bash
+# Generate new password hash
+python -c "import bcrypt; print(bcrypt.hashpw('your_secure_password'.encode(), bcrypt.gensalt()).decode())"
+
+# Generate new TOTP secret
+python -c "import pyotp; print(pyotp.random_base32())"
+```
+
+### 2. Configure Environment
+```bash
+# .env
+ADMIN_USERNAME=your_admin_username
+ADMIN_PASSWORD_HASH=your_bcrypt_hash
+ADMIN_TOTP_SECRET=your_totp_secret
+ALLOWED_IPS=your.office.ip.1,your.office.ip.2
+REDIS_URL=redis://your-redis-host:6379/0
+SSL_KEYFILE=/etc/letsencrypt/live/goulburn.ai/privkey.pem
+SSL_CERTFILE=/etc/letsencrypt/live/goulburn.ai/fullchain.pem
+```
+
+### 3. Use Docker (Optional)
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 8000
+CMD ["python", "main.py"]
+```
+
+## Monitoring
+
+### Health Check
+```bash
+curl https://your-domain/health
+```
+
+### Audit Log Query
+```bash
+curl -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
+  https://your-domain/api/v1/admin/audit-log?limit=50
+```
+
+## License
+
+Private - Goulburn.ai Internal Use Only
