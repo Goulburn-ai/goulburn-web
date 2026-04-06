@@ -144,5 +144,206 @@
         </div>
     </footer>
 
+
+    <script>
+    (function() {
+      const API_BASE = 'https://goulburn-admin-production.up.railway.app';
+      const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
+      const BUTTON_MAP = {
+        'Continue with GitHub': 'github',
+        'Continue with X': 'twitter',
+        'Continue with Discord': 'discord',
+        'Continue with LinkedIn': 'linkedin'
+      };
+
+      // Get agent_id from URL params (passed when verifying agent ownership)
+      function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+
+      // Show status message to user
+      function showStatus(msg, isError) {
+        let el = document.getElementById('auth-status');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'auth-status';
+          el.style.cssText = 'padding:12px 16px;border-radius:8px;margin:16px 0;text-align:center;font-size:14px;';
+          const form = document.querySelector('form');
+          if (form) form.parentNode.insertBefore(el, form);
+        }
+        el.textContent = msg;
+        el.style.background = isError ? '#fef2f2' : '#f0fdf4';
+        el.style.color = isError ? '#dc2626' : '#16a34a';
+        el.style.border = isError ? '1px solid #fecaca' : '1px solid #bbf7d0';
+        el.style.display = 'block';
+      }
+
+      // Handle OAuth button clicks
+      function initOAuth(platform) {
+        const agentId = getParam('agent_id') || 'default';
+        showStatus('Connecting to ' + platform + '...', false);
+
+        fetch(API_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=' + encodeURIComponent(agentId))
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.success && data.auth_url) {
+              window.location.href = data.auth_url;
+            } else {
+              showStatus('OAuth error: ' + (data.detail || 'Unknown error'), true);
+            }
+          })
+          .catch(function(err) {
+            showStatus('Connection failed: ' + err.message, true);
+          });
+      }
+
+      // Handle OAuth callback (code + state in URL)
+      function handleCallback() {
+        const code = getParam('code');
+        const state = getParam('state');
+        if (!code || !state) return false;
+
+        // Determine platform from state (try each)
+        showStatus('Completing verification...', false);
+        let found = false;
+
+        PLATFORMS.forEach(function(platform) {
+          if (found) return;
+          fetch(API_BASE + '/api/v1/oauth/' + platform + '/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, state: state })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.success) {
+              found = true;
+              showStatus('Verified as ' + data.username + ' on ' + data.platform + '!', false);
+              // Clean URL
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+          })
+          .catch(function() {});
+        });
+        return true;
+      }
+
+      // Handle admin login form
+      function handleLogin(e) {
+        e.preventDefault();
+        const email = document.querySelector('input[type="email"]');
+        const pass = document.querySelector('input[type="password"]');
+        if (!email || !pass) return;
+
+        const username = email.value.trim();
+        const password = pass.value;
+        if (!username || !password) {
+          showStatus('Please enter email and password.', true);
+          return;
+        }
+
+        showStatus('Signing in...', false);
+        fetch(API_BASE + '/api/v1/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && data.requires_2fa) {
+            sessionStorage.setItem('goulburn_session', data.session_token);
+            show2FAForm();
+          } else if (data.success) {
+            showStatus('Login successful!', false);
+            sessionStorage.setItem('goulburn_session', data.session_token);
+          } else {
+            showStatus(data.detail || 'Login failed.', true);
+          }
+        })
+        .catch(function(err) {
+          showStatus('Connection failed: ' + err.message, true);
+        });
+      }
+
+      // Show 2FA input form
+      function show2FAForm() {
+        const form = document.querySelector('form');
+        if (!form) return;
+        form.innerHTML = '<div style="text-align:center;margin-bottom:16px;">' +
+          '<h3 style="font-size:18px;font-weight:600;color:#1a1a2e;margin-bottom:8px;">Two-Factor Authentication</h3>' +
+          '<p style="font-size:14px;color:#6b7280;">Enter the 6-digit code from your authenticator app</p></div>' +
+          '<div style="margin-bottom:16px;">' +
+          '<input id="totp-code" type="text" maxlength="6" pattern="[0-9]{6}" placeholder="000000" ' +
+          'style="width:100%;padding:12px;text-align:center;font-size:24px;letter-spacing:8px;border:1px solid #d1d5db;border-radius:8px;outline:none;" autofocus>' +
+          '</div>' +
+          '<button type="submit" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors">Verify</button>';
+        form.onsubmit = handle2FA;
+      }
+
+      // Handle 2FA verification
+      function handle2FA(e) {
+        e.preventDefault();
+        const code = document.getElementById('totp-code');
+        if (!code || code.value.length !== 6) {
+          showStatus('Please enter a 6-digit code.', true);
+          return;
+        }
+
+        const token = sessionStorage.getItem('goulburn_session');
+        if (!token) {
+          showStatus('Session expired. Please sign in again.', true);
+          return;
+        }
+
+        showStatus('Verifying...', false);
+        fetch(API_BASE + '/api/v1/admin/auth/verify-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_token: token, totp_code: code.value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            showStatus('Authentication successful! Redirecting...', false);
+            if (data.session_token) {
+              sessionStorage.setItem('goulburn_session', data.session_token);
+            }
+            setTimeout(function() { window.location.href = '/'; }, 1500);
+          } else {
+            showStatus(data.detail || 'Invalid code. Try again.', true);
+          }
+        })
+        .catch(function(err) {
+          showStatus('Verification failed: ' + err.message, true);
+        });
+      }
+
+      // Initialize on DOM ready
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check for OAuth callback first
+        if (handleCallback()) return;
+
+        // Attach OAuth button handlers
+        var buttons = document.querySelectorAll('button');
+        buttons.forEach(function(btn) {
+          var text = btn.textContent.trim();
+          var platform = BUTTON_MAP[text];
+          if (platform) {
+            btn.type = 'button';
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              initOAuth(platform);
+            });
+          }
+        });
+
+        // Attach login form handler
+        var form = document.querySelector('form');
+        if (form) {
+          form.addEventListener('submit', handleLogin);
+        }
+      });
+    })();
+    </script>
 </body>
 </html>
