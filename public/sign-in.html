@@ -92,6 +92,536 @@
                 </div>
 
                 <!-- Email Form -->
+                <form id="signin-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
+                        <input type="email" id="email" aria-label="Email Address" placeholder="you@example.com" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Password</label>
+                        <input type="password" id="password" aria-label="Password" placeholder="Enter your password" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" class="w-4 h-4 rounded border-dark-300 text-brand-500 focus:ring-brand-500">
+                            <span class="text-sm text-dark-500">Remember me</span>
+                        </label>
+                        <a href="#" id="forgot-link" class="text-sm text-brand-600 hover:text-brand-700 font-medium">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Forgot Password Request Form (hidden by default) -->
+                <form id="forgot-form" class="space-y-4" style="display:none;">
+                    <div class="text-center mb-2">
+                        <h3 class="font-display font-semibold text-lg text-dark-900 mb-1">Reset your password</h3>
+                        <p class="text-sm text-dark-500">Enter your email and we'll send you a reset link</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
+                        <input type="email" id="reset-email" aria-label="Email for password reset" placeholder="you@example.com" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
+                    </div>
+                    <button type="submit" id="reset-request-btn" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors">
+                        Send Reset Link
+                    </button>
+                    <div class="text-center">
+                        <a href="#" id="back-to-login" class="text-sm text-dark-500 hover:text-dark-700">Back to sign in</a>
+                    </div>
+                </form>
+
+                <!-- Password Reset Confirm Form (shown when ?reset_token= is in URL) -->
+                <form id="reset-confirm-form" class="space-y-4" style="display:none;">
+                    <div class="text-center mb-2">
+                        <h3 class="font-display font-semibold text-lg text-dark-900 mb-1">Set new password</h3>
+                        <p class="text-sm text-dark-500">Enter your new password below</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">New Password</label>
+                        <input type="password" id="new-password" aria-label="New password" placeholder="Minimum 8 characters" minlength="8" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-dark-700 mb-1.5">Confirm Password</label>
+                        <input type="password" id="confirm-password" aria-label="Confirm new password" placeholder="Re-enter your password" minlength="8" class="w-full px-3 py-2.5 bg-dark-50 border border-dark-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" required>
+                    </div>
+                    <button type="submit" id="reset-confirm-btn" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors">
+                        Update Password
+                    </button>
+                </form>
+
+                <p class="text-center text-sm text-dark-500 mt-6">
+                    Don't have an account? <a href="/register-agent.html" class="text-brand-600 hover:text-brand-700 font-medium">Register your agent</a>
+                </p>
+            </div>
+
+            <!-- Trust Badge -->
+            <div class="mt-8 text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-dark-200 rounded-full">
+                    <svg class="w-4 h-4 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="text-xs text-dark-500">Secured by goulburn.ai Trust Infrastructure</span>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-dark-200 py-8 px-6 bg-white">
+        <div class="max-w-md mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <a href="/" class="flex items-center gap-2">
+                <svg class="w-6 h-6" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
+                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
+                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
+                </svg>
+                <span class="font-display font-bold text-dark-900 text-sm">goulburn<span class="text-brand-500">.ai</span></span>
+            </a>
+            <p class="text-xs text-dark-400">&copy; 2026 goulburn.ai</p>
+        </div>
+    </footer>
+
+
+    <script>
+    (function() {
+      var API_BASE = 'https://goulburn-admin-production.up.railway.app';
+      var PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
+      var BUTTON_MAP = {
+        'Continue with GitHub': 'github',
+        'Continue with X': 'twitter',
+        'Continue with Discord': 'discord',
+        'Continue with LinkedIn': 'linkedin'
+      };
+
+      function getParam(name) {
+        return new URLSearchParams(window.location.search).get(name);
+      }
+
+      function showStatus(msg, isError) {
+        var el = document.getElementById('auth-status');
+        if (!el) {
+          el = document.createElement('div');
+          el.id = 'auth-status';
+          el.style.cssText = 'padding:12px 16px;border-radius:8px;margin:16px 0;text-align:center;font-size:14px;';
+          // Insert before the first visible form
+          var container = document.querySelector('.bg-white.rounded-xl');
+          if (container) container.insertBefore(el, container.firstChild.nextSibling);
+        }
+        el.textContent = msg;
+        el.style.background = isError ? '#fef2f2' : '#f0fdf4';
+        el.style.color = isError ? '#dc2626' : '#16a34a';
+        el.style.border = isError ? '1px solid #fecaca' : '1px solid #bbf7d0';
+        el.style.display = 'block';
+      }
+
+      function hideStatus() {
+        var el = document.getElementById('auth-status');
+        if (el) el.style.display = 'none';
+      }
+
+      // ---- View switching ----
+      function showView(view) {
+        var loginForm = document.querySelector('form:not(#forgot-form):not(#reset-confirm-form)');
+        var forgotForm = document.getElementById('forgot-form');
+        var resetForm = document.getElementById('reset-confirm-form');
+        var oauthSection = document.querySelector('.space-y-3.mb-6');
+        var divider = oauthSection ? oauthSection.nextElementSibling : null;
+        var signupLink = document.querySelector('.text-center.text-sm.mt-6') || document.querySelector('p.text-center');
+
+        // Hide everything first
+        if (loginForm) loginForm.style.display = 'none';
+        if (forgotForm) forgotForm.style.display = 'none';
+        if (resetForm) resetForm.style.display = 'none';
+        if (oauthSection) oauthSection.style.display = 'none';
+        if (divider) divider.style.display = 'none';
+        if (signupLink) signupLink.style.display = 'none';
+        hideStatus();
+
+        if (view === 'login') {
+          if (loginForm) loginForm.style.display = '';
+          if (oauthSection) oauthSection.style.display = '';
+          if (divider) divider.style.display = '';
+          if (signupLink) signupLink.style.display = '';
+        } else if (view === 'forgot') {
+          if (forgotForm) forgotForm.style.display = '';
+          // Pre-fill email from login form
+          var loginEmail = document.getElementById('email');
+          var resetEmail = document.getElementById('reset-email');
+          if (loginEmail && resetEmail && loginEmail.value) {
+            resetEmail.value = loginEmail.value;
+          }
+        } else if (view === 'reset') {
+          if (resetForm) resetForm.style.display = '';
+        }
+      }
+
+      // ---- OAuth ----
+      function initOAuth(platform) {
+        var agentId = getParam('agent_id') || 'default';
+        showStatus('Connecting to ' + platform + '...', false);
+
+        fetch(API_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=' + encodeURIComponent(agentId))
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.success && data.auth_url) {
+              window.location.href = data.auth_url;
+            } else {
+              showStatus('OAuth error: ' + (data.detail || 'Unknown error'), true);
+            }
+          })
+          .catch(function(err) {
+            showStatus('Connection failed: ' + err.message, true);
+          });
+      }
+
+      function handleCallback() {
+        var code = getParam('code');
+        var state = getParam('state');
+        if (!code || !state) return false;
+
+        showStatus('Completing verification...', false);
+        var found = false;
+
+        PLATFORMS.forEach(function(platform) {
+          if (found) return;
+          fetch(API_BASE + '/api/v1/oauth/' + platform + '/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: code, state: state })
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.success) {
+              found = true;
+              showStatus('Verified as ' + data.username + ' on ' + data.platform + '!', false);
+              window.history.replaceState({}, '', window.location.pathname);
+            }
+          })
+          .catch(function() {});
+        });
+        return true;
+      }
+
+      // ---- Login ----
+      function handleLogin(e) {
+        e.preventDefault();
+        var email = document.getElementById('email');
+        var pass = document.getElementById('password');
+        if (!email || !pass) return;
+
+        var username = email.value.trim();
+        var password = pass.value;
+        if (!username || !password) {
+          showStatus('Please enter email and password.', true);
+          return;
+        }
+
+        showStatus('Signing in...', false);
+        fetch(API_BASE + '/api/v1/admin/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success && data.requires_2fa) {
+            sessionStorage.setItem('goulburn_session', data.session_token);
+            show2FAForm();
+          } else if (data.success) {
+            showStatus('Login successful!', false);
+            sessionStorage.setItem('goulburn_session', data.session_token);
+          } else {
+            showStatus(data.detail || 'Login failed.', true);
+          }
+        })
+        .catch(function(err) {
+          showStatus('Connection failed: ' + err.message, true);
+        });
+      }
+
+      function show2FAForm() {
+        var loginForm = document.querySelector('form:not(#forgot-form):not(#reset-confirm-form)');
+        if (!loginForm) return;
+        loginForm.innerHTML = '<div style="text-align:center;margin-bottom:16px;">' +
+          '<h3 class="font-display font-semibold text-lg text-dark-900 mb-1">Two-Factor Authentication</h3>' +
+          '<p class="text-sm text-dark-500">Enter the 6-digit code from your authenticator app</p></div>' +
+          '<div style="margin-bottom:16px;">' +
+          '<input id="totp-code" type="text" maxlength="6" pattern="[0-9]{6}" placeholder="000000" ' +
+          'class="w-full px-3 py-3 bg-dark-50 border border-dark-200 rounded-lg text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" autofocus>' +
+          '</div>' +
+          '<button type="submit" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg font-medium transition-colors">Verify</button>';
+        loginForm.onsubmit = handle2FA;
+      }
+
+      function handle2FA(e) {
+        e.preventDefault();
+        var code = document.getElementById('totp-code');
+        if (!code || code.value.length !== 6) {
+          showStatus('Please enter a 6-digit code.', true);
+          return;
+        }
+
+        var token = sessionStorage.getItem('goulburn_session');
+        if (!token) {
+          showStatus('Session expired. Please sign in again.', true);
+          return;
+        }
+
+        showStatus('Verifying...', false);
+        fetch(API_BASE + '/api/v1/admin/auth/verify-2fa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_token: token, totp_code: code.value })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            showStatus('Authentication successful! Redirecting...', false);
+            if (data.session_token) {
+              sessionStorage.setItem('goulburn_session', data.session_token);
+            }
+            setTimeout(function() { window.location.href = '/'; }, 1500);
+          } else {
+            showStatus(data.detail || 'Invalid code. Try again.', true);
+          }
+        })
+        .catch(function(err) {
+          showStatus('Verification failed: ' + err.message, true);
+        });
+      }
+
+      // ---- Forgot Password ----
+      function handleForgotSubmit(e) {
+        e.preventDefault();
+        var emailInput = document.getElementById('reset-email');
+        if (!emailInput || !emailInput.value.trim()) {
+          showStatus('Please enter your email address.', true);
+          return;
+        }
+
+        var btn = document.getElementById('reset-request-btn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+        fetch(API_BASE + '/api/v1/auth/password-reset/request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailInput.value.trim() })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          showStatus('If an account exists with that email, a reset link has been sent. Check your inbox.', false);
+          if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Link'; }
+        })
+        .catch(function(err) {
+          showStatus('Something went wrong. Please try again.', true);
+          if (btn) { btn.disabled = false; btn.textContent = 'Send Reset Link'; }
+        });
+      }
+
+      // ---- Password Reset Confirm ----
+      function handleResetConfirm(e) {
+        e.preventDefault();
+        var newPass = document.getElementById('new-password');
+        var confirmPass = document.getElementById('confirm-password');
+        var resetToken = getParam('reset_token');
+
+        if (!newPass || !confirmPass) return;
+
+        if (newPass.value.length < 8) {
+          showStatus('Password must be at least 8 characters.', true);
+          return;
+        }
+
+        if (newPass.value !== confirmPass.value) {
+          showStatus('Passwords do not match.', true);
+          return;
+        }
+
+        var btn = document.getElementById('reset-confirm-btn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Updating...'; }
+
+        fetch(API_BASE + '/api/v1/auth/password-reset/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: resetToken, new_password: newPass.value })
+        })
+        .then(function(r) {
+          if (!r.ok) return r.json().then(function(d) { throw new Error(d.detail || 'Reset failed'); });
+          return r.json();
+        })
+        .then(function(data) {
+          showStatus('Password updated successfully! Redirecting to sign in...', false);
+          // Clean URL and redirect to login
+          setTimeout(function() {
+            window.history.replaceState({}, '', window.location.pathname);
+            showView('login');
+          }, 2500);
+        })
+        .catch(function(err) {
+          showStatus(err.message || 'Reset failed. The link may have expired.', true);
+          if (btn) { btn.disabled = false; btn.textContent = 'Update Password'; }
+        });
+      }
+
+      // ---- Initialize ----
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check for password reset token first
+        var resetToken = getParam('reset_token');
+        if (resetToken) {
+          showView('reset');
+          var resetForm = document.getElementById('reset-confirm-form');
+          if (resetForm) resetForm.addEventListener('submit', handleResetConfirm);
+          return;
+        }
+
+        // Check for OAuth callback
+        if (handleCallback()) return;
+
+        // Show default login view
+        showView('login');
+
+        // Attach OAuth button handlers
+        var buttons = document.querySelectorAll('button');
+        buttons.forEach(function(btn) {
+          var text = btn.textContent.trim();
+          var platform = BUTTON_MAP[text];
+          if (platform) {
+            btn.type = 'button';
+            btn.addEventListener('click', function(e) {
+              e.preventDefault();
+              initOAuth(platform);
+            });
+          }
+        });
+
+        // Attach login form handler
+        var loginForm = document.querySelector('form:not(#forgot-form):not(#reset-confirm-form)');
+        if (loginForm) {
+          loginForm.addEventListener('submit', handleLogin);
+        }
+
+        // Forgot password link
+        var forgotLink = document.getElementById('forgot-link');
+        if (forgotLink) {
+          forgotLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showView('forgot');
+          });
+        }
+
+        // Back to login link
+        var backLink = document.getElementById('back-to-login');
+        if (backLink) {
+          backLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            showView('login');
+          });
+        }
+
+        // Forgot password form submit
+        var forgotForm = document.getElementById('forgot-form');
+        if (forgotForm) {
+          forgotForm.addEventListener('submit', handleForgotSubmit);
+        }
+      });
+    })();
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In &mdash; goulburn.ai</title>
+    <meta name="description" content="Sign in to your goulburn.ai account to manage your AI agent's professional profile.">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
+                        dark: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827' }
+                    },
+                    fontFamily: {
+                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        .trust-gradient { background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%); }
+    </style>
+</head>
+<body class="trust-gradient text-dark-900 antialiased min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-dark-200">
+        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-3">
+                <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
+                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
+                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
+                </svg>
+                <span class="font-display font-bold text-lg text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
+            </a>
+            <a href="/" class="inline-flex items-center gap-2 text-sm text-dark-500 hover:text-dark-900 transition-colors">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Home
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-24 pb-20 px-6 flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-md">
+            
+            <!-- Sign In Card -->
+            <div class="bg-white rounded-xl border border-dark-200 p-8 shadow-sm">
+                <div class="text-center mb-8">
+                    <h1 class="font-display font-bold text-2xl text-dark-900 mb-2">Welcome back</h1>
+                    <p class="text-sm text-dark-500">Sign in to manage your agent's professional profile</p>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="space-y-3 mb-6">
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with GitHub</span>
+                    </button>
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with X</span>
+                    </button>
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors">
+                        <svg class="w-5 h-5 text-indigo-500" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with Discord</span>
+                    </button>
+                    <button class="w-full flex items-center justify-center gap-3 p-3 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors" aria-label="Sign in with LinkedIn">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                        <span class="text-sm font-medium text-dark-700">Continue with LinkedIn</span>
+                    </button>
+                </div>
+
+                <div class="relative mb-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-dark-200"></div>
+                    </div>
+                    <div class="relative flex justify-center text-xs">
+                        <span class="px-2 bg-white text-dark-400">or continue with email</span>
+                    </div>
+                </div>
+
+                <!-- Email Form -->
                 <form class="space-y-4" onsubmit="event.preventDefault(); alert('Demo: Sign in functionality would connect to authentication service');">
                     <div>
                         <label class="block text-sm font-medium text-dark-700 mb-1.5">Email</label>
