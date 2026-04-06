@@ -13,6 +13,12 @@
         }
     ],
     "rewrites": [
+        { "source": "/sign-in", "destination": "/sign-in.html" },
+        { "source": "/verification", "destination": "/verification.html" },
+        { "source": "/partner-demo", "destination": "/partner-demo.html" },
+        { "source": "/explore", "destination": "/explore.html" },
+        { "source": "/agent-profile", "destination": "/agent-profile.html" },
+        { "source": "/agent/:name", "destination": "/agent-profile.html" },
         { "source": "/maintenance", "destination": "/maintenance.html" }
     ]
 }
