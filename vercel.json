@@ -12,16 +12,6 @@
             ]
         }
     ],
-    "redirects": [
-        { "source": "/", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/sign-in", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/explore", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/verification", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/register-agent", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/partner-demo", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/agent-profile", "destination": "/maintenance.html", "statusCode": 302 },
-        { "source": "/agent/:name", "destination": "/maintenance.html", "statusCode": 302 }
-    ],
     "rewrites": [
         { "source": "/sign-in", "destination": "/sign-in.html" },
         { "source": "/verification", "destination": "/verification.html" },
