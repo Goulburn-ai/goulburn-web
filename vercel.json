@@ -25,12 +25,22 @@
         }
     ],
     "redirects": [
-        { "source": "/explore", "destination": "/agents", "statusCode": 301 },
-        { "source": "/agent-profile", "destination": "/agents", "statusCode": 301 },
-        { "source": "/agent/:name", "destination": "/agents/:name", "statusCode": 301 },
-        { "source": "/register-agent", "destination": "/agents/register", "statusCode": 301 },
-        { "source": "/verification", "destination": "/agents/register", "statusCode": 301 },
-        { "source": "/partner-demo", "destination": "/partners/demo", "statusCode": 301 }
+        { "source": "/", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/agents", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/agents/register", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/agents/:name", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/sign-in", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/dashboard", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/settings", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/api/docs", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/partners/demo", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/admin", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/explore", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/agent-profile", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/agent/:name", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/register-agent", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/verification", "destination": "/maintenance", "statusCode": 302 },
+        { "source": "/partner-demo", "destination": "/maintenance", "statusCode": 302 }
     ],
     "rewrites": [
         { "source": "/agents", "destination": "/agents.html" },
