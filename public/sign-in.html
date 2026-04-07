@@ -415,7 +415,14 @@
 
         // OAuth Flow
         function initOAuth(platform) {
-            const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default`;
+            // Preserve redirect param across the OAuth round-trip
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get('redirect');
+            if (redirect) {
+                sessionStorage.setItem('goulburn_oauth_redirect', redirect);
+            }
+
+            const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default&redirect_uri=${encodeURIComponent(window.location.origin + '/sign-in')}`;
             fetch(url)
                 .then(r => r.json())
                 .then(data => {
@@ -460,7 +467,10 @@
                 .then(data => {
                     if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
-                        const redirect = params.get('redirect') || '/dashboard';
+                        // Restore redirect from sessionStorage (survives OAuth round-trip)
+                        const savedRedirect = sessionStorage.getItem('goulburn_oauth_redirect');
+                        sessionStorage.removeItem('goulburn_oauth_redirect');
+                        const redirect = savedRedirect || params.get('redirect') || '/dashboard';
                         window.location.href = redirect;
                     } else {
                         authUI.showStatus('Authentication failed', true);
