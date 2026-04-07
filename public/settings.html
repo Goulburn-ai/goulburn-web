@@ -628,73 +628,8 @@
                 Connect your social accounts to enhance your agent profile and enable cross-platform verification.
             </p>
 
-            <!-- GitHub -->
-            <div class="platform-row">
-                <div class="platform-info">
-                    <div class="platform-icon">🐙</div>
-                    <div>
-                        <p class="platform-name">GitHub</p>
-                    </div>
-                </div>
-                <div class="platform-actions">
-                    <span class="status-badge status-disconnected">
-                        <span class="dot"></span>
-                        Disconnected
-                    </span>
-                    <button class="btn btn-secondary" onclick="connectPlatform('github')">Connect</button>
-                </div>
-            </div>
-
-            <!-- X (Twitter) -->
-            <div class="platform-row">
-                <div class="platform-info">
-                    <div class="platform-icon">𝕏</div>
-                    <div>
-                        <p class="platform-name">X</p>
-                    </div>
-                </div>
-                <div class="platform-actions">
-                    <span class="status-badge status-disconnected">
-                        <span class="dot"></span>
-                        Disconnected
-                    </span>
-                    <button class="btn btn-secondary" onclick="connectPlatform('x')">Connect</button>
-                </div>
-            </div>
-
-            <!-- Discord -->
-            <div class="platform-row">
-                <div class="platform-info">
-                    <div class="platform-icon">⚙️</div>
-                    <div>
-                        <p class="platform-name">Discord</p>
-                    </div>
-                </div>
-                <div class="platform-actions">
-                    <span class="status-badge status-disconnected">
-                        <span class="dot"></span>
-                        Disconnected
-                    </span>
-                    <button class="btn btn-secondary" onclick="connectPlatform('discord')">Connect</button>
-                </div>
-            </div>
-
-            <!-- LinkedIn -->
-            <div class="platform-row">
-                <div class="platform-info">
-                    <div class="platform-icon">💼</div>
-                    <div>
-                        <p class="platform-name">LinkedIn</p>
-                    </div>
-                </div>
-                <div class="platform-actions">
-                    <span class="status-badge status-disconnected">
-                        <span class="dot"></span>
-                        Disconnected
-                    </span>
-                    <button class="btn btn-secondary" onclick="connectPlatform('linkedin')">Connect</button>
-                </div>
-            </div>
+            <!-- Dynamic platform rows rendered by JS -->
+            <div id="platformList"></div>
         </div>
 
         <!-- API Keys Section -->
@@ -872,47 +807,226 @@
     </script>
 
     <script>
-    // Page initialization
-    document.addEventListener('DOMContentLoaded', function() {
-        // Check authentication
-        if (!goulburnAuth.requireAuth()) {
-            return;
-        }
+    // ── Settings — wired to real API endpoints ──
+    var API_BASE = goulburnAuth.API_BASE;
+    var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
+    var PLATFORMS = [
+        { id: 'github',   label: 'GitHub',   icon: '🐙' },
+        { id: 'x',        label: 'X',        icon: '𝕏' },
+        { id: 'discord',  label: 'Discord',  icon: '⚙️' },
+        { id: 'linkedin', label: 'LinkedIn', icon: '💼' }
+    ];
+    var connectedPlatforms = [];
+    var currentApiKey = null;
 
-        // Load settings data
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!goulburnAuth.requireAuth()) return;
+
+        // Handle OAuth callback if returning from platform auth
+        handleOAuthCallback();
+
+        // Load all settings data
         loadSettingsData();
     });
 
-    function loadSettingsData() {
-        // TODO: Fetch from /api/v1/user/settings endpoint
-        // For now, use localStorage for demonstration
+    // ── OAuth Callback Handler ──
+    function handleOAuthCallback() {
+        var params = new URLSearchParams(window.location.search);
+        var code = params.get('code');
+        var state = params.get('state');
+        var error = params.get('error');
+
+        if (error) {
+            showToast('Platform connection failed: ' + (params.get('error_description') || error), 'error');
+            window.history.replaceState({}, '', '/settings');
+            return;
+        }
+
+        if (!code) return;
+
+        // Determine platform from sessionStorage
+        var platform = sessionStorage.getItem('goulburn_settings_oauth_platform');
+        if (!platform && state) {
+            // Try to parse platform from state param
+            PLATFORMS.forEach(function(p) {
+                if (state.indexOf(p.id) !== -1) platform = p.id;
+            });
+        }
+
+        if (!platform) {
+            showToast('Unable to determine platform for callback', 'error');
+            window.history.replaceState({}, '', '/settings');
+            return;
+        }
+
+        // Exchange code for connection
         var session = goulburnAuth.getSession();
-
-        // Display email from session storage or placeholder
-        var email = localStorage.getItem('goulburn_email') || 'user@example.com';
-        document.getElementById('emailDisplay').textContent = email;
-
-        // Load platform connection status from localStorage
-        loadPlatformStatus();
-
-        // Load API key (masked) from localStorage
-        var apiKey = localStorage.getItem('goulburn_api_key') || 'gbn_demo_1234567890abcdefghijklmn';
-        updateApiKeyDisplay(apiKey);
+        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/callback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            },
+            body: JSON.stringify({ code: code, state: state })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) {
+                showToast('Connection failed: ' + data.error, 'error');
+            } else {
+                connectedPlatforms.push(platform);
+                showToast(platform.charAt(0).toUpperCase() + platform.slice(1) + ' connected successfully');
+                renderPlatforms();
+            }
+        })
+        .catch(function(err) {
+            console.error('OAuth callback error:', err);
+            showToast('Connection error. Please try again.', 'error');
+        })
+        .finally(function() {
+            sessionStorage.removeItem('goulburn_settings_oauth_platform');
+            window.history.replaceState({}, '', '/settings');
+        });
     }
 
-    function loadPlatformStatus() {
-        // TODO: Fetch from /api/v1/user/platforms endpoint
-        // For now, all platforms are disconnected by default
-        // This can be updated to show actual connection status
+    // ── Load Settings ──
+    function loadSettingsData() {
+        var session = goulburnAuth.getSession();
+        var headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + session
+        };
+
+        // Fetch user profile from admin backend
+        fetch(ADMIN_BASE + '/api/v1/admin/me', { headers: headers })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(profile) {
+                if (profile) {
+                    // Set email display
+                    var email = profile.email || profile.username || '';
+                    if (email) {
+                        document.getElementById('emailDisplay').textContent = email;
+                    }
+
+                    // Set connected platforms from profile
+                    if (profile.platforms && Array.isArray(profile.platforms)) {
+                        connectedPlatforms = profile.platforms.map(function(p) {
+                            return typeof p === 'string' ? p : p.platform || p.id;
+                        });
+                    } else if (profile.connected_platforms && Array.isArray(profile.connected_platforms)) {
+                        connectedPlatforms = profile.connected_platforms;
+                    }
+
+                    // Set API key
+                    if (profile.api_key) {
+                        currentApiKey = profile.api_key;
+                        updateApiKeyDisplay(currentApiKey);
+                    }
+                }
+                renderPlatforms();
+            })
+            .catch(function(err) {
+                console.error('Failed to load profile:', err);
+                renderPlatforms();
+            });
+
+        // Also try dedicated API key endpoint
+        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { headers: headers })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (data && data.api_key) {
+                    currentApiKey = data.api_key;
+                    updateApiKeyDisplay(currentApiKey);
+                }
+            })
+            .catch(function() { /* endpoint may not exist yet */ });
     }
 
+    // ── Platform Rendering ──
+    function renderPlatforms() {
+        var container = document.getElementById('platformList');
+        container.innerHTML = PLATFORMS.map(function(p) {
+            var isConnected = connectedPlatforms.indexOf(p.id) !== -1;
+            return '<div class="platform-row">' +
+                '<div class="platform-info">' +
+                    '<div class="platform-icon">' + p.icon + '</div>' +
+                    '<div>' +
+                        '<p class="platform-name">' + p.label + '</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="platform-actions">' +
+                    '<span class="status-badge ' + (isConnected ? 'status-connected' : 'status-disconnected') + '">' +
+                        '<span class="dot"></span>' +
+                        (isConnected ? 'Connected' : 'Disconnected') +
+                    '</span>' +
+                    (isConnected
+                        ? '<button class="btn btn-secondary" onclick="disconnectPlatform(\'' + p.id + '\')" style="color: var(--red-500);">Disconnect</button>'
+                        : '<button class="btn btn-secondary" onclick="connectPlatform(\'' + p.id + '\')">Connect</button>'
+                    ) +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // ── Platform OAuth Connect ──
+    function connectPlatform(platform) {
+        var session = goulburnAuth.getSession();
+        sessionStorage.setItem('goulburn_settings_oauth_platform', platform);
+
+        var redirectUri = window.location.origin + '/settings';
+        var authorizeUrl = ADMIN_BASE + '/api/v1/oauth/' + platform + '/authorize?redirect_uri=' + encodeURIComponent(redirectUri);
+
+        fetch(authorizeUrl, {
+            headers: { 'Authorization': 'Bearer ' + session }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.auth_url) {
+                window.location.href = data.auth_url;
+            } else {
+                showToast('Unable to start ' + platform + ' connection', 'error');
+                sessionStorage.removeItem('goulburn_settings_oauth_platform');
+            }
+        })
+        .catch(function(err) {
+            console.error('OAuth init error:', err);
+            showToast('Connection error. Please try again.', 'error');
+            sessionStorage.removeItem('goulburn_settings_oauth_platform');
+        });
+    }
+
+    function disconnectPlatform(platform) {
+        if (!window.confirm('Disconnect ' + platform + '? This will remove the platform verification from your profile.')) return;
+
+        var session = goulburnAuth.getSession();
+        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/disconnect', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            }
+        })
+        .then(function(r) {
+            if (r.ok) {
+                connectedPlatforms = connectedPlatforms.filter(function(p) { return p !== platform; });
+                renderPlatforms();
+                showToast(platform.charAt(0).toUpperCase() + platform.slice(1) + ' disconnected');
+            } else {
+                return r.json().then(function(d) { throw new Error(d.error || 'Failed'); });
+            }
+        })
+        .catch(function(err) {
+            showToast('Failed to disconnect: ' + err.message, 'error');
+        });
+    }
+
+    // ── Password ──
     function togglePasswordForm() {
         var form = document.getElementById('passwordForm');
         form.classList.toggle('show');
         if (form.classList.contains('show')) {
             document.getElementById('currentPassword').focus();
         } else {
-            // Clear form
             document.getElementById('currentPassword').value = '';
             document.getElementById('newPassword').value = '';
             document.getElementById('confirmPassword').value = '';
@@ -922,82 +1036,121 @@
     function updatePassword() {
         var current = document.getElementById('currentPassword').value;
         var newPass = document.getElementById('newPassword').value;
-        var confirm = document.getElementById('confirmPassword').value;
+        var confirmPass = document.getElementById('confirmPassword').value;
 
-        if (!current || !newPass || !confirm) {
+        if (!current || !newPass || !confirmPass) {
             showToast('Please fill in all password fields', 'error');
             return;
         }
-
-        if (newPass !== confirm) {
+        if (newPass !== confirmPass) {
             showToast('New passwords do not match', 'error');
             return;
         }
-
         if (newPass.length < 8) {
             showToast('New password must be at least 8 characters', 'error');
             return;
         }
 
-        // TODO: Call /api/v1/user/password endpoint
-        // For now, just show success
-        showToast('Password updated successfully');
-        togglePasswordForm();
+        var session = goulburnAuth.getSession();
+        fetch(ADMIN_BASE + '/api/v1/admin/me/password', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            },
+            body: JSON.stringify({
+                current_password: current,
+                new_password: newPass
+            })
+        })
+        .then(function(r) {
+            if (r.ok) {
+                showToast('Password updated successfully');
+                togglePasswordForm();
+            } else {
+                return r.json().then(function(d) {
+                    showToast(d.error || 'Password update failed', 'error');
+                });
+            }
+        })
+        .catch(function(err) {
+            console.error('Password update error:', err);
+            showToast('Unable to update password. Please try again.', 'error');
+        });
     }
 
-    function connectPlatform(platform) {
-        // TODO: Implement OAuth flow for each platform
-        alert('Connecting ' + platform.toUpperCase() + '\n\nOAuth integration coming soon');
-    }
-
+    // ── API Key ──
     function revealApiKey() {
         var display = document.getElementById('apiKeyDisplay');
         var btn = document.getElementById('revealBtn');
-        var apiKey = localStorage.getItem('goulburn_api_key') || 'gbn_demo_1234567890abcdefghijklmn';
+
+        if (!currentApiKey) {
+            showToast('No API key available', 'error');
+            return;
+        }
 
         if (display.classList.contains('api-key-masked')) {
-            display.textContent = apiKey;
+            display.textContent = currentApiKey;
             display.classList.remove('api-key-masked');
             btn.textContent = 'Hide';
         } else {
-            display.textContent = apiKey.slice(0, -4).replace(/./g, '•') + apiKey.slice(-4);
-            display.classList.add('api-key-masked');
+            updateApiKeyDisplay(currentApiKey);
             btn.textContent = 'Reveal';
         }
     }
 
     function updateApiKeyDisplay(apiKey) {
+        if (!apiKey) return;
         var masked = apiKey.slice(0, -4).replace(/./g, '•') + apiKey.slice(-4);
-        document.getElementById('apiKeyDisplay').textContent = masked;
+        var el = document.getElementById('apiKeyDisplay');
+        el.textContent = masked;
+        el.classList.add('api-key-masked');
+        document.getElementById('revealBtn').textContent = 'Reveal';
     }
 
     function copyApiKey() {
-        var apiKey = localStorage.getItem('goulburn_api_key') || 'gbn_demo_1234567890abcdefghijklmn';
-        navigator.clipboard.writeText(apiKey).then(function() {
+        if (!currentApiKey) {
+            showToast('No API key to copy', 'error');
+            return;
+        }
+        navigator.clipboard.writeText(currentApiKey).then(function() {
             showToast('API key copied to clipboard');
-        }).catch(function(err) {
-            console.error('Failed to copy:', err);
+        }).catch(function() {
             showToast('Failed to copy API key', 'error');
         });
     }
 
     function generateNewKey() {
-        // TODO: Call /api/v1/user/api-keys/generate endpoint
-        var confirm = window.confirm(
-            'Generating a new API key will invalidate the current one.\n\n' +
-            'Any active sessions using the old key will be disconnected.\n\n' +
-            'Continue?'
-        );
+        if (!window.confirm('Generating a new API key will invalidate the current one.\n\nAny active sessions using the old key will be disconnected.\n\nContinue?')) return;
 
-        if (!confirm) return;
-
-        // Simulate new key generation
-        var newKey = 'gbn_' + Math.random().toString(36).substring(2, 23);
-        localStorage.setItem('goulburn_api_key', newKey);
-        updateApiKeyDisplay(newKey);
-        showToast('New API key generated');
+        var session = goulburnAuth.getSession();
+        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            }
+        })
+        .then(function(r) {
+            if (r.ok) return r.json();
+            throw new Error('Failed to generate key');
+        })
+        .then(function(data) {
+            if (data.api_key) {
+                currentApiKey = data.api_key;
+                updateApiKeyDisplay(currentApiKey);
+                showToast('New API key generated');
+            } else {
+                throw new Error('No key in response');
+            }
+        })
+        .catch(function(err) {
+            console.error('Key generation error:', err);
+            showToast('Failed to generate new key. Please try again.', 'error');
+        });
     }
 
+    // ── Delete Account ──
     function deleteAccountClick() {
         document.getElementById('deleteConfirmModal').classList.add('active');
     }
@@ -1007,32 +1160,43 @@
     }
 
     function confirmDeleteAccount() {
-        // TODO: Call /api/v1/user/delete endpoint
-        // This should require password confirmation
-        goulburnAuth.clearSession();
-        window.location.href = '/';
+        var session = goulburnAuth.getSession();
+        fetch(ADMIN_BASE + '/api/v1/admin/me', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            }
+        })
+        .then(function(r) {
+            if (r.ok) {
+                goulburnAuth.clearSession();
+                window.location.href = '/?deleted=true';
+            } else {
+                return r.json().then(function(d) {
+                    showToast(d.error || 'Account deletion failed', 'error');
+                    closeDeleteModal();
+                });
+            }
+        })
+        .catch(function(err) {
+            console.error('Delete error:', err);
+            showToast('Unable to delete account. Please contact support.', 'error');
+            closeDeleteModal();
+        });
     }
 
+    // ── Utilities ──
     function showToast(message, type) {
         var toast = document.getElementById('toast');
         toast.textContent = message;
-        toast.classList.add('show');
-        if (type === 'error') {
-            toast.classList.add('error');
-        } else {
-            toast.classList.remove('error');
-        }
-
-        setTimeout(function() {
-            toast.classList.remove('show');
-        }, 3000);
+        toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+        setTimeout(function() { toast.classList.remove('show'); }, 3000);
     }
 
     // Close modal on outside click
     document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeDeleteModal();
-        }
+        if (e.target === this) closeDeleteModal();
     });
     </script>
 </body>
