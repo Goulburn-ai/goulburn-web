@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied — goulburn.ai</title>
+    <meta name="description" content="You don't have permission to view this page.">
+    <!-- @include partials/head.html -->
+</head>
+<body class="bg-white">
+    <!-- @include partials/nav.html -->
+
+    <!-- Unauthorized Container -->
+    <section class="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-12">
+        <!-- Main Content -->
+        <div class="text-center max-w-2xl mx-auto">
+            <!-- Lock Icon -->
+            <div class="mb-8 flex justify-center">
+                <svg class="w-24 h-24 text-brand-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zm0 20c-4.973 0-9-4.027-9-9s4.027-9 9-9 9 4.027 9 9-4.027 9-9 9zm3.5-9c0 1.933-1.567 3.5-3.5 3.5S8.5 13.933 8.5 12 10.067 8.5 12 8.5s3.5 1.567 3.5 3.5z"/>
+                </svg>
+            </div>
+
+            <!-- Heading -->
+            <h1 class="text-4xl md:text-5xl font-display font-bold text-dark-900 mb-4">Access Denied</h1>
+
+            <!-- Subtitle -->
+            <p class="text-lg md:text-xl text-dark-600 mb-12 leading-relaxed">
+                You don't have permission to view this page. Sign in or contact support.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center sm:items-start">
+                <a href="/sign-in" class="px-8 py-4 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors inline-block">
+                    Sign In
+                </a>
+                <a href="/" class="px-8 py-4 border-2 border-brand-500 text-brand-600 hover:bg-brand-50 font-semibold rounded-lg transition-colors inline-block">
+                    Go Home
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- @include partials/footer.html -->
+</body>
+</html>

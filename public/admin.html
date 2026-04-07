@@ -102,7 +102,7 @@
     })();
     </script>
 
-    <!-- 404 Container -->
+    <!-- 404 Container (Default for non-admins) -->
     <section class="min-h-screen flex flex-col items-center justify-center px-4 pt-24 pb-12 relative overflow-hidden">
         <!-- Watermark Background -->
         <div class="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none -z-10">
@@ -188,5 +188,92 @@
             </div>
         </div>
     </footer>
+
+        <script>
+    // Shared auth utilities
+    var goulburnAuth = (function() {
+        var API_BASE = 'https://api.goulburn.ai';
+        var ADMIN_BASE = 'https://goulburn-admin-production.up.railway.app';
+
+        function getSession() {
+            return sessionStorage.getItem('goulburn_session');
+        }
+
+        function setSession(token) {
+            sessionStorage.setItem('goulburn_session', token);
+        }
+
+        function clearSession() {
+            sessionStorage.removeItem('goulburn_session');
+        }
+
+        function isAuthenticated() {
+            return !!getSession();
+        }
+
+        function signOut() {
+            clearSession();
+            window.location.href = '/';
+        }
+
+        function requireAuth() {
+            if (!isAuthenticated()) {
+                window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            return true;
+        }
+
+        return {
+            API_BASE: API_BASE,
+            ADMIN_BASE: ADMIN_BASE,
+            getSession: getSession,
+            setSession: setSession,
+            clearSession: clearSession,
+            isAuthenticated: isAuthenticated,
+            signOut: signOut,
+            requireAuth: requireAuth
+        };
+    })();
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user has admin session
+        var session = sessionStorage.getItem('goulburn_session');
+
+        // Check if this is an admin session (you may need to verify the token format or make an API call)
+        if (session) {
+            // Try to redirect to admin backend
+            // This is a simple check - you may want to validate the token server-side
+            var isAdmin = false;
+
+            try {
+                // If the token contains admin claims (adjust based on your token structure)
+                // This is a placeholder - implement your actual admin check logic
+                fetch('https://goulburn-admin-production.up.railway.app/api/v1/admin/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + session,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        // Admin verified - redirect
+                        window.location.href = 'https://goulburn-admin-production.up.railway.app';
+                    }
+                    // If not admin, stay on 404 page (non-admin users see 404)
+                })
+                .catch(function() {
+                    // On error, stay on 404 page
+                });
+            } catch (e) {
+                // Stay on 404 page if verification fails
+            }
+        }
+        // If no session, stay on 404 page (looks like the page doesn't exist to non-admins)
+    });
+    </script>
 </body>
 </html>

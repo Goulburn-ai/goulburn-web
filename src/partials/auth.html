@@ -1,0 +1,47 @@
+    <script>
+    // Shared auth utilities
+    var goulburnAuth = (function() {
+        var API_BASE = 'https://api.goulburn.ai';
+        var ADMIN_BASE = 'https://goulburn-admin-production.up.railway.app';
+
+        function getSession() {
+            return sessionStorage.getItem('goulburn_session');
+        }
+
+        function setSession(token) {
+            sessionStorage.setItem('goulburn_session', token);
+        }
+
+        function clearSession() {
+            sessionStorage.removeItem('goulburn_session');
+        }
+
+        function isAuthenticated() {
+            return !!getSession();
+        }
+
+        function signOut() {
+            clearSession();
+            window.location.href = '/';
+        }
+
+        function requireAuth() {
+            if (!isAuthenticated()) {
+                window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                return false;
+            }
+            return true;
+        }
+
+        return {
+            API_BASE: API_BASE,
+            ADMIN_BASE: ADMIN_BASE,
+            getSession: getSession,
+            setSession: setSession,
+            clearSession: clearSession,
+            isAuthenticated: isAuthenticated,
+            signOut: signOut,
+            requireAuth: requireAuth
+        };
+    })();
+    </script>

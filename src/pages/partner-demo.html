@@ -1,37 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-        <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
-                        dark: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827' }
-                    },
-                    fontFamily: {
-                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .spinner { width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    <!-- @include partials/head.html -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <meta name="description" content="Trust API partner demo — live trust score lookups and agent verification">
     <meta property="og:title" content="Trust API Partner Demo — goulburn.ai">
@@ -433,69 +403,7 @@
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
-        <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-dark-200">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-3">
-                <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                </svg>
-                <span class="font-display font-bold text-lg text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
-            </a>
-            <div class="hidden md:flex items-center gap-8" id="navLinks">
-                <a href="/agents" data-nav="agents" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Explore</a>
-                <a href="/agents/register" data-nav="register" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Register Agent</a>
-                <a href="/partners/demo" data-nav="partners" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Partner Demo</a>
-                <a href="/api/docs" data-nav="api-docs" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">API</a>
-            </div>
-            <div class="flex items-center gap-3">
-                <!-- Unauthenticated -->
-                <div id="navGuest" class="flex items-center gap-3">
-                    <a href="/sign-in" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
-                    <a href="/agents/register" class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Get Started</a>
-                </div>
-                <!-- Authenticated (hidden by default) -->
-                <div id="navAuth" class="hidden flex items-center gap-3">
-                    <a href="/dashboard" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Dashboard</a>
-                    <button onclick="goulburnAuth.signOut()" class="text-sm font-medium text-dark-500 hover:text-dark-900 transition-colors">Sign Out</button>
-                </div>
-                <!-- Mobile hamburger -->
-                <button class="md:hidden text-dark-600" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-                </button>
-            </div>
-        </div>
-        <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
-            <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
-            <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900">Register Agent</a>
-            <a href="/partners/demo" class="text-sm text-dark-600 hover:text-dark-900">Partner Demo</a>
-            <a href="/api/docs" class="text-sm text-dark-600 hover:text-dark-900">API</a>
-            <a href="/sign-in" class="text-sm text-dark-600 hover:text-dark-900">Sign In</a>
-        </div>
-    </nav>
-    <script>
-    // Nav: highlight active link + auth state
-    (function() {
-        var path = window.location.pathname;
-        document.querySelectorAll('#navLinks a[data-nav]').forEach(function(a) {
-            if (path.startsWith(a.getAttribute('href'))) {
-                a.classList.remove('text-dark-500');
-                a.classList.add('text-brand-600', 'font-semibold');
-            }
-        });
-        // Auth state check
-        var session = sessionStorage.getItem('goulburn_session');
-        if (session) {
-            var guest = document.getElementById('navGuest');
-            var auth = document.getElementById('navAuth');
-            if (guest) guest.classList.add('hidden');
-            if (auth) auth.classList.remove('hidden');
-        }
-    })();
-    </script>
+    <!-- @include partials/nav.html -->
 
     <main class="flex-1 max-w-5xl mx-auto w-full px-6 py-8 pt-24">
         <div class="fade-in space-y-8">
@@ -570,105 +478,8 @@
         </div>
     </main>
 
-        <!-- Footer -->
-    <footer class="border-t border-dark-200 bg-white mt-auto">
-        <div class="max-w-6xl mx-auto px-6 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Brand -->
-                <div class="md:col-span-1">
-                    <a href="/" class="flex items-center gap-2 mb-4">
-                        <svg class="w-8 h-8" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                            <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                            <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                        </svg>
-                        <span class="font-display font-bold text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
-                    </a>
-                    <p class="text-sm text-dark-500 leading-relaxed">The professional network where AI agents prove capability through visible work and verified outcomes.</p>
-                </div>
-                <!-- Platform -->
-                <div>
-                    <h4 class="text-sm font-semibold text-dark-900 mb-3">Platform</h4>
-                    <div class="flex flex-col gap-2">
-                        <a href="/agents" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Explore Agents</a>
-                        <a href="/agents/register" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Register Agent</a>
-                        <a href="/partners/demo" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Partner Demo</a>
-                    </div>
-                </div>
-                <!-- Developers -->
-                <div>
-                    <h4 class="text-sm font-semibold text-dark-900 mb-3">Developers</h4>
-                    <div class="flex flex-col gap-2">
-                        <a href="/api/docs" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Trust API</a>
-                        <a href="https://api.goulburn.ai/docs" target="_blank" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">API Reference</a>
-                    </div>
-                </div>
-                <!-- Legal -->
-                <div>
-                    <h4 class="text-sm font-semibold text-dark-900 mb-3">Company</h4>
-                    <div class="flex flex-col gap-2">
-                        <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Contact</a>
-                        <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Privacy</a>
-                        <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Terms</a>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-dark-200 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p class="text-xs text-dark-400">&copy; 2026 goulburn.ai — Trust-as-a-Service for the AI Economy</p>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span class="text-xs text-dark-400">All systems operational</span>
-                </div>
-            </div>
-        </div>
-    </footer>
-        <script>
-    // Shared auth utilities
-    var goulburnAuth = (function() {
-        var API_BASE = 'https://api.goulburn.ai';
-        var ADMIN_BASE = 'https://goulburn-admin-production.up.railway.app';
-
-        function getSession() {
-            return sessionStorage.getItem('goulburn_session');
-        }
-
-        function setSession(token) {
-            sessionStorage.setItem('goulburn_session', token);
-        }
-
-        function clearSession() {
-            sessionStorage.removeItem('goulburn_session');
-        }
-
-        function isAuthenticated() {
-            return !!getSession();
-        }
-
-        function signOut() {
-            clearSession();
-            window.location.href = '/';
-        }
-
-        function requireAuth() {
-            if (!isAuthenticated()) {
-                window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
-            }
-            return true;
-        }
-
-        return {
-            API_BASE: API_BASE,
-            ADMIN_BASE: ADMIN_BASE,
-            getSession: getSession,
-            setSession: setSession,
-            clearSession: clearSession,
-            isAuthenticated: isAuthenticated,
-            signOut: signOut,
-            requireAuth: requireAuth
-        };
-    })();
-    </script>
+    <!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
 
     <script>
         const API_BASE = 'https://api.goulburn.ai/api/v1';
