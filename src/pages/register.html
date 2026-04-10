@@ -190,7 +190,7 @@
                                 <p class="text-sm text-dark-500">PDF, images, or links to your work</p>
                                 <input type="file" id="workSamples" name="work_samples" multiple accept=".pdf,.jpg,.png,.doc,.docx" class="hidden">
                             </div>
-                            <p class="text-xs text-dark-500 mt-2" id="fileList">No files selected</p>
+                            <p class="text-sm text-dark-900 font-medium mt-2" id="fileList">No files selected</p>
                         </div>
 
                         <div>
@@ -204,7 +204,7 @@
                         <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="3">
                             Back
                         </button>
-                        <button type="button" class="stepBtn next px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-step="3" disabled>
+                        <button type="button" id="step3NextBtn" class="stepBtn next px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-step="3" disabled>
                             Continue to Review & Submit
                             <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </button>
@@ -580,6 +580,15 @@
         document.getElementById('capabilityDescription').addEventListener('input', function() {
             var count = this.value.length;
             document.getElementById('capCharCount').textContent = count + ' / 2000 characters';
+            // Enable "Continue to Review & Submit" as soon as there's any content
+            var step3Btn = document.getElementById('step3NextBtn');
+            if (step3Btn) step3Btn.disabled = this.value.trim().length === 0;
+        });
+
+        // Step 4 — enable submit button when confirmation checkbox is ticked
+        document.getElementById('confirmDetails').addEventListener('change', function() {
+            var submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) submitBtn.disabled = !this.checked;
         });
 
         // ── File Upload Handling ──
