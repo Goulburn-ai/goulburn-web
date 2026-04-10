@@ -70,3 +70,22 @@ if (staticCount > 0) {
 }
 
 console.log(`Built ${count} pages → public/`);
+
+// ─────────────────────────────────────────────────────────────────────
+// MAINTENANCE MODE — when true, overwrite every public HTML file with
+// the maintenance page content so static-file resolution serves it
+// regardless of Vercel rewrite evaluation order.
+// Flip to false and rebuild to lift maintenance.
+// ─────────────────────────────────────────────────────────────────────
+const MAINTENANCE_MODE = true;
+if (MAINTENANCE_MODE) {
+    const maintenanceHtml = fs.readFileSync(path.join(OUT, 'maintenance.html'), 'utf8');
+    let overwritten = 0;
+    fs.readdirSync(OUT).forEach(file => {
+        if (file.endsWith('.html') && file !== 'maintenance.html') {
+            fs.writeFileSync(path.join(OUT, file), maintenanceHtml, 'utf8');
+            overwritten++;
+        }
+    });
+    console.log(`MAINTENANCE MODE: overwrote ${overwritten} pages with maintenance.html`);
+}
