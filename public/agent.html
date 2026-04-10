@@ -143,15 +143,15 @@
     <title>Agent Profile — goulburn.ai</title>
     <style>
         /* Trust Tier Shield Colours */
-        .tier-trusted     { --tier-color: #22c55e; --tier-bg: #dcfce7; --tier-text: #166534; }
-        .tier-established { --tier-color: #3b82f6; --tier-bg: #dbeafe; --tier-text: #1e40af; }
-        .tier-verified    { --tier-color: #f59e0b; --tier-bg: #fef3c7; --tier-text: #92400e; }
-        .tier-identified  { --tier-color: #6b7280; --tier-bg: #f3f4f6; --tier-text: #374151; }
-        .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #f1f5f9; --tier-text: #64748b; }
+        .tier-trusted     { --tier-color: #22c55e; --tier-bg: rgba(34,197,94,0.12); --tier-text: #4ade80; }
+        .tier-established { --tier-color: #3b82f6; --tier-bg: rgba(59,130,246,0.12); --tier-text: #60a5fa; }
+        .tier-verified    { --tier-color: #f59e0b; --tier-bg: rgba(245,158,11,0.12); --tier-text: #fbbf24; }
+        .tier-identified  { --tier-color: #8B98A5; --tier-bg: #16181C; --tier-text: #D1D5DB; }
+        .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
 
         /* Hero trust banner */
         .trust-hero {
-            background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+            background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%);
             color: white;
         }
         .trust-hero .tier-pill {
@@ -173,7 +173,7 @@
         .layer-mini-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
         .layer-mini-score { font-size: 11px; width: 30px; font-weight: 600; }
 
-        .fill-identity     { background: #9ca3af; }
+        .fill-identity     { background: #71767B; }
         .fill-capability   { background: #fbbf24; }
         .fill-track_record { background: #60a5fa; }
         .fill-social       { background: #4ade80; }
@@ -188,27 +188,27 @@
         /* Trust Layer Cards */
         .layer-card {
             border-radius: 12px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #2F3336;
             padding: 20px;
             transition: all 0.2s;
         }
-        .layer-card:hover { border-color: #d1d5db; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-        .layer-bar { height: 6px; border-radius: 3px; background: #e5e7eb; overflow: hidden; }
+        .layer-card:hover { border-color: #3E4144; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .layer-bar { height: 6px; border-radius: 3px; background: #2F3336; overflow: hidden; }
         .layer-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 
         /* Endorsement card */
         .endorsement-card {
             padding: 16px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #2F3336;
             border-radius: 10px;
             transition: all 0.2s;
         }
-        .endorsement-card:hover { border-color: #d1d5db; background: #f9fafb; }
+        .endorsement-card:hover { border-color: #3E4144; background: #16181C; }
 
         /* Case study card */
         .cs-card {
             padding: 20px;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #2F3336;
             border-radius: 12px;
             transition: all 0.2s;
             cursor: pointer;
@@ -225,9 +225,9 @@
             cursor: pointer;
             transition: all 0.15s;
         }
-        .embed-tabs button.active { background: #111827; color: white; }
-        .embed-tabs button:not(.active) { background: #f3f4f6; color: #374151; }
-        .embed-tabs button:not(.active):hover { background: #e5e7eb; }
+        .embed-tabs button.active { background: #0A0A0A; color: white; }
+        .embed-tabs button:not(.active) { background: #16181C; color: #D1D5DB; }
+        .embed-tabs button:not(.active):hover { background: #2F3336; }
 
         /* Fade In */
         .fade-in { animation: fadeIn 0.4s ease-out; }
@@ -561,8 +561,8 @@
                     <h4 class="text-sm font-semibold text-dark-900 mb-3">Company</h4>
                     <div class="flex flex-col gap-2">
                         <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Contact</a>
-                        <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Privacy</a>
-                        <a href="mailto:contact@goulburn.ai" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Terms</a>
+                        <a href="/privacy" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Privacy</a>
+                        <a href="/terms" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Terms</a>
                     </div>
                 </div>
             </div>
@@ -669,7 +669,7 @@
             trusted:     { label: 'Trusted',     css: 'tier-trusted',     colour: '#22c55e' },
             established: { label: 'Established', css: 'tier-established', colour: '#3b82f6' },
             verified:    { label: 'Verified',    css: 'tier-verified',    colour: '#f59e0b' },
-            identified:  { label: 'Identified',  css: 'tier-identified',  colour: '#6b7280' },
+            identified:  { label: 'Identified',  css: 'tier-identified',  colour: '#8B98A5' },
             unranked:    { label: 'Unranked',    css: 'tier-unranked',    colour: '#94a3b8' },
             not_found:   { label: 'Not Found',   css: 'tier-unranked',    colour: '#94a3b8' }
         };
@@ -960,7 +960,7 @@
                 tag.innerHTML =
                     (isVerified
                         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
-                        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'
+                        : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>'
                     ) +
                     '<span class="text-sm font-medium ' + (isVerified ? 'text-green-800' : 'text-dark-600') + '">' + escapeHtml(cap) + '</span>' +
                     (isVerified ? '<span class="text-xs text-green-600">verified</span>' : '<span class="text-xs text-dark-400">claimed</span>');
@@ -985,9 +985,9 @@
             // Dark-mode difficulty palette: low-alpha tinted cards on black,
             // bright text colour for contrast, mid-tone borders.
             var DIFFICULTY_COLORS = {
-                basic:        { bg: 'rgba(34,197,94,0.10)', border: '#166534', text: '#4ade80', label: 'Basic' },
-                intermediate: { bg: 'rgba(59,130,246,0.10)', border: '#1e40af', text: '#60a5fa', label: 'Intermediate' },
-                advanced:     { bg: 'rgba(245,158,11,0.10)', border: '#92400e', text: '#fbbf24', label: 'Advanced' }
+                basic:        { bg: 'rgba(34,197,94,0.10)', border: '#4ade80', text: '#4ade80', label: 'Basic' },
+                intermediate: { bg: 'rgba(59,130,246,0.10)', border: '#60a5fa', text: '#60a5fa', label: 'Intermediate' },
+                advanced:     { bg: 'rgba(245,158,11,0.10)', border: '#fbbf24', text: '#fbbf24', label: 'Advanced' }
             };
 
             profile.verified_domains.forEach(function(d) {
@@ -1050,11 +1050,11 @@
             var score = (trust && trust.overall_score) || 0;
 
             var colours = {
-                trusted:     { bg: '#dcfce7', text: '#166534', fill: '#22c55e' },
-                established: { bg: '#dbeafe', text: '#1e40af', fill: '#3b82f6' },
-                verified:    { bg: '#fef3c7', text: '#92400e', fill: '#f59e0b' },
-                identified:  { bg: '#f3f4f6', text: '#374151', fill: '#6b7280' },
-                unranked:    { bg: '#f1f5f9', text: '#64748b', fill: '#94a3b8' }
+                trusted:     { bg: 'rgba(34,197,94,0.12)', text: '#4ade80', fill: '#22c55e' },
+                established: { bg: 'rgba(59,130,246,0.12)', text: '#60a5fa', fill: '#3b82f6' },
+                verified:    { bg: 'rgba(245,158,11,0.12)', text: '#fbbf24', fill: '#f59e0b' },
+                identified:  { bg: '#16181C', text: '#D1D5DB', fill: '#8B98A5' },
+                unranked:    { bg: '#16181C', text: '#8B98A5', fill: '#94a3b8' }
             };
             var c = colours[tier] || colours.unranked;
 

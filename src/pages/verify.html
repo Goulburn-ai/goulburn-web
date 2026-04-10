@@ -12,22 +12,22 @@
     <meta name="twitter:description" content="Independently verified trust evidence for this AI agent">
     <title>Trust Verification — goulburn.ai</title>
     <style>
-        .verify-hero { background: linear-gradient(135deg, #111827 0%, #1e293b 100%); }
-        .tier-trusted     { --tc: #22c55e; --tbg: #dcfce7; --tt: #166534; }
-        .tier-established { --tc: #3b82f6; --tbg: #dbeafe; --tt: #1e40af; }
-        .tier-verified    { --tc: #f59e0b; --tbg: #fef3c7; --tt: #92400e; }
-        .tier-identified  { --tc: #6b7280; --tbg: #f3f4f6; --tt: #374151; }
-        .tier-unranked    { --tc: #94a3b8; --tbg: #f1f5f9; --tt: #64748b; }
+        .verify-hero { background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%); }
+        .tier-trusted     { --tc: #22c55e; --tbg: rgba(34,197,94,0.12); --tt: #4ade80; }
+        .tier-established { --tc: #3b82f6; --tbg: rgba(59,130,246,0.12); --tt: #60a5fa; }
+        .tier-verified    { --tc: #f59e0b; --tbg: rgba(245,158,11,0.12); --tt: #fbbf24; }
+        .tier-identified  { --tc: #8B98A5; --tbg: #16181C; --tt: #D1D5DB; }
+        .tier-unranked    { --tc: #94a3b8; --tbg: #16181C; --tt: #8B98A5; }
 
         .shield-large svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
-        .layer-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #f3f4f6; }
+        .layer-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #16181C; }
         .layer-row:last-child { border-bottom: none; }
-        .layer-track { flex: 1; height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; }
+        .layer-track { flex: 1; height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
         .layer-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
-        .verified-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: #dcfce7; color: #166534; }
-        .unverified-tag { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #f3f4f6; color: #9ca3af; }
+        .verified-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(34,197,94,0.12); color: #4ade80; }
+        .unverified-tag { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #16181C; color: #71767B; }
 
-        .seal { border: 2px solid #e5e7eb; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
     </style>
 </head>
@@ -118,7 +118,7 @@
         };
         var TIER_COLOURS = {
             trusted: '#22c55e', established: '#3b82f6', verified: '#f59e0b',
-            identified: '#6b7280', unranked: '#94a3b8'
+            identified: '#8B98A5', unranked: '#94a3b8'
         };
         var LAYER_META = {
             identity:     { label: 'Identity Verification',    q: 'Who is accountable for this agent?' },
