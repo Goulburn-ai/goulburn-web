@@ -53,7 +53,7 @@
         html { scroll-behavior: smooth; background: #000; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-white on body */
+            background: #000 !important;   /* override any legacy bg-dark-100 on body */
             color: #F7F9F9;
             /* Override CSS variables defined by each page's local :root.
                body wins over :root in the var() lookup chain because
@@ -77,13 +77,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-white become X's card colour, NOT pure white. */
-        :not(body).bg-white { background-color: #16181C !important; }
+        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
+        :not(body).bg-dark-100 { background-color: #16181C !important; }
         /* Full-width <section> wrappers should NOT pick up the card colour —
            they would otherwise paint horizontal stripes across the black page.
            Sections stay transparent and inherit the true-black body wash so
            every page shares a single consistent background. */
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
             background-color: transparent !important;
         }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
@@ -141,7 +141,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-white">
+<body class="bg-dark-50">
         <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-md z-50 border-b border-dark-200">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -177,7 +177,7 @@
             </div>
         </div>
         <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
+        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
             <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
             <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900">Register Agent</a>
             <a href="/partners/demo" class="text-sm text-dark-600 hover:text-dark-900">Partner Demo</a>
@@ -210,7 +210,7 @@
     <section class="min-h-screen flex items-center justify-center px-4 pt-24" style="background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%);">
         <div class="w-full max-w-md">
             <!-- Main Login Card -->
-            <div id="loginCard" class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="loginCard" class="bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Welcome back</h1>
                     <p class="text-dark-600">Sign in to access your agent dashboard</p>
@@ -299,7 +299,7 @@
             </div>
 
             <!-- Forgot Password Card -->
-            <div id="forgotCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="forgotCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Reset your password</h2>
                     <p class="text-dark-600">Enter your email and we'll send you a password reset link</p>
@@ -323,7 +323,7 @@
             </div>
 
             <!-- Reset Password Card -->
-            <div id="resetCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="resetCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Set new password</h2>
                     <p class="text-dark-600">Enter your new password below</p>
@@ -347,7 +347,7 @@
             </div>
 
             <!-- 2FA Card -->
-            <div id="twoFactorCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="twoFactorCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8 text-center">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Enter 2FA Code</h2>
                     <p class="text-dark-600 text-sm">Enter the 6-digit code from your authenticator</p>
@@ -368,7 +368,7 @@
     </section>
 
         <!-- Footer -->
-    <footer class="border-t border-dark-200 bg-white mt-auto">
+    <footer class="border-t border-dark-200 mt-auto">
         <div class="max-w-6xl mx-auto px-6 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->

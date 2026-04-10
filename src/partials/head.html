@@ -46,7 +46,7 @@
         html { scroll-behavior: smooth; background: #000; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-white on body */
+            background: #000 !important;   /* override any legacy bg-dark-100 on body */
             color: #F7F9F9;
             /* Override CSS variables defined by each page's local :root.
                body wins over :root in the var() lookup chain because
@@ -70,13 +70,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-white become X's card colour, NOT pure white. */
-        :not(body).bg-white { background-color: #16181C !important; }
+        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
+        :not(body).bg-dark-100 { background-color: #16181C !important; }
         /* Full-width <section> wrappers should NOT pick up the card colour —
            they would otherwise paint horizontal stripes across the black page.
            Sections stay transparent and inherit the true-black body wash so
            every page shares a single consistent background. */
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
             background-color: transparent !important;
         }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white

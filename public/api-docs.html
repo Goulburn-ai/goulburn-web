@@ -49,7 +49,7 @@
         html { scroll-behavior: smooth; background: #000; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-white on body */
+            background: #000 !important;   /* override any legacy bg-dark-100 on body */
             color: #F7F9F9;
             /* Override CSS variables defined by each page's local :root.
                body wins over :root in the var() lookup chain because
@@ -73,13 +73,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-white become X's card colour, NOT pure white. */
-        :not(body).bg-white { background-color: #16181C !important; }
+        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
+        :not(body).bg-dark-100 { background-color: #16181C !important; }
         /* Full-width <section> wrappers should NOT pick up the card colour —
            they would otherwise paint horizontal stripes across the black page.
            Sections stay transparent and inherit the true-black body wash so
            every page shares a single consistent background. */
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
             background-color: transparent !important;
         }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
@@ -476,7 +476,7 @@
             </div>
         </div>
         <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
+        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
             <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
             <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900">Register Agent</a>
             <a href="/partners/demo" class="text-sm text-dark-600 hover:text-dark-900">Partner Demo</a>
@@ -534,7 +534,7 @@
             </div>
 
             <!-- Quick Start Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Quick Start</h2>
                 <div class="space-y-8">
                     <div>
@@ -563,7 +563,7 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
             </div>
 
             <!-- Response Format Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Response Format</h2>
                 <p class="section-description">Response detail depends on your API tier. Free tier returns tier + score. Pro/Enterprise returns the full 5-layer breakdown:</p>
                 <div class="code-block">
@@ -592,7 +592,7 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
             </div>
 
             <!-- Endpoints Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Endpoints</h2>
                 <p class="section-description">All endpoints are available under <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">https://api.goulburn.ai/api/v1</code></p>
 
@@ -662,7 +662,7 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
             </div>
 
             <!-- Code Examples Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Code Examples</h2>
 
                 <div class="tab-nav">
@@ -741,7 +741,7 @@ if (data.layers) {
             </div>
 
             <!-- Pricing & Rate Limits Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Pricing & Rate Limits</h2>
                 <p class="section-description">Limits are per API key. Exceeding limits returns 429 Too Many Requests with reset time and upgrade URL. Unauthenticated requests receive Free tier access.</p>
                 <table class="tier-table">
@@ -785,7 +785,7 @@ if (data.layers) {
             </div>
 
             <!-- Authentication Section -->
-            <div class="bg-white rounded-xl border border-dark-200 p-8">
+            <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Authentication</h2>
                 <p class="section-description">Trust API keys use the <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">gbt_</code> prefix. Include your key in any of these ways:</p>
                 <div class="code-block" style="margin-top:16px;">
@@ -817,7 +817,7 @@ https://api.goulburn.ai/api/v1/trust/agent-name?api_key=gbt_YOUR_API_KEY</div>
     </main>
 
         <!-- Footer -->
-    <footer class="border-t border-dark-200 bg-white mt-auto">
+    <footer class="border-t border-dark-200 mt-auto">
         <div class="max-w-6xl mx-auto px-6 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->

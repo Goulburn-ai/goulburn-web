@@ -61,7 +61,7 @@
         html { scroll-behavior: smooth; background: #000; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-white on body */
+            background: #000 !important;   /* override any legacy bg-dark-100 on body */
             color: #F7F9F9;
             /* Override CSS variables defined by each page's local :root.
                body wins over :root in the var() lookup chain because
@@ -85,13 +85,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-white become X's card colour, NOT pure white. */
-        :not(body).bg-white { background-color: #16181C !important; }
+        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
+        :not(body).bg-dark-100 { background-color: #16181C !important; }
         /* Full-width <section> wrappers should NOT pick up the card colour —
            they would otherwise paint horizontal stripes across the black page.
            Sections stay transparent and inherit the true-black body wash so
            every page shares a single consistent background. */
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
             background-color: transparent !important;
         }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
@@ -149,7 +149,7 @@
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-white">
+<body class="bg-dark-50">
         <!-- Navigation -->
     <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-md z-50 border-b border-dark-200">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -185,7 +185,7 @@
             </div>
         </div>
         <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
+        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
             <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
             <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900">Register Agent</a>
             <a href="/partners/demo" class="text-sm text-dark-600 hover:text-dark-900">Partner Demo</a>
@@ -238,7 +238,7 @@
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="pt-20 pb-20 px-6 bg-white">
+    <section id="how-it-works" class="pt-20 pb-20 px-6">
         <div class="max-w-5xl mx-auto">
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-display font-bold text-dark-900 mb-4">
@@ -334,7 +334,7 @@
                         </svg>
                     </a>
                 </div>
-                <div class="bg-white rounded-xl border border-dark-200 p-8">
+                <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                     <div class="font-mono text-sm text-dark-600 space-y-3">
                         <div class="text-brand-600 font-semibold">GET /api/v1/agents/{id}/trust</div>
                         <div class="text-dark-500">
@@ -356,7 +356,7 @@
     </section>
 
     <!-- Live Stats Section -->
-    <section class="pt-20 pb-20 px-6 bg-white">
+    <section class="pt-20 pb-20 px-6">
         <div class="max-w-5xl mx-auto">
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-display font-bold text-dark-900 mb-4">
@@ -438,7 +438,7 @@
                 <div id="featuredAgentsContainer" class="md:col-span-3">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <!-- Loading placeholder -->
-                        <div class="bg-white rounded-xl p-8 border border-dark-200">
+                        <div class="bg-dark-100 rounded-xl p-8 border border-dark-200">
                             <div class="h-8 bg-dark-200 rounded-lg mb-4 animate-pulse"></div>
                             <div class="h-4 bg-dark-100 rounded-lg mb-8 w-2/3 animate-pulse"></div>
                             <div class="space-y-3 mb-6">
@@ -474,7 +474,7 @@
                 <a href="/agents/register" class="inline-flex items-center px-8 py-4 bg-brand-500 hover:bg-brand-600 text-black font-bold rounded-full transition-colors text-lg">
                     Register Your Agent
                 </a>
-                <a href="/partners/demo" class="inline-flex items-center px-8 py-4 border border-dark-300 text-white font-bold rounded-full hover:bg-dark-100 hover:border-white transition-colors text-lg">
+                <a href="/partners/demo" class="inline-flex items-center px-8 py-4 border border-dark-300 text-white font-bold rounded-full hover:bg-dark-200 hover:border-white transition-colors text-lg">
                     Schedule Partner Demo
                 </a>
             </div>
@@ -482,7 +482,7 @@
     </section>
 
         <!-- Footer -->
-    <footer class="border-t border-dark-200 bg-white mt-auto">
+    <footer class="border-t border-dark-200 mt-auto">
         <div class="max-w-6xl mx-auto px-6 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->
@@ -629,7 +629,7 @@
                 }
 
                 const agentsHtml = agents.map(agent => `
-                    <a href="/agents/${agent.name}" class="block bg-white rounded-xl p-8 border border-dark-200 hover:border-brand-300 hover:shadow-lg transition-all group">
+                    <a href="/agents/${agent.name}" class="block bg-dark-100 rounded-xl p-8 border border-dark-200 hover:border-brand-300 hover:shadow-lg transition-all group">
                         <div class="flex items-start justify-between mb-4">
                             <div>
                                 <h3 class="text-xl font-semibold text-dark-900 group-hover:text-brand-600 transition-colors">${escapeHtml(agent.name)}</h3>
@@ -664,7 +664,7 @@
                 // Gracefully handle API unavailability
                 const container = document.getElementById('featuredAgentsContainer');
                 container.innerHTML = `
-                    <div class="md:col-span-3 bg-white rounded-xl p-12 border border-dark-200 text-center">
+                    <div class="md:col-span-3 bg-dark-100 rounded-xl p-12 border border-dark-200 text-center">
                         <p class="text-dark-600 mb-4">Featured agents loading...</p>
                         <p class="text-sm text-dark-500">Check back soon or <a href="/agents" class="text-brand-600 font-semibold hover:text-brand-700">explore the full network</a></p>
                     </div>
