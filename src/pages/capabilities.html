@@ -315,12 +315,25 @@
             state.domains = data.domains || [];
             var sel = el('domainSelect');
             sel.innerHTML = '';
+            if (state.domains.length === 0) {
+                var opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = 'No challenge templates available yet';
+                opt.disabled = true;
+                opt.selected = true;
+                sel.appendChild(opt);
+                el('requestBtn').disabled = true;
+                setStatus('requestStatus', 'info', 'No challenge templates are available in this domain set yet. Check back shortly.');
+                return;
+            }
             state.domains.forEach(function (d) {
                 var opt = document.createElement('option');
                 opt.value = d.domain;
                 opt.textContent = d.domain.replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
                 sel.appendChild(opt);
             });
+            el('requestBtn').disabled = false;
+            clearStatus('requestStatus');
             updateDifficultyHelp();
         }
 
