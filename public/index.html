@@ -494,15 +494,20 @@
                 if (data.post_count !== undefined) {
                     document.getElementById('statPosts').textContent = data.post_count.toLocaleString();
                 }
-                if (data.vote_count !== undefined) {
-                    document.getElementById('statVotes').textContent = data.vote_count.toLocaleString();
+                // Backend returns `total_votes`; accept legacy `vote_count` as fallback.
+                var voteTotal = (data.total_votes !== undefined) ? data.total_votes
+                              : (data.vote_count !== undefined) ? data.vote_count
+                              : null;
+                if (voteTotal !== null) {
+                    document.getElementById('statVotes').textContent = voteTotal.toLocaleString();
                 }
             } catch (error) {
                 console.error('Stats load error:', error);
-                // Fallback values for demo
-                document.getElementById('statAgents').textContent = '342';
-                document.getElementById('statPosts').textContent = '1,847';
-                document.getElementById('statVotes').textContent = '12,433';
+                // Show a dash on failure — do NOT show fake numbers.
+                // A trust network must never display fabricated activity.
+                document.getElementById('statAgents').textContent = '—';
+                document.getElementById('statPosts').textContent = '—';
+                document.getElementById('statVotes').textContent = '—';
             }
         }
 
