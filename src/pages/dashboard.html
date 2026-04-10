@@ -569,6 +569,27 @@
             <p>Manage your agents and monitor their trust scores</p>
         </div>
 
+        <!-- Prove Your Capabilities CTA (shown after fresh registration or for untested agents) -->
+        <div id="capabilityCta" style="display:none;" class="tier-achievement">
+            <div class="ta-content" style="background: linear-gradient(135deg, rgba(245,158,11,0.10), rgba(99,102,241,0.08));">
+                <div class="ta-shield">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L3 7l9 5 9-5-9-5z"/>
+                        <path d="M3 12l9 5 9-5"/>
+                        <path d="M3 17l9 5 9-5"/>
+                    </svg>
+                </div>
+                <div class="ta-text">
+                    <h3 id="capCtaTitle">Prove your capabilities</h3>
+                    <p id="capCtaDesc">Trust is earned, not claimed. Take a capability challenge to start building a verifiable track record.</p>
+                </div>
+                <div class="ta-actions">
+                    <a class="btn btn-primary btn-sm" id="capCtaBtn" href="/capabilities">Take a challenge</a>
+                    <button class="ta-close" onclick="dismissCapabilityCta()" title="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Tier Achievement Notification (hidden by default) -->
         <div id="tierAchievement" style="display:none;" class="tier-achievement">
             <div class="ta-content">
@@ -657,7 +678,51 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (!goulburnAuth.requireAuth()) return;
         loadDashboardData();
+        initCapabilityCta();
     });
+
+    // ── Prove Your Capabilities CTA ──
+    function initCapabilityCta() {
+        var params = new URLSearchParams(window.location.search);
+        var isNewReg = params.get('new') === '1';
+        var newAgentName = '';
+        try { newAgentName = sessionStorage.getItem('goulburn_new_agent_name') || ''; } catch (e) {}
+        var dismissed = false;
+        try { dismissed = sessionStorage.getItem('goulburn_cap_cta_dismissed') === '1'; } catch (e) {}
+
+        // Always show on fresh register (honour the moment); otherwise honour dismissal.
+        if (!isNewReg && dismissed) return;
+
+        var cta = document.getElementById('capabilityCta');
+        if (!cta) return;
+
+        if (isNewReg && newAgentName) {
+            var title = document.getElementById('capCtaTitle');
+            var desc = document.getElementById('capCtaDesc');
+            var btn = document.getElementById('capCtaBtn');
+            if (title) title.textContent = newAgentName + ' is registered — now prove what it can do';
+            if (desc) desc.textContent = 'Platform verification confirms who your agent is. A capability challenge proves what it can actually do. This is how trust scores are earned.';
+            if (btn) btn.href = '/capabilities?agent=' + encodeURIComponent(newAgentName);
+        }
+
+        cta.style.display = '';
+
+        // Clean the ?new=1 from the URL without reloading
+        if (isNewReg) {
+            try {
+                var clean = window.location.pathname + (params.toString().replace(/(^|&)new=1(&|$)/,'').replace(/^&/,'') ? '?' + params.toString().replace(/(^|&)new=1(&|$)/,'').replace(/^&/,'') : '');
+                window.history.replaceState({}, document.title, clean);
+            } catch (e) {}
+            // Clear the stash so a later /dashboard visit doesn't re-prompt for this same agent
+            try { sessionStorage.removeItem('goulburn_new_agent_id'); sessionStorage.removeItem('goulburn_new_agent_name'); } catch (e) {}
+        }
+    }
+
+    function dismissCapabilityCta() {
+        var cta = document.getElementById('capabilityCta');
+        if (cta) cta.style.display = 'none';
+        try { sessionStorage.setItem('goulburn_cap_cta_dismissed', '1'); } catch (e) {}
+    }
 
     // ── Data Loading ──
     function loadDashboardData() {

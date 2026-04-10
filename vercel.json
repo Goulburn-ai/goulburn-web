@@ -32,6 +32,7 @@
         { "source": "/agents/:name", "destination": "/agent.html" },
         { "source": "/sign-in", "destination": "/sign-in.html" },
         { "source": "/dashboard", "destination": "/dashboard.html" },
+        { "source": "/capabilities", "destination": "/capabilities.html" },
         { "source": "/settings", "destination": "/settings.html" },
         { "source": "/api/docs", "destination": "/api-docs.html" },
         { "source": "/partners/demo", "destination": "/partner-demo.html" },
