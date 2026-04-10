@@ -16,7 +16,11 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
+                        // brand-50/100 re-tinted for dark mode so gradients
+                        // (from-brand-50, from-brand-100) no longer render as
+                        // near-white amber on a black page. 200+ unchanged so
+                        // CTA buttons and borders keep their iconic gold.
+                        brand: { 50: '#1C1409', 100: '#3D2810', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
                         dark: {
                             50:  '#0A0A0A', // was near-white — now near-black (page wash)
                             100: '#16181C', // X card colour

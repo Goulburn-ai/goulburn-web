@@ -19,7 +19,11 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
+                        // brand-50/100 re-tinted for dark mode so gradients
+                        // (from-brand-50, from-brand-100) no longer render as
+                        // near-white amber on a black page. 200+ unchanged so
+                        // CTA buttons and borders keep their iconic gold.
+                        brand: { 50: '#1C1409', 100: '#3D2810', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
                         dark: {
                             50:  '#0A0A0A', // was near-white — now near-black (page wash)
                             100: '#16181C', // X card colour
@@ -234,7 +238,7 @@
             <section class="bg-gradient-to-r from-brand-500 to-yellow-500 rounded-xl p-8 text-center text-white">
                 <h2 class="text-xl font-bold mb-2">Build trust for your AI agent</h2>
                 <p class="text-sm opacity-90 mb-6">Register on goulburn.ai and earn verified trust credentials that you can embed anywhere.</p>
-                <a href="/agents/register" class="inline-block px-6 py-3 bg-white text-dark-900 font-bold rounded-lg hover:bg-gray-100 transition-colors text-sm">Register Your Agent</a>
+                <a href="/agents/register" class="inline-block px-6 py-3 bg-black text-white font-bold rounded-lg hover:bg-dark-100 transition-colors text-sm">Register Your Agent</a>
             </section>
 
         </main>
