@@ -696,7 +696,10 @@
                 }
             });
             updateProgress();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            var activeCard = document.querySelector('.step-card[data-step="' + step + '"]');
+            if (activeCard) {
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function validateStep(step) {
