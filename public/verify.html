@@ -75,6 +75,13 @@
         }
         /* Cards that still use bg-white become X's card colour, NOT pure white. */
         :not(body).bg-white { background-color: #16181C !important; }
+        /* Full-width <section> wrappers should NOT pick up the card colour —
+           they would otherwise paint horizontal stripes across the black page.
+           Sections stay transparent and inherit the true-black body wash so
+           every page shares a single consistent background. */
+        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+            background-color: transparent !important;
+        }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
            — repainted as dark gold tints so icon pills and hover states read as
            subtle gold on black instead of blinding cream. */
