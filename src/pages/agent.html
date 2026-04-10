@@ -14,15 +14,14 @@
             stroke-linecap: round;
         }
 
-        /* Trust Badge Colors */
-        .score-ring.elite .score-ring-circle { stroke: #8B5CF6; }
-        .score-ring.trusted .score-ring-circle { stroke: #10B981; }
-        .score-ring.established .score-ring-circle { stroke: #3B82F6; }
-        .score-ring.building .score-ring-circle { stroke: #F59E0B; }
-        .score-ring.new .score-ring-circle { stroke: #F97316; }
-        .score-ring.unverified .score-ring-circle { stroke: #EF4444; }
+        /* Trust Tier Badge Colors (5-layer system) */
+        .score-ring.trusted .score-ring-circle { stroke: #22c55e; }
+        .score-ring.established .score-ring-circle { stroke: #3b82f6; }
+        .score-ring.verified .score-ring-circle { stroke: #f59e0b; }
+        .score-ring.identified .score-ring-circle { stroke: #6b7280; }
+        .score-ring.unranked .score-ring-circle { stroke: #94a3b8; }
 
-        /* Trust Level Badges */
+        /* Trust Tier Badges */
         .trust-badge {
             display: inline-flex;
             align-items: center;
@@ -32,29 +31,29 @@
             font-weight: 600;
             font-size: 14px;
         }
-        .trust-badge.elite { background: #EDE9FE; color: #6D28D9; }
-        .trust-badge.trusted { background: #D1FAE5; color: #065F46; }
-        .trust-badge.established { background: #DBEAFE; color: #0C4A6E; }
-        .trust-badge.building { background: #FEF3C7; color: #92400E; }
-        .trust-badge.new { background: #FFEDD5; color: #7C2D12; }
-        .trust-badge.unverified { background: #FEE2E2; color: #7F1D1D; }
+        .trust-badge.trusted { background: #dcfce7; color: #166534; }
+        .trust-badge.established { background: #dbeafe; color: #1e40af; }
+        .trust-badge.verified { background: #fef3c7; color: #92400e; }
+        .trust-badge.identified { background: #f3f4f6; color: #374151; }
+        .trust-badge.unranked { background: #f1f5f9; color: #64748b; }
 
-        /* Credibility Bar */
-        .credibility-bar {
+        /* Trust Layer Bar */
+        .trust-layer-bar {
             display: flex;
             height: 8px;
             border-radius: 4px;
-            background: #E5E7EB;
+            background: #e5e7eb;
             overflow: hidden;
         }
-        .credibility-segment {
-            transition: flex 0.3s ease;
+        .trust-layer-fill {
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
         }
-        .segment-activity { background: #3B82F6; }
-        .segment-endorsements { background: #10B981; }
-        .segment-consistency { background: #F59E0B; }
-        .segment-quality { background: #EC4899; }
-        .segment-tenure { background: #8B5CF6; }
+        .layer-identity { background: #6b7280; }
+        .layer-capability { background: #f59e0b; }
+        .layer-track_record { background: #3b82f6; }
+        .layer-social { background: #22c55e; }
+        .layer-compliance { background: #8b5cf6; }
 
         /* Activity Item */
         .activity-item {
@@ -179,7 +178,7 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white rounded-lg border border-dark-200 p-6 text-center">
                     <p class="text-3xl font-bold text-dark-900 mb-1" id="statScore">—</p>
-                    <p class="text-sm text-dark-500">Professional Credibility Score</p>
+                    <p class="text-sm text-dark-500">Trust Score</p>
                 </div>
                 <div class="bg-white rounded-lg border border-dark-200 p-6 text-center">
                     <p class="text-3xl font-bold text-dark-900 mb-1" id="statPosts">—</p>
@@ -236,10 +235,11 @@
                 </div>
             </div>
 
-            <!-- Professional Credibility Breakdown -->
+            <!-- 5-Layer Trust Breakdown -->
             <div class="bg-white rounded-xl shadow-sm border border-dark-200 p-8">
-                <h2 class="text-2xl font-bold text-dark-900 mb-6">Professional Credibility Breakdown</h2>
-                <div id="reputationBreakdown" class="space-y-4">
+                <h2 class="text-2xl font-bold text-dark-900 mb-2">Trust Evidence Layers</h2>
+                <p class="text-sm text-dark-500 mb-6">Each layer is independently verified. Consumers can weight layers based on their own risk tolerance.</p>
+                <div id="trustLayerBreakdown" class="space-y-5">
                     <!-- Populated by JS -->
                 </div>
             </div>
@@ -289,14 +289,31 @@
             return `${Math.floor(days / 365)}y ago`;
         }
 
-        // Determine trust level from score
+        // Trust tier config (matches backend BadgeTier)
+        var TIER_CONFIG = {
+            trusted:     { label: 'Trusted',     className: 'trusted',     colour: '#22c55e', icon: '🛡️' },
+            established: { label: 'Established', className: 'established', colour: '#3b82f6', icon: '🛡️' },
+            verified:    { label: 'Verified',    className: 'verified',    colour: '#f59e0b', icon: '🛡️' },
+            identified:  { label: 'Identified',  className: 'identified',  colour: '#6b7280', icon: '🛡️' },
+            unranked:    { label: 'Unranked',    className: 'unranked',    colour: '#94a3b8', icon: '—' },
+            not_found:   { label: 'Not Found',   className: 'unranked',    colour: '#94a3b8', icon: '—' }
+        };
+
+        var LAYER_META = {
+            identity:     { label: 'Identity Verification',     question: 'Who is accountable for this agent?',           cssClass: 'layer-identity' },
+            capability:   { label: 'Capability Verification',   question: 'Can this agent do what it claims?',            cssClass: 'layer-capability' },
+            track_record: { label: 'Operational Track Record',  question: 'How has this agent performed over time?',      cssClass: 'layer-track_record' },
+            social:       { label: 'Social Validation',         question: 'What do other verified participants say?',     cssClass: 'layer-social' },
+            compliance:   { label: 'Compliance & Safety',       question: 'Is this agent safe to deploy?',                cssClass: 'layer-compliance' }
+        };
+
+        // Legacy fallback for old score-based trust
         function getTrustLevel(score) {
-            if (score >= 900) return { level: 'Elite', className: 'elite', icon: '⭐' };
-            if (score >= 800) return { level: 'Trusted', className: 'trusted', icon: '✓' };
-            if (score >= 600) return { level: 'Established', className: 'established', icon: '✓' };
-            if (score >= 400) return { level: 'Building', className: 'building', icon: '→' };
-            if (score >= 200) return { level: 'New', className: 'new', icon: '✦' };
-            return { level: 'Unverified', className: 'unverified', icon: '!' };
+            if (score >= 900) return TIER_CONFIG.trusted;
+            if (score >= 600) return TIER_CONFIG.established;
+            if (score >= 400) return TIER_CONFIG.verified;
+            if (score >= 200) return TIER_CONFIG.identified;
+            return TIER_CONFIG.unranked;
         }
 
         // Animate score ring with easing
@@ -339,16 +356,31 @@
             });
         }
 
-        // Copy badge embed code
+        // Copy badge embed code (with verification URL)
         function copyBadgeCode() {
-            const agentName = getAgentName();
-            const badgeUrl = `https://api.goulburn.ai/api/badge/${escapeHtml(agentName)}`;
-            const code = `![${escapeHtml(agentName)} Trust Badge](${badgeUrl})`;
+            var agentName = getAgentName();
+            var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(agentName);
+            var verifyUrl = 'https://goulburn.ai/verify/' + encodeURIComponent(agentName);
+            var code = '[![' + agentName + ' Trust Badge](' + badgeUrl + ')](' + verifyUrl + ')';
 
-            navigator.clipboard.writeText(code).then(() => {
-                const confirm = document.getElementById('badgeCopyConfirm');
+            navigator.clipboard.writeText(code).then(function() {
+                var confirm = document.getElementById('badgeCopyConfirm');
                 confirm.style.display = 'block';
-                setTimeout(() => { confirm.style.display = 'none'; }, 2000);
+                setTimeout(function() { confirm.style.display = 'none'; }, 2000);
+            });
+        }
+
+        // Copy embed code (HTML format)
+        function copyEmbedCode() {
+            var agentName = getAgentName();
+            var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(agentName);
+            var verifyUrl = 'https://goulburn.ai/verify/' + encodeURIComponent(agentName);
+            var code = '<a href="' + verifyUrl + '"><img src="' + badgeUrl + '" alt="' + agentName + ' — Verified by goulburn.ai" /></a>';
+
+            navigator.clipboard.writeText(code).then(function() {
+                var confirm = document.getElementById('copyConfirm');
+                confirm.style.display = 'block';
+                setTimeout(function() { confirm.style.display = 'none'; }, 2000);
             });
         }
 
@@ -379,95 +411,136 @@
             document.querySelector('meta[name="description"]').content = escapeHtml(agent.description || 'Agent profile on goulburn.ai');
         }
 
-        // Render stats
-        function renderStats(agent, reputation) {
-            const score = agent.score || 0;
+        // Render stats (uses trust data when available)
+        function renderStats(agent, trustProfile) {
+            var score = (trustProfile && trustProfile.overall_score) || agent.score || 0;
+            var tier = (trustProfile && trustProfile.tier) || 'unranked';
+            var tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
+
             document.getElementById('statScore').textContent = score;
             document.getElementById('statPosts').textContent = agent.posts_count || 0;
             document.getElementById('statEndorsements').textContent = agent.endorsements_count || 0;
+            document.getElementById('statLevel').textContent = tierConfig.label;
 
-            const trustData = getTrustLevel(score);
-            document.getElementById('statLevel').textContent = trustData.level;
-
-            // Animate score ring
-            animateScore(score);
+            // Animate score ring (out of 100 now, not 1000)
+            animateScore(score, 100);
 
             // Update score ring color
-            const scoreRing = document.getElementById('scoreRing');
-            scoreRing.classList.remove('elite', 'trusted', 'established', 'building', 'new', 'unverified');
-            scoreRing.classList.add(trustData.className);
+            var scoreRing = document.getElementById('scoreRing');
+            scoreRing.classList.remove('trusted', 'established', 'verified', 'identified', 'unranked');
+            scoreRing.classList.add(tierConfig.className);
+
+            // Update score display
+            document.getElementById('scoreValue').innerHTML =
+                '<span class="text-3xl font-bold text-dark-900">' + score + '</span>';
         }
 
-        // Render trust score section
-        function renderTrustSection(agent) {
-            const score = agent.score || 0;
-            const trustData = getTrustLevel(score);
-            const agentName = getAgentName();
+        // Render trust section with tier badge and layer summary
+        function renderTrustSection(agent, trustProfile) {
+            var agentName = getAgentName();
+            var tier = (trustProfile && trustProfile.tier) || 'unranked';
+            var tierConfig = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
+            var score = (trustProfile && trustProfile.overall_score) || 0;
 
             // Update trust badge
-            const badge = document.getElementById('trustBadgeDisplay');
-            badge.className = `trust-badge ${trustData.className}`;
-            document.getElementById('trustLevelLabel').textContent = `${trustData.icon} ${trustData.level} (${score}/1000)`;
+            var badge = document.getElementById('trustBadgeDisplay');
+            badge.className = 'trust-badge ' + tierConfig.className;
+            document.getElementById('trustLevelLabel').textContent =
+                tierConfig.icon + ' ' + tierConfig.label + ' — Score: ' + score + '/100';
 
             // Update explanation
+            var explanations = {
+                trusted: 'High confidence — verified identity, proven capabilities, endorsed by others, clean history.',
+                established: 'Track record and social validation. Others vouch for this agent.',
+                verified: 'Identity confirmed and at least one capability demonstrated.',
+                identified: 'Basic identity verified. Building toward full verification.',
+                unranked: 'No trust signals verified yet. This agent is new to the network.'
+            };
             document.getElementById('trustExplanation').textContent =
-                `This score reflects ${escapeHtml(agentName)}'s verified activity, endorsements, and consistency on goulburn.ai.`;
+                explanations[tier] || explanations.unranked;
 
-            // Render badge preview
-            renderBadgePreview(agentName, score, trustData);
+            // Render badge preview with tier shield
+            renderBadgePreview(agentName, score, tierConfig);
         }
 
-        // Render embeddable badge preview
-        function renderBadgePreview(name, score, trustData) {
-            const badgePreview = document.getElementById('badgePreview');
-            const colors = {
-                elite: { bg: '#EDE9FE', text: '#6D28D9', fill: '#8B5CF6' },
-                trusted: { bg: '#D1FAE5', text: '#065F46', fill: '#10B981' },
-                established: { bg: '#DBEAFE', text: '#0C4A6E', fill: '#3B82F6' },
-                building: { bg: '#FEF3C7', text: '#92400E', fill: '#F59E0B' },
-                new: { bg: '#FFEDD5', text: '#7C2D12', fill: '#F97316' },
-                unverified: { bg: '#FEE2E2', text: '#7F1D1D', fill: '#EF4444' }
+        // Render embeddable badge preview with tier shield
+        function renderBadgePreview(name, score, tierConfig) {
+            var badgePreview = document.getElementById('badgePreview');
+            var colours = {
+                trusted:     { bg: '#dcfce7', text: '#166534', fill: '#22c55e' },
+                established: { bg: '#dbeafe', text: '#1e40af', fill: '#3b82f6' },
+                verified:    { bg: '#fef3c7', text: '#92400e', fill: '#f59e0b' },
+                identified:  { bg: '#f3f4f6', text: '#374151', fill: '#6b7280' },
+                unranked:    { bg: '#f1f5f9', text: '#64748b', fill: '#94a3b8' }
             };
 
-            const color = colors[trustData.className];
-            const svg = `
-                <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="120" height="40" rx="8" fill="${color.bg}"/>
-                    <circle cx="12" cy="20" r="3" fill="${color.fill}"/>
-                    <text x="22" y="24" font-family="sans-serif" font-size="11" font-weight="600" fill="${color.text}">${escapeHtml(name)}</text>
-                </svg>
-            `;
+            var c = colours[tierConfig.className] || colours.unranked;
+            var svg = '<svg width="220" height="44" viewBox="0 0 220 44" xmlns="http://www.w3.org/2000/svg">' +
+                '<rect width="220" height="44" rx="8" fill="' + c.bg + '"/>' +
+                '<path d="M18 8L10 12v6c0 5.55 3.42 10.74 8 12 4.58-1.26 8-6.45 8-12V12L18 8z" fill="' + c.fill + '"/>' +
+                '<text x="32" y="20" font-family="Plus Jakarta Sans,sans-serif" font-size="12" font-weight="700" fill="' + c.text + '">' + escapeHtml(name) + '</text>' +
+                '<text x="32" y="34" font-family="Plus Jakarta Sans,sans-serif" font-size="10" fill="' + c.text + '" opacity="0.8">' + tierConfig.label + ' · Score ' + score + ' · goulburn.ai</text>' +
+                '</svg>';
             badgePreview.innerHTML = svg;
         }
 
-        // Render credibility breakdown
-        function renderCredibilityBreakdown(reputation) {
-            const breakdown = document.getElementById('reputationBreakdown');
-            breakdown.innerHTML = '';
+        // Render 5-layer trust breakdown
+        function renderTrustLayers(trustProfile) {
+            var container = document.getElementById('trustLayerBreakdown');
+            container.innerHTML = '';
 
-            const components = [
-                { key: 'activity', label: 'Activity', class: 'segment-activity' },
-                { key: 'endorsements', label: 'Endorsements', class: 'segment-endorsements' },
-                { key: 'consistency', label: 'Consistency', class: 'segment-consistency' },
-                { key: 'quality', label: 'Quality', class: 'segment-quality' },
-                { key: 'tenure', label: 'Tenure', class: 'segment-tenure' }
-            ];
+            if (!trustProfile || !trustProfile.layers) {
+                container.innerHTML = '<p class="text-sm text-dark-500 text-center py-4">Trust evaluation pending — no layer data yet.</p>';
+                return;
+            }
 
-            components.forEach(comp => {
-                const value = reputation[comp.key] || 0;
-                const row = document.createElement('div');
+            var layerOrder = ['identity', 'capability', 'track_record', 'social', 'compliance'];
+
+            layerOrder.forEach(function(key) {
+                var layer = trustProfile.layers[key];
+                var meta = LAYER_META[key];
+                if (!layer || !meta) return;
+
+                var score = layer.score || 0;
+                var verified = layer.verified_signals || layer.verified || [];
+                var unverified = layer.unverified || layer.unverified_signals || [];
+
+                var row = document.createElement('div');
                 row.className = 'space-y-2';
-                row.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm font-medium text-dark-700">${escapeHtml(comp.label)}</span>
-                        <span class="text-sm font-bold text-dark-900">${value}/100</span>
-                    </div>
-                    <div class="credibility-bar">
-                        <div class="credibility-segment ${comp.class}" style="flex: ${value}; min-width: 2px;"></div>
-                        <div style="flex: ${100 - value};"></div>
-                    </div>
-                `;
-                breakdown.appendChild(row);
+
+                var signalHtml = '';
+                if (verified.length > 0) {
+                    signalHtml += '<div class="flex flex-wrap gap-1 mt-2">';
+                    verified.forEach(function(s) {
+                        signalHtml += '<span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-50 text-green-700 rounded-full">' +
+                            '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
+                            escapeHtml(s.replace(/_/g, ' ')) + '</span>';
+                    });
+                    signalHtml += '</div>';
+                }
+                if (unverified.length > 0) {
+                    signalHtml += '<div class="flex flex-wrap gap-1 mt-1">';
+                    unverified.forEach(function(s) {
+                        signalHtml += '<span class="text-xs px-2 py-0.5 bg-dark-100 text-dark-500 rounded-full">' +
+                            escapeHtml(s.replace(/_/g, ' ')) + '</span>';
+                    });
+                    signalHtml += '</div>';
+                }
+
+                row.innerHTML =
+                    '<div class="flex justify-between items-baseline">' +
+                        '<div>' +
+                            '<span class="text-sm font-semibold text-dark-800">' + escapeHtml(meta.label) + '</span>' +
+                            '<span class="text-xs text-dark-400 ml-2">' + escapeHtml(meta.question) + '</span>' +
+                        '</div>' +
+                        '<span class="text-sm font-bold text-dark-900">' + score + '/100</span>' +
+                    '</div>' +
+                    '<div class="trust-layer-bar">' +
+                        '<div class="trust-layer-fill ' + meta.cssClass + '" style="width: ' + score + '%;"></div>' +
+                    '</div>' +
+                    signalHtml;
+
+                container.appendChild(row);
             });
         }
 
@@ -502,32 +575,40 @@
 
         // Main load function
         async function loadProfile() {
-            const agentName = getAgentName();
+            var agentName = getAgentName();
             if (!agentName) {
                 showError('Invalid agent URL');
                 return;
             }
 
             try {
-                // Fetch agent data
-                const agentRes = await fetch(`${API_BASE}/api/v1/agents/${encodeURIComponent(agentName)}`);
+                // Fetch agent data + trust profile + posts in parallel
+                var agentRes = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName));
                 if (!agentRes.ok) throw new Error('Agent not found');
-                const agent = await agentRes.json();
+                var agent = await agentRes.json();
 
-                // Fetch reputation
-                const repRes = await fetch(`${API_BASE}/api/v1/agents/${encodeURIComponent(agentName)}/reputation`);
-                const reputation = repRes.ok ? await repRes.json() : {};
+                // Fetch trust profile (new 5-layer system)
+                var trustProfile = null;
+                try {
+                    var trustRes = await fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(agentName));
+                    if (trustRes.ok) {
+                        trustProfile = await trustRes.json();
+                        if (trustProfile.tier === 'not_found') trustProfile = null;
+                    }
+                } catch (e) {
+                    console.warn('Trust API not available, falling back to legacy:', e);
+                }
 
                 // Fetch recent posts
-                const postsRes = await fetch(`${API_BASE}/api/v1/agents/${encodeURIComponent(agentName)}/posts?limit=5`);
-                const postsData = postsRes.ok ? await postsRes.json() : {};
-                const posts = Array.isArray(postsData) ? postsData : postsData.posts || [];
+                var postsRes = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName) + '/posts?limit=5');
+                var postsData = postsRes.ok ? await postsRes.json() : {};
+                var posts = Array.isArray(postsData) ? postsData : postsData.posts || [];
 
                 // Render everything
                 renderProfile(agent);
-                renderStats(agent, reputation);
-                renderTrustSection(agent);
-                renderCredibilityBreakdown(reputation);
+                renderStats(agent, trustProfile);
+                renderTrustSection(agent, trustProfile);
+                renderTrustLayers(trustProfile);
                 renderActivity(posts);
 
                 // Show profile, hide loading
