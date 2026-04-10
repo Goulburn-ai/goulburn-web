@@ -56,5 +56,17 @@ pages.forEach(file => {
     count++;
 });
 
-// Copy any non-HTML assets from public (favicon, etc.) — they stay as-is
+// Copy static assets (JS, CSS, images) from src/static/ → public/
+const STATIC_DIR = path.join(SRC, 'static');
+let staticCount = 0;
+if (fs.existsSync(STATIC_DIR)) {
+    fs.readdirSync(STATIC_DIR).forEach(file => {
+        fs.copyFileSync(path.join(STATIC_DIR, file), path.join(OUT, file));
+        staticCount++;
+    });
+}
+if (staticCount > 0) {
+    console.log(`Copied ${staticCount} static asset(s) → public/`);
+}
+
 console.log(`Built ${count} pages → public/`);

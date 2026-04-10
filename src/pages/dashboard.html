@@ -29,6 +29,33 @@
             background-color: var(--dark-50);
         }
 
+        /* Tier achievement notification */
+        .tier-achievement {
+            background: linear-gradient(135deg, #111827, #1e293b);
+            border-radius: 12px;
+            padding: 1px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            animation: ta-slide-in 0.4s ease;
+        }
+        @keyframes ta-slide-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+        .ta-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(34,197,94,0.06));
+        }
+        .ta-shield svg { display: block; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3)); }
+        .ta-text { flex: 1; }
+        .ta-text h3 { margin: 0 0 2px 0; font-size: 0.95rem; font-weight: 700; color: #f9fafb; }
+        .ta-text p { margin: 0; font-size: 0.8rem; color: #9ca3af; }
+        .ta-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .btn-sm { padding: 6px 14px; font-size: 0.75rem; border-radius: 6px; }
+        .ta-close { background: none; border: none; color: #6b7280; font-size: 1.2rem; cursor: pointer; padding: 4px 8px; }
+        .ta-close:hover { color: #f9fafb; }
+
         .page-container {
             max-width: 80rem;
             margin: 0 auto;
@@ -542,6 +569,22 @@
             <p>Manage your agents and monitor their trust scores</p>
         </div>
 
+        <!-- Tier Achievement Notification (hidden by default) -->
+        <div id="tierAchievement" style="display:none;" class="tier-achievement">
+            <div class="ta-content">
+                <div class="ta-shield" id="taShield"></div>
+                <div class="ta-text">
+                    <h3 id="taTitle">Tier Achieved!</h3>
+                    <p id="taDesc">Your agent has earned a new trust tier.</p>
+                </div>
+                <div class="ta-actions">
+                    <button class="btn btn-primary btn-sm" onclick="shareTierAchievement()">Share</button>
+                    <button class="btn-secondary btn-sm" onclick="showBadgeFromAchievement()">Embed Badge</button>
+                    <button class="ta-close" onclick="dismissAchievement()" title="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Agent Section -->
         <div class="section-header">
             <h2>
@@ -656,6 +699,7 @@
                 renderAgents(agents);
                 updateStats(agents);
                 loadActivityFeed(agents);
+                checkTierAchievements(agents);
             });
     }
 
@@ -857,7 +901,7 @@
     function showBadgeModal(agentName) {
         var markdown = '[![Trust Score](https://api.goulburn.ai/api/badge/' + agentName + ')](https://goulburn.ai/agents/' + agentName + ')';
         var html = '<a href="https://goulburn.ai/agents/' + agentName + '"><img src="https://api.goulburn.ai/api/badge/' + agentName + '" alt="Trust Score" /></a>';
-        var script = '<script src="https://goulburn.ai/badge.js" data-agent="' + agentName + '"><\\/script>';
+        var script = '<script src="https://goulburn.ai/widget.js" data-agent="' + agentName + '"><\\/script>';
 
         document.getElementById('badgeCode').innerHTML =
             '<div style="margin-bottom: 1rem;">' +
@@ -895,6 +939,92 @@
         toast.textContent = message;
         toast.className = 'toast show' + (type === 'error' ? ' error' : '');
         setTimeout(function() { toast.classList.remove('show'); }, 3000);
+    }
+
+    // ── Tier Achievement Notification ──
+    var TIER_COLOURS_MAP = {
+        trusted:     { fill: '#22c55e', label: 'Trusted' },
+        established: { fill: '#3b82f6', label: 'Established' },
+        verified:    { fill: '#f59e0b', label: 'Verified' },
+        identified:  { fill: '#6b7280', label: 'Identified' },
+        unranked:    { fill: '#94a3b8', label: 'Unranked' }
+    };
+    var TIER_RANK = { unranked: 0, identified: 1, verified: 2, established: 3, trusted: 4 };
+    var achievementAgent = null;
+
+    function checkTierAchievements(agents) {
+        if (!agents || agents.length === 0) return;
+        var dismissed = {};
+        try { dismissed = JSON.parse(sessionStorage.getItem('goulburn_dismissed_tiers') || '{}'); } catch(e) {}
+
+        agents.forEach(function(agent) {
+            var name = agent.name || agent.username;
+            if (!name || dismissed[name]) return;
+
+            // Fetch fresh trust data for this agent
+            fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(name))
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .catch(function() { return null; })
+                .then(function(trust) {
+                    if (!trust || !trust.tier || trust.tier === 'unranked' || trust.tier === 'not_found') return;
+
+                    // Check if tier is new (compare against last known tier stored in sessionStorage)
+                    var lastKey = 'goulburn_last_tier_' + name;
+                    var lastTier = sessionStorage.getItem(lastKey);
+                    var currentRank = TIER_RANK[trust.tier] || 0;
+                    var lastRank = TIER_RANK[lastTier] || 0;
+
+                    // Show achievement if: first time seeing tier data OR tier upgraded
+                    if (lastTier === null || currentRank > lastRank) {
+                        sessionStorage.setItem(lastKey, trust.tier);
+                        if (lastTier !== null) { // Only show banner for upgrades, not first load
+                            showTierAchievement(name, trust.tier, trust.overall_score);
+                        } else {
+                            sessionStorage.setItem(lastKey, trust.tier);
+                        }
+                    }
+                });
+        });
+    }
+
+    function showTierAchievement(agentName, tier, score) {
+        achievementAgent = agentName;
+        var tc = TIER_COLOURS_MAP[tier] || TIER_COLOURS_MAP.unranked;
+        var shield = '<svg width="36" height="36" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="' + tc.fill + '"/></svg>';
+
+        document.getElementById('taShield').innerHTML = shield;
+        document.getElementById('taTitle').textContent = agentName + ' is now ' + tc.label + '!';
+        document.getElementById('taDesc').textContent = 'Trust score: ' + (score || 0) + '/100. Share your achievement or embed the badge.';
+        document.getElementById('tierAchievement').style.display = 'block';
+    }
+
+    function dismissAchievement() {
+        document.getElementById('tierAchievement').style.display = 'none';
+        if (achievementAgent) {
+            try {
+                var dismissed = JSON.parse(sessionStorage.getItem('goulburn_dismissed_tiers') || '{}');
+                dismissed[achievementAgent] = true;
+                sessionStorage.setItem('goulburn_dismissed_tiers', JSON.stringify(dismissed));
+            } catch(e) {}
+        }
+    }
+
+    function shareTierAchievement() {
+        if (!achievementAgent) return;
+        var url = 'https://goulburn.ai/verify/' + encodeURIComponent(achievementAgent);
+        if (navigator.share) {
+            navigator.share({ title: achievementAgent + ' — Verified on goulburn.ai', url: url }).catch(function() {});
+        } else {
+            navigator.clipboard.writeText(url).then(function() {
+                showToast('Verification link copied!');
+            }).catch(function() {
+                window.open(url, '_blank');
+            });
+        }
+    }
+
+    function showBadgeFromAchievement() {
+        if (achievementAgent) showBadgeModal(achievementAgent);
     }
 
     // Close modal on outside click

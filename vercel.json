@@ -52,6 +52,7 @@
         { "source": "/api/docs", "destination": "/api-docs.html" },
         { "source": "/partners/demo", "destination": "/partner-demo.html" },
         { "source": "/admin", "destination": "/admin.html" },
+        { "source": "/verify/:name", "destination": "/verify.html" },
         { "source": "/maintenance", "destination": "/maintenance.html" },
         { "source": "/unauthorized", "destination": "/unauthorized.html" }
     ]
