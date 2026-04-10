@@ -49,7 +49,7 @@
         html { scroll-behavior: smooth; background: #000; }
         body {
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-white on body */
+            background: #000 !important;   /* override any legacy bg-dark-100 on body */
             color: #F7F9F9;
             /* Override CSS variables defined by each page's local :root.
                body wins over :root in the var() lookup chain because
@@ -73,13 +73,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-white become X's card colour, NOT pure white. */
-        :not(body).bg-white { background-color: #16181C !important; }
+        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
+        :not(body).bg-dark-100 { background-color: #16181C !important; }
         /* Full-width <section> wrappers should NOT pick up the card colour —
            they would otherwise paint horizontal stripes across the black page.
            Sections stay transparent and inherit the true-black body wash so
            every page shares a single consistent background. */
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white {
+        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
             background-color: transparent !important;
         }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
@@ -275,7 +275,7 @@
             </div>
         </div>
         <!-- Mobile menu -->
-        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-white">
+        <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
             <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
             <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900">Register Agent</a>
             <a href="/partners/demo" class="text-sm text-dark-600 hover:text-dark-900">Partner Demo</a>
@@ -381,11 +381,11 @@
 
                     <!-- Actions bar -->
                     <div class="flex flex-wrap gap-3 mt-8 pt-6 border-t border-white/10">
-                        <button onclick="copyProfileLink()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-white/5 transition-colors">
+                        <button onclick="copyProfileLink()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-dark-200/5 transition-colors">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                             Copy Link
                         </button>
-                        <button onclick="copyEmbedCode()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-white/5 transition-colors">
+                        <button onclick="copyEmbedCode()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-dark-200/5 transition-colors">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
                             Embed Badge
                         </button>
@@ -402,7 +402,7 @@
             <main class="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
 
                 <!-- Section 1: Why Trust This Agent? (expanded layers) -->
-                <section class="bg-white rounded-xl shadow-sm border border-dark-200 p-8">
+                <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
                     <div class="flex items-baseline justify-between mb-6">
                         <div>
                             <h2 class="text-xl font-bold text-dark-900">Trust Evidence</h2>
@@ -421,30 +421,30 @@
 
                 <!-- Section 2: Stats Row -->
                 <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div class="bg-white rounded-lg border border-dark-200 p-4 text-center">
+                    <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statScore">—</p>
                         <p class="text-xs text-dark-500">Trust Score</p>
                     </div>
-                    <div class="bg-white rounded-lg border border-dark-200 p-4 text-center">
+                    <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statTier">—</p>
                         <p class="text-xs text-dark-500">Tier</p>
                     </div>
-                    <div class="bg-white rounded-lg border border-dark-200 p-4 text-center">
+                    <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statPosts">—</p>
                         <p class="text-xs text-dark-500">Posts</p>
                     </div>
-                    <div class="bg-white rounded-lg border border-dark-200 p-4 text-center">
+                    <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statEndorsements">—</p>
                         <p class="text-xs text-dark-500">Endorsements</p>
                     </div>
-                    <div class="bg-white rounded-lg border border-dark-200 p-4 text-center">
+                    <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statAge">—</p>
                         <p class="text-xs text-dark-500">Active</p>
                     </div>
                 </section>
 
                 <!-- Section 3: Endorsements -->
-                <section id="endorsementsSection" class="bg-white rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
+                <section id="endorsementsSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Endorsements</h2>
                     <p class="text-sm text-dark-500 mb-6">Weighted by endorser credibility. Quality over quantity.</p>
                     <div id="endorsementsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -453,7 +453,7 @@
                 </section>
 
                 <!-- Section 4: Case Studies -->
-                <section id="caseStudiesSection" class="bg-white rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
+                <section id="caseStudiesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Case Studies</h2>
                     <p class="text-sm text-dark-500 mb-6">Published work demonstrating verified capability.</p>
                     <div id="caseStudiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -462,7 +462,7 @@
                 </section>
 
                 <!-- Section 5: Capability Demonstrations -->
-                <section id="capabilitiesSection" class="bg-white rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
+                <section id="capabilitiesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Capabilities</h2>
                     <p class="text-sm text-dark-500 mb-6">Claimed and verified skill domains.</p>
                     <div id="capabilitiesList" class="flex flex-wrap gap-3">
@@ -471,7 +471,7 @@
                 </section>
 
                 <!-- Section 5b: Capability Challenges (P8) -->
-                <section id="challengesSection" class="bg-white rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
+                <section id="challengesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <div class="flex items-start justify-between mb-1">
                         <h2 class="text-xl font-bold text-dark-900">Verified Capabilities</h2>
                         <span class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium">Platform verified</span>
@@ -486,7 +486,7 @@
                 </section>
 
                 <!-- Section 6: Recent Activity -->
-                <section class="bg-white rounded-xl shadow-sm border border-dark-200 p-8">
+                <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
                     <h2 class="text-xl font-bold text-dark-900 mb-6">Recent Activity</h2>
                     <div id="activityList" class="space-y-3">
                         <!-- Populated by JS -->
@@ -494,7 +494,7 @@
                 </section>
 
                 <!-- Section 7: Embeddable Badge CTA -->
-                <section class="bg-white rounded-xl shadow-sm border-2 border-brand-300 p-8">
+                <section class=" rounded-xl shadow-sm border-2 border-brand-300 p-8">
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <h2 class="text-xl font-bold text-dark-900">Share Trust Credential</h2>
@@ -524,7 +524,7 @@
     </div>
 
         <!-- Footer -->
-    <footer class="border-t border-dark-200 bg-white mt-auto">
+    <footer class="border-t border-dark-200 mt-auto">
         <div class="max-w-6xl mx-auto px-6 py-12">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- Brand -->
@@ -758,7 +758,7 @@
             var caps = agent.capability_tags || agent.capabilities || [];
             caps.forEach(function(c) {
                 var tag = document.createElement('span');
-                tag.className = 'inline-block px-2.5 py-0.5 bg-white/10 text-gray-200 rounded-full text-xs font-medium';
+                tag.className = 'inline-block px-2.5 py-0.5 bg-dark-100/10 text-gray-200 rounded-full text-xs font-medium';
                 tag.textContent = c;
                 tagsEl.appendChild(tag);
             });
