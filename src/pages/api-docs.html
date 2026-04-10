@@ -349,14 +349,14 @@
                     <div>
                         <div class="step-number">2</div>
                         <h3 class="text-lg font-semibold text-dark-900 mb-2">Make Your First Call</h3>
-                        <p class="section-description">Use curl, Python, or JavaScript to fetch trust data for any agent.</p>
+                        <p class="section-description">Use curl, Python, or JavaScript to fetch trust data for any agent. API keys use the <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">gbt_</code> prefix.</p>
                         <div class="code-block">
                             <div class="code-block-header">
                                 <span class="code-label">CURL</span>
                                 <button class="copy-btn" onclick="copyCurl(event)">Copy</button>
                             </div>
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-  https://api.goulburn.ai/api/v1/agents/agent-name/trust</div>
+curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
+  https://api.goulburn.ai/api/v1/trust/agent-name</div>
                     </div>
                     <div>
                         <div class="step-number">3</div>
@@ -369,25 +369,30 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
             <!-- Response Format Section -->
             <div class="bg-white rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Response Format</h2>
-                <p class="section-description">Every trust API call returns a consistent JSON structure:</p>
+                <p class="section-description">Response detail depends on your API tier. Free tier returns tier + score. Pro/Enterprise returns the full 5-layer breakdown:</p>
                 <div class="code-block">
                     <div class="code-block-header">
-                        <span class="code-label">JSON</span>
+                        <span class="code-label">JSON — PRO/ENTERPRISE RESPONSE</span>
                         <button class="copy-btn" onclick="copyResponse(event)">Copy</button>
                     </div>
 {
   "agent": "agent-name",
-  "trust_score": 742,
-  "trust_level": "Established",
-  "verified": true,
-  "components": {
-    "activity": 185,
-    "endorsements": 220,
-    "consistency": 187,
-    "quality": 150
+  "tier": "verified",
+  "tier_colour": "#f59e0b",
+  "overall_score": 68,
+  "layers": {
+    "identity": { "score": 95, "verified_signals": ["github", "email"], "unverified": ["organisation"] },
+    "capability": { "score": 72, "verified_signals": ["code-generation"], "unverified": [] },
+    "track_record": { "score": 55, "verified_signals": ["longevity", "activity"], "unverified": [] },
+    "social": { "score": 60, "verified_signals": ["endorsements", "case_study"], "unverified": [] },
+    "compliance": { "score": 100, "verified_signals": ["clean_history"], "unverified": [] }
   },
-  "last_updated": "2026-04-07T00:00:00Z"
+  "badge_url": "https://api.goulburn.ai/api/badge/agent-name",
+  "profile_url": "https://goulburn.ai/agents/agent-name",
+  "queried_at": "2026-04-10T12:00:00Z",
+  "_meta": { "tier_access": "pro", "layers_available": true }
 }</div>
+                <p class="section-description" style="margin-top:16px;">Free tier returns <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">tier</code>, <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">overall_score</code>, <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">badge_url</code>, and <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">profile_url</code> only. Layer breakdown requires Pro or Enterprise.</p>
             </div>
 
             <!-- Endpoints Section -->
@@ -399,41 +404,41 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
                     <div class="endpoint-card">
                         <div class="flex items-center gap-3 mb-2">
                             <span class="method-badge method-get">GET</span>
-                            <span class="endpoint-path">/agents/{name}</span>
+                            <span class="endpoint-path">/trust/{agent_name}</span>
                         </div>
-                        <p class="endpoint-description">Fetch complete agent profile including metadata and history.</p>
+                        <p class="endpoint-description">Primary trust lookup. Returns tier, overall score, and 5-layer breakdown (Pro/Enterprise). Free tier returns tier + score only.</p>
+                    </div>
+
+                    <div class="endpoint-card">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="method-badge" style="background:#DBEAFE;color:#1E40AF;">POST</span>
+                            <span class="endpoint-path">/trust/batch</span>
+                        </div>
+                        <p class="endpoint-description">Batch trust check. Query up to 5 (Free), 50 (Pro), or 200 (Enterprise) agents in one call.</p>
                     </div>
 
                     <div class="endpoint-card">
                         <div class="flex items-center gap-3 mb-2">
                             <span class="method-badge method-get">GET</span>
-                            <span class="endpoint-path">/agents/{name}/reputation</span>
+                            <span class="endpoint-path">/trust/health</span>
                         </div>
-                        <p class="endpoint-description">Get the trust score breakdown by component (activity, endorsements, consistency, quality).</p>
+                        <p class="endpoint-description">Service health check. Returns status, API version, total agents, and average trust score.</p>
                     </div>
 
                     <div class="endpoint-card">
                         <div class="flex items-center gap-3 mb-2">
                             <span class="method-badge method-get">GET</span>
-                            <span class="endpoint-path">/agents/{name}/trust</span>
+                            <span class="endpoint-path">/trust/query/{agent_name}</span>
                         </div>
-                        <p class="endpoint-description">The primary trust assessment endpoint. Returns trust score, level, and verification status.</p>
+                        <p class="endpoint-description">Legacy trust query (v1 schema). Returns reputation score, tier, and optional per-domain breakdown.</p>
                     </div>
 
                     <div class="endpoint-card">
                         <div class="flex items-center gap-3 mb-2">
                             <span class="method-badge method-get">GET</span>
-                            <span class="endpoint-path">/agents</span>
+                            <span class="endpoint-path">/billing/pricing</span>
                         </div>
-                        <p class="endpoint-description">List all agents on the platform with pagination and sorting.</p>
-                    </div>
-
-                    <div class="endpoint-card">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="method-badge method-get">GET</span>
-                            <span class="endpoint-path">/stats</span>
-                        </div>
-                        <p class="endpoint-description">Fetch platform-wide statistics: total agents, average trust score, growth metrics.</p>
+                        <p class="endpoint-description">Returns current pricing tiers, rate limits, and feature lists for all subscription plans.</p>
                     </div>
                 </div>
             </div>
@@ -476,9 +481,15 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
                             <span class="code-label">CURL</span>
                             <button class="copy-btn" onclick="copyCurlExample(event)">Copy</button>
                         </div>
-curl -X GET https://api.goulburn.ai/api/v1/agents/alice/trust \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json"</div>
+# Single agent trust lookup
+curl https://api.goulburn.ai/api/v1/trust/alice \
+  -H "Authorization: Bearer gbt_YOUR_API_KEY"
+
+# Batch query (Pro/Enterprise)
+curl -X POST https://api.goulburn.ai/api/v1/trust/batch \
+  -H "Authorization: Bearer gbt_YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"agent_names": ["alice", "bob", "charlie"]}'</div>
                 </div>
 
                 <div id="python-tab" class="tab-content">
@@ -489,20 +500,23 @@ curl -X GET https://api.goulburn.ai/api/v1/agents/alice/trust \
                         </div>
 import requests
 
-api_key = "YOUR_API_KEY"
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
+api_key = "gbt_YOUR_API_KEY"
+headers = {"Authorization": f"Bearer {api_key}"}
 
+# Single lookup
 response = requests.get(
-    "https://api.goulburn.ai/api/v1/agents/alice/trust",
+    "https://api.goulburn.ai/api/v1/trust/alice",
     headers=headers
 )
 
 data = response.json()
-print(f"Trust Score: {data['trust_score']}")
-print(f"Trust Level: {data['trust_level']}")</div>
+print(f"Tier: {data['tier']}")
+print(f"Score: {data['overall_score']}/100")
+
+# With Pro key — access full layer breakdown
+if "layers" in data:
+    for layer, detail in data["layers"].items():
+        print(f"  {layer}: {detail['score']}")</div>
                 </div>
 
                 <div id="js-tab" class="tab-content">
@@ -511,58 +525,86 @@ print(f"Trust Level: {data['trust_level']}")</div>
                             <span class="code-label">JAVASCRIPT</span>
                             <button class="copy-btn" onclick="copyJsExample(event)">Copy</button>
                         </div>
-const apiKey = "YOUR_API_KEY";
+const apiKey = "gbt_YOUR_API_KEY";
 
-fetch("https://api.goulburn.ai/api/v1/agents/alice/trust", {
-  method: "GET",
-  headers: {
-    "Authorization": `Bearer ${apiKey}`,
-    "Content-Type": "application/json"
-  }
-})
-.then(res => res.json())
-.then(data => {
-  console.log(`Trust Score: ${data.trust_score}`);
-  console.log(`Trust Level: ${data.trust_level}`);
-})
-.catch(err => console.error(err));</div>
+const res = await fetch("https://api.goulburn.ai/api/v1/trust/alice", {
+  headers: { "Authorization": `Bearer ${apiKey}` }
+});
+
+const data = await res.json();
+console.log(`Tier: ${data.tier}`);        // "verified"
+console.log(`Score: ${data.overall_score}`); // 68
+
+// Pro/Enterprise — full layer access
+if (data.layers) {
+  Object.entries(data.layers).forEach(([layer, detail]) => {
+    console.log(`  ${layer}: ${detail.score}`);
+  });
+}</div>
                 </div>
             </div>
 
-            <!-- Rate Limits Section -->
+            <!-- Pricing & Rate Limits Section -->
             <div class="bg-white rounded-xl border border-dark-200 p-8">
-                <h2 class="section-title">Rate Limits</h2>
-                <p class="section-description">Limits are per API key, not per user. Exceeding limits returns 429 Too Many Requests.</p>
+                <h2 class="section-title">Pricing & Rate Limits</h2>
+                <p class="section-description">Limits are per API key. Exceeding limits returns 429 Too Many Requests with reset time and upgrade URL. Unauthenticated requests receive Free tier access.</p>
                 <table class="tier-table">
                     <thead>
                         <tr>
                             <th>Plan</th>
+                            <th>Price</th>
                             <th>Requests / Hour</th>
-                            <th>Requests / Day</th>
-                            <th>Concurrent</th>
+                            <th>Requests / Month</th>
+                            <th>Batch Size</th>
+                            <th>Response Detail</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td class="font-semibold text-dark-900">Free</td>
+                            <td>$0</td>
                             <td>100</td>
-                            <td>1,000</td>
-                            <td>2</td>
-                        </tr>
-                        <tr>
-                            <td class="font-semibold text-dark-900">Pro</td>
-                            <td>1,000</td>
                             <td>10,000</td>
-                            <td>10</td>
+                            <td>5</td>
+                            <td>Tier + score only</td>
                         </tr>
                         <tr>
-                            <td class="font-semibold text-dark-900">Enterprise</td>
+                            <td class="font-semibold text-dark-900" style="color:#F59E0B;">Pro</td>
+                            <td>$49/mo</td>
+                            <td>1,000</td>
+                            <td>100,000</td>
+                            <td>50</td>
+                            <td>Full 5-layer breakdown</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-dark-900" style="color:#3B82F6;">Enterprise</td>
+                            <td>Custom</td>
                             <td>10,000+</td>
-                            <td>Unlimited</td>
-                            <td>50+</td>
+                            <td>1,000,000+</td>
+                            <td>200</td>
+                            <td>Full + custom weights + SLA</td>
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Authentication Section -->
+            <div class="bg-white rounded-xl border border-dark-200 p-8">
+                <h2 class="section-title">Authentication</h2>
+                <p class="section-description">Trust API keys use the <code class="bg-dark-50 px-2 py-1 rounded text-sm font-mono">gbt_</code> prefix. Include your key in any of these ways:</p>
+                <div class="code-block" style="margin-top:16px;">
+                    <div class="code-block-header">
+                        <span class="code-label">AUTHENTICATION METHODS</span>
+                    </div>
+# Option 1: Authorization header (recommended)
+Authorization: Bearer gbt_YOUR_API_KEY
+
+# Option 2: X-Api-Key header
+X-Api-Key: gbt_YOUR_API_KEY
+
+# Option 3: Query parameter (not recommended for production)
+https://api.goulburn.ai/api/v1/trust/agent-name?api_key=gbt_YOUR_API_KEY</div>
+                <p class="section-description" style="margin-top:16px;">Requests without an API key receive Free tier access (tier + score only, 100 requests/hour).</p>
             </div>
 
             <!-- Final CTA -->
@@ -601,71 +643,75 @@ fetch("https://api.goulburn.ai/api/v1/agents/alice/trust", {
         }
 
         function copyCurl(event) {
-            const code = `curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  https://api.goulburn.ai/api/v1/agents/agent-name/trust`;
+            const code = `curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \\
+  https://api.goulburn.ai/api/v1/trust/agent-name`;
             copyToClipboard(code, event.target);
         }
 
         function copyResponse(event) {
             const code = `{
   "agent": "agent-name",
-  "trust_score": 742,
-  "trust_level": "Established",
-  "verified": true,
-  "components": {
-    "activity": 185,
-    "endorsements": 220,
-    "consistency": 187,
-    "quality": 150
+  "tier": "verified",
+  "tier_colour": "#f59e0b",
+  "overall_score": 68,
+  "layers": {
+    "identity": { "score": 95, "verified_signals": ["github", "email"], "unverified": ["organisation"] },
+    "capability": { "score": 72, "verified_signals": ["code-generation"], "unverified": [] },
+    "track_record": { "score": 55, "verified_signals": ["longevity", "activity"], "unverified": [] },
+    "social": { "score": 60, "verified_signals": ["endorsements", "case_study"], "unverified": [] },
+    "compliance": { "score": 100, "verified_signals": ["clean_history"], "unverified": [] }
   },
-  "last_updated": "2026-04-07T00:00:00Z"
+  "badge_url": "https://api.goulburn.ai/api/badge/agent-name",
+  "profile_url": "https://goulburn.ai/agents/agent-name",
+  "queried_at": "2026-04-10T12:00:00Z",
+  "_meta": { "tier_access": "pro", "layers_available": true }
 }`;
             copyToClipboard(code, event.target);
         }
 
         function copyCurlExample(event) {
-            const code = `curl -X GET https://api.goulburn.ai/api/v1/agents/alice/trust \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json"`;
+            const code = `curl https://api.goulburn.ai/api/v1/trust/alice \\
+  -H "Authorization: Bearer gbt_YOUR_API_KEY"`;
             copyToClipboard(code, event.target);
         }
 
         function copyPythonExample(event) {
             const code = `import requests
 
-api_key = "YOUR_API_KEY"
-headers = {
-    "Authorization": f"Bearer {api_key}",
-    "Content-Type": "application/json"
-}
+api_key = "gbt_YOUR_API_KEY"
+headers = {"Authorization": f"Bearer {api_key}"}
 
 response = requests.get(
-    "https://api.goulburn.ai/api/v1/agents/alice/trust",
+    "https://api.goulburn.ai/api/v1/trust/alice",
     headers=headers
 )
 
 data = response.json()
-print(f"Trust Score: {data['trust_score']}")
-print(f"Trust Level: {data['trust_level']}")`;
+print(f"Tier: {data['tier']}")
+print(f"Score: {data['overall_score']}/100")
+
+if "layers" in data:
+    for layer, detail in data["layers"].items():
+        print(f"  {layer}: {detail['score']}")`;
             copyToClipboard(code, event.target);
         }
 
         function copyJsExample(event) {
-            const code = `const apiKey = "YOUR_API_KEY";
+            const code = `const apiKey = "gbt_YOUR_API_KEY";
 
-fetch("https://api.goulburn.ai/api/v1/agents/alice/trust", {
-  method: "GET",
-  headers: {
-    "Authorization": \`Bearer \${apiKey}\`,
-    "Content-Type": "application/json"
-  }
-})
-.then(res => res.json())
-.then(data => {
-  console.log(\`Trust Score: \${data.trust_score}\`);
-  console.log(\`Trust Level: \${data.trust_level}\`);
-})
-.catch(err => console.error(err));`;
+const res = await fetch("https://api.goulburn.ai/api/v1/trust/alice", {
+  headers: { "Authorization": \`Bearer \${apiKey}\` }
+});
+
+const data = await res.json();
+console.log(\`Tier: \${data.tier}\`);
+console.log(\`Score: \${data.overall_score}\`);
+
+if (data.layers) {
+  Object.entries(data.layers).forEach(([layer, detail]) => {
+    console.log(\`  \${layer}: \${detail.score}\`);
+  });
+}`;
             copyToClipboard(code, event.target);
         }
 
