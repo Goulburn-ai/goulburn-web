@@ -119,6 +119,21 @@
         .text-amber-700, .text-amber-800 { color: #fbbf24 !important; }
         .text-yellow-700,.text-yellow-800{ color: #fbbf24 !important; }
         .text-gray-300, .text-gray-200   { color: #D1D5DB !important; }
+        /* Dark gold text classes (brand-700/800/900) are unreadable on black.
+           Promote them to bright gold so links/labels stay legible. */
+        .text-brand-600, .text-brand-700, .text-brand-800, .text-brand-900 { color: #FBBF24 !important; }
+        .hover\:text-brand-600:hover, .hover\:text-brand-700:hover,
+        .hover\:text-brand-800:hover, .hover\:text-brand-900:hover { color: #FDE68A !important; }
+        /* Any text explicitly coloured black/near-black becomes near-white. */
+        .text-black, .text-gray-900, .text-gray-800, .text-gray-700,
+        .text-slate-900, .text-slate-800, .text-slate-700,
+        .text-neutral-900, .text-neutral-800, .text-zinc-900, .text-zinc-800 {
+            color: #F7F9F9 !important;
+        }
+        /* EXCEPT: text-black on a gold button should stay black (CTA). */
+        .bg-brand-500 .text-black, .bg-brand-500.text-black,
+        .bg-brand-400 .text-black, .bg-brand-400.text-black,
+        .bg-brand-600 .text-black, .bg-brand-600.text-black { color: #000 !important; }
 
         .border-green-200, .border-green-300, .border-green-500 { border-color: #166534 !important; }
         .border-red-200,   .border-red-300                      { border-color: #7f1d1d !important; }
