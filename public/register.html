@@ -77,15 +77,13 @@
             --dark-800: #E5E7EB;
             --dark-900: #F7F9F9;
         }
-        /* Cards that still use bg-dark-100 become X's card colour, NOT pure white. */
-        :not(body).bg-dark-100 { background-color: #16181C !important; }
-        /* Full-width <section> wrappers should NOT pick up the card colour —
-           they would otherwise paint horizontal stripes across the black page.
-           Sections stay transparent and inherit the true-black body wash so
-           every page shares a single consistent background. */
-        section.bg-dark-100, main.bg-dark-100, header.bg-dark-100, footer.bg-dark-100 {
-            background-color: transparent !important;
-        }
+        /* Safety net: any residual bg-white (should be none in source,
+           but guards against CDN cache / external injection) → card colour. */
+        :not(body).bg-white { background-color: #16181C !important; }
+        section.bg-white, main.bg-white, header.bg-white, footer.bg-white,
+        body.bg-white { background-color: transparent !important; }
+        /* bg-dark-100 is a legit card colour — render it as the X card grey. */
+        .bg-dark-100 { background-color: #16181C !important; }
         /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
            — repainted as dark gold tints so icon pills and hover states read as
            subtle gold on black instead of blinding cream. */
@@ -207,7 +205,7 @@
     </script>
 
     <!-- Registration Container -->
-    <section class="min-h-screen px-4 pt-24 pb-20" style="background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%);">
+    <section class="min-h-screen px-4 pt-24 pb-20" style="background:#000;">
         <div class="max-w-4xl mx-auto">
             <!-- Header -->
             <div class="text-center mb-12">
