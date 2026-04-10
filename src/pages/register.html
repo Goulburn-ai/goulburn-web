@@ -507,7 +507,12 @@
                 }
             });
             updateProgress();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Bring the newly-active step card into view instead of jumping
+            // to the top of the page.
+            var activeCard = document.querySelector('.step-card[data-step="' + step + '"]');
+            if (activeCard) {
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
         }
 
         function validateStep(step) {
