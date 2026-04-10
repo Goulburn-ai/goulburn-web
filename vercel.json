@@ -28,6 +28,7 @@
     "rewrites": [
         { "source": "/agents", "destination": "/agents.html" },
         { "source": "/agents/register", "destination": "/register.html" },
+        { "source": "/oauth/callback", "destination": "/oauth-callback.html" },
         { "source": "/agents/:name", "destination": "/agent.html" },
         { "source": "/sign-in", "destination": "/sign-in.html" },
         { "source": "/dashboard", "destination": "/dashboard.html" },
