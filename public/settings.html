@@ -17,12 +17,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
+        // Dark theme — bold, high-contrast, X.com-inspired.
+        // The `dark` scale is INVERTED from Tailwind's stock grays so that
+        // existing classes (text-dark-900 for headings, bg-dark-50 for pale
+        // sections, border-dark-200 for hairlines) automatically map to the
+        // correct dark-mode tone without touching every page.
+        // Brand gold (#F59E0B) is preserved — gold-on-black is the CTA colour.
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: { 50: '#FFFBEB', 100: '#FEF3C7', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
-                        dark: { 50: '#F9FAFB', 100: '#F3F4F6', 200: '#E5E7EB', 300: '#D1D5DB', 400: '#9CA3AF', 500: '#6B7280', 600: '#4B5563', 700: '#374151', 800: '#1F2937', 900: '#111827' }
+                        dark: {
+                            50:  '#0A0A0A', // was near-white — now near-black (page wash)
+                            100: '#16181C', // X card colour
+                            200: '#2F3336', // X hairline border
+                            300: '#3E4144',
+                            400: '#71767B', // X secondary text
+                            500: '#8B98A5', // readable muted
+                            600: '#B1B7BD',
+                            700: '#D1D5DB',
+                            800: '#E5E7EB',
+                            900: '#F7F9F9'  // near-white — used for headings
+                        }
                     },
                     fontFamily: {
                         display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
@@ -33,11 +50,43 @@
         }
     </script>
     <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+        html { scroll-behavior: smooth; background: #000; }
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            background: #000 !important;   /* override any legacy bg-white on body */
+            color: #F7F9F9;
+        }
+        /* Cards that still use bg-white become X's card colour, NOT pure white. */
+        :not(body).bg-white { background-color: #16181C !important; }
+        /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
+           — repainted as dark gold tints so icon pills and hover states read as
+           subtle gold on black instead of blinding cream. */
+        .bg-brand-50  { background-color: #1C1409 !important; }
+        .bg-brand-100 { background-color: #3D2810 !important; }
+        .hover\:bg-brand-50:hover  { background-color: #1C1409 !important; }
+        .hover\:bg-brand-100:hover { background-color: #3D2810 !important; }
+        /* Dark-100 (#16181C) used as page-wash on some pages — keep consistent.
+           No override needed, tailwind value already matches. */
+        /* Any legacy bg-dark-50 (used as page wash) — pure black for the
+           "sits inside a void" feel. */
+        .bg-dark-50 { background-color: #000 !important; }
+        /* Soften default input backgrounds so they sit on black. */
+        input, textarea, select {
+            background-color: #16181C;
+            color: #F7F9F9;
+            border-color: #2F3336;
+        }
+        input::placeholder, textarea::placeholder { color: #71767B; }
+        /* Links inherit gold accent by default only inside prose; nav controls its own. */
+        /* Scrollbars — subtle, X-style. */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #2F3336; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3E4144; }
+
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .spinner { width: 24px; height: 24px; border: 3px solid #e5e7eb; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .spinner { width: 24px; height: 24px; border: 3px solid #2F3336; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
     <style>
@@ -505,7 +554,7 @@
 </head>
 <body class="bg-dark-50">
         <!-- Navigation -->
-    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-dark-200">
+    <nav class="fixed top-0 w-full bg-black/80 backdrop-blur-md z-50 border-b border-dark-200">
         <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
             <a href="/" class="flex items-center gap-3">
                 <svg class="w-9 h-9" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
