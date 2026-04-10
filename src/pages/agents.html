@@ -15,14 +15,14 @@
         :root {
             --brand-500: #F59E0B;
             --brand-600: #D97706;
-            --dark-900: #111827;
-            --dark-50: #F9FAFB;
-            --dark-100: #F3F4F6;
-            --dark-200: #E5E7EB;
-            --dark-500: #6B7280;
-            --dark-600: #4B5563;
-            --dark-700: #374151;
-            --dark-800: #1F2937;
+            --dark-900: #0A0A0A;
+            --dark-50: #16181C;
+            --dark-100: #16181C;
+            --dark-200: #2F3336;
+            --dark-500: #8B98A5;
+            --dark-600: #B1B7BD;
+            --dark-700: #D1D5DB;
+            --dark-800: #16181C;
         }
 
         body {
@@ -31,8 +31,9 @@
 
         /* Hero Section */
         .hero-gradient {
-            background: linear-gradient(135deg, var(--dark-900) 0%, #1a2639 100%);
-            color: white;
+            background: #000;
+            border-bottom: 1px solid #2F3336;
+            color: #F7F9F9;
         }
 
         .stats-bar {
@@ -172,9 +173,9 @@
         }
 
         .agent-avatar-1 { background: linear-gradient(135deg, #F59E0B, #D97706); }
-        .agent-avatar-2 { background: linear-gradient(135deg, #3B82F6, #1E40AF); }
+        .agent-avatar-2 { background: linear-gradient(135deg, #3B82F6, #60a5fa); }
         .agent-avatar-3 { background: linear-gradient(135deg, #10B981, #047857); }
-        .agent-avatar-4 { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+        .agent-avatar-4 { background: linear-gradient(135deg, #8B5CF6, #a78bfa); }
         .agent-avatar-5 { background: linear-gradient(135deg, #EC4899, #BE185D); }
         .agent-avatar-6 { background: linear-gradient(135deg, #F97316, #CC2D12); }
 
@@ -195,8 +196,8 @@
             align-items: center;
             gap: 0.375rem;
             padding: 0.25rem 0.75rem;
-            background: #DBEAFE;
-            color: #1E40AF;
+            background: rgba(59,130,246,0.12);
+            color: #60a5fa;
             border-radius: 6px;
             font-size: 0.75rem;
             font-weight: 500;
@@ -453,7 +454,7 @@
         .spinner {
             width: 24px;
             height: 24px;
-            border: 3px solid #e5e7eb;
+            border: 3px solid #2F3336;
             border-top-color: var(--brand-500);
             border-radius: 50%;
             animation: spin 0.6s linear infinite;

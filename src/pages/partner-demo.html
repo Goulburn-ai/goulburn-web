@@ -16,8 +16,8 @@
             align-items: center;
             gap: 8px;
             padding: 8px 14px;
-            background: #D1FAE5;
-            color: #065F46;
+            background: rgba(34,197,94,0.12);
+            color: #4ade80;
             border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
@@ -40,7 +40,7 @@
         .tab-nav {
             display: flex;
             gap: 12px;
-            border-bottom: 2px solid #E5E7EB;
+            border-bottom: 2px solid #2F3336;
             margin-bottom: 24px;
             margin-left: -32px;
             margin-right: -32px;
@@ -53,7 +53,7 @@
             border: none;
             padding: 12px 16px;
             border-bottom: 3px solid transparent;
-            color: #6B7280;
+            color: #8B98A5;
             font-weight: 500;
             cursor: pointer;
             font-size: 14px;
@@ -62,7 +62,7 @@
         }
 
         .tab-btn:hover {
-            color: #374151;
+            color: #D1D5DB;
         }
 
         .tab-btn.active {
@@ -87,7 +87,7 @@
         .search-input {
             flex: 1;
             padding: 12px 16px;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #2F3336;
             border-radius: 8px;
             font-size: 14px;
             font-family: inherit;
@@ -117,7 +117,7 @@
         }
 
         .btn-search:disabled {
-            background: #D1D5DB;
+            background: #3E4144;
             cursor: not-allowed;
         }
 
@@ -125,7 +125,7 @@
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid #E5E7EB;
+            border: 2px solid #2F3336;
             border-top-color: #F59E0B;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
@@ -137,7 +137,7 @@
 
         .result-card {
             background: #16181C;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #2F3336;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 16px;
@@ -154,7 +154,7 @@
         .result-name {
             font-size: 18px;
             font-weight: 600;
-            color: #111827;
+            color: #0A0A0A;
             margin-bottom: 4px;
         }
 
@@ -193,7 +193,7 @@
             justify-content: center;
             font-weight: 700;
             font-size: 20px;
-            color: #111827;
+            color: #0A0A0A;
         }
 
         .trust-level-badge {
@@ -205,12 +205,12 @@
             margin-bottom: 12px;
         }
 
-        .trust-level-badge.elite { background: #EDE9FE; color: #6D28D9; }
-        .trust-level-badge.trusted { background: #D1FAE5; color: #065F46; }
-        .trust-level-badge.established { background: #DBEAFE; color: #0C4A6E; }
-        .trust-level-badge.building { background: #FEF3C7; color: #92400E; }
-        .trust-level-badge.new { background: #FFEDD5; color: #7C2D12; }
-        .trust-level-badge.unverified { background: #FEE2E2; color: #7F1D1D; }
+        .trust-level-badge.elite { background: rgba(139,92,246,0.12); color: #a78bfa; }
+        .trust-level-badge.trusted { background: rgba(34,197,94,0.12); color: #4ade80; }
+        .trust-level-badge.established { background: rgba(59,130,246,0.12); color: #60a5fa; }
+        .trust-level-badge.building { background: rgba(245,158,11,0.12); color: #fbbf24; }
+        .trust-level-badge.new { background: rgba(249,115,22,0.12); color: #fb923c; }
+        .trust-level-badge.unverified { background: rgba(239,68,68,0.12); color: #f87171; }
 
         .components-grid {
             display: grid;
@@ -220,7 +220,7 @@
         }
 
         .component-item {
-            background: #F9FAFB;
+            background: #16181C;
             padding: 12px;
             border-radius: 6px;
             text-align: center;
@@ -228,7 +228,7 @@
 
         .component-label {
             font-size: 12px;
-            color: #6B7280;
+            color: #8B98A5;
             margin-bottom: 6px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -237,7 +237,7 @@
         .component-value {
             font-size: 18px;
             font-weight: 700;
-            color: #111827;
+            color: #0A0A0A;
         }
 
         .agents-table {
@@ -247,32 +247,32 @@
         }
 
         .agents-table th {
-            background: #F9FAFB;
+            background: #16181C;
             padding: 12px;
             text-align: left;
             font-weight: 600;
-            color: #111827;
-            border-bottom: 2px solid #E5E7EB;
+            color: #0A0A0A;
+            border-bottom: 2px solid #2F3336;
         }
 
         .agents-table td {
             padding: 14px 12px;
-            border-bottom: 1px solid #E5E7EB;
-            color: #6B7280;
+            border-bottom: 1px solid #2F3336;
+            color: #8B98A5;
         }
 
         .agents-table tr:hover {
-            background: #F9FAFB;
+            background: #16181C;
         }
 
         .agent-name {
             font-weight: 500;
-            color: #111827;
+            color: #0A0A0A;
         }
 
         .score-cell {
             font-weight: 600;
-            color: #111827;
+            color: #0A0A0A;
         }
 
         .gate-slider {
@@ -284,7 +284,7 @@
         .slider-label {
             font-size: 14px;
             font-weight: 600;
-            color: #111827;
+            color: #0A0A0A;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
@@ -292,8 +292,8 @@
         }
 
         .slider-value {
-            background: #FEF3C7;
-            color: #92400E;
+            background: rgba(245,158,11,0.12);
+            color: #fbbf24;
             padding: 4px 12px;
             border-radius: 4px;
             font-weight: 600;
@@ -303,7 +303,7 @@
         input[type="range"] {
             width: 100%;
             height: 6px;
-            background: #E5E7EB;
+            background: #2F3336;
             border-radius: 3px;
             outline: none;
             -webkit-appearance: none;
@@ -344,26 +344,26 @@
         }
 
         .gate-card.pass {
-            background: #F0FDF4;
+            background: rgba(34,197,94,0.10);
             border-color: #22C55E;
         }
 
         .gate-card.fail {
-            background: #FEF2F2;
+            background: rgba(239,68,68,0.10);
             border-color: #EF4444;
             opacity: 0.7;
         }
 
         .gate-card-name {
             font-weight: 600;
-            color: #111827;
+            color: #0A0A0A;
             margin-bottom: 4px;
         }
 
         .gate-card-score {
             font-size: 20px;
             font-weight: 700;
-            color: #111827;
+            color: #0A0A0A;
         }
 
         .gate-card-status {
@@ -387,7 +387,7 @@
         .empty-state {
             text-align: center;
             padding: 40px;
-            color: #6B7280;
+            color: #8B98A5;
         }
 
         .empty-state-icon {
@@ -397,7 +397,7 @@
 
         .subtitle {
             font-size: 16px;
-            color: #6B7280;
+            color: #8B98A5;
             margin: 12px 0 24px;
         }
     </style>
@@ -491,7 +491,7 @@
             trusted:     { label: 'Trusted',     className: 'trusted',     icon: '✓', colour: '#22c55e' },
             established: { label: 'Established', className: 'established', icon: '✓', colour: '#3b82f6' },
             verified:    { label: 'Verified',    className: 'building',    icon: '→', colour: '#f59e0b' },
-            identified:  { label: 'Identified',  className: 'new',         icon: '✦', colour: '#6b7280' },
+            identified:  { label: 'Identified',  className: 'new',         icon: '✦', colour: '#8B98A5' },
             unranked:    { label: 'Unranked',    className: 'unverified',  icon: '!', colour: '#94a3b8' },
             not_found:   { label: 'Not Found',   className: 'unverified',  icon: '?', colour: '#ef4444' },
         };
@@ -587,7 +587,7 @@
                 });
                 layersHtml += '</div>';
             } else {
-                layersHtml = '<p style="color:#6B7280;font-size:13px;margin-top:16px;">Layer breakdown requires a Pro or Enterprise API key. <a href="/api/docs" style="color:#F59E0B;">Learn more</a></p>';
+                layersHtml = '<p style="color:#8B98A5;font-size:13px;margin-top:16px;">Layer breakdown requires a Pro or Enterprise API key. <a href="/api/docs" style="color:#F59E0B;">Learn more</a></p>';
             }
 
             const html = `
@@ -600,13 +600,13 @@
                                     ${tierCfg.icon} ${tierCfg.label}
                                 </span>
                             </div>
-                            <div style="margin-top: 8px; font-size: 13px; color: #6B7280;">
+                            <div style="margin-top: 8px; font-size: 13px; color: #8B98A5;">
                                 Queried at ${data.queried_at ? new Date(data.queried_at).toLocaleString() : 'now'}
                             </div>
                         </div>
                         <div class="score-ring ${tierCfg.className}">
                             <svg width="100" height="100" viewBox="0 0 100 100">
-                                <circle cx="50" cy="50" r="40" fill="none" stroke="#E5E7EB" stroke-width="5"/>
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="#2F3336" stroke-width="5"/>
                                 <circle id="${ringId}" cx="50" cy="50" r="40" fill="none" stroke="${tierCfg.colour}" stroke-width="5" class="score-ring-circle" stroke-dasharray="0 251.33"/>
                             </svg>
                             <div class="score-value">${score}</div>
@@ -714,7 +714,7 @@
                 html += `
                     <div class="gate-card ${passes ? 'pass' : 'fail'}">
                         <div class="gate-card-name">${escapeHtml(agent.name)}</div>
-                        <div class="gate-card-score">${score}<span style="font-size:12px;font-weight:400;color:#6B7280">/100</span></div>
+                        <div class="gate-card-score">${score}<span style="font-size:12px;font-weight:400;color:#8B98A5">/100</span></div>
                         <div class="gate-card-status">
                             ${passes ? '✓ Access Granted' : '✕ Access Denied'}
                         </div>
@@ -723,7 +723,7 @@
             });
 
             html += '</div>';
-            html = `<p style="margin-bottom: 20px; color: #6B7280;">
+            html = `<p style="margin-bottom: 20px; color: #8B98A5;">
                 <strong>${passCount}</strong> agents pass the gate | <strong>${failCount}</strong> agents denied
             </p>` + html;
 

@@ -39,6 +39,8 @@
         { "source": "/admin", "destination": "/admin.html" },
         { "source": "/verify/:name", "destination": "/verify.html" },
         { "source": "/maintenance", "destination": "/maintenance.html" },
-        { "source": "/unauthorized", "destination": "/unauthorized.html" }
+        { "source": "/unauthorized", "destination": "/unauthorized.html" },
+        { "source": "/privacy", "destination": "/privacy.html" },
+        { "source": "/terms", "destination": "/terms.html" }
     ]
 }
