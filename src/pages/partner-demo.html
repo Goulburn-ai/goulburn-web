@@ -461,9 +461,9 @@
                     <div class="gate-slider">
                         <div class="slider-label">
                             <span>Minimum Trust Score</span>
-                            <span class="slider-value" id="gateValue">500</span>
+                            <span class="slider-value" id="gateValue">50</span>
                         </div>
-                        <input type="range" id="gateSlider" min="0" max="1000" value="500" oninput="updateGate()">
+                        <input type="range" id="gateSlider" min="0" max="100" value="50" oninput="updateGate()">
                     </div>
                     <div id="gateResults">
                         <div class="empty-state">
@@ -486,25 +486,33 @@
         let allAgents = [];
         let agentsData = {};
 
-        // Escape HTML to prevent XSS
+        // Tier config matching the backend badge system
+        const TIER_CONFIG = {
+            trusted:     { label: 'Trusted',     className: 'trusted',     icon: '✓', colour: '#22c55e' },
+            established: { label: 'Established', className: 'established', icon: '✓', colour: '#3b82f6' },
+            verified:    { label: 'Verified',    className: 'building',    icon: '→', colour: '#f59e0b' },
+            identified:  { label: 'Identified',  className: 'new',         icon: '✦', colour: '#6b7280' },
+            unranked:    { label: 'Unranked',    className: 'unverified',  icon: '!', colour: '#94a3b8' },
+            not_found:   { label: 'Not Found',   className: 'unverified',  icon: '?', colour: '#ef4444' },
+        };
+
+        const LAYER_LABELS = {
+            identity: 'Identity', capability: 'Capability',
+            track_record: 'Track Record', social: 'Social', compliance: 'Compliance'
+        };
+
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
-        // Get trust level from score
-        function getTrustLevel(score) {
-            if (score >= 900) return { level: 'Elite', className: 'elite', icon: '⭐' };
-            if (score >= 800) return { level: 'Trusted', className: 'trusted', icon: '✓' };
-            if (score >= 600) return { level: 'Established', className: 'established', icon: '✓' };
-            if (score >= 400) return { level: 'Building', className: 'building', icon: '→' };
-            if (score >= 200) return { level: 'New', className: 'new', icon: '✦' };
-            return { level: 'Unverified', className: 'unverified', icon: '!' };
+        function getTierConfig(tier) {
+            return TIER_CONFIG[tier] || TIER_CONFIG.unranked;
         }
 
-        // Animate score ring
-        function animateScore(targetScore, maxScore = 1000, ringId) {
+        // Animate score ring (0-100 scale)
+        function animateScore(targetScore, maxScore, ringId) {
             const arc = document.getElementById(ringId);
             if (!arc) return;
 
@@ -516,114 +524,103 @@
                 if (!startTime) startTime = currentTime;
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / 600, 1);
-
                 const eased = 1 - Math.pow(1 - progress, 2);
                 const current = targetDasharray * eased;
-
                 arc.setAttribute('stroke-dasharray', `${current} ${maxCircumference}`);
-
-                if (progress < 1) {
-                    requestAnimationFrame(animate);
-                }
+                if (progress < 1) requestAnimationFrame(animate);
             }
-
             requestAnimationFrame(animate);
         }
 
-        // Switch tabs
         function switchTab(event, tabId) {
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
             event.target.classList.add('active');
 
-            if (tabId === 'batch-tab' && allAgents.length === 0) {
-                loadBatchAgents();
-            } else if (tabId === 'gate-tab' && allAgents.length === 0) {
+            if ((tabId === 'batch-tab' || tabId === 'gate-tab') && allAgents.length === 0) {
                 loadBatchAgents();
             }
         }
 
-        // Search for single agent
+        // Search for single agent — uses Trust API endpoint
         async function searchAgent() {
             const input = document.getElementById('agentInput');
             const agentName = input.value.trim();
-
             if (!agentName) return;
 
             const resultsDiv = document.getElementById('lookupResults');
-            resultsDiv.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><p>Searching...</p></div>';
+            resultsDiv.innerHTML = '<div class="empty-state"><div class="loading-spinner"></div><p>Querying Trust API...</p></div>';
 
             try {
-                const res = await fetch(`${API_BASE}/agents/${encodeURIComponent(agentName)}/trust`);
+                const res = await fetch(`${API_BASE}/trust/${encodeURIComponent(agentName)}`);
                 if (!res.ok) throw new Error('Agent not found');
 
                 const data = await res.json();
+                if (data.tier === 'not_found') throw new Error('Agent not found');
                 renderLookupResult(data);
             } catch (error) {
-                resultsDiv.innerHTML = `<div class="empty-state"><div class="empty-state-icon">❌</div><p>Agent not found. Try: alice, bob, claude</p></div>`;
+                resultsDiv.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><p>Agent not found. Try searching for a registered agent name.</p></div>';
             }
         }
 
-        // Render lookup result
-        function renderLookupResult(agent) {
-            const trustData = getTrustLevel(agent.trust_score);
+        // Render trust lookup result — 5-layer model
+        function renderLookupResult(data) {
+            const tierCfg = getTierConfig(data.tier);
+            const score = data.overall_score || 0;
             const ringId = `ring-lookup-${Date.now()}`;
+
+            // Build layer breakdown if available
+            let layersHtml = '';
+            if (data.layers && Object.keys(data.layers).length > 0) {
+                layersHtml = '<div class="components-grid">';
+                const layerOrder = ['identity', 'capability', 'track_record', 'social', 'compliance'];
+                layerOrder.forEach(key => {
+                    const layer = data.layers[key];
+                    if (layer) {
+                        layersHtml += `
+                            <div class="component-item">
+                                <div class="component-label">${LAYER_LABELS[key] || key}</div>
+                                <div class="component-value">${layer.score || 0}</div>
+                            </div>`;
+                    }
+                });
+                layersHtml += '</div>';
+            } else {
+                layersHtml = '<p style="color:#6B7280;font-size:13px;margin-top:16px;">Layer breakdown requires a Pro or Enterprise API key. <a href="/api/docs" style="color:#F59E0B;">Learn more</a></p>';
+            }
 
             const html = `
                 <div class="result-card">
                     <div class="result-header">
                         <div>
-                            <div class="result-name">${escapeHtml(agent.agent)}</div>
-                            <div class="result-verified">
-                                ${agent.verified ? '<span>✓</span><span>Verified</span>' : '<span>○</span><span>Unverified</span>'}
-                            </div>
-                            <div style="margin-top: 12px;">
-                                <span class="trust-level-badge ${trustData.className}">
-                                    ${trustData.icon} ${trustData.level}
+                            <div class="result-name">${escapeHtml(data.agent)}</div>
+                            <div style="margin-top: 8px;">
+                                <span class="trust-level-badge ${tierCfg.className}">
+                                    ${tierCfg.icon} ${tierCfg.label}
                                 </span>
                             </div>
+                            <div style="margin-top: 8px; font-size: 13px; color: #6B7280;">
+                                Queried at ${data.queried_at ? new Date(data.queried_at).toLocaleString() : 'now'}
+                            </div>
                         </div>
-                        <div class="score-ring ${trustData.className}" id="${ringId}">
-                            <svg width="100" height="100" viewBox="0 0 100 100" class="absolute inset-0">
+                        <div class="score-ring ${tierCfg.className}">
+                            <svg width="100" height="100" viewBox="0 0 100 100">
                                 <circle cx="50" cy="50" r="40" fill="none" stroke="#E5E7EB" stroke-width="5"/>
-                                <circle id="${ringId}" cx="50" cy="50" r="40" fill="none" stroke="#F59E0B" stroke-width="5" class="score-ring-circle" stroke-dasharray="0 251.33"/>
+                                <circle id="${ringId}" cx="50" cy="50" r="40" fill="none" stroke="${tierCfg.colour}" stroke-width="5" class="score-ring-circle" stroke-dasharray="0 251.33"/>
                             </svg>
-                            <div class="score-value">${agent.trust_score}</div>
+                            <div class="score-value">${score}</div>
                         </div>
                     </div>
-
-                    <div class="components-grid">
-                        <div class="component-item">
-                            <div class="component-label">Activity</div>
-                            <div class="component-value">${agent.components.activity}</div>
-                        </div>
-                        <div class="component-item">
-                            <div class="component-label">Endorsements</div>
-                            <div class="component-value">${agent.components.endorsements}</div>
-                        </div>
-                        <div class="component-item">
-                            <div class="component-label">Consistency</div>
-                            <div class="component-value">${agent.components.consistency}</div>
-                        </div>
-                        <div class="component-item">
-                            <div class="component-label">Quality</div>
-                            <div class="component-value">${agent.components.quality}</div>
-                        </div>
-                    </div>
+                    ${layersHtml}
                 </div>
             `;
 
             document.getElementById('lookupResults').innerHTML = html;
-            setTimeout(() => animateScore(agent.trust_score, 1000, ringId), 100);
+            setTimeout(() => animateScore(score, 100, ringId), 100);
         }
 
-        // Load batch agents
+        // Load agents for batch + gate tabs
         async function loadBatchAgents() {
             try {
                 const res = await fetch(`${API_BASE}/agents?limit=50`);
@@ -632,10 +629,10 @@
                 const data = await res.json();
                 allAgents = Array.isArray(data) ? data : (data.agents || []);
 
-                // Fetch full trust data for each agent
+                // Fetch trust data for each agent via trust endpoint
                 for (let agent of allAgents) {
                     try {
-                        const trustRes = await fetch(`${API_BASE}/agents/${encodeURIComponent(agent.name)}/trust`);
+                        const trustRes = await fetch(`${API_BASE}/trust/${encodeURIComponent(agent.name)}`);
                         if (trustRes.ok) {
                             agentsData[agent.name] = await trustRes.json();
                         }
@@ -652,11 +649,11 @@
             }
         }
 
-        // Render batch results as table
+        // Render batch results — trust tier model
         function renderBatchResults() {
-            const sorted = allAgents.sort((a, b) => {
-                const scoreA = agentsData[a.name]?.trust_score || 0;
-                const scoreB = agentsData[b.name]?.trust_score || 0;
+            const sorted = [...allAgents].sort((a, b) => {
+                const scoreA = agentsData[a.name]?.overall_score || 0;
+                const scoreB = agentsData[b.name]?.overall_score || 0;
                 return scoreB - scoreA;
             });
 
@@ -665,64 +662,59 @@
                     <thead>
                         <tr>
                             <th>Agent</th>
-                            <th>Trust Score</th>
-                            <th>Level</th>
-                            <th>Status</th>
+                            <th>Score</th>
+                            <th>Tier</th>
                         </tr>
                     </thead>
                     <tbody>
             `;
 
             sorted.forEach(agent => {
-                const trustData = agentsData[agent.name];
-                if (!trustData) return;
+                const trust = agentsData[agent.name];
+                if (!trust || trust.tier === 'not_found') return;
 
-                const level = getTrustLevel(trustData.trust_score);
+                const tierCfg = getTierConfig(trust.tier);
                 html += `
                     <tr>
                         <td class="agent-name">${escapeHtml(agent.name)}</td>
-                        <td class="score-cell">${trustData.trust_score}</td>
-                        <td><span class="trust-level-badge ${level.className}">${level.level}</span></td>
-                        <td>${trustData.verified ? '<span style="color:#10B981">✓ Verified</span>' : '<span style="color:#6B7280">○ Unverified</span>'}</td>
+                        <td class="score-cell">${trust.overall_score || 0}/100</td>
+                        <td><span class="trust-level-badge ${tierCfg.className}">${tierCfg.icon} ${tierCfg.label}</span></td>
                     </tr>
                 `;
             });
 
-            html += `
-                    </tbody>
-                </table>
-            `;
-
+            html += '</tbody></table>';
             document.getElementById('batchResults').innerHTML = html;
         }
 
-        // Update gate threshold
         function updateGate() {
             const threshold = parseInt(document.getElementById('gateSlider').value);
             document.getElementById('gateValue').textContent = threshold;
             renderGateResults();
         }
 
-        // Render gate simulation
+        // Gate simulation — 0-100 score scale
         function renderGateResults() {
             const threshold = parseInt(document.getElementById('gateSlider').value);
-            let passCount = 0;
-            let failCount = 0;
+            let passCount = 0, failCount = 0;
 
             let html = '<div class="gate-results">';
 
             allAgents.forEach(agent => {
-                const trustData = agentsData[agent.name];
-                if (!trustData) return;
+                const trust = agentsData[agent.name];
+                if (!trust || trust.tier === 'not_found') return;
 
-                const passes = trustData.trust_score >= threshold;
+                const score = trust.overall_score || 0;
+                const passes = score >= threshold;
                 if (passes) passCount++;
                 else failCount++;
+
+                const tierCfg = getTierConfig(trust.tier);
 
                 html += `
                     <div class="gate-card ${passes ? 'pass' : 'fail'}">
                         <div class="gate-card-name">${escapeHtml(agent.name)}</div>
-                        <div class="gate-card-score">${trustData.trust_score}</div>
+                        <div class="gate-card-score">${score}<span style="font-size:12px;font-weight:400;color:#6B7280">/100</span></div>
                         <div class="gate-card-status">
                             ${passes ? '✓ Access Granted' : '✕ Access Denied'}
                         </div>
@@ -738,9 +730,7 @@
             document.getElementById('gateResults').innerHTML = html;
         }
 
-        // Load on page ready
         document.addEventListener('DOMContentLoaded', () => {
-            // Optionally pre-load first agent in lookup
             document.getElementById('agentInput').value = 'alice';
             searchAgent();
         });
