@@ -366,11 +366,16 @@
             formData.step1 = { name: name, desc: desc, caps: caps, version: version, context: context };
             saveState();
 
-            // Store which platform we're verifying
+            // Store which platform we're verifying + where to bounce back after the provider redirect
             sessionStorage.setItem('goulburn_reg_oauth_platform', platform);
+            sessionStorage.setItem('goulburn_oauth_platform', platform);
+            sessionStorage.setItem('goulburn_oauth_return_to', '/agents/register');
+            sessionStorage.setItem('goulburn_oauth_flow', 'register');
 
             var agentName = formData.step1.name || 'default';
-            var url = API_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=' + encodeURIComponent(agentName) + '&redirect_uri=' + encodeURIComponent(window.location.origin + '/agents/register');
+            // Canonical OAuth callback — all providers point here. The bouncer at
+            // /oauth/callback will stash the code+state and send the user back here.
+            var url = API_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=' + encodeURIComponent(agentName) + '&redirect_uri=' + encodeURIComponent(window.location.origin + '/oauth/callback');
 
             // Update button to show loading state
             var btn = document.querySelector('.platformBtn[data-platform="' + platform + '"]');
@@ -403,17 +408,29 @@
         }
 
         function handleOAuthCallback() {
+            // Two paths: (1) legacy — provider redirected directly here with ?code=...
+            // (2) canonical — /oauth/callback bouncer stashed the code+state in sessionStorage
+            //     and sent us back here with a clean URL. Prefer (2), fall back to (1).
             var params = new URLSearchParams(window.location.search);
-            var code = params.get('code');
-            var state = params.get('state');
-            var error = params.get('error');
+            var code = params.get('code') || sessionStorage.getItem('goulburn_oauth_code');
+            var state = params.get('state') || sessionStorage.getItem('goulburn_oauth_state');
+            var error = params.get('error') || sessionStorage.getItem('goulburn_oauth_error');
 
             // Check if we're returning from an OAuth redirect
-            var platform = sessionStorage.getItem('goulburn_reg_oauth_platform');
+            var platform = sessionStorage.getItem('goulburn_reg_oauth_platform')
+                || sessionStorage.getItem('goulburn_oauth_platform');
             if (!platform) return false;
 
-            // Clean up the platform marker
+            // Clean up all OAuth session keys — we've consumed them
             sessionStorage.removeItem('goulburn_reg_oauth_platform');
+            sessionStorage.removeItem('goulburn_oauth_platform');
+            sessionStorage.removeItem('goulburn_oauth_return_to');
+            sessionStorage.removeItem('goulburn_oauth_flow');
+            sessionStorage.removeItem('goulburn_oauth_code');
+            sessionStorage.removeItem('goulburn_oauth_state');
+            sessionStorage.removeItem('goulburn_oauth_error');
+            sessionStorage.removeItem('goulburn_oauth_error_description');
+            sessionStorage.removeItem('goulburn_oauth_bounced_at');
 
             // Handle OAuth error (user denied, etc.)
             if (error) {
