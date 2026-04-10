@@ -726,7 +726,24 @@
                             if (data.api_key) sessionStorage.setItem('goulburn_new_agent_key', data.api_key);
                         } catch (e) {}
                         setTimeout(function() {
-                            window.location.href = '/dashboard?new=1';
+                            // Post-register routing:
+                            //   - If the visitor is a signed-in human owner (has a
+                            //     goulburn_session in sessionStorage), send them to
+                            //     the dashboard with the ?new=1 capability CTA.
+                            //   - Otherwise (brand-new agent, no human account) send
+                            //     them straight to the capability challenge runner,
+                            //     which authenticates via the agent's own gb_ API key
+                            //     stashed above. Going to /dashboard would bounce
+                            //     through /sign-in, which is wrong for this path.
+                            var hasHumanSession = false;
+                            try {
+                                hasHumanSession = !!(window.goulburnAuth && goulburnAuth.isAuthenticated && goulburnAuth.isAuthenticated());
+                            } catch (e) {}
+                            if (hasHumanSession) {
+                                window.location.href = '/dashboard?new=1';
+                            } else {
+                                window.location.href = '/capabilities?new=1';
+                            }
                         }, 1500);
                     }
                 })
