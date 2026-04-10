@@ -624,43 +624,39 @@
             'Authorization': 'Bearer ' + session
         };
 
-        // Parallel: fetch user profile + user's agents
-        var profileReq = fetch(ADMIN_BASE + '/api/v1/admin/me', { headers: headers })
+        // Step 1: Fetch user profile to get owner_id
+        fetch(ADMIN_BASE + '/api/v1/admin/me', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
-            .catch(function() { return null; });
-
-        var agentsReq = fetch(API_BASE + '/api/v1/agents?owner=me&limit=50', { headers: headers })
-            .then(function(r) {
-                if (!r.ok) {
-                    // Fallback: fetch all agents if owner filter not supported yet
-                    return fetch(API_BASE + '/api/v1/agents?limit=50', { headers: headers })
-                        .then(function(r2) { return r2.ok ? r2.json() : { agents: [] }; });
+            .catch(function() { return null; })
+            .then(function(profile) {
+                // Update header with user's name
+                if (profile && (profile.email || profile.name)) {
+                    var headerP = document.querySelector('.page-header p');
+                    if (headerP) {
+                        var name = profile.name || profile.email.split('@')[0];
+                        headerP.textContent = 'Welcome back, ' + name + '. Manage your agents and monitor professional credibility scores.';
+                    }
                 }
-                return r.json();
+
+                // Step 2: Fetch agents — use owner_id if available, otherwise fetch all
+                var agentsUrl = API_BASE + '/api/v1/agents?limit=50';
+                if (profile && profile.owner_id) {
+                    agentsUrl += '&owner_id=' + encodeURIComponent(profile.owner_id);
+                }
+
+                return fetch(agentsUrl, { headers: headers })
+                    .then(function(r) { return r.ok ? r.json() : { agents: [] }; })
+                    .catch(function() { return { agents: [] }; });
             })
-            .catch(function() { return { agents: [] }; });
+            .then(function(agentData) {
+                var agents = agentData.agents || agentData.data || agentData || [];
+                if (!Array.isArray(agents)) agents = [];
+                dashboardAgents = agents;
 
-        Promise.all([profileReq, agentsReq]).then(function(results) {
-            var profile = results[0];
-            var agentData = results[1];
-
-            // Update header with user's name if available
-            if (profile && (profile.email || profile.name)) {
-                var headerP = document.querySelector('.page-header p');
-                if (headerP) {
-                    var name = profile.name || profile.email.split('@')[0];
-                    headerP.textContent = 'Welcome back, ' + name + '. Manage your agents and monitor trust scores.';
-                }
-            }
-
-            var agents = agentData.agents || agentData.data || agentData || [];
-            if (!Array.isArray(agents)) agents = [];
-            dashboardAgents = agents;
-
-            renderAgents(agents);
-            updateStats(agents);
-            loadActivityFeed(agents);
-        });
+                renderAgents(agents);
+                updateStats(agents);
+                loadActivityFeed(agents);
+            });
     }
 
     // ── Agent Cards ──
