@@ -658,7 +658,12 @@
                 var isVerified = verifiedDomains.indexOf(cap) !== -1;
                 var tag = document.createElement('div');
                 tag.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-lg border ' +
-                    (isVerified ? 'border-green-300 bg-green-50' : 'border-dark-200 bg-white');
+                    (isVerified ? 'border-green-700' : 'border-dark-200');
+                if (isVerified) {
+                    tag.style.background = 'rgba(34,197,94,0.10)';
+                } else {
+                    tag.style.background = '#16181C';
+                }
                 tag.innerHTML =
                     (isVerified
                         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
@@ -684,10 +689,12 @@
             section.style.display = 'block';
             list.innerHTML = '';
 
+            // Dark-mode difficulty palette: low-alpha tinted cards on black,
+            // bright text colour for contrast, mid-tone borders.
             var DIFFICULTY_COLORS = {
-                basic:        { bg: '#f0fdf4', border: '#bbf7d0', text: '#166534', label: 'Basic' },
-                intermediate: { bg: '#eff6ff', border: '#bfdbfe', text: '#1e40af', label: 'Intermediate' },
-                advanced:     { bg: '#fef3c7', border: '#fde68a', text: '#92400e', label: 'Advanced' }
+                basic:        { bg: 'rgba(34,197,94,0.10)', border: '#166534', text: '#4ade80', label: 'Basic' },
+                intermediate: { bg: 'rgba(59,130,246,0.10)', border: '#1e40af', text: '#60a5fa', label: 'Intermediate' },
+                advanced:     { bg: 'rgba(245,158,11,0.10)', border: '#92400e', text: '#fbbf24', label: 'Advanced' }
             };
 
             profile.verified_domains.forEach(function(d) {
@@ -705,7 +712,7 @@
                             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>' +
                             '<span class="text-sm font-bold" style="color:' + diff.text + ';">' + escapeHtml(d.domain) + '</span>' +
                         '</div>' +
-                        '<span class="text-xs px-2 py-0.5 rounded font-medium" style="background:#fff; color:' + diff.text + '; border:1px solid ' + diff.border + ';">' + diff.label + '</span>' +
+                        '<span class="text-xs px-2 py-0.5 rounded font-medium" style="background:#000; color:' + diff.text + '; border:1px solid ' + diff.border + ';">' + diff.label + '</span>' +
                     '</div>' +
                     '<div class="flex items-center justify-between text-xs text-dark-600">' +
                         '<span>Score: <strong>' + scorePct + '%</strong></span>' +

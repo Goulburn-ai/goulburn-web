@@ -51,6 +51,27 @@
             font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             background: #000 !important;   /* override any legacy bg-white on body */
             color: #F7F9F9;
+            /* Override CSS variables defined by each page's local :root.
+               body wins over :root in the var() lookup chain because
+               body is closer to descendants than html. This dark-mode-ifies
+               every page that uses var(--dark-*) in custom <style> blocks
+               (dashboard, settings, agents, api-docs, partner-demo, capabilities). */
+            --brand-50:  #1C1409;
+            --brand-100: #3D2810;
+            --brand-200: #FDE68A;
+            --brand-500: #F59E0B;
+            --brand-600: #D97706;
+            --brand-700: #B45309;
+            --dark-50:  #000000;
+            --dark-100: #16181C;
+            --dark-200: #2F3336;
+            --dark-300: #3E4144;
+            --dark-400: #71767B;
+            --dark-500: #8B98A5;
+            --dark-600: #B1B7BD;
+            --dark-700: #D1D5DB;
+            --dark-800: #E5E7EB;
+            --dark-900: #F7F9F9;
         }
         /* Cards that still use bg-white become X's card colour, NOT pure white. */
         :not(body).bg-white { background-color: #16181C !important; }
@@ -66,6 +87,29 @@
         /* Any legacy bg-dark-50 (used as page wash) — pure black for the
            "sits inside a void" feel. */
         .bg-dark-50 { background-color: #000 !important; }
+
+        /* Stock Tailwind pale colour utilities used for status pills/toasts.
+           Repaint as low-alpha dark tints with bright text so success/error
+           callouts read as glowing-on-black instead of cream-on-black. */
+        .bg-green-50, .bg-green-100  { background-color: rgba(34,197,94,0.12) !important; }
+        .bg-red-50,   .bg-red-100    { background-color: rgba(239,68,68,0.12) !important; }
+        .bg-blue-50,  .bg-blue-100   { background-color: rgba(59,130,246,0.12) !important; }
+        .bg-amber-50, .bg-amber-100  { background-color: rgba(245,158,11,0.12) !important; }
+        .bg-yellow-50, .bg-yellow-100{ background-color: rgba(245,158,11,0.12) !important; }
+        .bg-gray-50,  .bg-gray-100   { background-color: #16181C !important; }
+        .bg-gray-200                 { background-color: #2F3336 !important; }
+
+        .text-green-700, .text-green-800 { color: #4ade80 !important; }
+        .text-red-700,   .text-red-800   { color: #f87171 !important; }
+        .text-blue-700,  .text-blue-800  { color: #60a5fa !important; }
+        .text-amber-700, .text-amber-800 { color: #fbbf24 !important; }
+        .text-yellow-700,.text-yellow-800{ color: #fbbf24 !important; }
+        .text-gray-300, .text-gray-200   { color: #D1D5DB !important; }
+
+        .border-green-200, .border-green-300, .border-green-500 { border-color: #166534 !important; }
+        .border-red-200,   .border-red-300                      { border-color: #7f1d1d !important; }
+        .border-blue-200,  .border-blue-300                     { border-color: #1e40af !important; }
+        .border-amber-200, .border-amber-300                    { border-color: #92400e !important; }
         /* Soften default input backgrounds so they sit on black. */
         input, textarea, select {
             background-color: #16181C;
@@ -147,7 +191,7 @@
         }
 
         .endpoint-card {
-            background: white;
+            background: #16181C;
             border: 1px solid #E5E7EB;
             border-radius: 8px;
             padding: 20px;
@@ -230,7 +274,7 @@
         }
 
         .use-case-card {
-            background: white;
+            background: #16181C;
             border: 1px solid #E5E7EB;
             border-radius: 8px;
             padding: 24px;
@@ -332,7 +376,7 @@
         }
 
         .btn-secondary {
-            background: white;
+            background: #16181C;
             color: #111827;
             border: 1px solid #E5E7EB;
         }
