@@ -26,6 +26,7 @@
     ],
     "redirects": [],
     "rewrites": [
+        { "source": "/(.*)", "destination": "/maintenance.html" },
         { "source": "/agents", "destination": "/agents.html" },
         { "source": "/agents/register", "destination": "/register.html" },
         { "source": "/oauth/callback", "destination": "/oauth-callback.html" },
