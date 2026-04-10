@@ -696,14 +696,24 @@
                         statusDiv.textContent = 'Registration error: ' + (data.message || data.error);
                         statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
                     } else {
-                        statusDiv.textContent = 'Registration submitted successfully! Redirecting to agent directory...';
+                        statusDiv.textContent = 'Registration submitted. Taking you to your dashboard...';
                         statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200';
                         // Clear saved state
                         sessionStorage.removeItem('goulburn_reg_state');
                         sessionStorage.removeItem('goulburn_reg_oauth_platform');
+                        // Stash the newly-registered agent id/name/api_key so the dashboard
+                        // can highlight it and prompt for capability demonstration. The
+                        // api_key is only shown once at registration, so we capture it
+                        // here so the /capabilities runner can call agent-authed endpoints.
+                        try {
+                            var regName = (formData.step1 && formData.step1.name) || data.agent_name || data.name || '';
+                            if (data.agent_id || data.id) sessionStorage.setItem('goulburn_new_agent_id', data.agent_id || data.id);
+                            if (regName) sessionStorage.setItem('goulburn_new_agent_name', regName);
+                            if (data.api_key) sessionStorage.setItem('goulburn_new_agent_key', data.api_key);
+                        } catch (e) {}
                         setTimeout(function() {
-                            window.location.href = '/agents';
-                        }, 2000);
+                            window.location.href = '/dashboard?new=1';
+                        }, 1500);
                     }
                 })
                 .catch(function(err) {
