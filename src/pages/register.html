@@ -28,7 +28,7 @@
             <!-- Progress Bar -->
             <div class="mb-12 bg-dark-100 rounded-2xl border border-dark-200 p-6">
                 <div class="flex items-center justify-between mb-4">
-                    <span class="text-sm font-semibold text-dark-900">Step <span id="progressStep">1</span> of 4</span>
+                    <span class="text-sm font-semibold text-dark-900">Step <span id="progressStep">1</span> of 3</span>
                     <span id="progressPercent" class="text-sm font-semibold text-dark-600">25%</span>
                 </div>
                 <div class="h-3 bg-dark-100 rounded-full overflow-hidden">
@@ -162,60 +162,17 @@
                             Back
                         </button>
                         <button type="button" id="step2NextBtn" class="stepBtn next px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-step="2" disabled>
-                            Continue to Capability Demonstration
-                            <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Step 3: Capability Demonstration -->
-                <div class="step-card bg-dark-100 rounded-2xl border-2 border-gray-300 p-8 opacity-50" data-step="3" data-status="pending">
-                    <div class="flex items-start justify-between mb-6">
-                        <div>
-                            <div class="inline-flex items-center justify-center w-10 h-10 bg-dark-100 text-dark-500 font-bold rounded-lg mb-3">03</div>
-                            <h2 class="text-2xl font-display font-bold text-dark-900">Capability Demonstration</h2>
-                            <p class="text-dark-600 mt-1">Share evidence of your agent's capabilities</p>
-                        </div>
-                        <span class="px-3 py-1 bg-dark-100 text-dark-600 font-semibold text-xs rounded-full">Pending</span>
-                    </div>
-
-                    <form id="step3Form" class="space-y-6 mb-8">
-                        <div>
-                            <label for="workSamples" class="block text-sm font-semibold text-dark-900 mb-2">Work Samples / Case Studies *</label>
-                            <div class="border-2 border-dashed border-dark-300 rounded-lg p-8 text-center hover:border-brand-500 hover:bg-brand-50 transition-colors cursor-pointer" id="dropZone">
-                                <svg class="w-12 h-12 text-dark-500 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="M12 4v16m8-8H4"></path>
-                                </svg>
-                                <p class="font-semibold text-dark-900 mb-1">Drop files or click to upload</p>
-                                <p class="text-sm text-dark-500">PDF, images, or links to your work</p>
-                                <input type="file" id="workSamples" name="work_samples" multiple accept=".pdf,.jpg,.png,.doc,.docx" class="hidden">
-                            </div>
-                            <p class="text-sm text-dark-900 font-medium mt-2" id="fileList">No files selected</p>
-                        </div>
-
-                        <div>
-                            <label for="capabilityDescription" class="block text-sm font-semibold text-dark-900 mb-2">Describe Demonstrated Capabilities *</label>
-                            <textarea id="capabilityDescription" name="capability_description" required rows="6" placeholder="Walk us through your agent's key accomplishments. What measurable results has it achieved? How does it demonstrate the capabilities you listed?" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
-                            <p class="text-xs text-dark-500 mt-1" id="capCharCount">0 / 2000 characters</p>
-                        </div>
-                    </form>
-
-                    <div class="flex items-center justify-between">
-                        <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="3">
-                            Back
-                        </button>
-                        <button type="button" id="step3NextBtn" class="stepBtn next px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" data-step="3" disabled>
                             Continue to Review & Submit
                             <svg class="w-5 h-5 ml-2 inline" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- Step 4: Review & Submit -->
-                <div class="step-card bg-dark-100 rounded-2xl border-2 border-gray-300 p-8 opacity-50" data-step="4" data-status="pending">
+                <\!-- Step 3: Review & Submit -->
+                <div class="step-card bg-dark-100 rounded-2xl border-2 border-gray-300 p-8 opacity-50" data-step="3" data-status="pending">
                     <div class="flex items-start justify-between mb-6">
                         <div>
-                            <div class="inline-flex items-center justify-center w-10 h-10 bg-dark-100 text-dark-500 font-bold rounded-lg mb-3">04</div>
+                            <div class="inline-flex items-center justify-center w-10 h-10 bg-dark-100 text-dark-500 font-bold rounded-lg mb-3">03</div>
                             <h2 class="text-2xl font-display font-bold text-dark-900">Review & Submit</h2>
                             <p class="text-dark-600 mt-1">Finalize your agent registration</p>
                         </div>
@@ -226,7 +183,7 @@
                         <!-- Summary will be populated by JavaScript -->
                     </div>
 
-                    <form id="step4Form" class="mb-8">
+                    <form id="step3Form" class="mb-8">
                         <label class="flex items-start gap-3 p-4 border border-dark-200 rounded-lg hover:bg-dark-50 transition-colors cursor-pointer">
                             <input type="checkbox" id="confirmDetails" name="confirm_details" required class="w-5 h-5 rounded border-dark-300 mt-1">
                             <span class="text-sm text-dark-700">I confirm that all provided information is accurate and that I have authority to register this agent</span>
@@ -234,7 +191,7 @@
                     </form>
 
                     <div class="flex items-center justify-between">
-                        <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="4">
+                        <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="3">
                             Back
                         </button>
                         <button type="button" id="submitBtn" class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
@@ -261,8 +218,7 @@
         let currentStep = 1;
         let formData = {
             step1: {},
-            step2: { platforms: [] },
-            step3: { files: [] }
+            step2: { platforms: [] }
         };
 
         // ── State Persistence (survives OAuth redirect) ──
@@ -471,7 +427,7 @@
 
         // ── Step Management ──
         function updateProgress() {
-            var percent = (currentStep * 25);
+            var percent = Math.round(currentStep * 33.3);
             document.getElementById('progressBar').style.width = percent + '%';
             document.getElementById('progressStep').textContent = currentStep;
             document.getElementById('progressPercent').textContent = percent + '%';
@@ -540,16 +496,7 @@
                     }
                     return true;
 
-                case 3:
-                    var capDesc = document.getElementById('capabilityDescription').value.trim();
-                    if (!capDesc) {
-                        alert('Please describe your agent\'s demonstrated capabilities');
-                        return false;
-                    }
-                    formData.step3.capDescription = capDesc;
-                    return true;
-
-                case 4:
+case 3:
                     var confirmed = document.getElementById('confirmDetails').checked;
                     if (!confirmed) {
                         alert('Please confirm the accuracy of your information');
@@ -565,9 +512,9 @@
         function advanceStep(direction) {
             if (direction === 'next') {
                 if (!validateStep(currentStep)) return;
-                if (currentStep < 4) {
+                if (currentStep < 3) {
                     showStep(currentStep + 1);
-                    if (currentStep === 4) populateReview();
+                    if (currentStep === 3) populateReview();
                 }
             } else if (direction === 'prev') {
                 if (currentStep > 1) {
@@ -582,53 +529,15 @@
             document.getElementById('descCharCount').textContent = count + ' / 500 characters';
         });
 
-        document.getElementById('capabilityDescription').addEventListener('input', function() {
-            var count = this.value.length;
-            document.getElementById('capCharCount').textContent = count + ' / 2000 characters';
-            // Enable "Continue to Review & Submit" as soon as there's any content
-            var step3Btn = document.getElementById('step3NextBtn');
-            if (step3Btn) step3Btn.disabled = this.value.trim().length === 0;
-        });
 
-        // Step 4 — enable submit button when confirmation checkbox is ticked
+
+        // Step 3 — enable submit button when confirmation checkbox is ticked
         document.getElementById('confirmDetails').addEventListener('change', function() {
             var submitBtn = document.getElementById('submitBtn');
             if (submitBtn) submitBtn.disabled = !this.checked;
         });
 
-        // ── File Upload Handling ──
-        var dropZone = document.getElementById('dropZone');
-        var fileInput = document.getElementById('workSamples');
 
-        dropZone.addEventListener('click', function() { fileInput.click(); });
-
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        dropZone.addEventListener('drop', function(e) {
-            var files = e.dataTransfer.files;
-            fileInput.files = files;
-            updateFileList();
-        });
-
-        fileInput.addEventListener('change', updateFileList);
-
-        function updateFileList() {
-            var files = fileInput.files;
-            if (files.length === 0) {
-                document.getElementById('fileList').textContent = 'No files selected';
-                return;
-            }
-            var names = Array.from(files).map(function(f) { return f.name; }).join(', ');
-            document.getElementById('fileList').textContent = files.length + ' file(s) selected: ' + names;
-            formData.step3.files = files;
-        }
 
         // ── Step Navigation ──
         document.querySelectorAll('.stepBtn.next').forEach(function(btn) {
@@ -679,11 +588,7 @@
                     '<p class="text-sm text-dark-600 mb-3">Connected Platforms:</p>' +
                     '<div class="flex flex-wrap gap-2">' + platformBadges + '</div>' +
                 '</div>' +
-                '<div class="bg-green-50 border border-green-200 rounded-lg p-6">' +
-                    '<h3 class="font-semibold text-dark-900 mb-4">Capability Demonstration</h3>' +
-                    '<p class="text-sm text-dark-600 mb-2">Description:</p>' +
-                    '<p class="text-sm text-dark-700">' + (formData.step3.capDescription || 'Not provided') + '</p>' +
-                '</div>';
+
         }
 
         // ── Submit Registration ──
@@ -695,8 +600,7 @@
 
             var payload = {
                 identity: formData.step1,
-                platforms: formData.step2.platforms,
-                capabilities: formData.step3
+                platforms: formData.step2.platforms
             };
 
             fetch(API_BASE + '/api/v1/agents/register', {
