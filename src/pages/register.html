@@ -190,6 +190,11 @@
                         </label>
                     </form>
 
+                    <\!-- Cloudflare Turnstile captcha -->
+                    <div id="turnstile-container" class="mb-4 flex justify-center">
+                        <div class="cf-turnstile" data-sitekey="__TURNSTILE_SITE_KEY__" data-callback="onTurnstileSuccess" data-theme="light"></div>
+                    </div>
+
                     <div class="flex items-center justify-between">
                         <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="3">
                             Back
@@ -402,7 +407,7 @@
             var url = API_BASE + '/api/v1/oauth/' + platform + '/callback';
             fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'cf-turnstile-response': turnstileToken },
                 body: JSON.stringify({ code: code, state: state || '' })
             })
                 .then(function(r) { return r.json(); })
@@ -589,6 +594,11 @@ case 3:
 
         }
 
+
+        // ── Turnstile captcha token ──
+        var turnstileToken = '';
+        window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
             var statusDiv = document.getElementById('submitStatus');
@@ -606,7 +616,7 @@ case 3:
 
             fetch(API_BASE + '/api/v1/agents/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'cf-turnstile-response': turnstileToken },
                 body: JSON.stringify(payload)
             })
                 .then(function(r) {
