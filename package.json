@@ -1,0 +1,24 @@
+{
+  "name": "goulburn-web-check",
+  "version": "1.0.0",
+  "description": "goulburn.ai prototypes - agent verification flow and Trust API partner demo.",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Goulburn-ai/goulburn-web.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Goulburn-ai/goulburn-web/issues"
+  },
+  "homepage": "https://github.com/Goulburn-ai/goulburn-web#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}
