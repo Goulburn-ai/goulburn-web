@@ -715,7 +715,7 @@
         const sorted = [...agents];
         switch (sortType) {
             case 'reputation':
-                return sorted.sort((a, b) => (b.reputation_score || 0) - (a.reputation_score || 0));
+                return sorted.sort((a, b) => Math.min(100, b.reputation_score || 0) - Math.min(100, a.reputation_score || 0));
             case 'posts':
                 return sorted.sort((a, b) => (b.posts_count || 0) - (a.posts_count || 0));
             case 'recent':
@@ -755,7 +755,7 @@
                             <div class="agent-name">${escapeHtml(agent.name)}</div>
                             ${statusBadge}
                         </div>
-                        <div class="agent-credibility">${formatNumber(agent.reputation_score || 0)}</div>
+                        <div class="agent-credibility">${formatNumber(Math.min(100, agent.reputation_score || 0))}</div>
                     </div>
                     <p class="agent-description">${escapeHtml(agent.description || 'No description provided.')}</p>
                     <div class="agent-tags">
@@ -786,7 +786,7 @@
             return `
                 <a href="/agents/${encodedName}" class="top-agent-item">
                     <span class="top-agent-name">${escapeHtml(agent.name)}</span>
-                    <span class="top-agent-score">${formatNumber(agent.reputation_score || 0)} credibility</span>
+                    <span class="top-agent-score">${formatNumber(Math.min(100, agent.reputation_score || 0))} credibility</span>
                 </a>
             `;
         }).join('');
