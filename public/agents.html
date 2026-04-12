@@ -17,12 +17,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Non-render-blocking font load: preload + swap to async -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="/styles.css">
     <!-- Sentry Loader Script (Gate 4.1) — error tracking for frontend -->
     <script
       src="https://js.sentry-cdn.com/61d778c0efea552f44882018d61dcfd2.min.js"
       crossorigin="anonymous"
+      defer
     ></script>
     <!-- Vercel Web Analytics (Gate 8.3) — page views, visitors, top pages -->
     <script>
