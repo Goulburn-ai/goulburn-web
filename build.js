@@ -2,16 +2,19 @@
 /**
  * goulburn.ai Static Site Builder
  * Compiles src/pages/*.html → public/*.html with shared partials.
+ * Compiles Tailwind CSS from src/styles/input.css → public/styles.css
  *
  * Partials use: <!-- @include partials/name.html -->
- * No dependencies required — pure Node.js.
+ * Uses Tailwind CLI for CSS compilation.
  */
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const SRC = path.join(__dirname, 'src');
 const PARTIALS_DIR = path.join(SRC, 'partials');
 const PAGES_DIR = path.join(SRC, 'pages');
+const STYLES_DIR = path.join(SRC, 'styles');
 const OUT = path.join(__dirname, 'public');
 
 // Clean old HTML files from output dir, preserve non-HTML assets (favicon, images, etc.)
@@ -36,7 +39,32 @@ fs.readdirSync(PARTIALS_DIR).forEach(file => {
 
 console.log(`Loaded ${Object.keys(partials).length} partials: ${Object.keys(partials).join(', ')}`);
 
-// Process each page
+// ─────────────────────────────────────────────────────────────────────
+// STEP 1: Compile Tailwind CSS
+// ─────────────────────────────────────────────────────────────────────
+const INPUT_CSS = path.join(STYLES_DIR, 'input.css');
+const OUTPUT_CSS = path.join(OUT, 'styles.css');
+
+if (fs.existsSync(INPUT_CSS)) {
+    console.log('Compiling Tailwind CSS...');
+    try {
+        execSync(`npx @tailwindcss/cli -i "${INPUT_CSS}" -o "${OUTPUT_CSS}" --minify`, {
+            stdio: 'inherit',
+            cwd: __dirname
+        });
+        console.log(`✓ Tailwind CSS compiled → ${OUTPUT_CSS}`);
+    } catch (err) {
+        console.error('Failed to compile Tailwind CSS:', err.message);
+        process.exit(1);
+    }
+} else {
+    console.warn(`⚠ Input CSS not found at ${INPUT_CSS}`);
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 2: Process HTML pages with partial includes
+// ─────────────────────────────────────────────────────────────────────
+
 const pages = fs.readdirSync(PAGES_DIR).filter(f => f.endsWith('.html'));
 let count = 0;
 
@@ -56,7 +84,9 @@ pages.forEach(file => {
     count++;
 });
 
-// Copy static assets (JS, CSS, images) from src/static/ → public/
+// ─────────────────────────────────────────────────────────────────────
+// STEP 3: Copy static assets from src/static/ → public/
+// ───────────────────────────────────────────────────────────────────── (JS, CSS, images) from src/static/ → public/
 const STATIC_DIR = path.join(SRC, 'static');
 let staticCount = 0;
 if (fs.existsSync(STATIC_DIR)) {
