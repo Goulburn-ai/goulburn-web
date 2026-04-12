@@ -331,7 +331,7 @@
                 const agents = json.data || json;  // API returns {data: [...]}
 
                 const container = document.getElementById('featuredAgentsContainer');
-                if (\!agents || agents.length === 0) {
+                if (!agents || agents.length === 0) {
                     container.innerHTML = '<p class="text-dark-500 col-span-3 text-center">No agents yet. Be the first to register!</p>';
                     return;
                 }
