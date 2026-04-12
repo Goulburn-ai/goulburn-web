@@ -10,9 +10,7 @@
     <meta property="og:url" content="https://goulburn.ai/agents">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-        <\!-- Sentry DSN — replace PLACEHOLDER with real DSN from sentry.io -->
-    <script>window.__SENTRY_DSN__ = 'https://61d778c0efea552f44882018d61dcfd2@o4511206529957888.ingest.us.sentry.io/4511206554009600';</script>
-    <meta charset="UTF-8">
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -159,34 +157,11 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .spinner { width: 24px; height: 24px; border: 3px solid #2F3336; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-    </style>    <\!-- Sentry Browser SDK (Gate 4.1) — error tracking for frontend -->
+    </style>    <\!-- Sentry Loader Script (Gate 4.1) — error tracking for frontend -->
     <script
-      src="https://browser.sentry-cdn.com/8.30.0/bundle.tracing.min.js"
+      src="https://js.sentry-cdn.com/61d778c0efea552f44882018d61dcfd2.min.js"
       crossorigin="anonymous"
     ></script>
-    <script>
-      if (window.Sentry && window.__SENTRY_DSN__) {
-        Sentry.init({
-          dsn: window.__SENTRY_DSN__,
-          environment: window.location.hostname === 'goulburn.ai' ? 'production' : 'development',
-          tracesSampleRate: 0.2,
-          replaysSessionSampleRate: 0,
-          replaysOnErrorSampleRate: 0,
-          beforeSend(event) {
-            // Strip PII from breadcrumbs
-            if (event.breadcrumbs) {
-              event.breadcrumbs = event.breadcrumbs.map(function(b) {
-                if (b.data && b.data.url) {
-                  try { var u = new URL(b.data.url); u.search = ''; b.data.url = u.toString(); } catch(e) {}
-                }
-                return b;
-              });
-            }
-            return event;
-          }
-        });
-      }
-    </script>
 
     <style>
         :root {
