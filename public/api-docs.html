@@ -3,159 +3,19 @@
 <head>
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- SOFT LAUNCH: remove this tag when ready for public search indexing -->
+    <\!-- SOFT LAUNCH: remove this tag when ready for public search indexing -->
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        // Dark theme — bold, high-contrast, X.com-inspired.
-        // The `dark` scale is INVERTED from Tailwind's stock grays so that
-        // existing classes (text-dark-900 for headings, bg-dark-50 for pale
-        // sections, border-dark-200 for hairlines) automatically map to the
-        // correct dark-mode tone without touching every page.
-        // Brand gold (#F59E0B) is preserved — gold-on-black is the CTA colour.
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        // brand-50/100 re-tinted for dark mode so gradients
-                        // (from-brand-50, from-brand-100) no longer render as
-                        // near-white amber on a black page. 200+ unchanged so
-                        // CTA buttons and borders keep their iconic gold.
-                        brand: { 50: '#1C1409', 100: '#3D2810', 200: '#FDE68A', 300: '#FCD34D', 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706', 700: '#B45309', 800: '#92400E', 900: '#78350F' },
-                        dark: {
-                            50:  '#0A0A0A', // was near-white — now near-black (page wash)
-                            100: '#16181C', // X card colour
-                            200: '#2F3336', // X hairline border
-                            300: '#3E4144',
-                            400: '#71767B', // X secondary text
-                            500: '#8B98A5', // readable muted
-                            600: '#B1B7BD',
-                            700: '#D1D5DB',
-                            800: '#E5E7EB',
-                            900: '#F7F9F9'  // near-white — used for headings
-                        }
-                    },
-                    fontFamily: {
-                        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
-                        body: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        html { scroll-behavior: smooth; background: #000; }
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-            background: #000 !important;   /* override any legacy bg-dark-100 on body */
-            color: #F7F9F9;
-            /* Override CSS variables defined by each page's local :root.
-               body wins over :root in the var() lookup chain because
-               body is closer to descendants than html. This dark-mode-ifies
-               every page that uses var(--dark-*) in custom <style> blocks
-               (dashboard, settings, agents, api-docs, partner-demo, capabilities). */
-            --brand-50:  #1C1409;
-            --brand-100: #3D2810;
-            --brand-200: #FDE68A;
-            --brand-500: #F59E0B;
-            --brand-600: #D97706;
-            --brand-700: #B45309;
-            --dark-50:  #000000;
-            --dark-100: #16181C;
-            --dark-200: #2F3336;
-            --dark-300: #3E4144;
-            --dark-400: #71767B;
-            --dark-500: #8B98A5;
-            --dark-600: #B1B7BD;
-            --dark-700: #D1D5DB;
-            --dark-800: #E5E7EB;
-            --dark-900: #F7F9F9;
-        }
-        /* Safety net: any residual bg-white (should be none in source,
-           but guards against CDN cache / external injection) → card colour. */
-        :not(body).bg-white { background-color: #16181C !important; }
-        section.bg-white, main.bg-white, header.bg-white, footer.bg-white,
-        body.bg-white { background-color: transparent !important; }
-        /* bg-dark-100 is a legit card colour — render it as the X card grey. */
-        .bg-dark-100 { background-color: #16181C !important; }
-        /* Pale brand backgrounds (bg-brand-50, bg-brand-100) originally amber-white
-           — repainted as dark gold tints so icon pills and hover states read as
-           subtle gold on black instead of blinding cream. */
-        .bg-brand-50  { background-color: #1C1409 !important; }
-        .bg-brand-100 { background-color: #3D2810 !important; }
-        .hover\:bg-brand-50:hover  { background-color: #1C1409 !important; }
-        .hover\:bg-brand-100:hover { background-color: #3D2810 !important; }
-        /* Dark-100 (#16181C) used as page-wash on some pages — keep consistent.
-           No override needed, tailwind value already matches. */
-        /* Any legacy bg-dark-50 (used as page wash) — pure black for the
-           "sits inside a void" feel. */
-        .bg-dark-50 { background-color: #000 !important; }
-
-        /* Stock Tailwind pale colour utilities used for status pills/toasts.
-           Repaint as low-alpha dark tints with bright text so success/error
-           callouts read as glowing-on-black instead of cream-on-black. */
-        .bg-green-50, .bg-green-100  { background-color: rgba(34,197,94,0.12) !important; }
-        .bg-red-50,   .bg-red-100    { background-color: rgba(239,68,68,0.12) !important; }
-        .bg-blue-50,  .bg-blue-100   { background-color: rgba(59,130,246,0.12) !important; }
-        .bg-amber-50, .bg-amber-100  { background-color: rgba(245,158,11,0.12) !important; }
-        .bg-yellow-50, .bg-yellow-100{ background-color: rgba(245,158,11,0.12) !important; }
-        .bg-gray-50,  .bg-gray-100   { background-color: #16181C !important; }
-        .bg-gray-200                 { background-color: #2F3336 !important; }
-
-        .text-green-700, .text-green-800 { color: #4ade80 !important; }
-        .text-red-700,   .text-red-800   { color: #f87171 !important; }
-        .text-blue-700,  .text-blue-800  { color: #60a5fa !important; }
-        .text-amber-700, .text-amber-800 { color: #fbbf24 !important; }
-        .text-yellow-700,.text-yellow-800{ color: #fbbf24 !important; }
-        .text-gray-300, .text-gray-200   { color: #D1D5DB !important; }
-        /* Dark gold text classes (brand-700/800/900) are unreadable on black.
-           Promote them to bright gold so links/labels stay legible. */
-        .text-brand-600, .text-brand-700, .text-brand-800, .text-brand-900 { color: #FBBF24 !important; }
-        .hover\:text-brand-600:hover, .hover\:text-brand-700:hover,
-        .hover\:text-brand-800:hover, .hover\:text-brand-900:hover { color: #FDE68A !important; }
-        /* Any text explicitly coloured black/near-black becomes near-white. */
-        .text-black, .text-gray-900, .text-gray-800, .text-gray-700,
-        .text-slate-900, .text-slate-800, .text-slate-700,
-        .text-neutral-900, .text-neutral-800, .text-zinc-900, .text-zinc-800 {
-            color: #F7F9F9 !important;
-        }
-        /* EXCEPT: text-black on a gold button should stay black (CTA). */
-        .bg-brand-500 .text-black, .bg-brand-500.text-black,
-        .bg-brand-400 .text-black, .bg-brand-400.text-black,
-        .bg-brand-600 .text-black, .bg-brand-600.text-black { color: #000 !important; }
-
-        .border-green-200, .border-green-300, .border-green-500 { border-color: #166534 !important; }
-        .border-red-200,   .border-red-300                      { border-color: #7f1d1d !important; }
-        .border-blue-200,  .border-blue-300                     { border-color: #1e40af !important; }
-        .border-amber-200, .border-amber-300                    { border-color: #92400e !important; }
-        /* Soften default input backgrounds so they sit on black. */
-        input, textarea, select {
-            background-color: #16181C;
-            color: #F7F9F9;
-            border-color: #2F3336;
-        }
-        input::placeholder, textarea::placeholder { color: #71767B; }
-        /* Links inherit gold accent by default only inside prose; nav controls its own. */
-        /* Scrollbars — subtle, X-style. */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: #2F3336; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3E4144; }
-
-        .fade-in { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .spinner { width: 24px; height: 24px; border: 3px solid #2F3336; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>    <!-- Sentry Loader Script (Gate 4.1) — error tracking for frontend -->
+    <link rel="stylesheet" href="/styles.css">
+    <\!-- Sentry Loader Script (Gate 4.1) — error tracking for frontend -->
     <script
       src="https://js.sentry-cdn.com/61d778c0efea552f44882018d61dcfd2.min.js"
       crossorigin="anonymous"
     ></script>
-    <!-- Vercel Web Analytics (Gate 8.3) — page views, visitors, top pages -->
+    <\!-- Vercel Web Analytics (Gate 8.3) — page views, visitors, top pages -->
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
