@@ -212,7 +212,7 @@
 
     <script>
     (function() {
-        const API_BASE = 'https://goulburn-admin-production.up.railway.app';
+        const API_BASE = (window.goulburnAuth && window.goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
         const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
         const PLATFORM_LABELS = { github: 'GitHub', twitter: 'X/Twitter', discord: 'Discord', linkedin: 'LinkedIn' };
         let currentStep = 1;
@@ -598,9 +598,12 @@ case 3:
             statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200';
             statusDiv.classList.remove('hidden');
 
+            // Map wizard fields to API schema (AgentRegister)
+            var caps = (formData.step1.caps || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
             var payload = {
-                identity: formData.step1,
-                platforms: formData.step2.platforms
+                name: formData.step1.name,
+                description: formData.step1.desc,
+                capability_tags: caps
             };
 
             fetch(API_BASE + '/api/v1/agents/register', {
@@ -608,10 +611,17 @@ case 3:
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
-                .then(function(r) { return r.json(); })
+                .then(function(r) {
+                        if (!r.ok) {
+                            return r.json().then(function(err) {
+                                throw new Error(err.detail || err.message || err.error || ('HTTP ' + r.status));
+                            });
+                        }
+                        return r.json();
+                    })
                 .then(function(data) {
-                    if (data.error) {
-                        statusDiv.textContent = 'Registration error: ' + (data.message || data.error);
+                    if (data.error || data.detail) {
+                        statusDiv.textContent = 'Registration error: ' + (data.detail || data.message || data.error);
                         statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
                     } else {
                         statusDiv.textContent = 'Registration submitted. Taking you to your dashboard...';
