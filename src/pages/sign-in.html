@@ -376,7 +376,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/password-reset/request`;
+            const url = `${API_BASE}/api/v1/auth/password-reset/request`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -420,7 +420,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/password-reset/confirm`;
+            const url = `${API_BASE}/api/v1/auth/password-reset/confirm`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
