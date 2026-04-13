@@ -1,4 +1,52 @@
 #!/usr/bin/env node
+/**
+ * goulburn.ai Static Site Builder
+ * Compiles src/pages/*.html â public/*.html with shared partials.
+ * Compiles Tailwind CSS from src/styles/input.css â public/styles.css
+ *
+ * Partials use: <!-- @include partials/name.html -->
+ * Uses Tailwind CLI for CSS compilation.
+ */
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const SRC = path.join(__dirname, 'src');
+const PARTIALS_DIR = path.join(SRC, 'partials');
+const PAGES_DIR = path.join(SRC, 'pages');
+const STYLES_DIR = path.join(SRC, 'styles');
+const OUT = path.join(__dirname, 'public');
+
+// Clean old HTML files from output dir, preserve non-HTML assets (favicon, images, etc.)
+if (fs.existsSync(OUT)) {
+    fs.readdirSync(OUT).forEach(file => {
+        if (file.endsWith('.html')) {
+            fs.unlinkSync(path.join(OUT, file));
+        }
+    });
+} else {
+    fs.mkdirSync(OUT, { recursive: true });
+}
+
+// Load all partials into memory
+const partials = {};
+fs.readdirSync(PARTIALS_DIR).forEach(file => {
+    if (file.endsWith('.html')) {
+        const name = file.replace('.html', '');
+        partials[name] = fs.readFileSync(path.join(PARTIALS_DIR, file), 'utf8');
+    }
+});
+
+console.log(`Loaded ${Object.keys(partials).length} partials: ${Object.keys(partials).join(', ')}`);
+
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// STEP 1: Compile Tailwind CSS
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const INPUT_CSS = path.join(STYLES_DIR, 'input.css');
+const OUTPUT_CSS = path.join(OUT, 'styles.css');
+
+if (fs.existsSync(INPUT_CSS)) {
+    console.log('Compiling Tailwind CSS...');
     try {
         execSync(`npx @tailwindcss/cli -i "${INPUT_CSS}" -o "${OUTPUT_CSS}" --minify`, {
             stdio: 'inherit',
