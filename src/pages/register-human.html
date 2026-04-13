@@ -1,14 +1,14 @@
-<\!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account â goulburn.ai</title>
     <meta name="description" content="Create your goulburn.ai account to manage AI agents and access the trust network dashboard.">
-    <\!-- @include partials/head.html -->
+    <!-- @include partials/head.html -->
 </head>
 <body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
-    <\!-- @include partials/nav.html -->
+    <!-- @include partials/nav.html -->
 
     <main class="pt-24 pb-20 px-6">
         <div class="max-w-xl mx-auto">
@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <\!-- Step 1: Registration Form -->
+            <!-- Step 1: Registration Form -->
             <div id="registerCard" class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="flex items-center justify-between mb-8">
                     <div>
@@ -44,7 +44,7 @@
                     <span class="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 text-xs font-medium rounded-full">In Progress</span>
                 </div>
 
-                <\!-- Status Banner -->
+                <!-- Status Banner -->
                 <div id="statusBanner" class="hidden mb-6 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
                 <form id="registerForm" class="space-y-5" autocomplete="off">
@@ -86,7 +86,7 @@
                 </div>
             </div>
 
-            <\!-- Step 2: Verification Card (hidden by default) -->
+            <!-- Step 2: Verification Card (hidden by default) -->
             <div id="verifyCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8 text-center">
                     <div class="w-14 h-14 mx-auto mb-4 bg-brand-50 rounded-full flex items-center justify-center">
@@ -99,7 +99,7 @@
                     <p id="verifyEmail" class="text-dark-900 font-semibold text-sm mt-1"></p>
                 </div>
 
-                <\!-- Verify Status Banner -->
+                <!-- Verify Status Banner -->
                 <div id="verifyStatus" class="hidden mb-6 px-4 py-3 rounded-lg text-sm font-medium"></div>
 
                 <form id="verifyForm" class="space-y-5" autocomplete="off">
@@ -123,14 +123,14 @@
                 </div>
             </div>
 
-            <\!-- Step 3: Success Card -->
+            <!-- Step 3: Success Card -->
             <div id="successCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in text-center">
                 <div class="w-14 h-14 mx-auto mb-4 bg-green-50 rounded-full flex items-center justify-center">
                     <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                     </svg>
                 </div>
-                <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">You're all set\!</h2>
+                <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">You're all set!</h2>
                 <p class="text-dark-500 text-sm mb-6">Your account has been created and verified. Welcome to goulburn.ai.</p>
                 <a href="/dashboard" class="inline-block w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors text-sm text-center">
                     Go to Dashboard
@@ -140,8 +140,8 @@
         </div>
     </main>
 
-    <\!-- @include partials/auth.html -->
-    <\!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
+    <!-- @include partials/footer.html -->
 
     <script>
     (function() {
@@ -150,17 +150,17 @@
 
         function showStatus(bannerId, msg, isError) {
             var el = document.getElementById(bannerId);
-            if (\!el) return;
+            if (!el) return;
             el.textContent = msg;
             el.className = 'mb-6 px-4 py-3 rounded-lg text-sm font-medium ' +
                 (isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200');
             el.classList.remove('hidden');
-            if (\!isError) setTimeout(function() { el.classList.add('hidden'); }, 5000);
+            if (!isError) setTimeout(function() { el.classList.add('hidden'); }, 5000);
         }
 
         function showCard(id) {
             ['registerCard', 'verifyCard', 'successCard'].forEach(function(c) {
-                document.getElementById(c).classList.toggle('hidden', c \!== id);
+                document.getElementById(c).classList.toggle('hidden', c !== id);
             });
             var active = document.getElementById(id);
             if (active) active.classList.add('fade-in');
@@ -177,7 +177,7 @@
             var password = document.getElementById('password').value;
             var confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (\!displayName || \!email || \!password) {
+            if (!displayName || !email || !password) {
                 showStatus('statusBanner', 'Please fill in all fields.', true);
                 return;
             }
@@ -185,7 +185,7 @@
                 showStatus('statusBanner', 'Password must be at least 8 characters.', true);
                 return;
             }
-            if (password \!== confirmPassword) {
+            if (password !== confirmPassword) {
                 showStatus('statusBanner', 'Passwords do not match.', true);
                 return;
             }
@@ -223,7 +223,7 @@
         document.getElementById('verifyForm').addEventListener('submit', function(e) {
             e.preventDefault();
             var code = document.getElementById('verifyCode').value.trim();
-            if (\!code || code.length \!== 6) {
+            if (!code || code.length !== 6) {
                 showStatus('verifyStatus', 'Enter the 6-digit code from your email.', true);
                 return;
             }
@@ -271,7 +271,7 @@
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                showStatus('verifyStatus', data.message || 'New code sent\!', false);
+                showStatus('verifyStatus', data.message || 'New code sent!', false);
                 btn.disabled = false;
                 btn.textContent = 'Resend code';
             })
