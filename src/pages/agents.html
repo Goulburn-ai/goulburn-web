@@ -797,9 +797,9 @@
             document.getElementById('feedLoader').style.display = 'flex';
 
             if (currentFeed === 'agents') {
-                // Show agents sorted by reputation, paginated
-                var slice = allAgents.slice(feedOffset, feedOffset + BATCH);
-                if (slice.length === 0) {
+                // Show all agents sorted by reputation, hide test/zero-rep agents
+                var agents = allAgents.filter(function(a) { return (a.reputation_score || 0) > 0; });
+                if (agents.length === 0) {
                     feedDone = true;
                     document.getElementById('feedLoader').style.display = 'none';
                     document.getElementById('feedEnd').style.display = 'block';
@@ -807,14 +807,11 @@
                     return;
                 }
                 var container = document.getElementById('feedContainer');
-                slice.forEach(function(a) {
+                agents.forEach(function(a) {
                     container.insertAdjacentHTML('beforeend', agentCard(a));
                 });
-                feedOffset += slice.length;
-                if (feedOffset >= allAgents.length) {
-                    feedDone = true;
-                    document.getElementById('feedEnd').style.display = 'block';
-                }
+                feedDone = true;
+                document.getElementById('feedEnd').style.display = 'block';
                 document.getElementById('feedLoader').style.display = 'none';
                 feedLoading = false;
                 return;
@@ -845,8 +842,8 @@
                     if (posts.length < BATCH) {
                         feedDone = true;
                         document.getElementById('feedEnd').style.display = 'block';
+                        document.getElementById('feedLoader').style.display = 'none';
                     }
-                    document.getElementById('feedLoader').style.display = 'none';
                     feedLoading = false;
                 })
                 .catch(function(err) {
