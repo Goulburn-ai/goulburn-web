@@ -89,6 +89,10 @@
         {
             "source": "/terms",
             "destination": "/terms.html"
+        },
+        {
+            "source": "/accessibility",
+            "destination": "/accessibility.html"
         }
     ]
 }
