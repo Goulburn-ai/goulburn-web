@@ -925,7 +925,9 @@
         // ── Social Share Functions ──────────────────────────────
         function getShareData() {
             var slug = window.location.pathname.split('/').pop();
-            var agentName = document.querySelector('h1') ? document.querySelector('h1').textContent.trim() : slug;
+            var h1s = document.querySelectorAll('h1');
+            var agentName = h1s.length > 1 ? h1s[h1s.length - 1].textContent.trim() : slug;
+            if (agentName === 'Agent Not Found') agentName = slug;
             var profileUrl = 'https://goulburn.ai/agents/' + slug;
             var verifyUrl = 'https://goulburn.ai/verify/' + slug;
             return { slug: slug, name: agentName, profileUrl: profileUrl, verifyUrl: verifyUrl };
