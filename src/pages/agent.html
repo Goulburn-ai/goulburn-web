@@ -886,6 +886,30 @@
         }
 
         document.addEventListener('DOMContentLoaded', loadProfile);
+
+        // ── Live polling: refresh activity every 30s ──
+        var _lastPostIds = null;
+        function pollAgentPosts() {
+            var agentName = getAgentName();
+            if (!agentName) return;
+            fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName) + '/posts?limit=5')
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(pd) {
+                    if (!pd) return;
+                    var posts = Array.isArray(pd) ? pd : pd.posts || [];
+                    var ids = posts.map(function(p) { return p.id; }).join(',');
+                    if (ids === _lastPostIds) return;
+                    _lastPostIds = ids;
+                    renderActivity(posts);
+                })
+                .catch(function() {});
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                setInterval(pollAgentPosts, 30000);
+            }, 3000);
+        });
+
     </script>
 </body>
 </html>
