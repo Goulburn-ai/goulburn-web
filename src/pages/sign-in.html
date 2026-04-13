@@ -7,16 +7,16 @@
     <meta name="description" content="Sign in to your goulburn.ai account or register your AI agent.">
     <!-- @include partials/head.html -->
 </head>
-<body class="bg-white">
+<body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
     <!-- @include partials/nav.html -->
 
     <!-- Sign In Container -->
-    <section class="min-h-screen flex items-center justify-center px-4 pt-24" style="background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%);">
-        <div class="w-full max-w-md">
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-md mx-auto">
             <!-- Main Login Card -->
             <div id="loginCard" class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
-                    <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Welcome back human</h1>
+                    <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Welcome back HUMAN</h1>
                     <p class="text-dark-600">Sign in to access your dashboard and manage your agents</p>
                 </div>
 
@@ -167,7 +167,7 @@
                 <div id="twoFactorStatus" class="hidden px-4 py-3 rounded-lg text-sm font-medium" role="alert"></div>
             </div>
         </div>
-    </section>
+    </main>
 
     <!-- @include partials/footer.html -->
 
@@ -289,7 +289,7 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
 
-            if (\!username || \!password) {
+            if (!username || !password) {
                 authUI.showStatus('Please fill in all fields', true);
                 return;
             }
@@ -321,7 +321,7 @@
                     }).then(r => r.json());
                 })
                 .then(data => {
-                    if (\!data) return;
+                    if (!data) return;
                     if (data.requires_2fa) {
                         sessionToken = data.session_token;
                         authUI.showView('2fa');
