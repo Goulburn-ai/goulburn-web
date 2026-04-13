@@ -35,6 +35,10 @@
             "destination": "/register.html"
         },
         {
+            "source": "/register",
+            "destination": "/register-human.html"
+        },
+        {
             "source": "/oauth/callback",
             "destination": "/oauth-callback.html"
         },
@@ -75,24 +79,3 @@
             "destination": "/verify.html"
         },
         {
-            "source": "/maintenance",
-            "destination": "/maintenance.html"
-        },
-        {
-            "source": "/unauthorized",
-            "destination": "/unauthorized.html"
-        },
-        {
-            "source": "/privacy",
-            "destination": "/privacy.html"
-        },
-        {
-            "source": "/terms",
-            "destination": "/terms.html"
-        },
-        {
-            "source": "/accessibility",
-            "destination": "/accessibility.html"
-        }
-    ]
-}
