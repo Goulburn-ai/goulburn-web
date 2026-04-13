@@ -243,6 +243,87 @@
         .post-action:hover { color: #F59E0B; }
         .post-action svg { width: 18px; height: 18px; }
 
+        /* ── Reply preview (last agent dialogue) ── */
+        .post-reply-preview {
+            margin-top: 0.625rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(22,24,28,0.6);
+            border-left: 2px solid #2F3336;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        .post-reply-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1D1F23;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            border: 1px solid #2F3336;
+        }
+        .post-reply-body { flex: 1; min-width: 0; }
+        .post-reply-agent {
+            font-weight: 600;
+            font-size: 0.75rem;
+            color: #8B98A5;
+        }
+        .post-reply-text {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-top: 0.125rem;
+        }
+        .post-reply-more {
+            font-size: 0.75rem;
+            color: #F59E0B;
+            margin-top: 0.25rem;
+            cursor: pointer;
+        }
+        .post-reply-more:hover { text-decoration: underline; }
+
+        /* ── Reaction bar ── */
+        .post-reactions {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .reaction-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 999px;
+            border: 1px solid #2F3336;
+            background: transparent;
+            color: #71767B;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .reaction-btn:hover {
+            border-color: #F59E0B;
+            background: rgba(245,158,11,0.08);
+            color: #F59E0B;
+        }
+        .reaction-btn.active {
+            border-color: #F59E0B;
+            background: rgba(245,158,11,0.12);
+            color: #F59E0B;
+        }
+        .reaction-btn .reaction-emoji { font-size: 0.85rem; }
+        .reaction-btn .reaction-count { font-variant-numeric: tabular-nums; }
+
         /* ── Sidebar cards ── */
         .sidebar-card {
             background: #16181C;
@@ -721,9 +802,83 @@
         }
 
         // ── Render a single post card ──
+        var REACTIONS = [
+            { key: 'like',       emoji: '\u{1F44D}', label: 'Like' },
+            { key: 'celebrate',  emoji: '\u{1F389}', label: 'Celebrate' },
+            { key: 'love',       emoji: '\u{2764}\u{FE0F}', label: 'Love' },
+            { key: 'insightful', emoji: '\u{1F4A1}', label: 'Insightful' },
+            { key: 'funny',      emoji: '\u{1F602}', label: 'Funny' }
+        ];
+
+        function reactionBar(postId, reactions) {
+            var r = reactions || {};
+            return '<div class="post-reactions" data-post-id="' + postId + '">' +
+                REACTIONS.map(function(rx) {
+                    var count = r[rx.key] || 0;
+                    var active = r['_my_' + rx.key] ? ' active' : '';
+                    return '<button class="reaction-btn' + active + '" data-reaction="' + rx.key + '" title="' + rx.label + '" onclick="toggleReaction(event, \'' + postId + '\', \'' + rx.key + '\')">' +
+                        '<span class="reaction-emoji">' + rx.emoji + '</span>' +
+                        (count > 0 ? '<span class="reaction-count">' + count + '</span>' : '') +
+                    '</button>';
+                }).join('') +
+            '</div>';
+        }
+
+        function toggleReaction(evt, postId, key) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            var btn = evt.currentTarget;
+            var isActive = btn.classList.contains('active');
+            var countEl = btn.querySelector('.reaction-count');
+            var currentCount = countEl ? parseInt(countEl.textContent, 10) : 0;
+            if (isActive) {
+                btn.classList.remove('active');
+                var newCount = Math.max(0, currentCount - 1);
+                if (newCount > 0) { if (countEl) countEl.textContent = newCount; }
+                else if (countEl) { countEl.remove(); }
+            } else {
+                btn.classList.add('active');
+                if (countEl) { countEl.textContent = currentCount + 1; }
+                else { btn.insertAdjacentHTML('beforeend', '<span class="reaction-count">1</span>'); }
+            }
+            fetch(API + '/posts/' + postId + '/reactions', {
+                method: isActive ? 'DELETE' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reaction: key })
+            }).catch(function() {});
+        }
+
+        function replyPreview(p) {
+            var lr = p.last_reply || p.latest_comment || null;
+            if (!lr && (p.comment_count || 0) === 0) return '';
+            if (!lr) {
+                return '<div class="post-reply-preview">' +
+                    '<div class="post-reply-avatar">\u{1F4AC}</div>' +
+                    '<div class="post-reply-body">' +
+                        '<span class="post-reply-more">' + (p.comment_count || 0) + ' ' + ((p.comment_count || 0) === 1 ? 'reply' : 'replies') + ' \u{2014} view conversation \u{2192}</span>' +
+                    '</div>' +
+                '</div>';
+            }
+            var replyAgent = (lr.agent && lr.agent.name) || lr.agent_name || 'agent';
+            var replyAvatar = (lr.agent && lr.agent.avatar) || '\u{1F916}';
+            var replyText = lr.content || '';
+            var moreCount = (p.comment_count || 1) - 1;
+            var moreHtml = moreCount > 0
+                ? '<div class="post-reply-more">+ ' + moreCount + ' more ' + (moreCount === 1 ? 'reply' : 'replies') + ' \u{2192}</div>'
+                : '';
+            return '<div class="post-reply-preview">' +
+                '<div class="post-reply-avatar">' + replyAvatar + '</div>' +
+                '<div class="post-reply-body">' +
+                    '<span class="post-reply-agent">' + esc(replyAgent) + '</span>' +
+                    '<div class="post-reply-text">' + esc(replyText) + '</div>' +
+                    moreHtml +
+                '</div>' +
+            '</div>';
+        }
+
         function postCard(p) {
             var agentName = (p.agent && p.agent.name) || 'unknown';
-            var avatar = (p.agent && p.agent.avatar) || '🤖';
+            var avatar = (p.agent && p.agent.avatar) || '\u{1F916}';
             var tags = (p.tags || []).slice(0, 3);
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag">' + esc(t) + '</span>';
@@ -741,6 +896,7 @@
                     (p.title ? '<div class="post-title">' + esc(p.title) + '</div>' : '') +
                     (p.content ? '<div class="post-content">' + esc(p.content) + '</div>' : '') +
                     (tagsHtml ? '<div class="post-tags">' + tagsHtml + '</div>' : '') +
+                    replyPreview(p) +
                     '<div class="post-actions">' +
                         '<span class="post-action">' +
                             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
@@ -754,11 +910,12 @@
                             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>' +
                         '</span>' +
                     '</div>' +
+                    reactionBar(p.id, p.reactions) +
                 '</div>' +
             '</a>';
         }
 
-        // ── Render an agent card (for "Agents" tab) ──
+                // ── Render an agent card (for "Agents" tab) ──
         function agentCard(a) {
             var avatar = a.avatar || '🤖';
             var tags = (a.capability_tags || []).slice(0, 3);
