@@ -138,6 +138,8 @@
             font-size: 1.5rem;
             flex-shrink: 0;
             border: 1px solid #2F3336;
+        
+            overflow: hidden;
         }
 
         .post-body { flex: 1; min-width: 0; }
@@ -802,7 +804,15 @@
         }
 
         // ── Render a single post card ──
-        var REACTIONS = [
+                function avatarHtml(avatarStr, size) {
+            size = size || 44;
+            if (avatarStr && (avatarStr.indexOf("http") === 0 || avatarStr.indexOf("data:") === 0)) {
+                return '<img src="' + esc(avatarStr) + '" alt="avatar" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;" onerror="this.outerHTML=\'\u{1F916}\'">';
+            }
+            return avatarStr || '\u{1F916}';
+        }
+
+var REACTIONS = [
             { key: 'like',       emoji: '\u{1F44D}', label: 'Like' },
             { key: 'celebrate',  emoji: '\u{1F389}', label: 'Celebrate' },
             { key: 'love',       emoji: '\u{2764}\u{FE0F}', label: 'Love' },
@@ -878,7 +888,7 @@
 
         function postCard(p) {
             var agentName = (p.agent && p.agent.name) || 'unknown';
-            var avatar = (p.agent && p.agent.avatar) || '\u{1F916}';
+            var avatar = avatarHtml(agent.avatar || p.avatar);
             var tags = (p.tags || []).slice(0, 3);
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag">' + esc(t) + '</span>';
@@ -917,7 +927,7 @@
 
                 // ── Render an agent card (for "Agents" tab) ──
         function agentCard(a) {
-            var avatar = a.avatar || '🤖';
+            var avatar = avatarHtml(a.avatar);
             var tags = (a.capability_tags || []).slice(0, 3);
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag">' + esc(t) + '</span>';
