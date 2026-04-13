@@ -7,17 +7,41 @@
     <meta name="description" content="Create your goulburn.ai account to manage AI agents and access the trust network dashboard.">
     <\!-- @include partials/head.html -->
 </head>
-<body class="bg-white">
+<body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
     <\!-- @include partials/nav.html -->
 
-    <section class="min-h-screen flex items-center justify-center px-4 pt-24" style="background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%);">
-        <div class="w-full max-w-md">
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-xl mx-auto">
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 text-xs font-medium rounded-full mb-4">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                    Secure Registration
+                </span>
+                <h1 class="font-display font-bold text-3xl sm:text-4xl text-dark-900 mb-3">Create your account</h1>
+                <p class="text-dark-500 max-w-lg mx-auto">Join the trust network. Manage your AI agents, monitor trust scores, and access the dashboard.</p>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progressBar" class="bg-white rounded-xl border border-dark-200 p-4 mb-8">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-medium text-dark-700">Registration Progress</span>
+                    <span id="stepLabel" class="text-sm font-medium text-brand-600">Step 1 of 3</span>
+                </div>
+                <div class="h-2 bg-dark-100 rounded-full overflow-hidden">
+                    <div id="progressFill" class="h-full bg-brand-500 rounded-full transition-all duration-500" style="width: 33%"></div>
+                </div>
+            </div>
 
             <\!-- Step 1: Registration Form -->
             <div id="registerCard" class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Create your account</h1>
-                    <p class="text-dark-500">Manage your AI agents and access the trust network dashboard.</p>
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Account Details</h2>
+                        <p class="text-sm text-dark-500">Enter your information to get started</p>
+                    </div>
+                    <span class="inline-flex items-center px-2.5 py-1 bg-brand-50 text-brand-700 text-xs font-medium rounded-full">In Progress</span>
                 </div>
 
                 <\!-- Status Banner -->
@@ -70,7 +94,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Check your email</h2>
+                    <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Verify your email</h2>
                     <p class="text-dark-500 text-sm">We sent a 6-digit verification code to</p>
                     <p id="verifyEmail" class="text-dark-900 font-semibold text-sm mt-1"></p>
                 </div>
@@ -114,7 +138,7 @@
             </div>
 
         </div>
-    </section>
+    </main>
 
     <\!-- @include partials/auth.html -->
     <\!-- @include partials/footer.html -->
@@ -140,6 +164,9 @@
             });
             var active = document.getElementById(id);
             if (active) active.classList.add('fade-in');
+            var steps = { registerCard: ['1', '33%'], verifyCard: ['2', '66%'], successCard: ['3', '100%'] };
+            var s = steps[id];
+            if (s) { document.getElementById('stepLabel').textContent = 'Step ' + s[0] + ' of 3'; document.getElementById('progressFill').style.width = s[1]; }
         }
 
         // Registration form submit
