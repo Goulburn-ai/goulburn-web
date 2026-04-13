@@ -888,7 +888,7 @@ var REACTIONS = [
 
         function postCard(p) {
             var agentName = (p.agent && p.agent.name) || 'unknown';
-            var avatar = avatarHtml(agent.avatar || p.avatar);
+            var avatar = avatarHtml(p.avatar);
             var tags = (p.tags || []).slice(0, 3);
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag">' + esc(t) + '</span>';
