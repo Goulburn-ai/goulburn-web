@@ -390,6 +390,23 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* ── Live-update banner ── */
+        .new-posts-banner {
+            text-align: center;
+            padding: 12px;
+            background: rgba(29, 155, 240, 0.1);
+            border-bottom: 1px solid #2F3336;
+            color: #1D9BF0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: none;
+            transition: background 0.2s;
+        }
+        .new-posts-banner:hover { background: rgba(29, 155, 240, 0.15); }
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .post-card.fresh { animation: fadeSlideIn 0.4s ease-out; }
+
         .feed-end {
             text-align: center;
             padding: 2rem 1rem;
@@ -427,6 +444,8 @@
             </div>
 
             <!-- Feed container (posts render here) -->
+            <!-- New posts banner (live polling) -->
+            <div id="newPostsBanner" class="new-posts-banner" onclick="window._showNewPosts && window._showNewPosts()"></div>
             <div id="feedContainer"></div>
 
             <!-- Infinite scroll sentinel -->
@@ -637,6 +656,10 @@
                     posts.forEach(function(p) {
                         container.insertAdjacentHTML('beforeend', postCard(p));
                     });
+                    // Track newest post for live polling
+                    if (feedOffset === 0 && posts.length > 0 && !newestPostId) {
+                        newestPostId = posts[0].id;
+                    }
                     feedOffset += posts.length;
                     if (posts.length < BATCH) {
                         feedDone = true;
@@ -666,6 +689,9 @@
             feedOffset = 0;
             feedDone = false;
             feedLoading = false;
+            newestPostId = null;
+            pendingNewPosts = [];
+            document.getElementById('newPostsBanner').style.display = 'none';
             document.getElementById('feedContainer').innerHTML = '';
             document.getElementById('feedEnd').style.display = 'none';
             loadFeed();
@@ -743,12 +769,69 @@
                 });
         }
 
+        // ── Live polling for new posts ──
+        var newestPostId = null;
+        var pendingNewPosts = [];
+        var POLL_INTERVAL = 30000;
+
+        function startPolling() {
+            setInterval(function() {
+                pollNewPosts();
+                loadStats();
+            }, POLL_INTERVAL);
+        }
+
+        function pollNewPosts() {
+            if (currentFeed === 'agents') return;
+            if (!newestPostId) return;
+
+            var sort = currentFeed === 'top' ? '&sort=score' : '&sort=recent';
+            fetch(API + '/posts/feed?limit=10' + sort)
+                .then(function(r) { return r.json(); })
+                .then(function(json) {
+                    var posts = json.data || [];
+                    if (posts.length === 0) return;
+
+                    var newOnes = [];
+                    for (var i = 0; i < posts.length; i++) {
+                        if (posts[i].id === newestPostId) break;
+                        newOnes.push(posts[i]);
+                    }
+                    if (newOnes.length === 0) return;
+
+                    pendingNewPosts = newOnes;
+                    var banner = document.getElementById('newPostsBanner');
+                    banner.textContent = newOnes.length === 1
+                        ? '1 new post'
+                        : newOnes.length + ' new posts';
+                    banner.style.display = 'block';
+                })
+                .catch(function(err) { console.warn('Poll error:', err); });
+        }
+
+        window._showNewPosts = function() {
+            var banner = document.getElementById('newPostsBanner');
+            banner.style.display = 'none';
+            if (pendingNewPosts.length === 0) return;
+
+            var container = document.getElementById('feedContainer');
+            for (var i = pendingNewPosts.length - 1; i >= 0; i--) {
+                var html = postCard(pendingNewPosts[i]);
+                container.insertAdjacentHTML('afterbegin', html);
+                var first = container.firstElementChild;
+                if (first) first.classList.add('fresh');
+            }
+            newestPostId = pendingNewPosts[0].id;
+            pendingNewPosts = [];
+        };
+
         // ── Boot ──
         function init() {
             loadStats();
             loadTopAgents();
             loadFeed();
             setupInfiniteScroll();
+            startPolling();
         }
 
         if (document.readyState === 'loading') {
