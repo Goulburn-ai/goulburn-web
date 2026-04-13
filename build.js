@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * goulburn.ai Static Site Builder
- * Compiles src/pages/*.html → public/*.html with shared partials.
- * Compiles Tailwind CSS from src/styles/input.css → public/styles.css
+ * Compiles src/pages/*.html â public/*.html with shared partials.
+ * Compiles Tailwind CSS from src/styles/input.css â public/styles.css
  *
  * Partials use: <!-- @include partials/name.html -->
  * Uses Tailwind CLI for CSS compilation.
@@ -39,9 +39,9 @@ fs.readdirSync(PARTIALS_DIR).forEach(file => {
 
 console.log(`Loaded ${Object.keys(partials).length} partials: ${Object.keys(partials).join(', ')}`);
 
-// ─────────────────────────────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // STEP 1: Compile Tailwind CSS
-// ─────────────────────────────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const INPUT_CSS = path.join(STYLES_DIR, 'input.css');
 const OUTPUT_CSS = path.join(OUT, 'styles.css');
 
@@ -52,18 +52,18 @@ if (fs.existsSync(INPUT_CSS)) {
             stdio: 'inherit',
             cwd: __dirname
         });
-        console.log(`✓ Tailwind CSS compiled → ${OUTPUT_CSS}`);
+        console.log(`â Tailwind CSS compiled â ${OUTPUT_CSS}`);
     } catch (err) {
         console.error('Failed to compile Tailwind CSS:', err.message);
         process.exit(1);
     }
 } else {
-    console.warn(`⚠ Input CSS not found at ${INPUT_CSS}`);
+    console.warn(`â  Input CSS not found at ${INPUT_CSS}`);
 }
 
-// ─────────────────────────────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // STEP 2: Process HTML pages with partial includes
-// ─────────────────────────────────────────────────────────────────────
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const pages = fs.readdirSync(PAGES_DIR).filter(f => f.endsWith('.html'));
 let count = 0;
@@ -84,9 +84,9 @@ pages.forEach(file => {
     count++;
 });
 
-// ─────────────────────────────────────────────────────────────────────
-// STEP 3: Copy static assets from src/static/ → public/
-// ───────────────────────────────────────────────────────────────────── (JS, CSS, images) from src/static/ → public/
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// STEP 3: Copy static assets from src/static/ â public/
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ (JS, CSS, images) from src/static/ â public/
 const STATIC_DIR = path.join(SRC, 'static');
 let staticCount = 0;
 if (fs.existsSync(STATIC_DIR)) {
@@ -96,18 +96,18 @@ if (fs.existsSync(STATIC_DIR)) {
     });
 }
 if (staticCount > 0) {
-    console.log(`Copied ${staticCount} static asset(s) → public/`);
+    console.log(`Copied ${staticCount} static asset(s) â public/`);
 }
 
-console.log(`Built ${count} pages → public/`);
+console.log(`Built ${count} pages â public/`);
 
-// ─────────────────────────────────────────────────────────────────────
-// MAINTENANCE MODE — when true, overwrite every public HTML file with
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// MAINTENANCE MODE â when true, overwrite every public HTML file with
 // the maintenance page content so static-file resolution serves it
 // regardless of Vercel rewrite evaluation order.
 // Flip to false and rebuild to lift maintenance.
-// ─────────────────────────────────────────────────────────────────────
-const MAINTENANCE_MODE = false;
+// âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+const MAINTENANCE_MODE = true;
 if (MAINTENANCE_MODE) {
     const maintenanceHtml = fs.readFileSync(path.join(OUT, 'maintenance.html'), 'utf8');
     let overwritten = 0;
