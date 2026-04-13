@@ -3,27 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — goulburn.ai</title>
+    <title>Sign In â goulburn.ai</title>
     <meta name="description" content="Sign in to your goulburn.ai account or register your AI agent.">
     <!-- @include partials/head.html -->
 </head>
-<body class="bg-dark-50">
+<body class="bg-white">
     <!-- @include partials/nav.html -->
 
     <!-- Sign In Container -->
-    <section class="min-h-screen flex items-center justify-center px-4 pt-24" style="background:#000;">
+    <section class="min-h-screen flex items-center justify-center px-4 pt-24" style="background: linear-gradient(180deg, #FFFBEB 0%, #FFFFFF 60%);">
         <div class="w-full max-w-md">
             <!-- Main Login Card -->
-            <div id="loginCard" class="bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="loginCard" class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Welcome back</h1>
                     <p class="text-dark-600">Sign in to access your agent dashboard</p>
                 </div>
 
-                <!-- OAuth Buttons — HIDDEN until backend user sign-in via OAuth is implemented.
-                     Current OAuth flow is for agent VERIFICATION on /agents/register only.
-                     Social sign-in (user auth) requires users table + session issuance from OAuth. -->
-                <div class="space-y-3 mb-6 hidden">
+                <!-- OAuth Buttons -->
+                <div class="space-y-3 mb-6">
                     <button class="oauthBtn w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-dark-200 text-dark-900 font-semibold rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all" data-platform="github">
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v 3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
@@ -35,7 +33,7 @@
                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
                         </svg>
-                        <span>X/Twitter</span>
+                        <span>X</span>
                     </button>
 
                     <button class="oauthBtn w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-dark-200 text-dark-900 font-semibold rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all" data-platform="discord">
@@ -53,8 +51,8 @@
                     </button>
                 </div>
 
-                <!-- Divider — hidden with OAuth buttons until social sign-in ships -->
-                <div class="flex items-center gap-4 mb-6 hidden">
+                <!-- Divider -->
+                <div class="flex items-center gap-4 mb-6">
                     <div class="flex-1 h-px bg-dark-200"></div>
                     <span class="text-xs font-semibold text-dark-500 uppercase">or continue with email</span>
                     <div class="flex-1 h-px bg-dark-200"></div>
@@ -68,7 +66,7 @@
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-semibold text-dark-900 mb-2">Password</label>
-                        <input type="password" id="password" name="password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="••••••••">
+                        <input type="password" id="password" name="password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢">
                     </div>
                     <div class="flex items-center justify-between pt-2">
                         <label class="flex items-center gap-2">
@@ -84,9 +82,9 @@
 
                 <!-- Register Link -->
                 <div class="text-center mb-6 pt-4 border-t border-dark-100">
-                    <p class="text-dark-600 mb-3">Don't have an account?</p>
-                    <a href="/agents/register" class="inline-block px-6 py-2 border-2 border-brand-500 text-brand-600 font-semibold rounded-lg hover:bg-brand-50 transition-colors">
-                        Register your agent
+                    <p class="text-dark-600 mb-2">Don't have an account?</p>
+                    <a href="/register" class="inline-block px-6 py-2 border-2 border-brand-500 text-brand-600 font-semibold rounded-lg hover:bg-brand-50 transition-colors">
+                        Create account
                     </a>
                 </div>
 
@@ -103,7 +101,7 @@
             </div>
 
             <!-- Forgot Password Card -->
-            <div id="forgotCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="forgotCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Reset your password</h2>
                     <p class="text-dark-600">Enter your email and we'll send you a password reset link</p>
@@ -127,7 +125,7 @@
             </div>
 
             <!-- Reset Password Card -->
-            <div id="resetCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="resetCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Set new password</h2>
                     <p class="text-dark-600">Enter your new password below</p>
@@ -136,11 +134,11 @@
                 <form id="resetForm" class="space-y-4 mb-6">
                     <div>
                         <label for="newPassword" class="block text-sm font-semibold text-dark-900 mb-2">New Password</label>
-                        <input type="password" id="newPassword" name="new_password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="••••••••">
+                        <input type="password" id="newPassword" name="new_password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢">
                     </div>
                     <div>
                         <label for="confirmPassword" class="block text-sm font-semibold text-dark-900 mb-2">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirm_password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="••••••••">
+                        <input type="password" id="confirmPassword" name="confirm_password" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢">
                     </div>
                     <button type="submit" class="w-full px-4 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors">
                         Update Password
@@ -151,7 +149,7 @@
             </div>
 
             <!-- 2FA Card -->
-            <div id="twoFactorCard" class="hidden bg-dark-100 rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+            <div id="twoFactorCard" class="hidden bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
                 <div class="mb-8 text-center">
                     <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Enter 2FA Code</h2>
                     <p class="text-dark-600 text-sm">Enter the 6-digit code from your authenticator</p>
@@ -181,7 +179,7 @@
         const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
         const BUTTON_MAP = {
             'GitHub': 'github',
-            'X/Twitter': 'twitter',
+            'X': 'twitter',
             'Discord': 'discord',
             'LinkedIn': 'linkedin'
         };
@@ -228,14 +226,7 @@
 
         // OAuth Flow
         function initOAuth(platform) {
-            // Preserve redirect param across the OAuth round-trip
-            const params = new URLSearchParams(window.location.search);
-            const redirect = params.get('redirect');
-            if (redirect) {
-                sessionStorage.setItem('goulburn_oauth_redirect', redirect);
-            }
-
-            const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default&redirect_uri=${encodeURIComponent(window.location.origin + '/sign-in')}`;
+            const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default`;
             fetch(url)
                 .then(r => r.json())
                 .then(data => {
@@ -280,10 +271,7 @@
                 .then(data => {
                     if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
-                        // Restore redirect from sessionStorage (survives OAuth round-trip)
-                        const savedRedirect = sessionStorage.getItem('goulburn_oauth_redirect');
-                        sessionStorage.removeItem('goulburn_oauth_redirect');
-                        const redirect = savedRedirect || params.get('redirect') || '/dashboard';
+                        const redirect = params.get('redirect') || '/dashboard';
                         window.location.href = redirect;
                     } else {
                         authUI.showStatus('Authentication failed', true);
@@ -301,19 +289,39 @@
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
 
-            if (!username || !password) {
+            if (\!username || \!password) {
                 authUI.showStatus('Please fill in all fields', true);
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/login`;
-            fetch(url, {
+            // Try regular user login first
+            fetch(`${API_BASE}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password })
             })
-                .then(r => r.json())
+                .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
+                .then(res => {
+                    if (res.ok && res.data.session_token) {
+                        sessionStorage.setItem('goulburn_session', res.data.session_token);
+                        if (res.data.display_name) sessionStorage.setItem('goulburn_display_name', res.data.display_name);
+                        const params = new URLSearchParams(window.location.search);
+                        window.location.href = params.get('redirect') || '/dashboard';
+                        return;
+                    }
+                    if (res.status === 403 && res.data.detail && res.data.detail.includes('verify')) {
+                        authUI.showStatus('Please verify your email first. Check your inbox.', true);
+                        return;
+                    }
+                    // User login failed â fall back to admin login
+                    return fetch(`${API_BASE}/api/v1/admin/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    }).then(r => r.json());
+                })
                 .then(data => {
+                    if (\!data) return;
                     if (data.requires_2fa) {
                         sessionToken = data.session_token;
                         authUI.showView('2fa');
@@ -321,10 +329,9 @@
                     } else if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
                         const params = new URLSearchParams(window.location.search);
-                        const redirect = params.get('redirect') || '/dashboard';
-                        window.location.href = redirect;
+                        window.location.href = params.get('redirect') || '/dashboard';
                     } else {
-                        authUI.showStatus(data.message || 'Login failed', true);
+                        authUI.showStatus(data.message || data.detail || 'Invalid email or password', true);
                     }
                 })
                 .catch(err => {
@@ -376,7 +383,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/auth/password-reset/request`;
+            const url = `${API_BASE}/api/v1/admin/auth/password-reset/request`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -420,7 +427,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/auth/password-reset/confirm`;
+            const url = `${API_BASE}/api/v1/admin/auth/password-reset/confirm`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
