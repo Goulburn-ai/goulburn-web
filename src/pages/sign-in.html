@@ -226,7 +226,11 @@
 
         // OAuth Flow
         function initOAuth(platform) {
-            try { sessionStorage.setItem('goulburn_oauth_return_to', '/dashboard'); } catch (e) {}
+            try {
+                sessionStorage.setItem('goulburn_oauth_return_to', '/dashboard');
+                sessionStorage.setItem('goulburn_oauth_flow', 'user_login');
+                sessionStorage.setItem('goulburn_oauth_platform', platform);
+            } catch (e) {}
             const url = `${API_BASE}/api/v1/auth/oauth/${platform}/start?return_to=/dashboard`;
             fetch(url)
                 .then(r => r.json())
@@ -246,37 +250,62 @@
         // Callback Handler
         function handleCallback() {
             const params = new URLSearchParams(window.location.search);
-            const code = params.get('code') || sessionStorage.getItem('goulburn_oauth_code');
-            const state = params.get('state') || sessionStorage.getItem('goulburn_oauth_state');
-
+            let code = params.get('code') || sessionStorage.getItem('goulburn_oauth_code');
+            let state = params.get('state') || sessionStorage.getItem('goulburn_oauth_state');
+            const errParam = params.get('error') || params.get('oauth_error');
+            if (errParam) {
+                authUI.showStatus('OAuth error: ' + errParam, true);
+                return;
+            }
             if (!code || !state) return;
 
-            // Parse state to get platform
-            let platform = null;
-            for (const p of PLATFORMS) {
-                if (state.includes(p)) {
-                    platform = p;
-                    break;
-                }
+            // Read flow marker stashed by initOAuth.
+            const flow = sessionStorage.getItem('goulburn_oauth_flow');
+            const platform = sessionStorage.getItem('goulburn_oauth_platform');
+
+            // Clean up the stash so we don't re-fire on refresh.
+            try {
+                sessionStorage.removeItem('goulburn_oauth_code');
+                sessionStorage.removeItem('goulburn_oauth_state');
+                sessionStorage.removeItem('goulburn_oauth_flow');
+                sessionStorage.removeItem('goulburn_oauth_platform');
+                sessionStorage.removeItem('goulburn_oauth_return_to');
+            } catch (e) {}
+
+            if (flow !== 'user_login' || !platform) {
+                // Not our flow — ignore (legacy agent-claim handler lives elsewhere).
+                return;
             }
 
-            if (!platform) return;
-
-            const url = `${API_BASE}/api/v1/oauth/${platform}/callback`;
-            fetch(url, {
+            authUI.showStatus('Completing sign-in...', false);
+            fetch(`${API_BASE}/api/v1/auth/oauth/callback-exchange`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, state })
+                body: JSON.stringify({ provider: platform, code, state })
             })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.session_token) {
-                        sessionStorage.setItem('goulburn_session', data.session_token);
-                        const redirect = params.get('redirect') || '/dashboard';
-                        window.location.href = redirect;
-                    } else {
-                        authUI.showStatus('Authentication failed', true);
+                .then(r => r.json().then(data => ({ ok: r.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok) {
+                        authUI.showStatus('Sign-in failed: ' + (data.message || data.detail || 'unknown'), true);
+                        return;
                     }
+                    if (data.action === '2fa' && data.mfa_token) {
+                        window.location.replace('/oauth/2fa#mfa_token=' + encodeURIComponent(data.mfa_token));
+                        return;
+                    }
+                    if (data.action === 'pending_email' && data.pending_token) {
+                        window.location.replace('/oauth/email#pending_token=' + encodeURIComponent(data.pending_token) + '&provider=' + encodeURIComponent(data.provider || platform));
+                        return;
+                    }
+                    if (data.action === 'session' && data.session_token) {
+                        try {
+                            sessionStorage.setItem('goulburn_session', data.session_token);
+                            if (data.user_id) sessionStorage.setItem('goulburn_user_id', data.user_id);
+                        } catch (e) {}
+                        window.location.replace('/dashboard');
+                        return;
+                    }
+                    authUI.showStatus('Unexpected response from sign-in', true);
                 })
                 .catch(err => {
                     console.error('Callback error:', err);
