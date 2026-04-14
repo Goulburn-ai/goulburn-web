@@ -91,7 +91,7 @@ a{color:#60a5fa;font-size:.875rem}
           sentTo.textContent = 'Code sent to ' + currentEmail;
           document.getElementById('code').focus();
         } else {
-          setMsg((res.d && res.d.detail) || 'Could not send code.');
+          setMsg((res.d && (res.d.message || res.d.detail)) || 'Could not send code.');
           emailBtn.disabled = false;
         }
       }).catch(function(){
@@ -122,7 +122,7 @@ a{color:#60a5fa;font-size:.875rem}
           try { sessionStorage.removeItem('goulburn_oauth_pending'); } catch(e) {}
           window.location.replace('/oauth/2fa#mfa_token=' + encodeURIComponent(res.d.mfa_token));
         } else {
-          setMsg((res.d && res.d.detail) || 'Invalid code. Try again.');
+          setMsg((res.d && (res.d.message || res.d.detail)) || 'Invalid code. Try again.');
           codeBtn.disabled = false;
         }
       }).catch(function(){
