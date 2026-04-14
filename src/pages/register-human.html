@@ -242,9 +242,13 @@
                 if (res.ok && res.data.success) {
                     // Store session
                     if (res.data.session_token) {
-                        sessionStorage.setItem('goulburn_session', res.data.session_token);
+                        localStorage.setItem('session_token', res.data.session_token);
+                        if (res.data.user_id) {
+                            localStorage.setItem('user_id', res.data.user_id);
+                        }
                     }
                     showCard('successCard');
+                    setTimeout(function() { window.location.href = '/dashboard'; }, 1200);
                 } else {
                     showStatus('verifyStatus', res.data.detail || res.data.message || 'Verification failed.', true);
                     btn.disabled = false;
