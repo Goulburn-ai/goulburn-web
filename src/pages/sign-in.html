@@ -227,7 +227,7 @@
         // OAuth Flow
         function initOAuth(platform) {
             try { sessionStorage.setItem('goulburn_oauth_return_to', '/dashboard'); } catch (e) {}
-            const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default`;
+            const url = `${API_BASE}/api/v1/auth/oauth/${platform}/start?return_to=/dashboard`;
             fetch(url)
                 .then(r => r.json())
                 .then(data => {
