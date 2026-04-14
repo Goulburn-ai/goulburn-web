@@ -226,6 +226,7 @@
 
         // OAuth Flow
         function initOAuth(platform) {
+            try { sessionStorage.setItem('goulburn_oauth_return_to', '/dashboard'); } catch (e) {}
             const url = `${API_BASE}/api/v1/oauth/${platform}/authorize?agent_id=default`;
             fetch(url)
                 .then(r => r.json())
@@ -245,8 +246,8 @@
         // Callback Handler
         function handleCallback() {
             const params = new URLSearchParams(window.location.search);
-            const code = params.get('code');
-            const state = params.get('state');
+            const code = params.get('code') || sessionStorage.getItem('goulburn_oauth_code');
+            const state = params.get('state') || sessionStorage.getItem('goulburn_oauth_state');
 
             if (!code || !state) return;
 
@@ -314,7 +315,7 @@
                         return;
                     }
                     // User login failed â fall back to admin login
-                    return fetch(`${API_BASE}/api/v1/admin/auth/login`, {
+                    return fetch(`${API_BASE}/api/v1/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password })
@@ -323,7 +324,7 @@
                 .then(data => {
                     if (!data) return;
                     if (data.requires_2fa) {
-                        sessionToken = data.session_token;
+                        sessionToken = data.mfa_token;
                         authUI.showView('2fa');
                         authUI.showStatus('Enter your 2FA code', false);
                     } else if (data.session_token) {
@@ -350,11 +351,11 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/verify-2fa`;
+            const url = `${API_BASE}/api/v1/auth/2fa/verify`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ session_token: sessionToken, totp_code: totp })
+                body: JSON.stringify({ mfa_token: sessionToken, code: totp })
             })
                 .then(r => r.json())
                 .then(data => {
@@ -383,7 +384,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/password-reset/request`;
+            const url = `${API_BASE}/api/v1/auth/password-reset/request`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -427,7 +428,7 @@
                 return;
             }
 
-            const url = `${API_BASE}/api/v1/admin/auth/password-reset/confirm`;
+            const url = `${API_BASE}/api/v1/auth/password-reset/confirm`;
             fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
