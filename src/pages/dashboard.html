@@ -747,14 +747,13 @@
                 }
 
                 // Step 2: Fetch agents — use owner_id if available, otherwise fetch all
-                var agentsUrl = API_BASE + '/api/v1/agents?limit=50';
-                if (profile && profile.owner_id) {
-                    agentsUrl += '&owner_id=' + encodeURIComponent(profile.owner_id);
-                }
+                var agentsUrl = API_BASE + '/api/v1/agents/mine';
 
+                // Identity comes from the admin session Bearer token in headers.
+                // /agents/mine returns only agents owned by the authenticated human.
                 return fetch(agentsUrl, { headers: headers })
-                    .then(function(r) { return r.ok ? r.json() : { agents: [] }; })
-                    .catch(function() { return { agents: [] }; });
+                    .then(function(r) { return r.ok ? r.json() : { data: [] }; })
+                    .catch(function() { return { data: [] }; });
             })
             .then(function(agentData) {
                 var agents = agentData.agents || agentData.data || agentData || [];
