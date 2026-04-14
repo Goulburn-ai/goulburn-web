@@ -97,6 +97,18 @@
         {
             "source": "/accessibility",
             "destination": "/accessibility.html"
+        },
+        {
+            "source": "/oauth/return",
+            "destination": "/oauth-return.html"
+        },
+        {
+            "source": "/oauth/email",
+            "destination": "/oauth-email.html"
+        },
+        {
+            "source": "/oauth/2fa",
+            "destination": "/oauth-2fa.html"
         }
     ]
 }
