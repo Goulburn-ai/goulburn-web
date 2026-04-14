@@ -472,6 +472,7 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
@@ -572,6 +573,51 @@
             <p style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.75rem;">
                 Generating a new key will invalidate the current one. Active sessions will be disconnected.
             </p>
+        </div>
+
+        <!-- Two-Factor Authentication -->
+        <div class="settings-card" id="twoFactorCard" style="margin-bottom: 1.5rem;">
+            <h2>Two-Factor Authentication</h2>
+            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1rem;">
+                Add a second layer of security with a time-based one-time password from your authenticator app.
+            </p>
+
+            <div id="twoFactorStatusRow" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 0;">
+                <div>
+                    <strong id="twoFactorStateLabel">Loading...</strong>
+                    <p id="twoFactorBackupLine" style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.25rem;"></p>
+                </div>
+                <button id="twoFactorPrimaryBtn" class="btn btn-primary" type="button" style="display: none;">Enable</button>
+            </div>
+
+            <div id="twoFactorEnableBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
+                <p style="font-size: 0.875rem; margin-bottom: 0.75rem;">Scan this QR code with your authenticator app, then enter the 6-digit code below.</p>
+                <div id="twoFactorQrBox" style="background: white; padding: 12px; display: inline-block; border-radius: 4px;"></div>
+                <p style="font-size: 0.75rem; color: var(--dark-600); margin-top: 0.5rem; word-break: break-all;">
+                    Manual setup key: <code id="twoFactorSecretText"></code>
+                </p>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                    <input type="text" id="twoFactorConfirmCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" style="flex: 1; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px;" />
+                    <button id="twoFactorConfirmBtn" class="btn btn-primary" type="button">Confirm</button>
+                    <button id="twoFactorCancelBtn" class="btn btn-secondary" type="button">Cancel</button>
+                </div>
+            </div>
+
+            <div id="twoFactorBackupBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
+                <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Save these backup codes somewhere safe.</strong> Each can be used once if you lose your authenticator.</p>
+                <pre id="twoFactorBackupList" style="background: white; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap;"></pre>
+                <button id="twoFactorBackupAckBtn" class="btn btn-primary" type="button" style="margin-top: 0.5rem;">I have saved them</button>
+            </div>
+
+            <div id="twoFactorDisableBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
+                <p style="font-size: 0.875rem; margin-bottom: 0.75rem;">Confirm your password and enter a current 2FA code to disable.</p>
+                <input type="password" id="twoFactorDisablePassword" placeholder="Password" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px; margin-bottom: 0.5rem;" />
+                <input type="text" id="twoFactorDisableCode" inputmode="numeric" maxlength="14" placeholder="123456 or backup code" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px; margin-bottom: 0.5rem;" />
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="twoFactorDisableConfirmBtn" class="btn btn-danger" type="button">Disable 2FA</button>
+                    <button id="twoFactorDisableCancelBtn" class="btn btn-secondary" type="button">Cancel</button>
+                </div>
+            </div>
         </div>
 
         <!-- Danger Zone -->
@@ -1009,6 +1055,155 @@
     document.getElementById('deleteConfirmModal').addEventListener('click', function(e) {
         if (e.target === this) closeDeleteModal();
     });
+    // -- Two-Factor Authentication --
+    var twoFactorState = { enabled: false, backupRemaining: 0, pendingSecret: null };
+
+    function tfaAuthHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + goulburnAuth.getSession()
+        };
+    }
+
+    function load2FAStatus() {
+        return fetch(API_BASE + '/api/v1/auth/2fa/status', { headers: tfaAuthHeaders() })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                twoFactorState.enabled = !!data.enabled;
+                twoFactorState.backupRemaining = data.backup_codes_remaining || 0;
+                render2FAStatus();
+            })
+            .catch(function(err) {
+                console.error('2FA status error:', err);
+                var label = document.getElementById('twoFactorStateLabel');
+                if (label) label.textContent = 'Status unavailable';
+            });
+    }
+
+    function render2FAStatus() {
+        var label = document.getElementById('twoFactorStateLabel');
+        var backupLine = document.getElementById('twoFactorBackupLine');
+        var btn = document.getElementById('twoFactorPrimaryBtn');
+        if (!label || !btn) return;
+        if (twoFactorState.enabled) {
+            label.textContent = 'Enabled';
+            backupLine.textContent = twoFactorState.backupRemaining + ' backup code(s) remaining';
+            btn.textContent = 'Disable';
+            btn.className = 'btn btn-danger';
+        } else {
+            label.textContent = 'Disabled';
+            backupLine.textContent = 'Protect sign-in with an authenticator app';
+            btn.textContent = 'Enable';
+            btn.className = 'btn btn-primary';
+        }
+        btn.style.display = '';
+    }
+
+    function start2FAEnable() {
+        var pwd = prompt('Confirm your account password to enable 2FA:');
+        if (!pwd) return;
+        fetch(API_BASE + '/api/v1/auth/2fa/enable', {
+            method: 'POST',
+            headers: tfaAuthHeaders(),
+            body: JSON.stringify({ password: pwd })
+        })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+                if (!res.ok) { showToast(res.data.detail || 'Could not start 2FA setup', 'error'); return; }
+                twoFactorState.pendingSecret = res.data.secret;
+                document.getElementById('twoFactorSecretText').textContent = res.data.secret;
+                var qrBox = document.getElementById('twoFactorQrBox');
+                qrBox.innerHTML = '';
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrBox, { text: res.data.provisioning_uri, width: 192, height: 192 });
+                } else {
+                    qrBox.textContent = 'QR library unavailable -- use the manual key below.';
+                }
+                document.getElementById('twoFactorEnableBox').style.display = 'block';
+                document.getElementById('twoFactorConfirmCode').value = '';
+                document.getElementById('twoFactorConfirmCode').focus();
+            })
+            .catch(function(err) { showToast('Network error: ' + err.message, 'error'); });
+    }
+
+    function confirm2FAEnable() {
+        var code = document.getElementById('twoFactorConfirmCode').value.trim();
+        if (!/^[0-9]{6}$/.test(code)) { showToast('Enter the 6-digit code from your app', 'error'); return; }
+        fetch(API_BASE + '/api/v1/auth/2fa/confirm', {
+            method: 'POST',
+            headers: tfaAuthHeaders(),
+            body: JSON.stringify({ code: code })
+        })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+                if (!res.ok) { showToast(res.data.detail || 'Code rejected', 'error'); return; }
+                document.getElementById('twoFactorEnableBox').style.display = 'none';
+                document.getElementById('twoFactorBackupList').textContent = (res.data.backup_codes || []).join('\n');
+                document.getElementById('twoFactorBackupBox').style.display = 'block';
+                showToast('Two-factor authentication enabled', 'success');
+                load2FAStatus();
+            })
+            .catch(function(err) { showToast('Network error: ' + err.message, 'error'); });
+    }
+
+    function cancel2FAEnable() {
+        document.getElementById('twoFactorEnableBox').style.display = 'none';
+        twoFactorState.pendingSecret = null;
+    }
+
+    function ack2FABackup() {
+        document.getElementById('twoFactorBackupBox').style.display = 'none';
+    }
+
+    function start2FADisable() {
+        document.getElementById('twoFactorDisableBox').style.display = 'block';
+        document.getElementById('twoFactorDisablePassword').value = '';
+        document.getElementById('twoFactorDisableCode').value = '';
+        document.getElementById('twoFactorDisablePassword').focus();
+    }
+
+    function confirm2FADisable() {
+        var pwd = document.getElementById('twoFactorDisablePassword').value;
+        var code = document.getElementById('twoFactorDisableCode').value.trim();
+        if (!pwd || !code) { showToast('Password and code required', 'error'); return; }
+        fetch(API_BASE + '/api/v1/auth/2fa/disable', {
+            method: 'POST',
+            headers: tfaAuthHeaders(),
+            body: JSON.stringify({ password: pwd, code: code })
+        })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(res) {
+                if (!res.ok) { showToast(res.data.detail || 'Could not disable 2FA', 'error'); return; }
+                document.getElementById('twoFactorDisableBox').style.display = 'none';
+                showToast('Two-factor authentication disabled', 'success');
+                load2FAStatus();
+            })
+            .catch(function(err) { showToast('Network error: ' + err.message, 'error'); });
+    }
+
+    function cancel2FADisable() {
+        document.getElementById('twoFactorDisableBox').style.display = 'none';
+    }
+
+    function init2FAUI() {
+        var primary = document.getElementById('twoFactorPrimaryBtn');
+        if (!primary) return;
+        primary.addEventListener('click', function() {
+            if (twoFactorState.enabled) start2FADisable();
+            else start2FAEnable();
+        });
+        document.getElementById('twoFactorConfirmBtn').addEventListener('click', confirm2FAEnable);
+        document.getElementById('twoFactorCancelBtn').addEventListener('click', cancel2FAEnable);
+        document.getElementById('twoFactorBackupAckBtn').addEventListener('click', ack2FABackup);
+        document.getElementById('twoFactorDisableConfirmBtn').addEventListener('click', confirm2FADisable);
+        document.getElementById('twoFactorDisableCancelBtn').addEventListener('click', cancel2FADisable);
+        if (typeof goulburnAuth !== 'undefined' && goulburnAuth.requireAuth && goulburnAuth.getSession()) {
+            load2FAStatus();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', init2FAUI);
+
     </script>
 </body>
 </html>
