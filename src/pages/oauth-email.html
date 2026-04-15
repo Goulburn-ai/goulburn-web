@@ -45,7 +45,7 @@ a{color:#60a5fa;font-size:.875rem}
 </div>
 <script>
 (function(){
-  var API_BASE = 'https://goulburn-admin-production.up.railway.app';
+  var API_BASE = goulburnAuth.ADMIN_BASE;
   var hash = (window.location.hash || '').replace(/^#/, '');
   var params = new URLSearchParams(hash);
   var pendingToken = params.get('pending_token') || sessionStorage.getItem('goulburn_oauth_pending');
