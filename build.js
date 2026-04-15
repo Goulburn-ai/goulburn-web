@@ -107,7 +107,7 @@ console.log(`Built ${count} pages â public/`);
 // regardless of Vercel rewrite evaluation order.
 // Flip to false and rebuild to lift maintenance.
 // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 if (MAINTENANCE_MODE) {
     const maintenanceHtml = fs.readFileSync(path.join(OUT, 'maintenance.html'), 'utf8');
     let overwritten = 0;
