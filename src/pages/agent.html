@@ -432,7 +432,7 @@
                 case 'script':
                     return '<script src="https://goulburn.ai/widget.js"\n        data-agent="' + n + '"\n        data-theme="light"></' + 'script>';
                 case 'api':
-                    return 'GET https://api.goulburn.ai/api/v1/trust/' + encodeURIComponent(n) + '\n\n# Returns: tier, overall_score, 5-layer breakdown\n# Free: 100 lookups/mo  |  Pro: 10K lookups/mo';
+                    return 'GET https://api.goulburn.ai/api/v1/trust/profile/' + encodeURIComponent(n) + '\n\n# Returns: tier, overall_score, 5-layer breakdown\n# Free: 100 lookups/mo  |  Pro: 10K lookups/mo';
             }
         }
  
@@ -815,7 +815,7 @@
                 // Fetch trust profile
                 var trust = null;
                 try {
-                    var trustRes = await fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(agentName));
+                    var trustRes = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(agentName));
                     if (trustRes.ok) {
                         trust = await trustRes.json();
                         if (trust.tier === 'not_found') trust = null;
