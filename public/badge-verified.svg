@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- Shield body gradient: bright gold top to deep amber bottom -->
+    <linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5C842"/>
+      <stop offset="35%" stop-color="#E8A830"/>
+      <stop offset="70%" stop-color="#D4892A"/>
+      <stop offset="100%" stop-color="#B86E1A"/>
+    </linearGradient>
+    
+    <!-- Shield highlight (left side 3D shine) -->
+    <linearGradient id="shieldHighlight" x1="0" y1="0" x2="1" y2="0.5">
+      <stop offset="0%" stop-color="#FFE680" stop-opacity="0.6"/>
+      <stop offset="40%" stop-color="#FFD040" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#C87020" stop-opacity="0"/>
+    </linearGradient>
+    
+    <!-- Border gradient: metallic gold edge -->
+    <linearGradient id="borderGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFE8A0"/>
+      <stop offset="30%" stop-color="#D4A030"/>
+      <stop offset="70%" stop-color="#B07820"/>
+      <stop offset="100%" stop-color="#8A5A10"/>
+    </linearGradient>
+    
+    <!-- Inner rect gradient -->
+    <linearGradient id="rectGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#C07818"/>
+      <stop offset="100%" stop-color="#8A5010"/>
+    </linearGradient>
+    
+    <!-- Checkmark circle gradient -->
+    <linearGradient id="checkGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5C040"/>
+      <stop offset="100%" stop-color="#D89020"/>
+    </linearGradient>
+    
+    <!-- Glow filter for sparkle -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Drop shadow for shield -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+    
+    <!-- Inner shadow for rect -->
+    <filter id="innerShadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feOffset dx="0" dy="2"/>
+      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1"/>
+      <feFlood flood-color="#000" flood-opacity="0.3"/>
+      <feComposite in2="SourceAlpha" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Shield shape -->
+  <g filter="url(#shadow)">
+    <!-- Shield border (slightly larger) -->
+    <path d="M256 28 L88 108 L88 250 C88 370 156 440 256 478 C356 440 424 370 424 250 L424 108 Z"
+          fill="url(#borderGrad)" stroke="none"/>
+    
+    <!-- Shield body -->
+    <path d="M256 38 L96 114 L96 248 C96 362 160 430 256 466 C352 430 416 362 416 248 L416 114 Z"
+          fill="url(#shieldGrad)" stroke="none"/>
+    
+    <!-- 3D highlight overlay -->
+    <path d="M256 38 L96 114 L96 248 C96 362 160 430 256 466 C352 430 416 362 416 248 L416 114 Z"
+          fill="url(#shieldHighlight)" stroke="none"/>
+    
+    <!-- Subtle curved shine line (top-left area) -->
+    <path d="M140 130 Q200 160 180 280" stroke="#FFE880" stroke-width="1.5" fill="none" opacity="0.3"/>
+  </g>
+
+  <!-- Inner rounded rectangle (logo background) -->
+  <rect x="178" y="175" width="160" height="160" rx="28" ry="28"
+        fill="url(#rectGrad)" filter="url(#innerShadow)" opacity="0.85"/>
+  
+  <!-- "g" letter with subtle shadow -->
+  <text x="258" y="282" text-anchor="middle" dominant-baseline="central"
+        font-family="'Nunito','Segoe UI',sans-serif" font-weight="800" font-size="120"
+        fill="#000" opacity="0.15">g</text>
+  <text x="256" y="280" text-anchor="middle" dominant-baseline="central"
+        font-family="'Nunito','Segoe UI',sans-serif" font-weight="800" font-size="120"
+        fill="white">g</text>
+
+  <!-- Decorative dot (top-right of rect) -->
+  <circle cx="322" cy="192" r="10" fill="#FFD870" opacity="0.7"/>
+
+  <!-- Checkmark circle (bottom-right) -->
+  <g transform="translate(358, 370)">
+    <!-- White border ring -->
+    <circle cx="0" cy="0" r="56" fill="white" opacity="0.9"/>
+    <!-- Gold circle -->
+    <circle cx="0" cy="0" r="48" fill="url(#checkGrad)"/>
+    <!-- Checkmark -->
+    <path d="M-20 2 L-6 18 L22 -12" stroke="white" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Sparkle top-left -->
+  <g filter="url(#glow)" opacity="0.8">
+    <line x1="108" y1="80" x2="108" y2="104" stroke="#FFF8D0" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="96" y1="92" x2="120" y2="92" stroke="#FFF8D0" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Smaller sparkle -->
+  <g filter="url(#glow)" opacity="0.5">
+    <line x1="128" y1="56" x2="128" y2="68" stroke="#FFF8D0" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="122" y1="62" x2="134" y2="62" stroke="#FFF8D0" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+</svg>
