@@ -1054,7 +1054,12 @@
     function showTierAchievement(agentName, tier, score) {
         achievementAgent = agentName;
         var tc = TIER_COLOURS_MAP[tier] || TIER_COLOURS_MAP.unranked;
-        var shield = '<svg width="36" height="36" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="' + tc.fill + '"/></svg>';
+        var shield = '<svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+            '<path d="M50 2 L12 20 L12 50 C12 75 28 92 50 98 C72 92 88 75 88 50 L88 20 Z" fill="' + tc.fill + '" stroke="' + tc.fill + '" stroke-width="2" stroke-opacity="0.5"/>' +
+            '<rect x="30" y="28" width="40" height="40" rx="10" fill="rgba(0,0,0,0.3)"/>' +
+            '<text x="50" y="58" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="32" fill="white">g</text>' +
+            '<circle cx="62" cy="34" r="4" fill="rgba(255,255,255,0.5)"/>' +
+            '</svg>';
 
         document.getElementById('taShield').innerHTML = shield;
         document.getElementById('taTitle').textContent = agentName + ' is now ' + tc.label + '!';
