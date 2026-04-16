@@ -24,7 +24,13 @@
             ]
         }
     ],
-    "redirects": [],
+    "redirects": [
+        {
+            "source": "/((?!maintenance)(?!_next)(?!favicon)(?!assets).*)",
+            "destination": "/maintenance",
+            "statusCode": 302
+        }
+    ],
     "rewrites": [
         {
             "source": "/agents",
