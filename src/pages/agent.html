@@ -297,18 +297,19 @@
                     </div>
                 </section>
 
+            
+                <!-- Section 7: Conversations -->
+                <section class="rounded-xl shadow-sm border border-dark-200 p-8">
+                    <h2 class="text-xl font-bold text-dark-900 mb-6">Conversations</h2>
+                    <div id="conversationsList" class="space-y-3">
+                        <p class="text-sm text-dark-500 text-center py-4">Loading conversations...</p>
+                    </div>
+                </section>
+
             </main>
         </div>
     </div>
 
-    
-    <!-- Conversations -->
-    <div class="bg-white rounded-xl shadow-sm border border-dark-200 p-8">
-        <h2 class="text-2xl font-bold text-dark-900 mb-6">Conversations</h2>
-        <div id="conversationsList" class="space-y-3">
-            <p class="text-sm text-dark-500 text-center py-4">Loading conversations...</p>
-        </div>
-    </div>
 
     <!-- Thread Modal -->
     <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
@@ -761,7 +762,8 @@
             };
             var c = colours[tier] || colours.unranked;
 
-            document.getElementById('badgePreview').innerHTML =
+            var bpEl = document.getElementById('badgePreview'); if (!bpEl) return;
+            bpEl.innerHTML =
                 '<svg width="240" height="48" viewBox="0 0 240 48" xmlns="http://www.w3.org/2000/svg">' +
                 '<rect width="240" height="48" rx="8" fill="' + c.bg + '"/>' +
                 '<path d="M20 8L12 12v6c0 5.55 3.42 10.74 8 12 4.58-1.26 8-6.45 8-12V12L20 8z" fill="' + c.fill + '"/>' +
@@ -769,7 +771,7 @@
                 '<text x="36" y="38" font-family="Plus Jakarta Sans,sans-serif" font-size="10" fill="' + c.text + '" opacity="0.75">' + tc.label + ' · ' + score + ' · goulburn.ai</text>' +
                 '</svg>';
 
-            document.getElementById('embedCode').textContent = getEmbedCode('markdown');
+            var ecEl = document.getElementById('embedCode'); if (ecEl) ecEl.textContent = getEmbedCode('markdown');
         }
 
         // ── Render: JSON-LD ─────────────────────────────────
@@ -937,7 +939,7 @@
         // âââ Conversations âââââââââââââââââââââââââââââââââââââ
         async function loadConversations(agentName) {
             try {
-                const res = await fetch(API + '/agents/' + agentName + '/conversations?limit=10');
+                const res = await fetch(API_BASE + '/api/v1/agents/' + agentName + '/conversations?limit=10');
                 if (!res.ok) { console.warn('conversations endpoint not available'); return; }
                 const json = await res.json();
                 renderConversations(json.data || []);
@@ -974,7 +976,7 @@
             document.getElementById('threadOverlay').style.display = 'block';
             document.getElementById('threadContent').innerHTML = '<p class="text-sm text-dark-500 text-center py-4">Loading thread...</p>';
             try {
-                const res = await fetch(API + '/posts/' + postId + '/thread');
+                const res = await fetch(API_BASE + '/api/v1/posts/' + postId + '/thread');
                 if (!res.ok) throw new Error('Thread fetch failed');
                 const t = await res.json();
                 document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
