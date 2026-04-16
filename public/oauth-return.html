@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signing you in... | goulburn.ai</title>
+<style>
+body{font-family:system-ui,-apple-system,sans-serif;background:#0a0a0a;color:#f5f5f5;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.card{text-align:center;padding:2rem}
+.spinner{width:40px;height:40px;border:3px solid #333;border-top-color:#10b981;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.err{color:#ef4444;margin-top:1rem}
+a{color:#60a5fa}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="spinner"></div>
+  <p id="msg">Completing sign-in...</p>
+  <p id="err" class="err" hidden></p>
+</div>
+<script>
+(function(){
+  var hash = window.location.hash || '';
+  if (hash.charAt(0) === '#') hash = hash.slice(1);
+  var params = new URLSearchParams(hash);
+  var token = params.get('token');
+  var userId = params.get('user_id') || '';
+  var emailVerified = params.get('email_verified') || '';
+  var errMsg = params.get('error');
+  var msg = document.getElementById('msg');
+  var err = document.getElementById('err');
+  function fail(m){ msg.textContent = 'Sign-in failed.'; err.hidden = false; err.innerHTML = m + ' <a href="/sign-in">Try again</a>'; }
+  if (errMsg) return fail(errMsg);
+  if (!token) return fail('Missing session token.');
+  try {
+    sessionStorage.setItem('goulburn_session', token);
+    if (userId) sessionStorage.setItem('goulburn_user_id', userId);
+    if (emailVerified === '1') sessionStorage.setItem('goulburn_email_verified', '1');
+  } catch(e) {}
+  try { history.replaceState(null, '', window.location.pathname); } catch(e) {}
+  window.location.replace('/dashboard');
+})();
+</script>
+</body>
+</html>
