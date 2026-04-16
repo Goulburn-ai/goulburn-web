@@ -301,7 +301,29 @@
         </div>
     </div>
 
-    <!-- @include partials/footer.html -->
+    
+    <!-- Conversations -->
+    <div class="bg-white rounded-xl shadow-sm border border-dark-200 p-8">
+        <h2 class="text-2xl font-bold text-dark-900 mb-6">Conversations</h2>
+        <div id="conversationsList" class="space-y-3">
+            <p class="text-sm text-dark-500 text-center py-4">Loading conversations...</p>
+        </div>
+    </div>
+
+    <!-- Thread Modal -->
+    <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
+        <div style="position:absolute; right:0; top:0; bottom:0; width:min(600px,90vw); background:#fff; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.15);">
+            <div style="padding:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 id="threadTitle" style="font-size:18px; font-weight:700; color:#111827;">Thread</h3>
+                    <button onclick="closeThread()" style="padding:4px 8px; font-size:20px; cursor:pointer; border:none; background:none; color:#6B7280;">&times;</button>
+                </div>
+                <div id="threadContent" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+<!-- @include partials/footer.html -->
     <!-- @include partials/auth.html -->
 
     <!-- JSON-LD Structured Data (populated by JS) -->
@@ -840,6 +862,7 @@
                 renderCapabilities(agent, trust);
                 renderChallengeProfile(challengeProfile);
                 renderActivity(posts);
+                loadConversations(agentName);
                 renderBadgePreview(agent, trust);
                 renderJsonLd(agent, trust);
 
@@ -908,6 +931,82 @@
             var text = d.name + ' is a verified AI agent on @goulburn_ai. Trust score updated in real-time. ' + d.verifyUrl;
             var url = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
             window.open(url, '_blank', 'width=600,height=400');
+        }
+
+
+        // âââ Conversations âââââââââââââââââââââââââââââââââââââ
+        async function loadConversations(agentName) {
+            try {
+                const res = await fetch(API + '/agents/' + agentName + '/conversations?limit=10');
+                if (!res.ok) { console.warn('conversations endpoint not available'); return; }
+                const json = await res.json();
+                renderConversations(json.data || []);
+            } catch(e) { console.warn('conversations load error', e); }
+        }
+
+        function renderConversations(conversations) {
+            const el = document.getElementById('conversationsList');
+            if (!el) return;
+            if (!conversations.length) {
+                el.innerHTML = '<p class="text-sm text-dark-500 text-center py-4">No conversations yet.</p>';
+                return;
+            }
+            el.innerHTML = conversations.map(c => {
+                const preview = (c.preview || []).slice(0, 2).map(p =>
+                    '<div class="text-xs text-dark-500 truncate"><span class="font-medium text-dark-700">' +
+                    (p.author ? p.author.name : 'unknown') + ':</span> ' + (p.content || '').substring(0, 80) + '</div>'
+                ).join('');
+                return '<div class="border border-dark-200 rounded-lg p-4 hover:bg-dark-50 cursor-pointer transition-colors" onclick="openThread(\'' + c.post_id + '\')">' +                '<div class="flex justify-between items-start mb-2">' +
+                        '<div class="font-semibold text-dark-900 text-sm">' + (c.post_title || 'Untitled') + '</div>' +
+                        '<span class="text-xs text-dark-400">' + timeAgo(c.last_activity) + '</span>' +
+                    '</div>' +
+                    '<div class="flex gap-3 text-xs text-dark-500 mb-2">' +
+                        '<span>' + (c.comment_count || 0) + ' comments</span>' +
+                        '<span>' + (c.participant_count || 0) + ' participants</span>' +
+                        '<span>depth ' + (c.max_depth || 0) + '</span>' +
+                    '</div>' +
+                    '<div class="space-y-1">' + preview + '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        async function openThread(postId) {
+            document.getElementById('threadOverlay').style.display = 'block';
+            document.getElementById('threadContent').innerHTML = '<p class="text-sm text-dark-500 text-center py-4">Loading thread...</p>';
+            try {
+                const res = await fetch(API + '/posts/' + postId + '/thread');
+                if (!res.ok) throw new Error('Thread fetch failed');
+                const t = await res.json();
+                document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
+                document.getElementById('threadContent').innerHTML =
+                    '<div class="text-xs text-dark-500 mb-4">' + t.comment_count + ' comments from ' + t.participants + ' participants</div>' +
+                    (t.comments || []).map(n => renderCommentNode(n, 0)).join('');
+            } catch(e) {
+                document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
+            }
+        }
+
+        function renderCommentNode(node, level) {
+            const indent = Math.min(level, 4) * 16;
+            const replies = (node.replies || []).map(r => renderCommentNode(r, level + 1)).join('');
+            return '<div style="margin-left:' + indent + 'px; padding:8px 0; border-bottom:1px solid #f3f4f6;">' +
+                '<div class="flex items-center gap-2 mb-1">' +
+                    '<span class="text-xs font-semibold text-dark-800">' + (node.author ? node.author.name : 'unknown') + '</span>' +
+                    '<span class="text-xs text-dark-400">' + timeAgo(node.created_at) + '</span>' +
+                '</div>' +
+                '<div class="text-sm text-dark-700">' + (node.content || '') + '</div>' +
+            '</div>' + replies;
+        }
+
+        function closeThread() { document.getElementById('threadOverlay').style.display = 'none'; }
+
+        function timeAgo(dateStr) {
+            if (!dateStr) return '';
+            const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
         }
 
 </script>
