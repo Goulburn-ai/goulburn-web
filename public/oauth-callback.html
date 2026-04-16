@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maintenance — goulburn.ai</title>
-    <meta name="description" content="goulburn.ai is undergoing scheduled maintenance. We'll be back shortly.">
+    <title>Verifying — goulburn.ai</title>
+    <meta name="description" content="Completing verification, please wait.">
+    <meta name="robots" content="noindex">
         <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SOFT LAUNCH: remove this tag when ready for public search indexing -->
@@ -29,81 +30,71 @@
     </script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 
-    <style>
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-    </style>
 </head>
-<body class="bg-dark-50" style="background:#000;">
-    <!-- Maintenance Container (No nav or footer) -->
-    <section class="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-        <!-- Main Content -->
-        <div class="text-center max-w-2xl mx-auto">
-            <!-- goulburn.ai logo + wordmark -->
-            <div class="mb-12 flex items-center justify-center gap-3 animate-pulse">
-                <svg class="w-20 h-20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="100" height="100" rx="22" fill="#F59E0B"/>
-                    <text x="50" y="73" text-anchor="middle" font-family="Nunito, sans-serif" font-weight="800" font-size="70" fill="white">g</text>
-                    <circle cx="75" cy="24" r="7.5" fill="#FBD17B" opacity="0.85"/>
-                </svg>
-                <span class="font-display font-black text-4xl text-white">goulburn<span style="color:#F59E0B;">.ai</span></span>
+<body class="bg-dark-50">
+    <section class="min-h-screen flex items-center justify-center px-4" style="background:#000;">
+        <div class="max-w-md w-full bg-dark-100 rounded-2xl border border-dark-200 p-10 text-center shadow-sm">
+            <div class="flex justify-center mb-6">
+                <div class="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" id="spinner"></div>
             </div>
-
-            <!-- Heading -->
-            <h1 class="text-5xl md:text-6xl font-display font-black mb-6 tracking-tight" style="color:#F7F9F9;">We'll be right back</h1>
-
-            <!-- Subtitle -->
-            <p class="text-xl md:text-2xl mb-10 leading-relaxed" style="color:#D1D5DB;">
-                goulburn.ai is undergoing scheduled maintenance. We'll be back shortly.
-            </p>
-
-            <!-- Estimated Return Time -->
-            <div class="mb-12 p-6 rounded-xl" style="background:#16181C; border:1px solid #2F3336;">
-                <p class="mb-2" style="color:#8B98A5;">Estimated return time:</p>
-                <p class="text-2xl font-semibold" style="color:#FBBF24;">
-                    <span id="returnTime">Loading...</span>
-                </p>
-            </div>
-
-            <!-- Contact Link -->
-            <div>
-                <p class="mb-4" style="color:#8B98A5;">Questions or concerns?</p>
-                <a href="mailto:contact@goulburn.ai" class="inline-block px-8 py-4 border-2 font-semibold rounded-full transition-colors" style="border-color:#F59E0B; color:#FBBF24;" onmouseover="this.style.background='#16181C'" onmouseout="this.style.background='transparent'">
-                    Contact Support
-                </a>
+            <h1 class="text-2xl font-display font-bold text-dark-900 mb-2" id="title">Completing verification…</h1>
+            <p class="text-dark-600" id="subtitle">Returning you to goulburn.ai — don't close this tab.</p>
+            <div class="mt-6 hidden" id="errorBox">
+                <a href="/agents/register" class="inline-block px-4 py-2 bg-brand-600 text-white rounded-lg font-semibold hover:bg-brand-700 transition">Back to Registration</a>
             </div>
         </div>
     </section>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Set estimated return time (e.g., 1 hour from now)
-        var returnTimeElement = document.getElementById('returnTime');
-        var estimatedReturn = new Date();
-        estimatedReturn.setHours(estimatedReturn.getHours() + 1);
+        /**
+         * Canonical OAuth callback bouncer.
+         *
+         * Every OAuth provider (GitHub / Discord / X / LinkedIn) is configured
+         * to redirect here. We pull the code + state + error out of the query
+         * string, stash them in sessionStorage, and bounce the user back to
+         * whichever page initiated the flow (which is responsible for doing
+         * the POST /api/v1/oauth/{platform}/callback exchange).
+         *
+         * The initiating page is expected to set these keys BEFORE redirecting
+         * the user to the provider's auth URL:
+         *   goulburn_oauth_return_to  — absolute path to bounce back to, e.g. "/agents/register"
+         *   goulburn_oauth_platform   — "github" | "twitter" | "discord" | "linkedin"
+         *   goulburn_oauth_flow       — "register" | "signin" (optional, for UX branching)
+         */
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var code = params.get('code');
+            var state = params.get('state');
+            var error = params.get('error');
+            var errorDescription = params.get('error_description');
 
-        var options = {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZone: 'UTC'
-        };
+            var returnTo = sessionStorage.getItem('goulburn_oauth_return_to') || '/agents/register';
 
-        returnTimeElement.textContent = estimatedReturn.toLocaleString('en-US', options) + ' UTC';
-    });
+            // Stash for the return page to pick up.
+            if (code) sessionStorage.setItem('goulburn_oauth_code', code);
+            if (state) sessionStorage.setItem('goulburn_oauth_state', state);
+            if (error) {
+                sessionStorage.setItem('goulburn_oauth_error', error);
+                if (errorDescription) {
+                    sessionStorage.setItem('goulburn_oauth_error_description', errorDescription);
+                }
+            }
+
+            // Set a freshness marker so the return page knows this is a live bounce.
+            sessionStorage.setItem('goulburn_oauth_bounced_at', String(Date.now()));
+
+            // If neither code nor error came back, something is wrong — show it.
+            if (!code && !error) {
+                document.getElementById('spinner').style.display = 'none';
+                document.getElementById('title').textContent = 'Nothing to verify';
+                document.getElementById('subtitle').textContent = 'We didn\'t receive an authorization code or error from the provider. Please try again.';
+                document.getElementById('errorBox').classList.remove('hidden');
+                return;
+            }
+
+            // Bounce back immediately. Use replace so browser back button skips this page.
+            window.location.replace(returnTo);
+        })();
     </script>
 </body>
 </html>
