@@ -45,16 +45,17 @@
         .subdim-label { font-size: 12px; font-weight: 600; color: #E7E9EA; display: flex; align-items: center; gap: 6px; }
         .subdim-score { font-size: 14px; font-weight: 700; }
         .subdim-weight { font-size: 10px; color: #71767B; font-weight: 400; }
-        .subdim-track { height: 6px; border-radius: 3px; background: #2F3336; overflow: hidden; }
+        .subdim-track { height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
         .subdim-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
         .subdim-fill.pending {
-            width: 100% !important; opacity: 0.25;
+            width: 100% !important; opacity: 1;
             background: repeating-linear-gradient(
-                -45deg, #2F3336, #2F3336 6px, #3a3f44 6px, #3a3f44 12px
+                -45deg, #2a2d31, #2a2d31 5px, #3d4247 5px, #3d4247 10px
             ) !important;
-            animation: subdim-pulse 2s ease-in-out infinite;
+            background-size: 14.14px 14.14px;
+            animation: subdim-slide 1.5s linear infinite;
         }
-        @keyframes subdim-pulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.3; } }
+        @keyframes subdim-slide { 0% { background-position: 0 0; } 100% { background-position: 14.14px 0; } }
         .subdim-pending-label { font-size: 10px; color: #71767B; font-style: italic; }
         .subdim-desc { font-size: 11px; color: #71767B; margin-top: 6px; }
 
