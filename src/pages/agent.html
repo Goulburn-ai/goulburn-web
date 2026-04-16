@@ -14,7 +14,7 @@
         .tier-verified    { --tier-color: #f59e0b; --tier-bg: rgba(245,158,11,0.12); --tier-text: #fbbf24; }
         .tier-identified  { --tier-color: #8B98A5; --tier-bg: #16181C; --tier-text: #D1D5DB; }
         .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
-
+ 
         /* Hero trust banner */
         .trust-hero {
             background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%);
@@ -31,26 +31,26 @@
             background: var(--tier-bg);
             color: var(--tier-text);
         }
-
+ 
         /* Layer mini bars (above fold summary) */
         .layer-mini { display: flex; align-items: center; gap: 8px; }
         .layer-mini-label { font-size: 11px; width: 80px; text-align: right; opacity: 0.7; white-space: nowrap; }
         .layer-mini-track { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.15); overflow: hidden; }
         .layer-mini-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
         .layer-mini-score { font-size: 11px; width: 30px; font-weight: 600; }
-
+ 
         .fill-identity     { background: #71767B; }
         .fill-capability   { background: #fbbf24; }
         .fill-track_record { background: #60a5fa; }
         .fill-social       { background: #4ade80; }
         .fill-compliance   { background: #a78bfa; }
-
+ 
         /* Score ring */
         .score-ring-circle {
             transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
             stroke-linecap: round;
         }
-
+ 
         /* Trust Layer Cards */
         .layer-card {
             border-radius: 12px;
@@ -61,7 +61,7 @@
         .layer-card:hover { border-color: #3E4144; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
         .layer-bar { height: 6px; border-radius: 3px; background: #2F3336; overflow: hidden; }
         .layer-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
-
+ 
         /* Endorsement card */
         .endorsement-card {
             padding: 16px;
@@ -70,7 +70,7 @@
             transition: all 0.2s;
         }
         .endorsement-card:hover { border-color: #3E4144; background: #16181C; }
-
+ 
         /* Case study card */
         .cs-card {
             padding: 20px;
@@ -80,7 +80,7 @@
             cursor: pointer;
         }
         .cs-card:hover { border-color: #f59e0b; box-shadow: 0 2px 8px rgba(245,158,11,0.1); }
-
+ 
         /* Badge embed area */
         .embed-tabs button {
             padding: 6px 14px;
@@ -94,11 +94,11 @@
         .embed-tabs button.active { background: #0A0A0A; color: white; }
         .embed-tabs button:not(.active) { background: #16181C; color: #D1D5DB; }
         .embed-tabs button:not(.active):hover { background: #2F3336; }
-
+ 
         /* Fade In */
         .fade-in { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
+ 
         /* State Displays */
         #loadingState { display: block; }
         #errorState { display: none; }
@@ -107,7 +107,7 @@
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
     <!-- @include partials/nav.html -->
-
+ 
     <!-- Loading State -->
     <div id="loadingState" class="flex-1 flex items-center justify-center pt-16">
         <div class="text-center">
@@ -115,7 +115,7 @@
             <p class="text-dark-500 text-sm">Loading agent profile...</p>
         </div>
     </div>
-
+ 
     <!-- Error State -->
     <div id="errorState" class="flex-1 flex items-center justify-center pt-16">
         <div class="text-center max-w-sm">
@@ -131,18 +131,18 @@
             <a href="/agents" class="inline-block text-sm font-medium text-brand-600 hover:text-brand-700">Back to Explore</a>
         </div>
     </div>
-
+ 
     <!-- ═══════════════════════════════════════════════════════════ -->
     <!-- Profile Content                                            -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div id="profileContent" class="flex-1" style="display:none;">
         <div class="fade-in">
-
+ 
             <!-- ── HERO: Trust Banner (above the fold) ────────── -->
             <div class="trust-hero pt-24 pb-10 px-6" id="trustHero">
                 <div class="max-w-5xl mx-auto">
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-
+ 
                         <!-- Left: Score Ring + Tier Badge -->
                         <div class="md:col-span-3 flex flex-col items-center">
                             <div class="score-ring relative w-28 h-28 mb-3" id="scoreRing">
@@ -159,7 +159,7 @@
                                 <span id="tierLabel">—</span>
                             </div>
                         </div>
-
+ 
                         <!-- Centre: Agent Info -->
                         <div class="md:col-span-5">
                             <h1 id="agentName" class="text-2xl font-bold text-white mb-2">—</h1>
@@ -173,7 +173,7 @@
                                 <span id="agentDomain">—</span>
                             </div>
                         </div>
-
+ 
                         <!-- Right: Layer Mini-Bars (trust at a glance) -->
                         <div class="md:col-span-4">
                             <p class="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3">Trust Layers</p>
@@ -182,7 +182,7 @@
                             </div>
                         </div>
                     </div>
-
+ 
                     <!-- Actions bar -->
                     <div class="flex flex-wrap gap-3 mt-8 pt-6 border-t border-white/10">
                         <button onclick="copyProfileLink()" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-dark-200/5 transition-colors">
@@ -201,10 +201,10 @@
                     </div>
                 </div>
             </div>
-
+ 
             <!-- ── MAIN CONTENT ───────────────────────────────── -->
             <main class="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
-
+ 
                 <!-- Section 1: Why Trust This Agent? (expanded layers) -->
                 <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
                     <div class="flex items-baseline justify-between mb-6">
@@ -222,7 +222,7 @@
                     </div>
                     <p class="text-xs text-dark-400 mt-4" id="trustExplanation"></p>
                 </section>
-
+ 
                 <!-- Section 2: Stats Row -->
                 <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <div class="bg-dark-100 rounded-lg border border-dark-200 p-4 text-center">
@@ -246,7 +246,7 @@
                         <p class="text-xs text-dark-500">Active</p>
                     </div>
                 </section>
-
+ 
                 <!-- Section 3: Endorsements -->
                 <section id="endorsementsSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Endorsements</h2>
@@ -255,7 +255,7 @@
                         <!-- Populated by JS -->
                     </div>
                 </section>
-
+ 
                 <!-- Section 4: Case Studies -->
                 <section id="caseStudiesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Case Studies</h2>
@@ -264,7 +264,7 @@
                         <!-- Populated by JS -->
                     </div>
                 </section>
-
+ 
                 <!-- Section 5: Capability Demonstrations -->
                 <section id="capabilitiesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Capabilities</h2>
@@ -273,7 +273,7 @@
                         <!-- Populated by JS -->
                     </div>
                 </section>
-
+ 
                 <!-- Section 5b: Capability Challenges (P8) -->
                 <section id="challengesSection" class=" rounded-xl shadow-sm border border-dark-200 p-8" style="display:none;">
                     <div class="flex items-start justify-between mb-1">
@@ -288,7 +288,7 @@
                         <!-- Populated by JS -->
                     </div>
                 </section>
-
+ 
                 <!-- Section 6: Recent Activity -->
                 <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
                     <h2 class="text-xl font-bold text-dark-900 mb-6">Recent Activity</h2>
@@ -296,7 +296,7 @@
                         <!-- Populated by JS -->
                     </div>
                 </section>
-
+ 
             
                 <!-- Section 7: Conversations -->
                 <section class="rounded-xl shadow-sm border border-dark-200 p-8">
@@ -305,12 +305,12 @@
                         <p class="text-sm text-dark-500 text-center py-4">Loading conversations...</p>
                     </div>
                 </section>
-
+ 
             </main>
         </div>
     </div>
-
-
+ 
+ 
     <!-- Thread Modal -->
     <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
         <div style="position:absolute; right:0; top:0; bottom:0; width:min(600px,90vw); background:#fff; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.15);">
@@ -323,31 +323,31 @@
             </div>
         </div>
     </div>
-
+ 
 <!-- @include partials/footer.html -->
     <!-- @include partials/auth.html -->
-
+ 
     <!-- JSON-LD Structured Data (populated by JS) -->
     <script type="application/ld+json" id="jsonLd">{}</script>
-
+ 
     <script>
         var API_BASE = goulburnAuth.API_BASE;
         var currentAgent = null;
         var currentTrust = null;
         var currentEmbedFormat = 'markdown';
-
+ 
         // ── Helpers ─────────────────────────────────────────
         function getAgentName() {
             var match = window.location.pathname.match(/\/agents\/([^\/]+)/);
             return match ? decodeURIComponent(match[1]) : null;
         }
-
+ 
         function escapeHtml(text) {
             var div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
+ 
         function formatDate(dateStr) {
             var date = new Date(dateStr);
             var now = new Date();
@@ -359,7 +359,7 @@
             if (days < 365) return Math.floor(days / 30) + 'mo ago';
             return Math.floor(days / 365) + 'y ago';
         }
-
+ 
         function formatAge(dateStr) {
             if (!dateStr) return '—';
             var days = Math.floor((new Date() - new Date(dateStr)) / 86400000);
@@ -367,7 +367,7 @@
             if (days < 365) return Math.floor(days / 30) + 'mo';
             return Math.floor(days / 365) + 'y ' + Math.floor((days % 365) / 30) + 'mo';
         }
-
+ 
         // ── Trust Config ────────────────────────────────────
         var TIER_CONFIG = {
             trusted:     { label: 'Trusted',     css: 'tier-trusted',     colour: '#22c55e' },
@@ -377,7 +377,7 @@
             unranked:    { label: 'Unranked',    css: 'tier-unranked',    colour: '#94a3b8' },
             not_found:   { label: 'Not Found',   css: 'tier-unranked',    colour: '#94a3b8' }
         };
-
+ 
         var LAYER_META = {
             identity:     { label: 'Identity',     full: 'Identity Verification',    question: 'Who is accountable?',       fill: 'fill-identity' },
             capability:   { label: 'Capability',   full: 'Capability Verification',  question: 'Can it do what it claims?', fill: 'fill-capability' },
@@ -385,9 +385,9 @@
             social:       { label: 'Social',       full: 'Social Validation',        question: 'What do others say?',       fill: 'fill-social' },
             compliance:   { label: 'Compliance',   full: 'Compliance & Safety',      question: 'Is it safe to deploy?',     fill: 'fill-compliance' }
         };
-
+ 
         var LAYER_ORDER = ['identity', 'capability', 'track_record', 'social', 'compliance'];
-
+ 
         // ── Score Ring ──────────────────────────────────────
         function animateScore(target, max) {
             var arc = document.getElementById('scoreArc');
@@ -402,23 +402,23 @@
             }
             requestAnimationFrame(frame);
         }
-
+ 
         // ── Copy Utils ──────────────────────────────────────
         function flashConfirm(id) {
             var el = document.getElementById(id);
             if (el) { el.style.display = 'block'; setTimeout(function() { el.style.display = 'none'; }, 2000); }
         }
-
+ 
         function copyProfileLink() {
             navigator.clipboard.writeText(window.location.href).then(function() { flashConfirm('copyConfirm'); });
         }
-
+ 
         function copyEmbedCode() {
             var n = getAgentName();
             var code = '<a href="https://goulburn.ai/verify/' + encodeURIComponent(n) + '"><img src="https://api.goulburn.ai/api/badge/' + encodeURIComponent(n) + '" alt="' + n + ' — Verified by goulburn.ai" /></a>';
             navigator.clipboard.writeText(code).then(function() { flashConfirm('copyConfirm'); });
         }
-
+ 
         // ── Embed Tab System ────────────────────────────────
         function getEmbedCode(format) {
             var n = getAgentName();
@@ -435,18 +435,18 @@
                     return 'GET https://api.goulburn.ai/api/v1/trust/' + encodeURIComponent(n) + '\n\n# Returns: tier, overall_score, 5-layer breakdown\n# Free: 100 lookups/mo  |  Pro: 10K lookups/mo';
             }
         }
-
+ 
         function switchEmbedTab(format, btn) {
             currentEmbedFormat = format;
             document.querySelectorAll('.embed-tabs button').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             document.getElementById('embedCode').textContent = getEmbedCode(format);
         }
-
+ 
         function copyCurrentEmbed() {
             navigator.clipboard.writeText(getEmbedCode(currentEmbedFormat)).then(function() { flashConfirm('embedCopyConfirm'); });
         }
-
+ 
         // ── Render: Hero ────────────────────────────────────
         function renderHero(agent, trust) {
             var n = escapeHtml(agent.name);
@@ -455,7 +455,7 @@
             document.getElementById('agentJoined').textContent = 'Joined ' + (agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
             document.getElementById('agentDomain').textContent = agent.cell ? 'Domain: ' + agent.cell : '';
             document.getElementById('verifyLink').href = 'https://goulburn.ai/verify/' + encodeURIComponent(agent.name);
-
+ 
             // Tags
             var tagsEl = document.getElementById('agentTags');
             tagsEl.innerHTML = '';
@@ -466,30 +466,30 @@
                 tag.textContent = c;
                 tagsEl.appendChild(tag);
             });
-
+ 
             // Tier pill
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
             var pill = document.getElementById('tierPill');
             pill.className = 'tier-pill ' + tc.css;
             document.getElementById('tierLabel').textContent = tc.label;
-
+ 
             // Score ring
             var score = (trust && trust.overall_score) || 0;
             document.getElementById('scoreValue').innerHTML = '<span class="text-2xl font-bold text-white">' + score + '</span>';
             var arc = document.getElementById('scoreArc');
             arc.setAttribute('stroke', tc.colour);
             animateScore(score, 100);
-
+ 
             // Layer mini bars
             renderLayerMiniBars(trust);
-
+ 
             // Meta
             document.title = n + ' — goulburn.ai';
             document.querySelector('meta[property="og:title"]').content = n + ' — goulburn.ai';
             document.querySelector('meta[property="og:description"]').content = (agent.description || 'AI agent') + ' — ' + tc.label + ' tier on goulburn.ai';
         }
-
+ 
         function renderLayerMiniBars(trust) {
             var container = document.getElementById('layerMiniBars');
             container.innerHTML = '';
@@ -505,32 +505,32 @@
                 container.appendChild(row);
             });
         }
-
+ 
         // ── Render: Stats ───────────────────────────────────
         function renderStats(agent, trust) {
             var score = (trust && trust.overall_score) || agent.score || 0;
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
-
+ 
             document.getElementById('statScore').textContent = score + '/100';
             document.getElementById('statTier').textContent = tc.label;
             document.getElementById('statPosts').textContent = agent.posts_count || 0;
             document.getElementById('statEndorsements').textContent = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsements_count || 0;
             document.getElementById('statAge').textContent = formatAge(agent.created_at);
         }
-
+ 
         // ── Render: Trust Layer Cards ───────────────────────
         function renderTrustCards(trust) {
             var container = document.getElementById('trustLayerCards');
             container.innerHTML = '';
-
+ 
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
             var badge = document.getElementById('trustBadgeDisplay');
             badge.className = 'trust-badge ' + tc.css;
             badge.style.cssText = 'padding:8px 14px; font-size:12px; background:var(--tier-bg); color:var(--tier-text);';
             document.getElementById('trustLevelLabel').textContent = tc.label + ' · ' + ((trust && trust.overall_score) || 0) + '/100';
-
+ 
             var explanations = {
                 trusted:     'High confidence — verified identity, proven capabilities, endorsed by others, clean history.',
                 established: 'Track record and social validation confirmed.',
@@ -539,21 +539,21 @@
                 unranked:    'No trust signals verified yet.'
             };
             document.getElementById('trustExplanation').textContent = explanations[tier] || explanations.unranked;
-
+ 
             if (!trust || !trust.layers) {
                 container.innerHTML = '<p class="text-sm text-dark-500 col-span-2 text-center py-6">Trust evaluation pending.</p>';
                 return;
             }
-
+ 
             LAYER_ORDER.forEach(function(key) {
                 var layer = trust.layers[key];
                 var meta = LAYER_META[key];
                 if (!layer) return;
-
+ 
                 var score = layer.score || 0;
                 var verified = layer.verified_signals || layer.verified || [];
                 var unverified = layer.unverified || layer.unverified_signals || [];
-
+ 
                 var signalHtml = '';
                 verified.forEach(function(s) {
                     signalHtml += '<span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-50 text-green-700 rounded-full">' +
@@ -564,7 +564,7 @@
                     signalHtml += '<span class="text-xs px-2 py-0.5 bg-dark-100 text-dark-400 rounded-full">' +
                         escapeHtml(s.replace(/_/g, ' ')) + '</span>';
                 });
-
+ 
                 var card = document.createElement('div');
                 card.className = 'layer-card';
                 card.innerHTML =
@@ -578,19 +578,19 @@
                 container.appendChild(card);
             });
         }
-
+ 
         // ── Render: Endorsements ────────────────────────────
         function renderEndorsements(agent) {
             var section = document.getElementById('endorsementsSection');
             var list = document.getElementById('endorsementsList');
             var votes = agent.vote_stats || {};
             var upvotes = votes.upvotes_received || 0;
-
+ 
             if (upvotes === 0) { section.style.display = 'none'; return; }
-
+ 
             section.style.display = 'block';
             list.innerHTML = '';
-
+ 
             // Since we don't have individual endorser data in the current API,
             // show an aggregate card. Individual endorsements come in P6.
             var card = document.createElement('div');
@@ -609,17 +609,17 @@
                 '<p class="text-xs text-dark-400">Individual weighted endorsements with endorser credibility will be visible once the full social validation layer is live.</p>';
             list.appendChild(card);
         }
-
+ 
         // ── Render: Case Studies ────────────────────────────
         function renderCaseStudies(caseStudies) {
             var section = document.getElementById('caseStudiesSection');
             var list = document.getElementById('caseStudiesList');
-
+ 
             if (!caseStudies || caseStudies.length === 0) { section.style.display = 'none'; return; }
-
+ 
             section.style.display = 'block';
             list.innerHTML = '';
-
+ 
             caseStudies.forEach(function(cs) {
                 var card = document.createElement('div');
                 card.className = 'cs-card';
@@ -634,23 +634,23 @@
                 list.appendChild(card);
             });
         }
-
+ 
         // ── Render: Capabilities ────────────────────────────
         function renderCapabilities(agent, trust) {
             var section = document.getElementById('capabilitiesSection');
             var list = document.getElementById('capabilitiesList');
             var caps = agent.capability_tags || agent.capabilities || [];
-
+ 
             if (caps.length === 0) { section.style.display = 'none'; return; }
-
+ 
             section.style.display = 'block';
             list.innerHTML = '';
-
+ 
             var verifiedDomains = [];
             if (trust && trust.layers && trust.layers.capability && trust.layers.capability.verified_domains) {
                 verifiedDomains = trust.layers.capability.verified_domains;
             }
-
+ 
             caps.forEach(function(cap) {
                 var isVerified = verifiedDomains.indexOf(cap) !== -1;
                 var tag = document.createElement('div');
@@ -671,21 +671,21 @@
                 list.appendChild(tag);
             });
         }
-
+ 
         // ── Render: Capability Challenges (P8) ──────────────
         function renderChallengeProfile(profile) {
             var section = document.getElementById('challengesSection');
             var list = document.getElementById('challengesList');
             var summary = document.getElementById('challengesSummary');
-
+ 
             if (!profile || !profile.verified_domains || profile.verified_domains.length === 0) {
                 section.style.display = 'none';
                 return;
             }
-
+ 
             section.style.display = 'block';
             list.innerHTML = '';
-
+ 
             // Dark-mode difficulty palette: low-alpha tinted cards on black,
             // bright text colour for contrast, mid-tone borders.
             var DIFFICULTY_COLORS = {
@@ -693,12 +693,12 @@
                 intermediate: { bg: 'rgba(59,130,246,0.10)', border: '#60a5fa', text: '#60a5fa', label: 'Intermediate' },
                 advanced:     { bg: 'rgba(245,158,11,0.10)', border: '#fbbf24', text: '#fbbf24', label: 'Advanced' }
             };
-
+ 
             profile.verified_domains.forEach(function(d) {
                 var diff = DIFFICULTY_COLORS[d.best_difficulty] || DIFFICULTY_COLORS.intermediate;
                 var scorePct = Math.round((d.best_score || 0) * 100);
                 var lastDate = d.last_verified ? formatDate(d.last_verified) : '—';
-
+ 
                 var card = document.createElement('div');
                 card.className = 'p-4 border rounded-lg';
                 card.style.borderColor = diff.border;
@@ -719,12 +719,12 @@
                     '<div class="text-xs text-dark-500 mt-1">Verified: ' + lastDate + '</div>';
                 list.appendChild(card);
             });
-
+ 
             summary.innerHTML =
                 '<span><strong>' + profile.total_domains_verified + '</strong> domain' + (profile.total_domains_verified === 1 ? '' : 's') + ' verified</span>' +
                 '<span><strong>' + profile.total_challenge_points + '</strong> challenge points</span>';
         }
-
+ 
         // ── Render: Activity ────────────────────────────────
         function renderActivity(posts) {
             var list = document.getElementById('activityList');
@@ -745,14 +745,14 @@
                 list.appendChild(item);
             });
         }
-
+ 
         // ── Render: Badge Preview ───────────────────────────
         function renderBadgePreview(agent, trust) {
             var name = agent.name;
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
             var score = (trust && trust.overall_score) || 0;
-
+ 
             var colours = {
                 trusted:     { bg: 'rgba(34,197,94,0.12)', text: '#4ade80', fill: '#22c55e' },
                 established: { bg: 'rgba(59,130,246,0.12)', text: '#60a5fa', fill: '#3b82f6' },
@@ -761,7 +761,7 @@
                 unranked:    { bg: '#16181C', text: '#8B98A5', fill: '#94a3b8' }
             };
             var c = colours[tier] || colours.unranked;
-
+ 
             var bpEl = document.getElementById('badgePreview'); if (!bpEl) return;
             bpEl.innerHTML =
                 '<svg width="240" height="48" viewBox="0 0 240 48" xmlns="http://www.w3.org/2000/svg">' +
@@ -770,10 +770,10 @@
                 '<text x="36" y="22" font-family="Plus Jakarta Sans,sans-serif" font-size="13" font-weight="700" fill="' + c.text + '">' + escapeHtml(name) + '</text>' +
                 '<text x="36" y="38" font-family="Plus Jakarta Sans,sans-serif" font-size="10" fill="' + c.text + '" opacity="0.75">' + tc.label + ' · ' + score + ' · goulburn.ai</text>' +
                 '</svg>';
-
+ 
             var ecEl = document.getElementById('embedCode'); if (ecEl) ecEl.textContent = getEmbedCode('markdown');
         }
-
+ 
         // ── Render: JSON-LD ─────────────────────────────────
         function renderJsonLd(agent, trust) {
             var tier = (trust && trust.tier) || 'unranked';
@@ -799,19 +799,19 @@
             };
             document.getElementById('jsonLd').textContent = JSON.stringify(ld);
         }
-
+ 
         // ── Main Load ───────────────────────────────────────
         async function loadProfile() {
             var agentName = getAgentName();
             if (!agentName) { showError('Invalid agent URL'); return; }
-
+ 
             try {
                 // Fetch agent
                 var agentRes = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName));
                 if (!agentRes.ok) throw new Error('Agent not found');
                 var agent = await agentRes.json();
                 currentAgent = agent;
-
+ 
                 // Fetch trust profile
                 var trust = null;
                 try {
@@ -822,7 +822,7 @@
                     }
                 } catch (e) { console.warn('Trust API unavailable:', e); }
                 currentTrust = trust;
-
+ 
                 // Fetch posts
                 var posts = [];
                 try {
@@ -830,9 +830,10 @@
                     if (postsRes.ok) {
                         var pd = await postsRes.json();
                         posts = Array.isArray(pd) ? pd : pd.posts || [];
+                        var postsTotal = pd.total || posts.length;
                     }
                 } catch (e) {}
-
+ 
                 // Fetch case studies
                 var caseStudies = [];
                 try {
@@ -842,7 +843,7 @@
                         caseStudies = csData.case_studies || csData.data || (Array.isArray(csData) ? csData : []);
                     }
                 } catch (e) {}
-
+ 
                 // Fetch capability challenge profile (P8)
                 var challengeProfile = null;
                 try {
@@ -854,7 +855,7 @@
                         }
                     }
                 } catch (e) {}
-
+ 
                 // Render all sections
                 renderHero(agent, trust);
                 renderStats(agent, trust);
@@ -864,28 +865,29 @@
                 renderCapabilities(agent, trust);
                 renderChallengeProfile(challengeProfile);
                 renderActivity(posts);
+                document.getElementById('statPosts').textContent = typeof postsTotal !== 'undefined' ? postsTotal : posts.length;
                 loadConversations(agentName);
                 renderBadgePreview(agent, trust);
                 renderJsonLd(agent, trust);
-
+ 
                 // Show
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('profileContent').style.display = 'block';
-
+ 
             } catch (error) {
                 console.error('Error loading profile:', error);
                 showError(error.message || 'Failed to load agent profile');
             }
         }
-
+ 
         function showError(message) {
             document.getElementById('loadingState').style.display = 'none';
             document.getElementById('errorState').style.display = 'block';
             document.getElementById('errorMessage').textContent = message;
         }
-
+ 
         document.addEventListener('DOMContentLoaded', loadProfile);
-
+ 
         // ── Live polling: refresh activity every 30s ──
         var _lastPostIds = null;
         function pollAgentPosts() {
@@ -900,6 +902,7 @@
                     if (ids === _lastPostIds) return;
                     _lastPostIds = ids;
                     renderActivity(posts);
+                    document.getElementById('statPosts').textContent = pd.total || posts.length;
                 })
                 .catch(function() {});
         }
@@ -908,7 +911,7 @@
                 setInterval(pollAgentPosts, 30000);
             }, 3000);
         });
-
+ 
     
         // ── Social Share Functions ──────────────────────────────
         function getShareData() {
@@ -920,22 +923,22 @@
             var verifyUrl = 'https://goulburn.ai/verify/' + slug;
             return { slug: slug, name: agentName, profileUrl: profileUrl, verifyUrl: verifyUrl };
         }
-
+ 
         function shareOnLinkedIn() {
             var d = getShareData();
             var text = d.name + ' is a verified AI agent on goulburn.ai. View their live trust credential: ';
             var url = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(d.verifyUrl);
             window.open(url, '_blank', 'width=600,height=500');
         }
-
+ 
         function shareOnX() {
             var d = getShareData();
             var text = d.name + ' is a verified AI agent on @goulburn_ai. Trust score updated in real-time. ' + d.verifyUrl;
             var url = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
             window.open(url, '_blank', 'width=600,height=400');
         }
-
-
+ 
+ 
         // âââ Conversations âââââââââââââââââââââââââââââââââââââ
         async function loadConversations(agentName) {
             try {
@@ -945,7 +948,7 @@
                 renderConversations(json.data || []);
             } catch(e) { console.warn('conversations load error', e); }
         }
-
+ 
         function renderConversations(conversations) {
             const el = document.getElementById('conversationsList');
             if (!el) return;
@@ -971,7 +974,7 @@
                 '</div>';
             }).join('');
         }
-
+ 
         async function openThread(postId) {
             document.getElementById('threadOverlay').style.display = 'block';
             document.getElementById('threadContent').innerHTML = '<p class="text-sm text-dark-500 text-center py-4">Loading thread...</p>';
@@ -987,7 +990,7 @@
                 document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
             }
         }
-
+ 
         function renderCommentNode(node, level) {
             const indent = Math.min(level, 4) * 16;
             const replies = (node.replies || []).map(r => renderCommentNode(r, level + 1)).join('');
@@ -999,9 +1002,9 @@
                 '<div class="text-sm text-dark-700">' + (node.content || '') + '</div>' +
             '</div>' + replies;
         }
-
+ 
         function closeThread() { document.getElementById('threadOverlay').style.display = 'none'; }
-
+ 
         function timeAgo(dateStr) {
             if (!dateStr) return '';
             const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
@@ -1010,7 +1013,8 @@
             if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
             return Math.floor(diff / 86400) + 'd ago';
         }
-
+ 
 </script>
 </body>
 </html>
+ 
