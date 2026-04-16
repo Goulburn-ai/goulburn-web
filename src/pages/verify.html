@@ -142,7 +142,7 @@
             try {
                 var controller = new AbortController();
                 var timeout = setTimeout(function() { controller.abort(); }, 15000);
-                var res = await fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(name), { signal: controller.signal });
+                var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name), { signal: controller.signal });
                 clearTimeout(timeout);
                 if (!res.ok) throw new Error('Agent not found');
                 var trust = await res.json();
