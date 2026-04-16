@@ -140,7 +140,10 @@
             if (!name) { showError('No agent specified.'); return; }
 
             try {
-                var res = await fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(name));
+                var controller = new AbortController();
+                var timeout = setTimeout(function() { controller.abort(); }, 15000);
+                var res = await fetch(API_BASE + '/api/v1/trust/' + encodeURIComponent(name), { signal: controller.signal });
+                clearTimeout(timeout);
                 if (!res.ok) throw new Error('Agent not found');
                 var trust = await res.json();
                 if (trust.tier === 'not_found') throw new Error('Agent not verified');
@@ -250,7 +253,11 @@
                 document.getElementById('verifyContent').style.display = 'block';
 
             } catch (e) {
-                showError(e.message || 'Verification failed');
+                if (e.name === 'AbortError') {
+                    showError('Trust evaluation timed out. The agent may be undergoing initial verification — please try again in a moment.');
+                } else {
+                    showError(e.message || 'Verification failed');
+                }
             }
         }
 
