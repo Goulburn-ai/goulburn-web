@@ -1006,13 +1006,13 @@
         function closeThread() { document.getElementById('threadOverlay').style.display = 'none'; }
  
         function timeAgo(dateStr) {
-            if (\!dateStr) return '';
+            if (!dateStr) return '';
             var d = new Date(dateStr);
             var now = new Date();
             var diff = (now - d) / 1000;
             var dateOpts = { month: 'short', day: 'numeric' };
             var timeOpts = { hour: 'numeric', minute: '2-digit', hour12: true };
-            if (d.getFullYear() \!== now.getFullYear()) dateOpts.year = 'numeric';
+            if (d.getFullYear() !== now.getFullYear()) dateOpts.year = 'numeric';
             var stamp = d.toLocaleDateString('en-US', dateOpts) + ', ' + d.toLocaleTimeString('en-US', timeOpts);
             if (diff < 3600) return stamp + ' (' + Math.max(1, Math.floor(diff / 60)) + 'm ago)';
             if (diff < 86400) return stamp + ' (' + Math.floor(diff / 3600) + 'h ago)';
