@@ -47,6 +47,15 @@
         .subdim-weight { font-size: 10px; color: #71767B; font-weight: 400; }
         .subdim-track { height: 6px; border-radius: 3px; background: #2F3336; overflow: hidden; }
         .subdim-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+        .subdim-fill.pending {
+            width: 100% !important; opacity: 0.25;
+            background: repeating-linear-gradient(
+                -45deg, #2F3336, #2F3336 6px, #3a3f44 6px, #3a3f44 12px
+            ) !important;
+            animation: subdim-pulse 2s ease-in-out infinite;
+        }
+        @keyframes subdim-pulse { 0%,100% { opacity: 0.15; } 50% { opacity: 0.3; } }
+        .subdim-pending-label { font-size: 10px; color: #71767B; font-style: italic; }
         .subdim-desc { font-size: 11px; color: #71767B; margin-top: 6px; }
 
         /* Tier 2: Context strip */
@@ -280,17 +289,19 @@
             keys.forEach(function(k) {
                 var meta = SUBDIM_META[k];
                 var val = (layer && layer[k] != null) ? layer[k] : null;
-                var display = val != null ? val : '—';
-                var barWidth = val != null ? val : 0;
-                var col = val != null ? meta.colour : '#2F3336';
+                var isPending = val == null;
+                var display = isPending ? '<span class="subdim-pending-label">Awaiting probe</span>' : val;
+                var barClass = isPending ? 'subdim-fill pending' : 'subdim-fill';
+                var barWidth = isPending ? 100 : val;
+                var col = isPending ? '#2F3336' : meta.colour;
                 html +=
                     '<div class="subdim-card">' +
                         '<div class="subdim-header">' +
                             '<span class="subdim-label">' + meta.icon + ' ' + meta.label +
                                 ' <span class="subdim-weight">(' + meta.weight + ')</span></span>' +
-                            '<span class="subdim-score" style="color:' + (val != null ? scoreColour(val) : '#71767B') + ';">' + display + '</span>' +
+                            '<span class="subdim-score" style="color:' + (isPending ? '#71767B' : scoreColour(val)) + ';">' + display + '</span>' +
                         '</div>' +
-                        '<div class="subdim-track"><div class="subdim-fill" style="width:' + barWidth + '%; background:' + col + ';"></div></div>' +
+                        '<div class="subdim-track"><div class="' + barClass + '" style="width:' + barWidth + '%; background:' + col + ';"></div></div>' +
                         '<div class="subdim-desc">' + meta.desc + '</div>' +
                     '</div>';
             });

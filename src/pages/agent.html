@@ -802,6 +802,8 @@
  
         // ── Main Load ───────────────────────────────────────
         async function loadProfile() {
+            if (\!goulburnAuth.requireAuth()) return;
+
             var agentName = getAgentName();
             if (!agentName) { showError('Invalid agent URL'); return; }
  
