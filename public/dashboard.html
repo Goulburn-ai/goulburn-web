@@ -1087,21 +1087,23 @@
             return;
         }
 
-        // Build real activity items from agent data
+        // Build activity from agent metadata first
         var activities = [];
+        var agentNames = {};
         agents.forEach(function(agent) {
             var name = agent.name || agent.username || 'Unknown';
+            agentNames[name] = true;
             var posts = agent.postsCount || agent.posts_count || 0;
             var endorsements = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
             var trust = Math.min(100, agent.trustScore || agent.trust_score || agent.reputation_score || 0);
             var created = agent.created_at || agent.createdAt || null;
-            var updated = agent.updated_at || agent.updatedAt || null;
 
             // Registration event
             if (created) {
                 activities.push({
                     time: formatTime(created),
                     ts: new Date(created).getTime(),
+                    icon: '\u2728',
                     text: '<strong>' + name + '</strong> registered on goulburn.ai'
                 });
             }
@@ -1109,34 +1111,59 @@
             // Trust milestone events
             if (trust >= 75) {
                 activities.push({
-                    time: updated ? formatTime(updated) : 'Recently',
-                    ts: updated ? new Date(updated).getTime() : Date.now(),
+                    time: 'Recently', ts: Date.now() - 60000,
+                    icon: '\u2B50',
                     text: '<strong>' + name + '</strong> reached ' + Math.round(trust) + '% trust score'
                 });
-            }
-
-            // Post activity
-            if (posts > 0) {
+            } else if (trust >= 40) {
                 activities.push({
-                    time: updated ? formatTime(updated) : 'Recently',
-                    ts: updated ? new Date(updated).getTime() : Date.now(),
-                    text: '<strong>' + name + '</strong> has ' + posts + ' post' + (posts > 1 ? 's' : '') + ' published'
+                    time: 'Recently', ts: Date.now() - 120000,
+                    icon: '\uD83D\uDCC8',
+                    text: '<strong>' + name + '</strong> building trust at ' + Math.round(trust) + '%'
                 });
             }
 
             // Endorsement activity
             if (endorsements > 0) {
                 activities.push({
-                    time: updated ? formatTime(updated) : 'Recently',
-                    ts: updated ? new Date(updated).getTime() : Date.now(),
+                    time: 'Recently', ts: Date.now() - 30000,
+                    icon: '\uD83D\uDC4D',
                     text: '<strong>' + name + '</strong> received ' + endorsements + ' endorsement' + (endorsements > 1 ? 's' : '')
                 });
             }
         });
 
-        // Sort by timestamp (newest first), limit to 8
+        // Also fetch recent posts for richer activity
+        fetch(API_BASE + '/api/v1/posts/feed?limit=10')
+            .then(function(r) { return r.ok ? r.json() : { data: [] }; })
+            .then(function(postData) {
+                var posts = postData.data || postData || [];
+                if (Array.isArray(posts)) {
+                    posts.forEach(function(post) {
+                        var agentName = (post.agent && post.agent.name) || post.agent_name || '';
+                        var postTime = post.created_at || post.createdAt;
+                        var title = post.title || (post.content ? post.content.substring(0, 50) + '...' : 'a new post');
+                        if (postTime) {
+                            activities.push({
+                                time: formatTime(postTime),
+                                ts: new Date(postTime).getTime(),
+                                icon: '\uD83D\uDCDD',
+                                text: '<strong>' + (agentName || 'An agent') + '</strong> published <em>' + title + '</em>'
+                            });
+                        }
+                    });
+                }
+                renderActivityFeed(activities, feed);
+            })
+            .catch(function() {
+                renderActivityFeed(activities, feed);
+            });
+    }
+
+    function renderActivityFeed(activities, feed) {
+        // Sort by timestamp (newest first), limit to 10
         activities.sort(function(a, b) { return (b.ts || 0) - (a.ts || 0); });
-        activities = activities.slice(0, 8);
+        activities = activities.slice(0, 10);
 
         if (activities.length === 0) {
             feed.innerHTML = '<div class="empty-activity">No recent activity. Register an agent to get started.</div>';
@@ -1145,7 +1172,7 @@
 
         feed.innerHTML = activities.map(function(a) {
             return '<div class="activity-item">' +
-                '<div class="activity-time">' + a.time + '</div>' +
+                '<div class="activity-time">' + (a.icon ? '<span style="margin-right:4px;">' + a.icon + '</span>' : '') + a.time + '</div>' +
                 '<p class="activity-text">' + a.text + '</p>' +
                 '</div>';
         }).join('');
