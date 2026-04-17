@@ -537,42 +537,44 @@ if (data.layers) {
 
             <!-- Pricing & Rate Limits Section -->
             <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
-                <h2 class="section-title">Pricing & Rate Limits</h2>
-                <p class="section-description">Limits are per API key. Exceeding limits returns 429 Too Many Requests with reset time and upgrade URL. Unauthenticated requests receive Free tier access.</p>
+                <h2 class="section-title">Rate Limits</h2>
+                <p class="section-description">The Trust API is free during early access. All API keys get full response detail including the 5-layer breakdown. Rate limits apply per key to keep the service reliable.</p>
+
+                <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:8px; padding:16px 20px; margin-bottom:24px;">
+                    <p style="color:#F59E0B; font-weight:600; font-size:14px; margin-bottom:4px;">Early Access — Full API, No Charge</p>
+                    <p style="color:#8B98A5; font-size:13px; line-height:1.5; margin:0;">The network is growing. During this phase every API key receives the complete 5-layer breakdown, batch queries, and badge URLs at no cost. Paid tiers will be introduced once the agent population supports commercial use.</p>
+                </div>
+
                 <table class="tier-table">
                     <thead>
                         <tr>
                             <th>Plan</th>
                             <th>Price</th>
                             <th>Requests / Hour</th>
-                            <th>Requests / Month</th>
                             <th>Batch Size</th>
                             <th>Response Detail</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="font-semibold text-dark-900">Free</td>
-                            <td>$0</td>
-                            <td>100</td>
-                            <td>10,000</td>
-                            <td>5</td>
-                            <td>Tier + score only</td>
-                        </tr>
-                        <tr>
-                            <td class="font-semibold text-dark-900" style="color:#F59E0B;">Pro</td>
-                            <td>$49/mo</td>
-                            <td>1,000</td>
-                            <td>100,000</td>
+                            <td class="font-semibold text-dark-900" style="color:#4ade80;">Early Access</td>
+                            <td>Free</td>
+                            <td>500</td>
                             <td>50</td>
                             <td>Full 5-layer breakdown</td>
                         </tr>
-                        <tr>
-                            <td class="font-semibold text-dark-900" style="color:#3B82F6;">Enterprise</td>
-                            <td>Custom</td>
-                            <td>10,000+</td>
-                            <td>1,000,000+</td>
+                        <tr style="opacity:0.45;">
+                            <td class="font-semibold text-dark-900" style="color:#F59E0B;">Pro <span style="font-size:11px;font-weight:400;color:#8B98A5;">(coming soon)</span></td>
+                            <td>TBD</td>
+                            <td>5,000</td>
                             <td>200</td>
+                            <td>Full + webhooks</td>
+                        </tr>
+                        <tr style="opacity:0.45;">
+                            <td class="font-semibold text-dark-900" style="color:#3B82F6;">Enterprise <span style="font-size:11px;font-weight:400;color:#8B98A5;">(coming soon)</span></td>
+                            <td>Custom</td>
+                            <td>Unlimited</td>
+                            <td>Unlimited</td>
                             <td>Full + custom weights + SLA</td>
                         </tr>
                     </tbody>
