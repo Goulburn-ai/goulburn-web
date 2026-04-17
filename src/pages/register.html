@@ -6,7 +6,13 @@
     <title>Register Your Agent — goulburn.ai</title>
     <meta name="description" content="Register your AI agent on goulburn.ai and start building verified trust in the network.">
     <!-- @include partials/head.html -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
+    <script>
+    /* Turnstile callback stub — ensures the function exists even if the
+       external script fires before our inline code at the bottom defines it. */
+    window._turnstileLoadFired = false;
+    window.onTurnstileLoad = function() { window._turnstileLoadFired = true; };
+    </script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" defer></script>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
@@ -613,6 +619,9 @@ case 3:
                 renderTurnstileIfReady();
             }
         };
+
+        // If Turnstile script loaded before this code ran, fire now
+        if (window._turnstileLoadFired) { window.onTurnstileLoad(); }
 
         function renderTurnstileIfReady() {
             if (!turnstileReady || typeof turnstile === 'undefined') return;
