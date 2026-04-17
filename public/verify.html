@@ -52,6 +52,86 @@
 
         .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
+
+        /* ── Compliance Advanced Display ────────────────────────── */
+        .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
+
+        /* Tier 1: Sub-dimension bars */
+        .subdim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 640px) { .subdim-grid { grid-template-columns: 1fr; } }
+        .subdim-card {
+            background: #16181C; border-radius: 10px; padding: 14px 16px;
+            border: 1px solid #2F3336; transition: border-color 0.2s;
+        }
+        .subdim-card:hover { border-color: #71767B; }
+        .subdim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .subdim-label { font-size: 12px; font-weight: 600; color: #E7E9EA; display: flex; align-items: center; gap: 6px; }
+        .subdim-score { font-size: 14px; font-weight: 700; }
+        .subdim-weight { font-size: 10px; color: #71767B; font-weight: 400; }
+        .subdim-track { height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
+        .subdim-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+        .subdim-fill.pending {
+            width: 100% !important; opacity: 1;
+            background: repeating-linear-gradient(
+                -45deg, #1a1c20, #1a1c20 5px, #52585f 5px, #52585f 10px
+            ) !important;
+            background-size: 14.14px 14.14px;
+            animation: subdim-slide 1.2s linear infinite;
+        }
+        @keyframes subdim-slide { 0% { background-position: 0 0; } 100% { background-position: 14.14px 0; } }
+        .subdim-pending-label { font-size: 10px; color: #71767B; font-style: italic; }
+        .subdim-desc { font-size: 11px; color: #71767B; margin-top: 6px; }
+
+        /* Tier 2: Context strip */
+        .context-strip {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+            padding: 12px 14px; background: #16181C; border-radius: 8px;
+            border: 1px solid #2F3336;
+        }
+        .ctx-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 11px; color: #E7E9EA; padding: 4px 10px;
+            border-radius: 6px; background: rgba(255,255,255,0.05);
+        }
+        .ctx-chip svg { flex-shrink: 0; }
+        .ctx-chip .ctx-label { color: #71767B; }
+
+        /* Tier 3: Probe timeline */
+        .probe-toggle {
+            display: flex; align-items: center; gap: 6px; cursor: pointer;
+            font-size: 12px; font-weight: 600; color: #71767B;
+            padding: 8px 0; user-select: none; transition: color 0.15s;
+        }
+        .probe-toggle:hover { color: #E7E9EA; }
+        .probe-toggle svg { transition: transform 0.2s; }
+        .probe-toggle.open svg { transform: rotate(90deg); }
+        .probe-timeline { display: none; }
+        .probe-timeline.open { display: block; }
+        .probe-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;
+            background: #16181C; border: 1px solid #2F3336; transition: border-color 0.15s;
+        }
+        .probe-row:hover { border-color: #71767B; }
+        .probe-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .probe-icon.pass { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .probe-icon.warn { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .probe-icon.fail { background: rgba(239,68,68,0.15); color: #f87171; }
+        .probe-icon.inconclusive { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .probe-meta { flex: 1; min-width: 0; }
+        .probe-type { font-size: 12px; font-weight: 600; color: #E7E9EA; }
+        .probe-time { font-size: 10px; color: #71767B; }
+        .probe-verdict {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;
+        }
+        .probe-verdict.pass { background: rgba(34,197,94,0.12); color: #4ade80; }
+        .probe-verdict.warn { background: rgba(245,158,11,0.12); color: #fbbf24; }
+        .probe-verdict.fail { background: rgba(239,68,68,0.12); color: #f87171; }
+        .probe-verdict.inconclusive { background: rgba(148,163,184,0.1); color: #94a3b8; }
+        .probe-score-chip { font-size: 11px; font-weight: 700; color: #E7E9EA; width: 32px; text-align: right; }
+        .probe-conf { font-size: 10px; color: #71767B; width: 40px; text-align: right; }
+        .probe-empty { text-align: center; padding: 24px; color: #71767B; font-size: 12px; }
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
@@ -163,7 +243,7 @@
             <section class=" rounded-xl shadow-sm border border-dark-200 p-8 text-center">
                 <div class="flex justify-center mb-4">
                     <div class="seal" id="vSeal">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="#f59e0b"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+                        <img src="/badge-verified.png" alt="Verified by goulburn.ai" width="56" height="56" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
                     </div>
                 </div>
                 <h3 class="text-lg font-bold text-dark-900 mb-2">Verified by goulburn.ai</h3>
@@ -309,12 +389,189 @@
             compliance:   { label: 'Compliance & Safety',      q: 'Is this agent safe to deploy?' }
         };
 
+        /* ── Compliance sub-dimension metadata ────────────────────── */
+        var SUBDIM_META = {
+            model_transparency: {
+                label: 'Model Transparency',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+                weight: '30%',
+                desc: 'Does the agent accurately disclose the model it runs?',
+                colour: '#a78bfa',
+            },
+            data_isolation: {
+                label: 'Data Isolation',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+                weight: '30%',
+                desc: 'Can this agent leak data across user sessions?',
+                colour: '#60a5fa',
+            },
+            output_safety: {
+                label: 'Output Safety',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+                weight: '20%',
+                desc: 'Does the agent avoid producing PII or harmful content?',
+                colour: '#4ade80',
+            },
+            infra_hygiene: {
+                label: 'Infra Hygiene',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',
+                weight: '20%',
+                desc: 'Is the agent\'s infrastructure consistent and well-maintained?',
+                colour: '#fbbf24',
+            },
+        };
+
+        var PROBE_TYPE_LABELS = {
+            model_fingerprint: 'Model Fingerprint',
+            latency_profile: 'Latency Profile',
+            watermark_detection: 'Watermark Detection',
+            honeypot_injection: 'Honeypot Injection',
+            cross_session_bleed: 'Cross-Session Bleed',
+            pii_scan: 'PII Scan',
+        };
+        var PROBE_TYPE_ICONS = {
+            model_fingerprint: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+            latency_profile: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+            watermark_detection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+            honeypot_injection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+            cross_session_bleed: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
+            pii_scan: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        };
+
         function getAgentName() {
             var m = window.location.pathname.match(/\/verify\/([^\/]+)/);
             return m ? decodeURIComponent(m[1]) : null;
         }
 
         function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+        function scoreColour(s) {
+            if (s >= 80) return '#4ade80';
+            if (s >= 60) return '#fbbf24';
+            if (s >= 40) return '#fb923c';
+            return '#f87171';
+        }
+
+        function timeAgo(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            var now = new Date();
+            var diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+
+        /* ── Tier 1: Sub-dimension mini-bars ──────────────────────── */
+        function renderComplianceSubdims(layer) {
+            var html = '<div class="subdim-grid">';
+            var keys = ['model_transparency', 'data_isolation', 'output_safety', 'infra_hygiene'];
+            keys.forEach(function(k) {
+                var meta = SUBDIM_META[k];
+                var val = (layer && layer[k] != null) ? layer[k] : null;
+                var isPending = val == null;
+                var display = isPending ? '<span class="subdim-pending-label">Awaiting probe</span>' : val;
+                var barClass = isPending ? 'subdim-fill pending' : 'subdim-fill';
+                var barWidth = isPending ? 100 : val;
+                var col = isPending ? '#2F3336' : meta.colour;
+                html +=
+                    '<div class="subdim-card">' +
+                        '<div class="subdim-header">' +
+                            '<span class="subdim-label">' + meta.icon + ' ' + meta.label +
+                                ' <span class="subdim-weight">(' + meta.weight + ')</span></span>' +
+                            '<span class="subdim-score" style="color:' + (isPending ? '#71767B' : scoreColour(val)) + ';">' + display + '</span>' +
+                        '</div>' +
+                        '<div class="subdim-track"><div class="' + barClass + '" style="width:' + barWidth + '%; background:' + col + ';"></div></div>' +
+                        '<div class="subdim-desc">' + meta.desc + '</div>' +
+                    '</div>';
+            });
+            html += '</div>';
+            return html;
+        }
+
+        /* ── Tier 2: Context strip ────────────────────────────────── */
+        function renderComplianceContext(layer) {
+            var mode = (layer && layer.scoring_mode) || 'platform_only';
+            var probeCount = (layer && layer.probe_count) || 0;
+            var incidents = (layer && layer.incidents) || 0;
+            var lastReviewed = layer && layer.last_reviewed;
+            var ageDays = layer && layer.age_days;
+            var ageBonus = layer && layer.age_bonus;
+            var idBonus = layer && layer.identity_bonus;
+
+            var modeLabel = mode === 'blended' ? 'Blended (probes + platform)' : 'Platform only';
+            var modeColour = mode === 'blended' ? '#4ade80' : '#fbbf24';
+
+            var html = '<div class="context-strip">';
+
+            // Scoring mode
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + modeColour + '" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+                '<span class="ctx-label">Mode:</span> ' + modeLabel + '</div>';
+
+            // Probe count
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
+                '<span class="ctx-label">Probes (90d):</span> ' + probeCount + '</div>';
+
+            // Incidents
+            var incColour = incidents > 0 ? '#f87171' : '#4ade80';
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + incColour + '" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+                '<span class="ctx-label">Incidents:</span> ' + incidents + '</div>';
+
+            // Grace period breakdown (only in platform-only mode)
+            if (mode === 'platform_only' && ageDays != null) {
+                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                    '<span class="ctx-label">Age:</span> ' + ageDays + 'd <span class="ctx-label">(+' + (ageBonus || 0) + ')</span></div>';
+
+                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                    '<span class="ctx-label">Identity:</span> +' + (idBonus || 0) + '</div>';
+            }
+
+            // Last reviewed
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                '<span class="ctx-label">Last reviewed:</span> ' + (lastReviewed ? timeAgo(lastReviewed) : 'Pending') + '</div>';
+
+            html += '</div>';
+            return html;
+        }
+
+        /* ── Tier 3: Probe history timeline ───────────────────────── */
+        function renderProbeTimeline(probes) {
+            var html = '';
+            html += '<div class="probe-toggle" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\');">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
+                'Probe History (' + probes.length + ' completed)' +
+            '</div>';
+            html += '<div class="probe-timeline">';
+
+            if (probes.length === 0) {
+                html += '<div class="probe-empty">No completed compliance probes yet. Probes are scheduled automatically and will appear here once executed.</div>';
+            } else {
+                probes.forEach(function(p) {
+                    var v = (p.verdict || 'inconclusive').toLowerCase();
+                    var typeLabel = PROBE_TYPE_LABELS[p.type] || p.type.replace(/_/g, ' ');
+                    var typeIcon = PROBE_TYPE_ICONS[p.type] || '';
+                    var score = p.score != null ? p.score : '—';
+                    var conf = p.confidence != null ? Math.round(p.confidence * 100) + '%' : '—';
+                    var durLabel = p.duration_ms ? (p.duration_ms < 1000 ? p.duration_ms + 'ms' : (p.duration_ms / 1000).toFixed(1) + 's') : '';
+
+                    html +=
+                        '<div class="probe-row">' +
+                            '<div class="probe-icon ' + v + '">' + typeIcon + '</div>' +
+                            '<div class="probe-meta">' +
+                                '<div class="probe-type">' + esc(typeLabel) + '</div>' +
+                                '<div class="probe-time">' + timeAgo(p.completed_at) + (durLabel ? ' · ' + durLabel : '') + '</div>' +
+                            '</div>' +
+                            '<span class="probe-verdict ' + v + '">' + v + '</span>' +
+                            '<span class="probe-score-chip">' + score + '</span>' +
+                            '<span class="probe-conf">' + conf + '</span>' +
+                        '</div>';
+                });
+            }
+
+            html += '</div>';
+            return html;
+        }
 
         async function loadVerification() {
             var name = getAgentName();
@@ -336,7 +593,7 @@
                 // Hero
                 document.getElementById('vAgentName').textContent = trust.agent;
                 document.getElementById('heroShield').innerHTML =
-                    '<svg width="64" height="64" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="' + colour + '"/></svg>';
+                    '<img src="/badge-verified.png" alt="Goulburn Trust Badge" width="100" height="100" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">';
 
                 var pill = document.getElementById('vTierPill');
                 pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4 ' + (TIER_CSS[tier] || TIER_CSS.unranked);
@@ -385,6 +642,28 @@
                         tagRow.className = 'flex flex-wrap gap-1 pb-3 pl-0 md:pl-36';
                         tagRow.innerHTML = tags;
                         layerContainer.appendChild(tagRow);
+                    }
+
+                    // ── Compliance advanced panel (Tiers 1-3) ──
+                    if (key === 'compliance') {
+                        var panel = document.createElement('div');
+                        panel.className = 'compliance-panel';
+
+                        // Tier 1: Sub-dimension bars
+                        var subdimHtml = renderComplianceSubdims(layer);
+
+                        // Tier 2: Context strip
+                        var ctxHtml = renderComplianceContext(layer);
+
+                        // Tier 3: Probe timeline placeholder (filled async)
+                        var timelineHtml = '<div class="probe-section">' + renderProbeTimeline([]) + '</div>';
+
+                        panel.innerHTML = subdimHtml + ctxHtml + timelineHtml;
+                        layerContainer.appendChild(panel);
+
+                        // Fetch probe history async (Tier 3)
+                        panel.setAttribute("data-agent", name);
+                        loadProbeHistory(name, panel);
                     }
                 });
 
@@ -439,6 +718,23 @@
                 } else {
                     showError(e.message || 'Verification failed');
                 }
+            }
+        }
+
+        async function loadProbeHistory(agentName, panelEl) {
+            try {
+                var res = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(agentName));
+                if (!res.ok) return;
+                var data = await res.json();
+                if (!data.probes) return;
+
+                // Replace entire probe section with real data
+                var probeSection = panelEl.querySelector('.probe-section');
+                if (probeSection) {
+                    probeSection.innerHTML = renderProbeTimeline(data.probes);
+                }
+            } catch (e) {
+                console.warn('Could not load probe history:', e.message);
             }
         }
 
