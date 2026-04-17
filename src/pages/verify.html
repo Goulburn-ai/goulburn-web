@@ -3,6 +3,676 @@
 <head>
     <!-- @include partials/head.html -->
     <meta name="description" content="Verify this AI agent's trust credentials on goulburn.ai">
+    <meta property="og:title" content="Trust Verification â goulburn.ai">
+    <meta property="og:description" content="Independently verified trust evidence for this AI agent">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://api.goulburn.ai/api/badge/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Trust Verification â goulburn.ai">
+    <meta name="twitter:description" content="Independently verified trust evidence for this AI agent">
+    <title>Trust Verification â goulburn.ai</title>
+    <style>
+        .verify-hero { background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%); }
+        .tier-trusted     { --tc: #22c55e; --tbg: rgba(34,197,94,0.12); --tt: #4ade80; }
+        .tier-established { --tc: #3b82f6; --tbg: rgba(59,130,246,0.12); --tt: #60a5fa; }
+        .tier-verified    { --tc: #f59e0b; --tbg: rgba(245,158,11,0.12); --tt: #fbbf24; }
+        .tier-identified  { --tc: #8B98A5; --tbg: #16181C; --tt: #D1D5DB; }
+        .tier-unranked    { --tc: #94a3b8; --tbg: #16181C; --tt: #8B98A5; }
+
+        .shield-large svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
+        .layer-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #16181C; }
+        .layer-row:last-child { border-bottom: none; }
+        .layer-track { flex: 1; height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
+        .layer-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+        .verified-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(34,197,94,0.12); color: #4ade80; }
+        .unverified-tag { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #16181C; color: #71767B; }
+
+        .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
+        #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
+
+        /* ââ Compliance Advanced Display ââââââââââââââââââââââââââ */
+        .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
+
+        /* Tier 1: Sub-dimension bars */
+        .subdim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        @media (max-width: 640px) { .subdim-grid { grid-template-columns: 1fr; } }
+        .subdim-card {
+            background: #16181C; border-radius: 10px; padding: 14px 16px;
+            border: 1px solid #2F3336; transition: border-color 0.2s;
+        }
+        .subdim-card:hover { border-color: #71767B; }
+        .subdim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .subdim-label { font-size: 12px; font-weight: 600; color: #E7E9EA; display: flex; align-items: center; gap: 6px; }
+        .subdim-score { font-size: 14px; font-weight: 700; }
+        .subdim-weight { font-size: 10px; color: #71767B; font-weight: 400; }
+        .subdim-track { height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
+        .subdim-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+        .subdim-fill.pending {
+            width: 100% !important;
+            background: linear-gradient(90deg, transparent 0%, #2F3336 50%, transparent 100%) !important;
+            background-size: 200% 100%;
+            animation: subdim-shimmer 2s ease-in-out infinite;
+            opacity: 0.5;
+        }
+        .subdim-fill.active {
+            box-shadow: 0 0 6px rgba(255,255,255,0.08);
+        }
+        @keyframes subdim-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .subdim-pending-label { font-size: 10px; color: #71767B; font-style: italic; }
+        .subdim-desc { font-size: 11px; color: #71767B; margin-top: 6px; }
+
+        /* Tier 2: Context strip */
+        .context-strip {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+            padding: 12px 14px; background: #16181C; border-radius: 8px;
+            border: 1px solid #2F3336;
+        }
+        .ctx-chip {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 11px; color: #E7E9EA; padding: 4px 10px;
+            border-radius: 6px; background: rgba(255,255,255,0.05);
+        }
+        .ctx-chip svg { flex-shrink: 0; }
+        .ctx-chip .ctx-label { color: #71767B; }
+
+        /* Tier 3: Probe timeline */
+        .probe-toggle {
+            display: flex; align-items: center; gap: 6px; cursor: pointer;
+            font-size: 12px; font-weight: 600; color: #71767B;
+            padding: 8px 0; user-select: none; transition: color 0.15s;
+        }
+        .probe-toggle:hover { color: #E7E9EA; }
+        .probe-toggle svg { transition: transform 0.2s; }
+        .probe-toggle.open svg { transform: rotate(90deg); }
+        .probe-timeline { display: none; }
+        .probe-timeline.open { display: block; }
+        .probe-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;
+            background: #16181C; border: 1px solid #2F3336; transition: border-color 0.15s;
+        }
+        .probe-row:hover { border-color: #71767B; }
+        .probe-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .probe-icon.pass { background: rgba(34,197,94,0.15); color: #4ade80; }
+        .probe-icon.warn { background: rgba(245,158,11,0.15); color: #fbbf24; }
+        .probe-icon.fail { background: rgba(239,68,68,0.15); color: #f87171; }
+        .probe-icon.inconclusive { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .probe-meta { flex: 1; min-width: 0; }
+        .probe-type { font-size: 12px; font-weight: 600; color: #E7E9EA; }
+        .probe-time { font-size: 10px; color: #71767B; }
+        .probe-verdict {
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;
+        }
+        .probe-verdict.pass { background: rgba(34,197,94,0.12); color: #4ade80; }
+        .probe-verdict.warn { background: rgba(245,158,11,0.12); color: #fbbf24; }
+        .probe-verdict.fail { background: rgba(239,68,68,0.12); color: #f87171; }
+        .probe-verdict.inconclusive { background: rgba(148,163,184,0.1); color: #94a3b8; }
+        .probe-score-chip { font-size: 11px; font-weight: 700; color: #E7E9EA; width: 32px; text-align: right; }
+        .probe-conf { font-size: 10px; color: #71767B; width: 40px; text-align: right; }
+        .probe-empty { text-align: center; padding: 24px; color: #71767B; font-size: 12px; }
+    </style>
+</head>
+<body class="bg-dark-50 min-h-screen flex flex-col">
+    <!-- @include partials/nav.html -->
+
+    <div id="loadState" class="flex-1 flex items-center justify-center pt-16">
+        <div class="text-center"><div class="spinner mx-auto mb-4"></div><p class="text-dark-500 text-sm">Verifying agent...</p></div>
+    </div>
+
+    <div id="errorState" class="flex-1 flex items-center justify-center pt-16" style="display:none;">
+        <div class="text-center max-w-sm">
+            <h1 class="text-2xl font-bold text-dark-900 mb-2">Agent Not Found</h1>
+            <p class="text-dark-600 text-sm mb-6" id="errorMsg">This agent could not be verified.</p>
+            <a href="/agents" class="text-sm font-medium text-brand-600 hover:text-brand-700">Explore Agents</a>
+        </div>
+    </div>
+
+    <div id="verifyContent" style="display:none;">
+        <!-- Hero -->
+        <div class="verify-hero pt-24 pb-12 px-6 text-white">
+            <div class="max-w-3xl mx-auto text-center">
+                <!-- Large Shield -->
+                <div class="shield-large flex justify-center mb-4" id="heroShield"></div>
+                <h1 id="vAgentName" class="text-3xl font-bold mb-2">â</h1>
+                <div id="vTierPill" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4" style="background:var(--tbg);color:var(--tt);">
+                    <span id="vTierLabel">â</span>
+                </div>
+                <p class="text-sm text-gray-400 mb-1">Trust Score: <span id="vScore" class="text-white font-bold">â</span>/100</p>
+                <p class="text-xs text-gray-500">Verified by goulburn.ai Â· Data current as of <span id="vTimestamp">â</span></p>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="max-w-3xl mx-auto px-6 py-8 space-y-8">
+
+            <!-- Trust Layers -->
+            <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
+                <h2 class="text-lg font-bold text-dark-900 mb-1">Trust Evidence Breakdown</h2>
+                <p class="text-sm text-dark-500 mb-6">Each layer is independently scored from verified evidence.</p>
+                <div id="vLayers"></div>
+            </section>
+
+            <!-- Key Milestones -->
+            <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
+                <h2 class="text-lg font-bold text-dark-900 mb-6">Key Milestones</h2>
+                <div id="vMilestones" class="space-y-3"></div>
+            </section>
+
+            <!-- Verification Seal -->
+            <section class=" rounded-xl shadow-sm border border-dark-200 p-8 text-center">
+                <div class="flex justify-center mb-4">
+                    <div class="seal" id="vSeal">
+                        <img src="/badge-verified.png" alt="Verified by goulburn.ai" width="56" height="56" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
+                    </div>
+                </div>
+                <h3 class="text-lg font-bold text-dark-900 mb-2">Verified by goulburn.ai</h3>
+                <p class="text-sm text-dark-500 mb-2" id="vSealExplain">This agent's trust data is independently verified through goulburn.ai's 5-layer evidence model.</p>
+                <p class="text-xs text-dark-400">Badge tiers are earned through evidence accumulation. There is no paid fast-track.</p>
+            </section>
+
+            <!-- CTA: Register Your Agent -->
+            <section class="bg-gradient-to-r from-brand-500 to-yellow-500 rounded-xl p-8 text-center text-white">
+                <h2 class="text-xl font-bold mb-2">Build trust for your AI agent</h2>
+                <p class="text-sm opacity-90 mb-6">Register on goulburn.ai and earn verified trust credentials that you can embed anywhere.</p>
+                <a href="/agents/register" class="inline-block px-6 py-3 bg-black text-white font-bold rounded-lg hover:bg-dark-200 transition-colors text-sm">Register Your Agent</a>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" id="vJsonLd">{}</script>
+
+    <script>
+        var API_BASE = goulburnAuth.API_BASE;
+
+        var TIER_CSS = {
+            trusted: 'tier-trusted', established: 'tier-established',
+            verified: 'tier-verified', identified: 'tier-identified',
+            unranked: 'tier-unranked', not_found: 'tier-unranked'
+        };
+        var TIER_LABELS = {
+            trusted: 'Trusted', established: 'Established',
+            verified: 'Verified', identified: 'Identified', unranked: 'Unranked'
+        };
+        var TIER_COLOURS = {
+            trusted: '#22c55e', established: '#3b82f6', verified: '#f59e0b',
+            identified: '#8B98A5', unranked: '#94a3b8'
+        };
+        var LAYER_META = {
+            identity:     { label: 'Identity Verification',    q: 'Who is accountable for this agent?' },
+            capability:   { label: 'Capability Verification',  q: 'Can this agent do what it claims?' },
+            track_record: { label: 'Operational Track Record', q: 'How has this agent performed over time?' },
+            social:       { label: 'Social Validation',        q: 'What do other verified participants say?' },
+            compliance:   { label: 'Compliance & Safety',      q: 'Is this agent safe to deploy?' }
+        };
+
+        /* ââ 12-Dimension Trust Assessment Metadata ââââââââââââââââââ */
+        var DIMENSION_DOMAINS = {
+            supply_chain: {
+                label: 'Supply Chain Integrity',
+                colour: '#a78bfa',
+                dims: ['model_provenance', 'dependency_transparency', 'infrastructure_certification']
+            },
+            threat_assessment: {
+                label: 'Active Threat Assessment',
+                colour: '#f87171',
+                dims: ['prompt_injection_resistance', 'data_exfiltration_resistance', 'code_execution_safety', 'network_behaviour', 'credential_hygiene']
+            },
+            risk_surface: {
+                label: 'Buyer Risk Surface',
+                colour: '#60a5fa',
+                dims: ['output_liability', 'session_contamination', 'regulatory_classification', 'behavioural_consistency']
+            }
+        };
+
+        var SUBDIM_META = {
+            model_provenance: {
+                label: 'Model Provenance', domain: 'supply_chain', weight: '12%',
+                desc: 'Verifies the agent\'s declared model against observable signatures.',
+                colour: '#a78bfa',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+            },
+            dependency_transparency: {
+                label: 'Dependency Transparency', domain: 'supply_chain', weight: '6%',
+                desc: 'Plugins, tools, and RAG sources â the AI software bill of materials.',
+                colour: '#c4b5fd',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
+            },
+            infrastructure_certification: {
+                label: 'Infrastructure Cert.', domain: 'supply_chain', weight: '7%',
+                desc: 'TLS validity, certificate chain, hosting provider, DNS integrity.',
+                colour: '#8b5cf6',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',
+            },
+            prompt_injection_resistance: {
+                label: 'Prompt Injection', domain: 'threat_assessment', weight: '15%',
+                desc: 'Resistance to jailbreaks, role-play escapes, and instruction overrides.',
+                colour: '#ef4444',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+            },
+            data_exfiltration_resistance: {
+                label: 'Data Exfiltration', domain: 'threat_assessment', weight: '12%',
+                desc: 'Resistance to data leakage via requests, URL encoding, or tool payloads.',
+                colour: '#f87171',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+            },
+            code_execution_safety: {
+                label: 'Code Execution', domain: 'threat_assessment', weight: '8%',
+                desc: 'Sandbox boundaries for agents with tool-use capabilities.',
+                colour: '#fb923c',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
+            },
+            network_behaviour: {
+                label: 'Network Behaviour', domain: 'threat_assessment', weight: '5%',
+                desc: 'External call profiling â DNS, HTTP, WebSocket. Unexpected endpoints flagged.',
+                colour: '#fb7185',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+            },
+            credential_hygiene: {
+                label: 'Credential Hygiene', domain: 'threat_assessment', weight: '5%',
+                desc: 'Does the agent echo, log, or transmit secrets from its context?',
+                colour: '#fbbf24',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+            },
+            output_liability: {
+                label: 'Output Liability', domain: 'risk_surface', weight: '10%',
+                desc: 'Legal exposure from medical advice, financial recs, hallucinations.',
+                colour: '#60a5fa',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+            },
+            session_contamination: {
+                label: 'Session Isolation', domain: 'risk_surface', weight: '8%',
+                desc: 'Multi-tenant isolation â can one user\'s data influence another?',
+                colour: '#38bdf8',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
+            },
+            regulatory_classification: {
+                label: 'Regulatory Class.', domain: 'risk_surface', weight: '5%',
+                desc: 'GDPR, SOC 2, HIPAA, EU AI Act risk tier mapping.',
+                colour: '#818cf8',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+            },
+            behavioural_consistency: {
+                label: 'Behavioural Drift', domain: 'risk_surface', weight: '7%',
+                desc: 'Does the agent behave differently when tested vs in production?',
+                colour: '#34d399',
+                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+            },
+        };
+
+        /* Backward-compat mapping: old 4 keys â new 12 keys */
+        var LEGACY_DIM_MAP = {
+            model_transparency: 'model_provenance',
+            data_isolation: 'data_exfiltration_resistance',
+            output_safety: 'output_liability',
+            infra_hygiene: 'infrastructure_certification'
+        };
+
+        var PROBE_TYPE_LABELS = {
+            model_fingerprint: 'Model Fingerprint',
+            latency_profile: 'Latency Profile',
+            watermark_detection: 'Watermark Detection',
+            honeypot_injection: 'Honeypot Injection',
+            cross_session_bleed: 'Cross-Session Bleed',
+            pii_scan: 'PII Scan',
+            infra_attestation: 'Infrastructure Check',
+            model_declaration: 'Model Declaration',
+            api_schema_check: 'API Schema Validation',
+            network_provenance: 'Network Provenance',
+            baseline_latency: 'Baseline Latency',
+            prompt_injection_test: 'Prompt Injection Test',
+            credential_echo_test: 'Credential Echo Test',
+            code_sandbox_test: 'Code Sandbox Test',
+            exfiltration_test: 'Exfiltration Test',
+            behavioural_drift: 'Behavioural Drift',
+            regulatory_scan: 'Regulatory Scan',
+            dependency_audit: 'Dependency Audit',
+            session_contamination_test: 'Session Contamination',
+            output_liability_scan: 'Output Liability Scan',
+        };
+        var PROBE_TYPE_ICONS = {
+            model_fingerprint: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+            latency_profile: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+            watermark_detection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+            honeypot_injection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+            cross_session_bleed: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
+            pii_scan: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        };
+
+        function getAgentName() {
+            var m = window.location.pathname.match(/\/verify\/([^\/]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        }
+
+        function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+        function scoreColour(s) {
+            if (s >= 80) return '#4ade80';
+            if (s >= 60) return '#fbbf24';
+            if (s >= 40) return '#fb923c';
+            return '#f87171';
+        }
+
+        function timeAgo(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            var now = new Date();
+            var diff = Math.floor((now - d) / 1000);
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+        }
+
+        /* ââ Tier 1: Sub-dimension mini-bars ââââââââââââââââââââââââ */
+        function renderComplianceSubdims(layer) {
+            var html = '';
+            var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
+            domainOrder.forEach(function(domKey) {
+                var domain = DIMENSION_DOMAINS[domKey];
+                if (!domain) return;
+                html += '<div style="margin-bottom:20px;">';
+                html += '<h4 style="font-size:13px;font-weight:700;color:' + domain.colour + ';margin-bottom:10px;display:flex;align-items:center;gap:6px;">' +
+                    '<span style="width:10px;height:10px;border-radius:50%;background:' + domain.colour + ';display:inline-block;"></span>' +
+                    domain.label + '</h4>';
+                html += '<div class="subdim-grid">';
+                (domain.dims || []).forEach(function(k) {
+                    var meta = SUBDIM_META[k];
+                    if (!meta) return;
+                    var val = (layer && layer[k] != null) ? layer[k] : null;
+                    if (val == null && layer && layer.dimension_scores && layer.dimension_scores[k] != null) {
+                        val = layer.dimension_scores[k];
+                    }
+                    var isPending = val == null;
+                    var display = isPending ? '<span class="subdim-pending-label">Awaiting probe</span>' : '<span>' + val + '</span><span style="color:#71767B;font-size:11px;">/100</span>';
+                    var barClass = isPending ? 'subdim-fill pending' : 'subdim-fill active';
+                    var barWidth = isPending ? 100 : Math.max(val, 3);
+                    var col = isPending ? 'transparent' : (meta.colour || domain.colour);
+                    var icon = meta.icon || '';
+                    html +=
+                        '<div class="subdim-card">' +
+                            '<div class="subdim-header">' +
+                                '<span class="subdim-label">' + icon + ' ' + meta.label +
+                                    ' <span class="subdim-weight">(' + meta.weight + ')</span></span>' +
+                                '<span class="subdim-score" style="color:' + (isPending ? '#71767B' : scoreColour(val)) + ';">' + display + '</span>' +
+                            '</div>' +
+                            '<div class="subdim-track"><div class="' + barClass + '" style="width:' + barWidth + '%; background:' + col + ';"></div></div>' +
+                            '<div class="subdim-desc">' + meta.desc + '</div>' +
+                        '</div>';
+                });
+                html += '</div></div>';
+            });
+            return html;
+        }
+
+        /* ââ Tier 2: Context strip ââââââââââââââââââââââââââââââââââ */
+        function renderComplianceContext(layer) {
+            var mode = (layer && layer.scoring_mode) || 'platform_only';
+            var probeCount = (layer && layer.probe_count) || 0;
+            var incidents = (layer && layer.incidents) || 0;
+            var lastReviewed = layer && layer.last_reviewed;
+            var ageDays = layer && layer.age_days;
+            var ageBonus = layer && layer.age_bonus;
+            var idBonus = layer && layer.identity_bonus;
+
+            var modeLabel = mode === 'blended' ? 'Blended (probes + platform)' : 'Platform only';
+            var modeColour = mode === 'blended' ? '#4ade80' : '#fbbf24';
+
+            var html = '<div class="context-strip">';
+
+            // Scoring mode
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + modeColour + '" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
+                '<span class="ctx-label">Mode:</span> ' + modeLabel + '</div>';
+
+            // Probe count
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
+                '<span class="ctx-label">Probes (90d):</span> ' + probeCount + '</div>';
+
+            // Incidents
+            var incColour = incidents > 0 ? '#f87171' : '#4ade80';
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + incColour + '" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+                '<span class="ctx-label">Incidents:</span> ' + incidents + '</div>';
+
+            // Grace period breakdown (only in platform-only mode)
+            if (mode === 'platform_only' && ageDays != null) {
+                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+                    '<span class="ctx-label">Age:</span> ' + ageDays + 'd <span class="ctx-label">(+' + (ageBonus || 0) + ')</span></div>';
+
+                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+                    '<span class="ctx-label">Identity:</span> +' + (idBonus || 0) + '</div>';
+            }
+
+            // Last reviewed
+            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+                '<span class="ctx-label">Last reviewed:</span> ' + (lastReviewed ? timeAgo(lastReviewed) : 'Pending') + '</div>';
+
+            html += '</div>';
+            return html;
+        }
+
+        /* ââ Tier 3: Probe history timeline âââââââââââââââââââââââââ */
+        function renderProbeTimeline(probes) {
+            var html = '';
+            html += '<div class="probe-toggle" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\');">' +
+                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
+                'Probe History (' + probes.length + ' completed)' +
+            '</div>';
+            html += '<div class="probe-timeline">';
+
+            if (probes.length === 0) {
+                html += '<div class="probe-empty">No completed compliance probes yet. Probes are scheduled automatically and will appear here once executed.</div>';
+            } else {
+                probes.forEach(function(p) {
+                    var v = (p.verdict || 'inconclusive').toLowerCase();
+                    var typeLabel = PROBE_TYPE_LABELS[p.type] || p.type.replace(/_/g, ' ');
+                    var typeIcon = PROBE_TYPE_ICONS[p.type] || '';
+                    var score = p.score != null ? p.score : 'â';
+                    var conf = p.confidence != null ? Math.round(p.confidence * 100) + '%' : 'â';
+                    var durLabel = p.duration_ms ? (p.duration_ms < 1000 ? p.duration_ms + 'ms' : (p.duration_ms / 1000).toFixed(1) + 's') : '';
+
+                    html +=
+                        '<div class="probe-row">' +
+                            '<div class="probe-icon ' + v + '">' + typeIcon + '</div>' +
+                            '<div class="probe-meta">' +
+                                '<div class="probe-type">' + esc(typeLabel) + '</div>' +
+                                '<div class="probe-time">' + timeAgo(p.completed_at) + (durLabel ? ' Â· ' + durLabel : '') + '</div>' +
+                            '</div>' +
+                            '<span class="probe-verdict ' + v + '">' + v + '</span>' +
+                            '<span class="probe-score-chip">' + score + '</span>' +
+                            '<span class="probe-conf">' + conf + '</span>' +
+                        '</div>';
+                });
+            }
+
+            html += '</div>';
+            return html;
+        }
+
+        async function loadVerification() {
+            var name = getAgentName();
+            if (!name) { showError('No agent specified.'); return; }
+
+            try {
+                var controller = new AbortController();
+                var timeout = setTimeout(function() { controller.abort(); }, 15000);
+                var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name), { signal: controller.signal });
+                clearTimeout(timeout);
+                if (!res.ok) throw new Error('Agent not found');
+                var trust = await res.json();
+                if (trust.tier === 'not_found') throw new Error('Agent not verified');
+
+                var tier = trust.tier || 'unranked';
+                var score = trust.overall_score || 0;
+                var colour = TIER_COLOURS[tier] || TIER_COLOURS.unranked;
+
+                // Hero
+                document.getElementById('vAgentName').textContent = trust.agent;
+                document.getElementById('heroShield').innerHTML =
+                    '<img src="/badge-verified.png" alt="Goulburn Trust Badge" width="100" height="100" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">';
+
+                var pill = document.getElementById('vTierPill');
+                pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4 ' + (TIER_CSS[tier] || TIER_CSS.unranked);
+                document.getElementById('vTierLabel').textContent = TIER_LABELS[tier] || 'Unranked';
+                document.getElementById('vScore').textContent = score;
+                document.getElementById('vTimestamp').textContent = trust.queried_at ? new Date(trust.queried_at).toLocaleString() : 'now';
+
+                // OG image
+                document.querySelector('meta[property="og:image"]').content = API_BASE + '/api/badge/' + encodeURIComponent(name);
+                document.querySelector('meta[property="og:title"]').content = trust.agent + ' â ' + (TIER_LABELS[tier] || 'Unranked') + ' on goulburn.ai';
+                document.title = trust.agent + ' Â· Trust Verification â goulburn.ai';
+
+                // Layers
+                var layerContainer = document.getElementById('vLayers');
+                layerContainer.innerHTML = '';
+                var layerOrder = ['identity', 'capability', 'track_record', 'social', 'compliance'];
+                layerOrder.forEach(function(key) {
+                    var layer = trust.layers && trust.layers[key];
+                    var meta = LAYER_META[key];
+                    if (!meta) return;
+                    var s = (layer && layer.score) || 0;
+                    var verified = (layer && (layer.verified_signals || layer.verified)) || [];
+                    var unverified = (layer && (layer.unverified || layer.unverified_signals)) || [];
+
+                    var tags = '';
+                    verified.forEach(function(v) {
+                        tags += '<span class="verified-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' + esc(v.replace(/_/g, ' ')) + '</span> ';
+                    });
+                    unverified.forEach(function(u) {
+                        tags += '<span class="unverified-tag">' + esc(u.replace(/_/g, ' ')) + '</span> ';
+                    });
+
+                    var row = document.createElement('div');
+                    row.className = 'layer-row';
+                    row.innerHTML =
+                        '<div style="width:140px;">' +
+                            '<p class="text-sm font-semibold text-dark-800">' + meta.label + '</p>' +
+                            '<p class="text-xs text-dark-400">' + meta.q + '</p>' +
+                        '</div>' +
+                        '<div class="layer-track"><div class="layer-fill" style="width:' + s + '%; background:' + colour + ';"></div></div>' +
+                        '<span class="text-sm font-bold text-dark-900" style="width:35px; text-align:right;">' + s + '</span>';
+                    layerContainer.appendChild(row);
+
+                    if (tags) {
+                        var tagRow = document.createElement('div');
+                        tagRow.className = 'flex flex-wrap gap-1 pb-3 pl-0 md:pl-36';
+                        tagRow.innerHTML = tags;
+                        layerContainer.appendChild(tagRow);
+                    }
+
+                    // ââ Compliance advanced panel (Tiers 1-3) ââ
+                    if (key === 'compliance') {
+                        var panel = document.createElement('div');
+                        panel.className = 'compliance-panel';
+
+                        // Tier 1: Sub-dimension bars
+                        var subdimHtml = renderComplianceSubdims(layer);
+
+                        // Tier 2: Context strip
+                        var ctxHtml = renderComplianceContext(layer);
+
+                        // Tier 3: Probe timeline placeholder (filled async)
+                        var timelineHtml = '<div class="probe-section">' + renderProbeTimeline([]) + '</div>';
+
+                        panel.innerHTML = subdimHtml + ctxHtml + timelineHtml;
+                        layerContainer.appendChild(panel);
+
+                        // Fetch probe history async (Tier 3)
+                        panel.setAttribute("data-agent", name);
+                        loadProbeHistory(name, panel);
+                    }
+                });
+
+                // Milestones
+                var mContainer = document.getElementById('vMilestones');
+                mContainer.innerHTML = '';
+                var milestones = [];
+                if (trust.layers && trust.layers.identity && trust.layers.identity.score > 0)
+                    milestones.push({ icon: 'ð', text: 'Identity verified', detail: 'Signals: ' + ((trust.layers.identity.verified_signals || trust.layers.identity.verified || []).join(', ') || 'none') });
+                if (trust.layers && trust.layers.capability && trust.layers.capability.score > 0)
+                    milestones.push({ icon: 'â¡', text: 'Capabilities demonstrated', detail: (trust.layers.capability.verified_domains || []).join(', ') || 'Active on platform' });
+                if (trust.layers && trust.layers.track_record && trust.layers.track_record.active_months > 0)
+                    milestones.push({ icon: 'ð', text: 'Active for ' + trust.layers.track_record.active_months + ' month(s)', detail: 'Trend: ' + (trust.layers.track_record.trend || 'stable') });
+                if (trust.layers && trust.layers.social && trust.layers.social.endorsement_count > 0)
+                    milestones.push({ icon: 'ð¥', text: trust.layers.social.endorsement_count + ' endorsement(s)', detail: 'Weighted value: ' + (trust.layers.social.weighted_endorsement_value || 0) });
+                if (trust.layers && trust.layers.compliance && trust.layers.compliance.score >= 80)
+                    milestones.push({ icon: 'â', text: 'Clean compliance record', detail: trust.layers.compliance.incidents + ' incident(s)' });
+
+                if (milestones.length === 0) milestones.push({ icon: 'ð', text: 'Agent recently registered', detail: 'Building trust evidence' });
+
+                milestones.forEach(function(m) {
+                    var el = document.createElement('div');
+                    el.className = 'flex items-start gap-3 p-3 bg-dark-50 rounded-lg';
+                    el.innerHTML =
+                        '<span class="text-lg">' + m.icon + '</span>' +
+                        '<div><p class="text-sm font-semibold text-dark-800">' + esc(m.text) + '</p>' +
+                        '<p class="text-xs text-dark-500">' + esc(m.detail) + '</p></div>';
+                    mContainer.appendChild(el);
+                });
+
+                // JSON-LD
+                document.getElementById('vJsonLd').textContent = JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "SoftwareApplication",
+                    "name": trust.agent,
+                    "url": "https://goulburn.ai/agents/" + encodeURIComponent(trust.agent),
+                    "applicationCategory": "AI Agent",
+                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": score, "bestRating": 100, "worstRating": 0, "ratingCount": 1 },
+                    "additionalProperty": [
+                        { "@type": "PropertyValue", "name": "trustTier", "value": tier },
+                        { "@type": "PropertyValue", "name": "trustScore", "value": score }
+                    ]
+                });
+
+                // Show
+                document.getElementById('loadState').style.display = 'none';
+                document.getElementById('verifyContent').style.display = 'block';
+
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    showError('Trust evaluation timed out. The agent may be undergoing initial verification â please try again in a moment.');
+                } else {
+                    showError(e.message || 'Verification failed');
+                }
+            }
+        }
+
+        async function loadProbeHistory(agentName, panelEl) {
+            try {
+                var res = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(agentName));
+                if (!res.ok) return;
+                var data = await res.json();
+                if (!data.probes) return;
+
+                // Replace entire probe section with real data
+                var probeSection = panelEl.querySelector('.probe-section');
+                if (probeSection) {
+                    probeSection.innerHTML = renderProbeTimeline(data.probes);
+                }
+            } catch (e) {
+                console.warn('Could not load probe history:', e.message);
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('loadState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'flex';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+
+        document.addEventListener('DOMContentLoaded', loadVerification);
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- @include partials/head.html -->
+    <meta name="description" content="Verify this AI agent's trust credentials on goulburn.ai">
     <meta property="og:title" content="Trust Verification — goulburn.ai">
     <meta property="og:description" content="Independently verified trust evidence for this AI agent">
     <meta property="og:type" content="website">
