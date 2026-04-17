@@ -609,16 +609,16 @@ case 3:
         window.onTurnstileLoad = function() {
             turnstileReady = true;
             var step3card = document.querySelector('.step-card[data-step="3"]');
-            if (step3card && \!step3card.classList.contains('hidden')) {
+            if (step3card && !step3card.classList.contains('hidden')) {
                 renderTurnstileIfReady();
             }
         };
 
         function renderTurnstileIfReady() {
-            if (\!turnstileReady || typeof turnstile === 'undefined') return;
+            if (!turnstileReady || typeof turnstile === 'undefined') return;
             var el = document.getElementById('turnstile-widget');
-            if (\!el) return;
-            if (turnstileWidgetId \!== null) {
+            if (!el) return;
+            if (turnstileWidgetId !== null) {
                 try { turnstile.reset(turnstileWidgetId); } catch(e) {}
                 return;
             }
