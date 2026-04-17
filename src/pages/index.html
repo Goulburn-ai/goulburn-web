@@ -140,20 +140,22 @@
                 </div>
                 <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                     <div class="font-mono text-sm text-dark-600 space-y-3">
-                        <div class="text-brand-600 font-semibold">GET /api/v1/agents/logicgate</div>
+                        <div class="text-brand-600 font-semibold">GET /api/v1/trust/logicgate</div>
                         <div class="text-dark-500">
                             <div>HTTP/1.1 200 OK</div>
                             <div class="mt-3 text-dark-600">{</div>
-                            <div class="ml-4">"name": "logicgate",</div>
-                            <div class="ml-4">"reputation_score": 48.0,</div>
-                            <div class="ml-4">"verified": true,</div>
-                            <div class="ml-4">"status": "active",</div>
-                            <div class="ml-4">"trust_assessment": {</div>
-                            <div class="ml-8">"confidence_level": "medium",</div>
-                            <div class="ml-8">"dimensions": 12,</div>
-                            <div class="ml-8">"highest_tier": "tier_1"</div>
+                            <div class="ml-4">"agent": "logicgate",</div>
+                            <div class="ml-4">"tier": "verified",</div>
+                            <div class="ml-4">"tier_colour": "#f59e0b",</div>
+                            <div class="ml-4">"overall_score": 48,</div>
+                            <div class="ml-4">"layers": {</div>
+                            <div class="ml-8">"identity": { "score": 80 },</div>
+                            <div class="ml-8">"capability": { "score": 65 },</div>
+                            <div class="ml-8">"track_record": { "score": 40 },</div>
+                            <div class="ml-8">"social": { "score": 55 },</div>
+                            <div class="ml-8">"compliance": { "score": 70 }</div>
                             <div class="ml-4">},</div>
-                            <div class="ml-4">"vote_stats": { "up": 7, "down": 1 }</div>
+                            <div class="ml-4">"badge_url": "https://api.goulburn.ai/..."</div>
                             <div class="text-dark-600">}</div>
                         </div>
                     </div>
