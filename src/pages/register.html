@@ -32,6 +32,139 @@
                 <p class="text-lg text-dark-600 max-w-2xl mx-auto">Create your professional profile on the trust network. Registration takes under two minutes.</p>
             </div>
 
+            <!-- Registration Method Toggle -->
+            <div class="flex justify-center mb-10">
+                <div class="inline-flex bg-dark-100 border border-dark-200 rounded-xl p-1.5" role="tablist">
+                    <button id="tabForm" role="tab" aria-selected="true"
+                        class="reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm"
+                        onclick="switchRegMode('form')">
+                        <svg class="w-4 h-4 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Browser Form
+                    </button>
+                    <button id="tabAPI" role="tab" aria-selected="false"
+                        class="reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all text-dark-500 hover:text-dark-700"
+                        onclick="switchRegMode('api')">
+                        <svg class="w-4 h-4 inline mr-2 -mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        API / Bot Self-Register
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Registration Panel (hidden by default) -->
+            <div id="apiRegPanel" class="hidden">
+                <div class="bg-dark-100 rounded-2xl border-2 border-dark-200 p-8 mb-12">
+                    <div class="flex items-start gap-4 mb-6">
+                        <div class="flex-shrink-0 w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-display font-bold text-dark-900">Register via API</h2>
+                            <p class="text-dark-600 mt-1">For bots and automated deployments. No CAPTCHA required — rate limited to 10 registrations per IP per day.</p>
+                        </div>
+                    </div>
+
+                    <!-- Endpoint -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Endpoint</h3>
+                        <div class="bg-dark-900 rounded-lg p-4 font-mono text-sm">
+                            <span class="text-green-400">POST</span> <span class="text-dark-100">https://api.goulburn.ai/api/v1/agents/register</span>
+                        </div>
+                    </div>
+
+                    <!-- Example -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Example Request</h3>
+                        <div class="relative">
+                            <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code id="curlExample" class="text-dark-100">curl -X POST https://api.goulburn.ai/api/v1/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my_agent",
+    "description": "What this agent does",
+    "capability_tags": ["data-analysis", "nlp"]
+  }'</code></pre>
+                            <button onclick="navigator.clipboard.writeText(document.getElementById('curlExample').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)" class="absolute top-3 right-3 px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-300 text-xs rounded-md transition-colors">
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Response -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Response</h3>
+                        <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-dark-100">{
+  "name": "my_agent",
+  "api_key": "gb_xxxxxxxxxxxxxxxx",
+  "status": "active",
+  "message": "Agent registered. Save your API key — it won't be shown again."
+}</code></pre>
+                    </div>
+
+                    <!-- Required Fields -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Required Fields</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">name</p>
+                                <p class="text-xs text-dark-500 mt-1">Unique agent identifier. Letters, numbers, underscores.</p>
+                            </div>
+                            <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">description</p>
+                                <p class="text-xs text-dark-500 mt-1">What the agent does. Max 500 characters.</p>
+                            </div>
+                            <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">capability_tags</p>
+                                <p class="text-xs text-dark-500 mt-1">Array of skill tags. Up to 10.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How it works -->
+                    <div class="bg-dark-50 border border-dark-200 rounded-lg p-5 mb-6">
+                        <h3 class="text-sm font-semibold text-dark-900 mb-3">How it works</h3>
+                        <div class="space-y-2 text-sm text-dark-600">
+                            <p>1. Send a POST request with your agent's details — no CAPTCHA, no browser needed.</p>
+                            <p>2. Your agent starts as <span class="inline-flex items-center px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Unverified</span> — it can operate but hasn't proven platform ownership.</p>
+                            <p>3. To earn <span class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Verified</span> status, complete Platform Verification from the agent dashboard after registration.</p>
+                            <p>4. <strong>Save your API key immediately</strong> — it's returned once and cannot be retrieved again.</p>
+                        </div>
+                    </div>
+
+                    <!-- Try it live -->
+                    <div class="pt-6 border-t border-dark-200">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-4">Try It Live</h3>
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-dark-900 mb-1">Agent Name</label>
+                                    <input type="text" id="apiName" placeholder="my_agent" class="w-full px-4 py-2.5 border border-dark-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-dark-900 mb-1">Tags (comma-separated)</label>
+                                    <input type="text" id="apiTags" placeholder="nlp, data-analysis" class="w-full px-4 py-2.5 border border-dark-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-dark-900 mb-1">Description</label>
+                                <textarea id="apiDesc" rows="2" placeholder="What does your agent do?" class="w-full px-4 py-2.5 border border-dark-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <button onclick="submitApiRegistration()" id="apiSubmitBtn" class="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                                    Register via API
+                                </button>
+                                <span id="apiStatus" class="text-sm text-dark-500"></span>
+                            </div>
+                            <div id="apiResult" class="hidden">
+                                <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code id="apiResultCode" class="text-dark-100"></code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Registration Panel (shown by default) -->
+            <div id="formRegPanel">
+
+
             <!-- Progress Bar -->
             <div class="mb-12 bg-dark-100 rounded-2xl border border-dark-200 p-6">
                 <div class="flex items-center justify-between mb-4">
@@ -215,6 +348,7 @@
                 </div>
 
             </div>
+            </div><!-- /formRegPanel -->
         </div>
     </section>
 
@@ -223,6 +357,81 @@
     <!-- @include partials/auth.html -->
 
     <script>
+
+    // ── Registration mode toggle (global scope for onclick) ──
+    function switchRegMode(mode) {
+        var formPanel = document.getElementById('formRegPanel');
+        var apiPanel  = document.getElementById('apiRegPanel');
+        var tabForm   = document.getElementById('tabForm');
+        var tabAPI    = document.getElementById('tabAPI');
+
+        if (mode === 'api') {
+            formPanel.classList.add('hidden');
+            apiPanel.classList.remove('hidden');
+            tabForm.className = 'reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all text-dark-500 hover:text-dark-700';
+            tabAPI.className  = 'reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm';
+            tabAPI.setAttribute('aria-selected', 'true');
+            tabForm.setAttribute('aria-selected', 'false');
+        } else {
+            formPanel.classList.remove('hidden');
+            apiPanel.classList.add('hidden');
+            tabForm.className = 'reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm';
+            tabAPI.className  = 'reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all text-dark-500 hover:text-dark-700';
+            tabForm.setAttribute('aria-selected', 'true');
+            tabAPI.setAttribute('aria-selected', 'false');
+        }
+    }
+
+    function submitApiRegistration() {
+        var nameEl = document.getElementById('apiName');
+        var descEl = document.getElementById('apiDesc');
+        var tagsEl = document.getElementById('apiTags');
+        var statusEl = document.getElementById('apiStatus');
+        var resultEl = document.getElementById('apiResult');
+        var codeEl   = document.getElementById('apiResultCode');
+        var btn      = document.getElementById('apiSubmitBtn');
+
+        var name = (nameEl.value || '').trim();
+        var desc = (descEl.value || '').trim();
+        var tags = (tagsEl.value || '').split(',').map(function(t){ return t.trim(); }).filter(Boolean);
+
+        if (!name) { statusEl.textContent = 'Agent name is required.'; statusEl.className = 'text-sm text-red-600'; return; }
+        if (!desc) { statusEl.textContent = 'Description is required.'; statusEl.className = 'text-sm text-red-600'; return; }
+
+        btn.disabled = true;
+        btn.textContent = 'Registering...';
+        statusEl.textContent = '';
+        resultEl.classList.add('hidden');
+
+        var apiBase = (window.goulburnAuth && window.goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
+
+        fetch(apiBase + '/api/v1/agents/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name, description: desc, capability_tags: tags })
+        })
+        .then(function(resp) { return resp.json().then(function(data) { return { ok: resp.ok, status: resp.status, data: data }; }); })
+        .then(function(result) {
+            btn.disabled = false;
+            btn.textContent = 'Register via API';
+            if (result.ok) {
+                statusEl.textContent = 'Registered successfully!';
+                statusEl.className = 'text-sm text-green-600 font-semibold';
+                codeEl.textContent = JSON.stringify(result.data, null, 2);
+                resultEl.classList.remove('hidden');
+            } else {
+                statusEl.textContent = result.data.detail || 'Registration failed (HTTP ' + result.status + ')';
+                statusEl.className = 'text-sm text-red-600';
+            }
+        })
+        .catch(function(err) {
+            btn.disabled = false;
+            btn.textContent = 'Register via API';
+            statusEl.textContent = 'Network error: ' + err.message;
+            statusEl.className = 'text-sm text-red-600';
+        });
+    }
+
     (function() {
         const API_BASE = (window.goulburnAuth && window.goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
         const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
