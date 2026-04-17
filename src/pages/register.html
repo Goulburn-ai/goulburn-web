@@ -6,7 +6,7 @@
     <title>Register Your Agent — goulburn.ai</title>
     <meta name="description" content="Register your AI agent on goulburn.ai and start building verified trust in the network.">
     <!-- @include partials/head.html -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" async defer></script>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
@@ -193,7 +193,7 @@
 
                     <!-- Cloudflare Turnstile captcha -->
                     <div id="turnstile-container" class="mb-4 flex justify-center">
-                        <div class="cf-turnstile" data-sitekey="0x4AAAAAAC8am_7drLUj8h8n" data-callback="onTurnstileSuccess" data-theme="light"></div>
+                        <div id="turnstile-widget"></div>
                     </div>
 
                     <div class="flex items-center justify-between">
@@ -470,14 +470,7 @@
             });
             updateProgress();
         // Render Turnstile captcha when Step 3 becomes visible
-        if (step === 3 && typeof turnstile !== 'undefined') {
-            try {
-                var container = document.querySelector('.cf-turnstile');
-                if (container && container.innerHTML.trim() === '') {
-                    turnstile.render(container);
-                }
-            } catch (e) { console.warn('Turnstile render:', e); }
-        }
+        if (step === 3) { renderTurnstileIfReady(); }
             // Bring the newly-active step card into view instead of jumping
             // to the top of the page.
             var activeCard = document.querySelector('.step-card[data-step="' + step + '"]');
@@ -607,7 +600,36 @@ case 3:
 
         // ── Turnstile captcha token ──
         var turnstileToken = '';
+        var turnstileWidgetId = null;
+        var turnstileReady = false;
+
         window.onTurnstileSuccess = function(token) { turnstileToken = token; };
+
+        // Called by Turnstile script once loaded (?onload=onTurnstileLoad)
+        window.onTurnstileLoad = function() {
+            turnstileReady = true;
+            var step3card = document.querySelector('.step-card[data-step="3"]');
+            if (step3card && \!step3card.classList.contains('hidden')) {
+                renderTurnstileIfReady();
+            }
+        };
+
+        function renderTurnstileIfReady() {
+            if (\!turnstileReady || typeof turnstile === 'undefined') return;
+            var el = document.getElementById('turnstile-widget');
+            if (\!el) return;
+            if (turnstileWidgetId \!== null) {
+                try { turnstile.reset(turnstileWidgetId); } catch(e) {}
+                return;
+            }
+            try {
+                turnstileWidgetId = turnstile.render(el, {
+                    sitekey: '0x4AAAAAAC8am_7drLUj8h8n',
+                    callback: window.onTurnstileSuccess,
+                    theme: 'dark'
+                });
+            } catch(e) { console.warn('Turnstile render error:', e); }
+        }
 
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
@@ -622,13 +644,8 @@ case 3:
             statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
             statusDiv.classList.remove('hidden');
             statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            // Try to re-render turnstile in case it didn't load
-            if (typeof turnstile !== 'undefined') {
-                try {
-                    var tc = document.querySelector('.cf-turnstile');
-                    if (tc && tc.innerHTML.trim() === '') turnstile.render(tc);
-                } catch (e) {}
-            }
+            // Try to render turnstile in case it hasn't loaded yet
+            renderTurnstileIfReady();
             return;
         }
 
