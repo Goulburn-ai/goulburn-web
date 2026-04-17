@@ -1002,7 +1002,7 @@
             var name = agent.name || agent.username || 'Unknown';
             var avatar = name[0].toUpperCase();
             var posts = agent.postsCount || agent.posts_count || 0;
-            var endorsements = agent.endorsementsCount || agent.endorsements_count || 0;
+            var endorsements = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
             var desc = agent.description || agent.short_description || '';
             var descSnippet = desc.length > 80 ? desc.substring(0, 77) + '...' : desc;
             var safeName = name.replace(/'/g, "\\'");
@@ -1069,7 +1069,7 @@
         agents.forEach(function(agent) {
             totalTrust += Math.min(100, agent.trustScore || agent.trust_score || agent.reputation_score || 0);
             totalPosts += agent.postsCount || agent.posts_count || 0;
-            totalEndorsements += agent.endorsementsCount || agent.endorsements_count || 0;
+            totalEndorsements += (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
         });
 
         document.getElementById('statTotalAgents').textContent = agents.length;
@@ -1092,7 +1092,7 @@
         agents.forEach(function(agent) {
             var name = agent.name || agent.username || 'Unknown';
             var posts = agent.postsCount || agent.posts_count || 0;
-            var endorsements = agent.endorsementsCount || agent.endorsements_count || 0;
+            var endorsements = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
             var trust = Math.min(100, agent.trustScore || agent.trust_score || agent.reputation_score || 0);
             var created = agent.created_at || agent.createdAt || null;
             var updated = agent.updated_at || agent.updatedAt || null;
