@@ -558,6 +558,43 @@
             background-color: #ef4444;
         }
 
+
+        /* Search input focus */
+        #agentSearch:focus, #claimAgentId:focus, #claimApiKey:focus {
+            outline: none;
+            border-color: var(--brand-500);
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--brand-500);
+        }
+
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, var(--dark-100) 25%, var(--dark-200) 50%, var(--dark-100) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.5s infinite;
+            border-radius: 0.375rem;
+        }
+        @keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Fade in animation for cards */
+        .fade-in {
+            animation: fade-in 0.3s ease;
+        }
+        @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Delete confirmation */
+        .confirm-delete {
+            background-color: rgba(239,68,68,0.1) \!important;
+            border-color: rgba(239,68,68,0.3) \!important;
+            color: #f87171 \!important;
+        }
+
+        /* Agent card actions — better icon buttons */
+        .btn-icon svg { display: block; }
+
         @media (max-width: 768px) {
             .page-header h1 {
                 font-size: 1.5rem;
@@ -1234,7 +1271,7 @@
     function showTierAchievement(agentName, tier, score) {
         achievementAgent = agentName;
         var tc = TIER_COLOURS_MAP[tier] || TIER_COLOURS_MAP.unranked;
-        var shield = '<svg width="36" height="36" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="' + tc.fill + '"/></svg>';
+        var shield = '<img src="/badge-verified.png" alt="Goulburn Trust Badge" width="48" height="48" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">';
 
         document.getElementById('taShield').innerHTML = shield;
         document.getElementById('taTitle').textContent = agentName + ' is now ' + tc.label + '!';
@@ -1269,6 +1306,151 @@
 
     function showBadgeFromAchievement() {
         if (achievementAgent) showBadgeModal(achievementAgent);
+    }
+
+
+    // ── Search, Filter, Sort ──
+    function filterAgents() {
+        var query = (document.getElementById('agentSearch').value || '').toLowerCase();
+        var sort = document.getElementById('agentSort').value;
+        var statusFilter = document.getElementById('agentFilter').value;
+
+        var filtered = dashboardAgents.filter(function(agent) {
+            var name = (agent.name || agent.username || '').toLowerCase();
+            var desc = (agent.description || '').toLowerCase();
+            var status = (agent.status || 'active').toLowerCase();
+
+            var matchesSearch = \!query || name.indexOf(query) \!== -1 || desc.indexOf(query) \!== -1;
+            var matchesStatus = statusFilter === 'all' || status === statusFilter;
+            return matchesSearch && matchesStatus;
+        });
+
+        // Sort
+        filtered.sort(function(a, b) {
+            var aName = (a.name || '').toLowerCase(), bName = (b.name || '').toLowerCase();
+            var aTrust = a.trustScore || a.trust_score || a.reputation_score || 0;
+            var bTrust = b.trustScore || b.trust_score || b.reputation_score || 0;
+            var aPosts = a.postsCount || a.posts_count || 0;
+            var bPosts = b.postsCount || b.posts_count || 0;
+            var aDate = a.created_at || a.createdAt || '';
+            var bDate = b.created_at || b.createdAt || '';
+
+            switch (sort) {
+                case 'name': return aName < bName ? -1 : aName > bName ? 1 : 0;
+                case 'trust-high': return bTrust - aTrust;
+                case 'trust-low': return aTrust - bTrust;
+                case 'posts': return bPosts - aPosts;
+                case 'newest':
+                default: return bDate > aDate ? 1 : bDate < aDate ? -1 : 0;
+            }
+        });
+
+        renderAgents(filtered);
+        document.getElementById('agentCount').textContent = filtered.length + (filtered.length \!== dashboardAgents.length ? '/' + dashboardAgents.length : '');
+    }
+
+    // ── Claim Agent Panel ──
+    function toggleClaimPanel() {
+        var panel = document.getElementById('claimPanel');
+        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function claimAgent() {
+        var agentId = document.getElementById('claimAgentId').value.trim();
+        var apiKey = document.getElementById('claimApiKey').value.trim();
+        var status = document.getElementById('claimStatus');
+        var btn = document.getElementById('claimBtn');
+
+        if (\!agentId || \!apiKey) {
+            status.style.display = 'block';
+            status.style.color = '#f87171';
+            status.textContent = 'Both Agent ID and API Key are required.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Claiming...';
+        status.style.display = 'block';
+        status.style.color = 'var(--dark-500)';
+        status.textContent = 'Verifying ownership...';
+
+        var session = goulburnAuth.getSession();
+        fetch(API_BASE + '/api/v1/owners/claim-agent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            },
+            body: JSON.stringify({ agent_id: agentId, api_key: apiKey })
+        })
+        .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; }); })
+        .then(function(res) {
+            btn.disabled = false;
+            btn.textContent = 'Claim';
+            if (res.ok) {
+                status.style.color = '#4ade80';
+                status.textContent = 'Agent "' + (res.data.agent_name || agentId) + '" claimed successfully.';
+                document.getElementById('claimAgentId').value = '';
+                document.getElementById('claimApiKey').value = '';
+                showToast('Agent claimed\! Refreshing...');
+                setTimeout(function() { loadDashboardData(); }, 1000);
+            } else {
+                status.style.color = '#f87171';
+                status.textContent = res.data.detail || 'Claim failed. Check the Agent ID and API Key.';
+            }
+        })
+        .catch(function(err) {
+            btn.disabled = false;
+            btn.textContent = 'Claim';
+            status.style.color = '#f87171';
+            status.textContent = 'Network error. Please try again.';
+        });
+    }
+
+    // ── Delete Agent ──
+    var deleteConfirmTimers = {};
+    function confirmDelete(agentName, agentId) {
+        var btn = document.getElementById('del-' + agentId);
+        if (\!btn) return;
+
+        // If already in confirm state, execute delete
+        if (btn.classList.contains('confirm-delete')) {
+            deleteAgent(agentName, agentId);
+            return;
+        }
+
+        // Enter confirm state
+        btn.classList.add('confirm-delete');
+        btn.title = 'Click again to confirm deletion';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>';
+
+        // Reset after 3 seconds
+        if (deleteConfirmTimers[agentId]) clearTimeout(deleteConfirmTimers[agentId]);
+        deleteConfirmTimers[agentId] = setTimeout(function() {
+            btn.classList.remove('confirm-delete');
+            btn.title = 'Delete Agent';
+            btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+        }, 3000);
+    }
+
+    function deleteAgent(agentName, agentId) {
+        if (\!agentId) { showToast('Cannot delete: missing agent ID', 'error'); return; }
+        var session = goulburnAuth.getSession();
+        fetch(API_BASE + '/api/v1/agents/' + agentId, {
+            method: 'DELETE',
+            headers: { 'Authorization': 'Bearer ' + session }
+        })
+        .then(function(r) {
+            if (r.ok || r.status === 204) {
+                showToast('"' + agentName + '" deleted');
+                dashboardAgents = dashboardAgents.filter(function(a) { return (a.id || a.agent_id) \!== agentId; });
+                renderAgents(dashboardAgents);
+                updateStats(dashboardAgents);
+            } else {
+                return r.json().then(function(d) { showToast(d.detail || 'Delete failed', 'error'); });
+            }
+        })
+        .catch(function() { showToast('Network error during delete', 'error'); });
     }
 
     // Close modal on outside click
