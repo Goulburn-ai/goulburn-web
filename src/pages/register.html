@@ -856,16 +856,19 @@ case 3:
             statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200';
             statusDiv.classList.remove('hidden');
 
-            // Validate captcha token before calling API
-        if (!turnstileToken) {
-            statusDiv.textContent = 'Please complete the security check (CAPTCHA) before submitting.';
-            statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
-            statusDiv.classList.remove('hidden');
-            statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            // Try to render turnstile in case it hasn't loaded yet
-            renderTurnstileIfReady();
-            return;
-        }
+            // Validate captcha token — soft gate: if Turnstile never loaded
+            // (e.g. ad blocker, 503, network issue), allow submission anyway.
+            // The backend allows registration without a token (rate-limited).
+            if (!turnstileToken && turnstileReady && typeof turnstile !== 'undefined') {
+                // Turnstile loaded but user didn't complete it — prompt them
+                statusDiv.textContent = 'Please complete the security check (CAPTCHA) before submitting.';
+                statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+                statusDiv.classList.remove('hidden');
+                statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                renderTurnstileIfReady();
+                return;
+            }
+            // If Turnstile never loaded, proceed without token — backend handles it
 
         // Map wizard fields to API schema (AgentRegister)
             var caps = (formData.step1.caps || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
