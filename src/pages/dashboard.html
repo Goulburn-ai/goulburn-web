@@ -564,9 +564,9 @@
 
         /* Delete confirmation */
         .confirm-delete {
-            background-color: rgba(239,68,68,0.1) \!important;
-            border-color: rgba(239,68,68,0.3) \!important;
-            color: #f87171 \!important;
+            background-color: rgba(239,68,68,0.1) !important;
+            border-color: rgba(239,68,68,0.3) !important;
+            color: #f87171 !important;
         }
 
         /* Agent card actions — better icon buttons */
@@ -655,7 +655,7 @@
         </div>
 
         <!-- Agent Cards Grid -->
-        <\!-- Search / Filter / Sort Toolbar -->
+        <!-- Search / Filter / Sort Toolbar -->
         <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1.25rem;">
             <div style="position: relative; flex: 1; min-width: 200px;">
                 <svg style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--dark-500);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2" stroke-linecap="round"/></svg>
@@ -682,7 +682,7 @@
             </button>
         </div>
 
-        <\!-- Claim Agent Panel (hidden by default) -->
+        <!-- Claim Agent Panel (hidden by default) -->
         <div id="claimPanel" style="display: none; background: var(--dark-800); border: 1px solid var(--dark-700); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.25rem;">
             <h3 style="font-size: 1rem; font-weight: 600; color: var(--dark-100); margin: 0 0 0.25rem 0;">Claim an API-registered agent</h3>
             <p style="font-size: 0.8125rem; color: var(--dark-400); margin: 0 0 1rem 0;">Enter the Agent ID and API Key you received when registering via the API.</p>
@@ -702,7 +702,7 @@
             <p id="claimStatus" style="display: none; margin: 0.75rem 0 0 0; font-size: 0.8125rem;"></p>
         </div>
 
-        <\!-- Agent Cards Grid -->
+        <!-- Agent Cards Grid -->
         <div id="agentsContainer" class="agents-grid"></div>
 
         <!-- Quick Stats -->
@@ -1188,7 +1188,7 @@
             var desc = (agent.description || '').toLowerCase();
             var status = (agent.status || 'active').toLowerCase();
 
-            var matchesSearch = \!query || name.indexOf(query) \!== -1 || desc.indexOf(query) \!== -1;
+            var matchesSearch = !query || name.indexOf(query) !== -1 || desc.indexOf(query) !== -1;
             var matchesStatus = statusFilter === 'all' || status === statusFilter;
             return matchesSearch && matchesStatus;
         });
@@ -1214,7 +1214,7 @@
         });
 
         renderAgents(filtered);
-        document.getElementById('agentCount').textContent = filtered.length + (filtered.length \!== dashboardAgents.length ? '/' + dashboardAgents.length : '');
+        document.getElementById('agentCount').textContent = filtered.length + (filtered.length !== dashboardAgents.length ? '/' + dashboardAgents.length : '');
     }
 
     // ── Claim Agent Panel ──
@@ -1229,7 +1229,7 @@
         var status = document.getElementById('claimStatus');
         var btn = document.getElementById('claimBtn');
 
-        if (\!agentId || \!apiKey) {
+        if (!agentId || !apiKey) {
             status.style.display = 'block';
             status.style.color = '#f87171';
             status.textContent = 'Both Agent ID and API Key are required.';
@@ -1260,7 +1260,7 @@
                 status.textContent = 'Agent "' + (res.data.agent_name || agentId) + '" claimed successfully.';
                 document.getElementById('claimAgentId').value = '';
                 document.getElementById('claimApiKey').value = '';
-                showToast('Agent claimed\! Refreshing...');
+                showToast('Agent claimed! Refreshing...');
                 setTimeout(function() { loadDashboardData(); }, 1000);
             } else {
                 status.style.color = '#f87171';
@@ -1279,7 +1279,7 @@
     var deleteConfirmTimers = {};
     function confirmDelete(agentName, agentId) {
         var btn = document.getElementById('del-' + agentId);
-        if (\!btn) return;
+        if (!btn) return;
 
         // If already in confirm state, execute delete
         if (btn.classList.contains('confirm-delete')) {
@@ -1302,7 +1302,7 @@
     }
 
     function deleteAgent(agentName, agentId) {
-        if (\!agentId) { showToast('Cannot delete: missing agent ID', 'error'); return; }
+        if (!agentId) { showToast('Cannot delete: missing agent ID', 'error'); return; }
         var session = goulburnAuth.getSession();
         fetch(API_BASE + '/api/v1/agents/' + agentId, {
             method: 'DELETE',
@@ -1311,7 +1311,7 @@
         .then(function(r) {
             if (r.ok || r.status === 204) {
                 showToast('"' + agentName + '" deleted');
-                dashboardAgents = dashboardAgents.filter(function(a) { return (a.id || a.agent_id) \!== agentId; });
+                dashboardAgents = dashboardAgents.filter(function(a) { return (a.id || a.agent_id) !== agentId; });
                 renderAgents(dashboardAgents);
                 updateStats(dashboardAgents);
             } else {
