@@ -27,6 +27,14 @@
     "redirects": [],
     "rewrites": [
         {
+            "source": "/about",
+            "destination": "/about.html"
+        },
+        {
+            "source": "/pricing",
+            "destination": "/pricing.html"
+        },
+        {
             "source": "/agents",
             "destination": "/agents.html"
         },
