@@ -371,16 +371,16 @@
 
         /* ââ Tier 1: Sub-dimension mini-bars ââââââââââââââââââââââââ */
         function renderComplianceSubdims(layer) {
-            var html = '';
             var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
+            var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
+            var domainColours = { supply_chain: '#a78bfa', threat_assessment: '#ef4444', risk_surface: '#60a5fa' };
+
+            // Build data for the donut
+            var segments = [];
+            var allPending = true;
             domainOrder.forEach(function(domKey) {
                 var domain = DIMENSION_DOMAINS[domKey];
                 if (!domain) return;
-                html += '<div style="margin-bottom:20px;">';
-                html += '<h4 style="font-size:13px;font-weight:700;color:' + domain.colour + ';margin-bottom:10px;display:flex;align-items:center;gap:6px;">' +
-                    '<span style="width:10px;height:10px;border-radius:50%;background:' + domain.colour + ';display:inline-block;"></span>' +
-                    domain.label + '</h4>';
-                html += '<div class="subdim-grid">';
                 (domain.dims || []).forEach(function(k) {
                     var meta = SUBDIM_META[k];
                     if (!meta) return;
@@ -389,28 +389,155 @@
                         val = layer.dimension_scores[k];
                     }
                     var isPending = val == null;
-                    var display = isPending ? '<span class="subdim-pending-label">Awaiting probe</span>' : '<span>' + val + '</span><span style="color:#71767B;font-size:11px;">/100</span>';
-                    var barClass = isPending ? 'subdim-fill pending' : 'subdim-fill active';
-                    var barWidth = isPending ? 100 : Math.max(val, 3);
-                    var col = isPending ? 'transparent' : (meta.colour || domain.colour);
-                    var icon = meta.icon || '';
-                    html +=
-                        '<div class="subdim-card">' +
-                            '<div class="subdim-header">' +
-                                '<span class="subdim-label">' + icon + ' ' + meta.label +
-                                    ' <span class="subdim-weight">(' + meta.weight + ')</span></span>' +
-                                '<span class="subdim-score" style="color:' + (isPending ? '#71767B' : scoreColour(val)) + ';">' + display + '</span>' +
-                            '</div>' +
-                            '<div class="subdim-track"><div class="' + barClass + '" style="width:' + barWidth + '%; background:' + col + ';"></div></div>' +
-                            '<div class="subdim-desc">' + meta.desc + '</div>' +
+                    if (!isPending) allPending = false;
+                    var weight = parseFloat(meta.weight) || 5;
+                    segments.push({
+                        key: k, label: meta.label, domain: domKey,
+                        domainLabel: domain.label, weight: weight,
+                        value: val, pending: isPending,
+                        colour: isPending ? '#2F3336' : (meta.colour || domain.colour),
+                        domainColour: domainColours[domKey] || domain.colour,
+                        desc: meta.desc, icon: meta.icon || ''
+                    });
+                });
+            });
+
+            var totalWeight = segments.reduce(function(s, d) { return s + d.weight; }, 0);
+
+            // SVG donut chart
+            var size = 300, cx = size/2, cy = size/2;
+            var outerR = 130, innerR = 85, innerR2 = 55;
+            var html = '<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;justify-content:center;">';
+
+            // Build outer ring (sub-dimensions) and inner ring (domains)
+            var svgParts = [];
+            var angle = -90; // start at top
+
+            // Outer ring: individual sub-dimensions
+            segments.forEach(function(seg) {
+                var sweep = (seg.weight / totalWeight) * 360;
+                var startAngle = angle;
+                var endAngle = angle + sweep;
+                var largeArc = sweep > 180 ? 1 : 0;
+
+                var rad1 = startAngle * Math.PI / 180;
+                var rad2 = endAngle * Math.PI / 180;
+                var x1 = cx + outerR * Math.cos(rad1);
+                var y1 = cy + outerR * Math.sin(rad1);
+                var x2 = cx + outerR * Math.cos(rad2);
+                var y2 = cy + outerR * Math.sin(rad2);
+                var ix1 = cx + innerR * Math.cos(rad1);
+                var iy1 = cy + innerR * Math.sin(rad1);
+                var ix2 = cx + innerR * Math.cos(rad2);
+                var iy2 = cy + innerR * Math.sin(rad2);
+
+                var path = 'M ' + x1 + ' ' + y1 +
+                    ' A ' + outerR + ' ' + outerR + ' 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 +
+                    ' L ' + ix2 + ' ' + iy2 +
+                    ' A ' + innerR + ' ' + innerR + ' 0 ' + largeArc + ' 0 ' + ix1 + ' ' + iy1 + ' Z';
+
+                var fillColour = seg.pending ? '#2F3336' : seg.colour;
+                var opacity = seg.pending ? '0.6' : '1';
+                var tooltip = seg.label + ' (' + seg.weight + '%) ' + (seg.pending ? '- Awaiting probe' : '- Score: ' + seg.value + '/100');
+
+                svgParts.push('<path d="' + path + '" fill="' + fillColour + '" opacity="' + opacity + '" stroke="#0A0A0A" stroke-width="1.5">' +
+                    '<title>' + tooltip + '</title></path>');
+
+                angle = endAngle;
+            });
+
+            // Inner ring: domain aggregates
+            angle = -90;
+            domainOrder.forEach(function(domKey) {
+                var domain = DIMENSION_DOMAINS[domKey];
+                if (!domain) return;
+                var domWeight = domainTotals[domKey] || 0;
+                var sweep = (domWeight / totalWeight) * 360;
+                var startAngle = angle;
+                var endAngle = angle + sweep;
+                var largeArc = sweep > 180 ? 1 : 0;
+
+                var rad1 = startAngle * Math.PI / 180;
+                var rad2 = endAngle * Math.PI / 180;
+                var x1 = cx + (innerR - 4) * Math.cos(rad1);
+                var y1 = cy + (innerR - 4) * Math.sin(rad1);
+                var x2 = cx + (innerR - 4) * Math.cos(rad2);
+                var y2 = cy + (innerR - 4) * Math.sin(rad2);
+                var ix1 = cx + innerR2 * Math.cos(rad1);
+                var iy1 = cy + innerR2 * Math.sin(rad1);
+                var ix2 = cx + innerR2 * Math.cos(rad2);
+                var iy2 = cy + innerR2 * Math.sin(rad2);
+
+                var path = 'M ' + x1 + ' ' + y1 +
+                    ' A ' + (innerR - 4) + ' ' + (innerR - 4) + ' 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 +
+                    ' L ' + ix2 + ' ' + iy2 +
+                    ' A ' + innerR2 + ' ' + innerR2 + ' 0 ' + largeArc + ' 0 ' + ix1 + ' ' + iy1 + ' Z';
+
+                var col = domainColours[domKey] || domain.colour;
+                svgParts.push('<path d="' + path + '" fill="' + col + '" opacity="0.35" stroke="#0A0A0A" stroke-width="1">' +
+                    '<title>' + domain.label + ' (' + domWeight + '%)</title></path>');
+
+                // Label on the inner ring
+                var midAngle = (startAngle + endAngle) / 2;
+                var labelR = (innerR2 + innerR - 4) / 2;
+                var lx = cx + labelR * Math.cos(midAngle * Math.PI / 180);
+                var ly = cy + labelR * Math.sin(midAngle * Math.PI / 180);
+
+                angle = endAngle;
+            });
+
+            // Center text
+            var centreScore = allPending ? '&mdash;' : (layer && layer.score != null ? Math.round(layer.score) : '&mdash;');
+            svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="28" font-weight="700">' + centreScore + '</text>');
+            svgParts.push('<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="#71767B" font-size="11">Compliance</text>');
+
+            html += '<div style="flex-shrink:0;"><svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' + svgParts.join('') + '</svg>';
+
+            // Legend beneath donut
+            html += '<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;flex-wrap:wrap;">';
+            domainOrder.forEach(function(domKey) {
+                var domain = DIMENSION_DOMAINS[domKey];
+                var col = domainColours[domKey] || domain.colour;
+                html += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#71767B;">' +
+                    '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></span>' +
+                    domain.label + '</div>';
+            });
+            html += '</div></div>';
+
+            // Detail list (right side)
+            html += '<div style="flex:1;min-width:260px;">';
+            domainOrder.forEach(function(domKey) {
+                var domain = DIMENSION_DOMAINS[domKey];
+                if (!domain) return;
+                var col = domainColours[domKey] || domain.colour;
+                html += '<div style="margin-bottom:16px;">';
+                html += '<h4 style="font-size:12px;font-weight:700;color:' + col + ';margin-bottom:8px;display:flex;align-items:center;gap:6px;">' +
+                    '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></span>' +
+                    domain.label + '</h4>';
+                (domain.dims || []).forEach(function(k) {
+                    var meta = SUBDIM_META[k];
+                    if (!meta) return;
+                    var seg = segments.find(function(s) { return s.key === k; });
+                    if (!seg) return;
+                    var statusText = seg.pending ? '<span style="color:#71767B;font-style:italic;font-size:10px;">Awaiting probe</span>' :
+                        '<span style="color:' + scoreColour(seg.value) + ';font-weight:700;">' + seg.value + '</span><span style="color:#71767B;font-size:10px;">/100</span>';
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;">' +
+                        '<div style="display:flex;align-items:center;gap:6px;">' +
+                        '<span style="color:' + (seg.pending ? '#71767B' : seg.colour) + ';">' + (meta.icon || '') + '</span>' +
+                        '<span style="font-size:11px;color:#E7E9EA;">' + meta.label + '</span>' +
+                        '<span style="font-size:9px;color:#71767B;">(' + meta.weight + ')</span>' +
+                        '</div>' +
+                        '<div>' + statusText + '</div>' +
                         '</div>';
                 });
-                html += '</div></div>';
+                html += '</div>';
             });
+            html += '</div></div>';
+
             return html;
         }
 
-        /* ââ Tier 2: Context strip ââââââââââââââââââââââââââââââââââ */
+/* ââ Tier 2: Context strip ââââââââââââââââââââââââââââââââââ */
         function renderComplianceContext(layer) {
             var mode = (layer && layer.scoring_mode) || 'platform_only';
             var probeCount = (layer && layer.probe_count) || 0;
