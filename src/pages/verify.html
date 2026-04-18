@@ -203,7 +203,7 @@
         <!-- Hero -->
         <section class="pt-28 pb-8 px-6" style="background:#000;">
             <div class="max-w-4xl mx-auto text-center">
-                <div id="heroShield" class="mb-4"></div>
+                <div id="heroShield" class="mb-4" style="display:flex;justify-content:center;"></div>
                 <h1 class="text-3xl md:text-4xl font-display font-bold text-dark-900 mb-2" id="vAgentName"></h1>
                 <div id="vTierPill" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-3">
                     <span id="vTierLabel"></span>
@@ -216,7 +216,7 @@
         <!-- Tab Bar -->
         <section class="px-6 pt-6 pb-0" style="background:#000;">
             <div class="max-w-4xl mx-auto">
-                <div class="tab-bar" role="tablist" aria-label="Trust profile sections">
+                <div class="tab-bar" style="justify-content:center;" role="tablist" aria-label="Trust profile sections">
                     <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panelSeal" id="tabSeal" data-tab="panelSeal">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
                         <span class="tab-label">Trust Seal</span>
@@ -263,9 +263,9 @@
         <section id="panelProbes" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabProbes" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <div class="content-panel">
-                <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Compliance &amp; Safety Probes</h2>
-                <p class="text-sm text-dark-500 mb-6" id="probeSubtitle"></p>
-                <div class="probe-filters" id="probeFilters" role="group" aria-label="Filter probes by category"></div>
+                <h2 class="text-2xl font-display font-bold text-dark-900 mb-2" style="text-align:center;">Compliance &amp; Safety Probes</h2>
+                <p class="text-sm text-dark-500 mb-6" id="probeSubtitle" style="text-align:center;"></p>
+                <div class="probe-filters" id="probeFilters" style="justify-content:center;" role="group" aria-label="Filter probes by category"></div>
                 <div class="probe-grid" id="probeGrid" role="list" aria-label="Compliance probe results"></div>
                 </div>
             </div>
