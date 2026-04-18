@@ -1,375 +1,357 @@
-<!DOCTYPE html>
+<\!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- @include partials/head.html -->
+    <\!-- @include partials/head.html -->
     <meta name="description" content="Verify this AI agent's trust credentials on goulburn.ai">
-    <meta property="og:title" content="Trust Verification &mdash; goulburn.ai">
-    <meta property="og:description" content="Independently verified trust evidence for this AI agent">
     <meta property="og:type" content="website">
+    <meta property="og:description" content="Independently verified trust evidence for this AI agent">
+    <meta property="og:title" content="Trust Verification — goulburn.ai">
     <meta property="og:image" content="https://api.goulburn.ai/api/badge/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Trust Verification &mdash; goulburn.ai">
     <meta name="twitter:description" content="Independently verified trust evidence for this AI agent">
-    <title>Trust Verification &mdash; goulburn.ai</title>
     <style>
-        .verify-hero { background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%); }
-        .tier-trusted     { --tc: #22c55e; --tbg: rgba(34,197,94,0.12); --tt: #4ade80; }
-        .tier-established { --tc: #3b82f6; --tbg: rgba(59,130,246,0.12); --tt: #60a5fa; }
-        .tier-verified    { --tc: #f59e0b; --tbg: rgba(245,158,11,0.12); --tt: #fbbf24; }
-        .tier-identified  { --tc: #8B98A5; --tbg: #16181C; --tt: #D1D5DB; }
-        .tier-unranked    { --tc: #94a3b8; --tbg: #16181C; --tt: #8B98A5; }
+        /* ── Radar Chart ── */
+        .radar-wrap { position: relative; width: 100%; max-width: 420px; margin: 0 auto; }
+        .radar-svg { width: 100%; height: auto; }
+        .radar-vertex { transition: r 0.2s ease; cursor: pointer; }
+        .radar-vertex:hover { filter: drop-shadow(0 0 6px currentColor); }
+        .radar-line { transition: all 0.6s ease; }
+        .radar-tooltip {
+            position: absolute; padding: 8px 12px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 8px; font-size: 13px; color: #f5f5f5; pointer-events: none; opacity: 0;
+            transition: opacity 0.15s; white-space: nowrap; z-index: 10;
+        }
+        .radar-tooltip.show { opacity: 1; }
 
-        .shield-large svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
-        .layer-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid #16181C; }
-        .layer-row:last-child { border-bottom: none; }
-        .layer-track { flex: 1; height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
-        .layer-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
-        .verified-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; background: rgba(34,197,94,0.12); color: #4ade80; }
-        .unverified-tag { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; background: #16181C; color: #71767B; }
+        /* ── Tabs ── */
+        .tab-bar { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); overflow-x: auto; }
+        .tab-btn {
+            display: flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px;
+            font-size: 14px; font-weight: 500; color: #a3a3a3; background: transparent; border: none;
+            cursor: pointer; transition: all 0.2s; white-space: nowrap; font-family: inherit;
+        }
+        .tab-btn:hover { color: #f5f5f5; background: rgba(255,255,255,0.04); }
+        .tab-btn.active { color: #f5f5f5; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.25); }
+        .tab-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
 
-        .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
-        #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
+        /* ── Score Cards ── */
+        .score-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 24px; }
+        .score-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 16px; text-align: center;
+        }
+        .score-card-val { font-family: 'Nunito', sans-serif; font-size: 28px; font-weight: 800; }
+        .score-card-label { font-size: 12px; color: #a3a3a3; margin-top: 4px; }
+        .score-card-bar { height: 4px; border-radius: 2px; background: #2f3336; margin-top: 8px; overflow: hidden; }
+        .score-card-fill { height: 100%; border-radius: 2px; transition: width 0.8s ease; }
 
-        /* === Compliance Donut Production === */
-        .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
-        .donut-layout {
-            display: flex; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+        /* ── Legend ── */
+        .legend-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; margin-top: 16px; padding: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a3a3a3; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        /* ── Accordion (Tab 2) ── */
+        .layer-accordion { display: flex; flex-direction: column; gap: 8px; }
+        .layer-section {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; overflow: hidden; transition: border-color 0.2s;
         }
-        @media (max-width: 767px) {
-            .donut-layout { flex-direction: column; align-items: center; gap: 20px; }
+        .layer-section:hover { border-color: rgba(255,255,255,0.12); }
+        .layer-header {
+            display: flex; align-items: center; gap: 16px; padding: 18px 20px; cursor: pointer;
+            background: transparent; border: none; width: 100%; text-align: left; font-family: inherit;
         }
-        .donut-wrap {
-            flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center; max-width: 300px;
+        .layer-score-badge {
+            width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 800; color: #000; flex-shrink: 0;
         }
-        .donut-svg { width: 280px; height: 280px; cursor: default; }
-        @media (max-width: 1023px) { .donut-svg { width: 260px; height: 260px; } }
-        @media (max-width: 767px) { .donut-svg { width: 240px; height: 240px; } }
-        .donut-seg { transition: opacity 0.2s ease, filter 0.2s ease; cursor: pointer; outline: none; }
-        .donut-seg:focus-visible { filter: drop-shadow(0 0 4px rgba(255,255,255,0.5)); }
-        .donut-seg.dimmed { opacity: 0.25 !important; }
-        .donut-seg.hovered { opacity: 1 !important; filter: brightness(1.15); }
-        .donut-seg.selected { opacity: 1 !important; filter: brightness(1.2); }
-        .donut-domain-seg { transition: opacity 0.2s ease; }
-        .donut-domain-seg.dimmed { opacity: 0.1 !important; }
-        @keyframes donut-draw {
-            from { stroke-dashoffset: var(--seg-len); opacity: 0.3; }
-            to   { stroke-dashoffset: 0; opacity: var(--seg-opacity, 1); }
+        .layer-header-text { flex: 1; }
+        .layer-header-title { font-size: 16px; font-weight: 600; color: #f5f5f5; }
+        .layer-header-sub { font-size: 13px; color: #737373; margin-top: 2px; }
+        .layer-chevron {
+            width: 20px; height: 20px; color: #737373; transition: transform 0.2s;
         }
-        .donut-seg.animate-in { animation: donut-draw 0.5s ease-out forwards; }
-        @keyframes donut-pulse {
-            0%, 100% { opacity: 0.4; }
-            50%      { opacity: 0.7; }
+        .layer-section.open .layer-chevron { transform: rotate(180deg); }
+        .layer-body { padding: 0 20px 20px; display: none; }
+        .layer-section.open .layer-body { display: block; }
+        .strength-bar { height: 8px; border-radius: 4px; background: #2f3336; margin-top: 8px; position: relative; }
+        .strength-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+        .strength-ticks { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; }
+        .strength-tick { width: 1px; background: rgba(0,0,0,0.4); }
+        .signal-list { margin-top: 16px; }
+        .signal-row {
+            display: flex; align-items: center; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 14px;
         }
-        .donut-seg.probe-running { animation: donut-pulse 2s ease-in-out infinite; }
-        .donut-tooltip {
-            position: fixed; z-index: 1000; pointer-events: none;
-            background: #1e2024; border: 1px solid #2F3336; border-radius: 8px;
-            padding: 10px 14px; min-width: 180px; max-width: 260px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-            opacity: 0; transition: opacity 0.15s ease;
-            font-size: 12px; color: #E7E9EA;
+        .signal-row:last-child { border-bottom: none; }
+        .signal-icon { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .signal-icon svg { width: 16px; height: 16px; }
+        .signal-name { flex: 1; color: #f5f5f5; }
+        .signal-status { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .signal-status.verified { color: #22c55e; }
+        .signal-status.pending { color: #f59e0b; }
+        .signal-status.not-linked { color: #737373; }
+        .signal-status.failed { color: #ef4444; }
+
+        /* ── Probe Grid (Tab 3) ── */
+        .probe-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+        .probe-filter-btn {
+            padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            color: #a3a3a3; cursor: pointer; transition: all 0.2s; font-family: inherit;
         }
-        .donut-tooltip.visible { opacity: 1; }
-        .donut-tooltip .tt-label { font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
-        .donut-tooltip .tt-domain { font-size: 10px; color: #71767B; margin-bottom: 6px; }
-        .donut-tooltip .tt-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
-        .donut-tooltip .tt-row .tt-k { color: #71767B; }
-        .donut-tooltip .tt-row .tt-v { font-weight: 600; }
-        .donut-tooltip .tt-desc { font-size: 10px; color: #71767B; margin-top: 4px; border-top: 1px solid #2F3336; padding-top: 4px; }
-        .donut-legend { flex: 1; min-width: 200px; max-width: 340px; }
-        @media (max-width: 767px) { .donut-legend { width: 100%; max-width: 100%; } }
-        .legend-domain-group { margin-bottom: 14px; }
-        .legend-domain-header {
-            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
-            padding: 6px 0; display: flex; align-items: center; gap: 6px; cursor: pointer;
-            user-select: none; transition: color 0.15s;
+        .probe-filter-btn:hover { background: rgba(255,255,255,0.06); color: #f5f5f5; }
+        .probe-filter-btn.active { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: #f59e0b; }
+        .probe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .probe-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px; padding: 16px; transition: border-color 0.2s;
         }
-        .legend-domain-header:hover { color: #E7E9EA; }
-        .legend-domain-header .legend-arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; }
-        .legend-domain-header.collapsed .legend-arrow { transform: rotate(-90deg); }
-        .legend-domain-items { overflow: hidden; transition: max-height 0.3s ease; }
-        .legend-domain-items.collapsed { max-height: 0 !important; }
-        .legend-item {
-            display: flex; align-items: center; gap: 8px;
-            padding: 7px 10px; border-radius: 6px; cursor: pointer;
-            transition: background 0.15s; border: 1px solid transparent;
+        .probe-card:hover { border-color: rgba(255,255,255,0.12); }
+        .probe-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .probe-category { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; border-radius: 4px; }
+        .probe-status-badge { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .probe-card-name { font-size: 14px; font-weight: 600; color: #f5f5f5; margin-bottom: 12px; }
+        .probe-coverage { display: flex; justify-content: space-between; font-size: 12px; color: #737373; margin-bottom: 4px; }
+        .probe-bar { height: 4px; border-radius: 2px; background: #2f3336; overflow: hidden; }
+        .probe-bar-fill { height: 100%; border-radius: 2px; }
+        .probe-timing { font-size: 11px; color: #525252; margin-top: 8px; display: flex; justify-content: space-between; }
+
+        /* ── Assessment (Tab 4) ── */
+        .assessment-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 32px;
         }
-        .legend-item:hover { background: rgba(255,255,255,0.04); }
-        .legend-item.selected { background: rgba(255,255,255,0.06); border-color: #2F3336; }
-        .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .legend-label { flex: 1; font-size: 11px; color: #E7E9EA; }
-        .legend-weight { font-size: 10px; color: #71767B; width: 30px; text-align: right; }
-        .legend-status { font-size: 10px; width: 70px; text-align: right; }
-        .legend-status.pending { color: #71767B; font-style: italic; }
-        .legend-status.passed { color: #4ade80; font-weight: 700; }
-        .legend-status.failed { color: #f87171; font-weight: 700; }
-        .legend-status.running { color: #fbbf24; }
-        .donut-detail {
-            margin-top: 12px; padding: 14px 16px; background: #16181C; border: 1px solid #2F3336;
-            border-radius: 10px; display: none;
+        .assessment-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .assessment-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.04); display: flex; align-items: center; justify-content: center; }
+        .assessment-title { font-size: 18px; font-weight: 600; color: #f5f5f5; }
+        .assessment-subtitle { font-size: 13px; color: #737373; }
+        .assessment-tier { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding: 16px; background: rgba(255,255,255,0.02); border-radius: 12px; }
+        .assessment-tier-score { font-family: 'Nunito', sans-serif; font-size: 32px; font-weight: 800; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .assessment-body p { font-size: 15px; color: #d4d4d4; line-height: 1.7; margin-bottom: 12px; }
+        .assessment-body strong { color: #f5f5f5; }
+        .assessment-recommendation { font-size: 15px; font-weight: 600; color: #f59e0b; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); }
+        .assessment-meta { margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 24px; flex-wrap: wrap; }
+        .assessment-meta span { font-size: 12px; color: #525252; }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .score-cards { grid-template-columns: repeat(3, 1fr); }
+            .probe-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        .donut-detail.visible { display: block; }
-        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .detail-title { font-size: 14px; font-weight: 700; color: #E7E9EA; display: flex; align-items: center; gap: 8px; }
-        .detail-close { cursor: pointer; color: #71767B; transition: color 0.15s; background: none; border: none; padding: 4px; }
-        .detail-close:hover { color: #E7E9EA; }
-        .detail-body { font-size: 12px; }
-        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1a1a1a; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-row .dk { color: #71767B; }
-        .detail-row .dv { color: #E7E9EA; font-weight: 600; }
-        .detail-desc { color: #71767B; font-size: 11px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #1a1a1a; }
-        .donut-mini-legend { display: flex; justify-content: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .mini-legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #71767B; }
+        @media (max-width: 640px) {
+            .score-cards { grid-template-columns: repeat(2, 1fr); }
+            .probe-grid { grid-template-columns: 1fr; }
+            .tab-bar { gap: 2px; }
+            .tab-btn { padding: 8px 12px; font-size: 13px; }
+            .tab-btn span.tab-label { display: none; }
+            .radar-wrap { max-width: 320px; }
+            .assessment-card { padding: 20px; }
+            .assessment-meta { flex-direction: column; gap: 8px; }
+        }
+
+        /* ── Animation ── */
+        @media (prefers-reduced-motion: no-preference) {
+            .radar-vertex { animation: vertex-pop 0.6s ease both; }
+            .radar-line { animation: line-draw 0.6s ease both; }
+            @keyframes vertex-pop { from { r: 0; opacity: 0; } }
+            @keyframes line-draw { from { stroke-dashoffset: 1000; opacity: 0; } to { stroke-dashoffset: 0; opacity: 1; } }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .radar-vertex, .radar-line { animation: none \!important; }
+        }
     </style>
 </head>
-<body class="bg-dark-50 min-h-screen flex flex-col">
-    <!-- @include partials/nav.html -->
+<body class="bg-dark-50">
+    <\!-- @include partials/nav.html -->
 
-    <div id="loadState" class="flex-1 flex items-center justify-center pt-16">
-        <div class="text-center"><div class="spinner mx-auto mb-4"></div><p class="text-dark-500 text-sm">Verifying agent...</p></div>
-    </div>
-
-    <div id="errorState" class="flex-1 flex items-center justify-center pt-16" style="display:none;">
-        <div class="text-center max-w-sm">
-            <h1 class="text-2xl font-bold text-dark-900 mb-2">Agent Not Found</h1>
-            <p class="text-dark-600 text-sm mb-6" id="errorMsg">This agent could not be verified.</p>
-            <a href="/agents" class="text-sm font-medium text-brand-600 hover:text-brand-700">Explore Agents</a>
+    <\!-- Loading state -->
+    <div id="loadState" class="flex items-center justify-center min-h-screen">
+        <div class="text-center">
+            <div style="width:40px;height:40px;border:3px solid #333;border-top-color:#f59e0b;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div>
+            <p class="text-sm text-dark-500 mt-4">Loading trust profile&hellip;</p>
+            <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
         </div>
     </div>
 
-    <div id="verifyContent" style="display:none;">
-        <!-- Hero -->
-        <div class="verify-hero pt-24 pb-12 px-6 text-white">
-            <div class="max-w-3xl mx-auto text-center">
-                <!-- Large Shield -->
-                <div class="shield-large flex justify-center mb-4" id="heroShield"></div>
-                <h1 id="vAgentName" class="text-3xl font-bold mb-2">&mdash;</h1>
-                <div id="vTierPill" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4" style="background:var(--tbg);color:var(--tt);">
-                    <span id="vTierLabel">&mdash;</span>
-                </div>
-                <p class="text-sm text-gray-400 mb-1">Trust Score: <span id="vScore" class="text-white font-bold">&mdash;</span>/100</p>
-                <p class="text-xs text-gray-500">Verified by goulburn.ai &middot; Data current as of <span id="vTimestamp">&mdash;</span></p>
+    <\!-- Error state -->
+    <div id="errorState" style="display:none;" class="flex items-center justify-center min-h-screen">
+        <div class="text-center max-w-md px-6">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             </div>
+            <h2 class="text-xl font-display font-bold text-dark-900 mb-2">Verification Failed</h2>
+            <p class="text-dark-500 mb-6" id="errorMsg">Agent not found.</p>
+            <a href="/agents" class="inline-block px-6 py-3 rounded-lg bg-brand-500 text-dark-50 font-semibold text-sm hover:bg-brand-600 transition-colors">Explore Agents</a>
         </div>
-
-        <!-- Main content -->
-        <main class="max-w-3xl mx-auto px-6 py-8 space-y-8">
-
-            <!-- Trust Layers -->
-            <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-1">Trust Evidence Breakdown</h2>
-                <p class="text-sm text-dark-500 mb-6">Each layer is independently scored from verified evidence.</p>
-                <div id="vLayers"></div>
-            </section>
-
-            <!-- Key Milestones -->
-            <section class=" rounded-xl shadow-sm border border-dark-200 p-8">
-                <h2 class="text-lg font-bold text-dark-900 mb-6">Key Milestones</h2>
-                <div id="vMilestones" class="space-y-3"></div>
-            </section>
-
-            <!-- Verification Seal -->
-            <section class=" rounded-xl shadow-sm border border-dark-200 p-8 text-center">
-                <div class="flex justify-center mb-4">
-                    <div class="seal" id="vSeal">
-                        <img src="/badge-verified.png" alt="Verified by goulburn.ai" width="56" height="56" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.3))">
-                    </div>
+    </div>
+    <\!-- ══ Main Content ══ -->
+    <div id="verifyContent" style="display:none;">
+        <\!-- Hero -->
+        <section class="pt-28 pb-8 px-6" style="background:#000;">
+            <div class="max-w-4xl mx-auto text-center">
+                <div id="heroShield" class="mb-4"></div>
+                <h1 class="text-3xl md:text-4xl font-display font-bold text-dark-900 mb-2" id="vAgentName"></h1>
+                <div id="vTierPill" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-3">
+                    <span id="vTierLabel"></span>
+                    <span class="text-xs opacity-70">Score: <span id="vScore"></span>/100</span>
                 </div>
-                <h3 class="text-lg font-bold text-dark-900 mb-2">Verified by goulburn.ai</h3>
-                <p class="text-sm text-dark-500 mb-2" id="vSealExplain">This agent's trust data is independently verified through goulburn.ai's 5-layer evidence model.</p>
-                <p class="text-xs text-dark-400">Badge tiers are earned through evidence accumulation. There is no paid fast-track.</p>
-            </section>
+                <p class="text-xs text-dark-400">Last assessed: <span id="vTimestamp"></span></p>
+            </div>
+        </section>
 
-            <!-- CTA: Register Your Agent -->
-            <section class="bg-gradient-to-r from-brand-500 to-yellow-500 rounded-xl p-8 text-center text-white">
-                <h2 class="text-xl font-bold mb-2">Build trust for your AI agent</h2>
-                <p class="text-sm opacity-90 mb-6">Register on goulburn.ai and earn verified trust credentials that you can embed anywhere.</p>
-                <a href="/agents/register" class="inline-block px-6 py-3 bg-black text-white font-bold rounded-lg hover:bg-dark-200 transition-colors text-sm">Register Your Agent</a>
-            </section>
+        <\!-- Tab Bar -->
+        <section class="px-6 pt-6 pb-0" style="background:#000;">
+            <div class="max-w-4xl mx-auto">
+                <div class="tab-bar" role="tablist" aria-label="Trust profile sections">
+                    <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panelSeal" id="tabSeal" data-tab="panelSeal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                        <span class="tab-label">Trust Seal</span>
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panelLayers" id="tabLayers" data-tab="panelLayers">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        <span class="tab-label">Evidence Layers</span>
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panelProbes" id="tabProbes" data-tab="panelProbes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span class="tab-label">Compliance Probes</span>
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panelAssess" id="tabAssess" data-tab="panelAssess">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="tab-label">Assessment</span>
+                    </button>
+                </div>
+            </div>
+        </section>
 
-        </main>
+        <\!-- ═══ Tab 1: Trust Seal ═══ -->
+        <section id="panelSeal" class="tab-panel active px-6 py-10" role="tabpanel" aria-labelledby="tabSeal" style="background:#000;">
+            <div class="max-w-4xl mx-auto">
+                <div class="radar-wrap" id="radarWrap">
+                    <div class="radar-tooltip" id="radarTooltip"></div>
+                </div>
+                <div class="score-cards" id="scoreCards"></div>
+                <div class="legend-row" id="legendRow"></div>
+            </div>
+        </section>
+
+        <\!-- ═══ Tab 2: Evidence Layers ═══ -->
+        <section id="panelLayers" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabLayers" style="background:#000;">
+            <div class="max-w-4xl mx-auto">
+                <div class="layer-accordion" id="layerAccordion"></div>
+            </div>
+        </section>
+
+        <\!-- ═══ Tab 3: Compliance Probes ═══ -->
+        <section id="panelProbes" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabProbes" style="background:#000;">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Compliance &amp; Safety Probes</h2>
+                <p class="text-sm text-dark-500 mb-6" id="probeSubtitle"></p>
+                <div class="probe-filters" id="probeFilters" role="group" aria-label="Filter probes by category"></div>
+                <div class="probe-grid" id="probeGrid" role="list" aria-label="Compliance probe results"></div>
+            </div>
+        </section>
+
+        <\!-- ═══ Tab 4: Assessment ═══ -->
+        <section id="panelAssess" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabAssess" style="background:#000;">
+            <div class="max-w-4xl mx-auto">
+                <div class="assessment-card" id="assessmentCard"></div>
+            </div>
+        </section>
+
+        <\!-- Share CTA -->
+        <section class="py-12 px-6 text-center" style="background:#000;border-top:1px solid rgba(255,255,255,0.04);">
+            <p class="text-sm text-dark-500 mb-3">Share this trust profile</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){this.textContent='Copied\!';setTimeout(function(){this.textContent='Copy Link';}.bind(this),2000);}.bind(this))" class="px-5 py-2 rounded-lg text-sm font-medium bg-brand-500 text-dark-50 hover:bg-brand-600 transition-colors">Copy Link</button>
+                <a id="badgeLink" href="#" target="_blank" class="px-5 py-2 rounded-lg text-sm font-medium border border-dark-200 text-dark-600 hover:text-dark-800 hover:border-dark-300 transition-colors">View Badge</a>
+            </div>
+        </section>
     </div>
 
-    <!-- @include partials/footer.html -->
-    <!-- @include partials/auth.html -->
+    <\!-- @include partials/footer.html -->
+    <\!-- @include partials/auth.html -->
 
-    <!-- JSON-LD -->
+    <\!-- JSON-LD -->
     <script type="application/ld+json" id="vJsonLd">{}</script>
 
     <script>
+    (function() {
         var API_BASE = goulburnAuth.API_BASE;
 
+        /* ── Constants ── */
+        var TIER_LABELS = { established: 'Established', verified: 'Verified', identified: 'Identified', registered: 'Registered', unranked: 'Registered', not_found: 'Unknown' };
+        var TIER_COLOURS = { established: '#14b8a6', verified: '#22c55e', identified: '#f59e0b', registered: '#ef4444', unranked: '#ef4444' };
         var TIER_CSS = {
-            trusted: 'tier-trusted', established: 'tier-established',
-            verified: 'tier-verified', identified: 'tier-identified',
-            unranked: 'tier-unranked', not_found: 'tier-unranked'
-        };
-        var TIER_LABELS = {
-            trusted: 'Trusted', established: 'Established',
-            verified: 'Verified', identified: 'Identified', unranked: 'Unranked'
-        };
-        var TIER_COLOURS = {
-            trusted: '#22c55e', established: '#3b82f6', verified: '#f59e0b',
-            identified: '#8B98A5', unranked: '#94a3b8'
-        };
-        var LAYER_META = {
-            identity:     { label: 'Identity Verification',    q: 'Who is accountable for this agent?' },
-            capability:   { label: 'Capability Verification',  q: 'Can this agent do what it claims?' },
-            track_record: { label: 'Operational Track Record', q: 'How has this agent performed over time?' },
-            social:       { label: 'Social Validation',        q: 'What do other verified participants say?' },
-            compliance:   { label: 'Compliance & Safety',      q: 'Is this agent safe to deploy?' }
+            established: 'bg-teal-500/15 text-teal-400 border border-teal-500/30',
+            verified: 'bg-green-500/15 text-green-400 border border-green-500/30',
+            identified: 'bg-amber-500/15 text-amber-400 border border-amber-500/30',
+            registered: 'bg-red-500/15 text-red-400 border border-red-500/30',
+            unranked: 'bg-gray-500/15 text-gray-400 border border-gray-500/30'
         };
 
-        /*  12-Dimension Trust Assessment Metadata  */
-        var DIMENSION_DOMAINS = {
-            supply_chain: {
-                label: 'Supply Chain Integrity',
-                colour: '#6ee7b7',
-                dims: ['model_provenance', 'dependency_transparency', 'infrastructure_certification']
-            },
-            threat_assessment: {
-                label: 'Active Threat Assessment',
-                colour: '#ff6b6b',
-                dims: ['prompt_injection_resistance', 'data_exfiltration_resistance', 'code_execution_safety', 'network_behaviour', 'credential_hygiene']
-            },
-            risk_surface: {
-                label: 'Buyer Risk Surface',
-                colour: '#22d3ee',
-                dims: ['output_liability', 'session_contamination', 'regulatory_classification', 'behavioural_consistency']
-            }
-        };
+        var LAYERS = [
+            { key: 'identity',     label: 'Identity',       q: 'Who is accountable for this agent?' },
+            { key: 'capability',   label: 'Capability',     q: 'Can it do what it claims?' },
+            { key: 'track_record', label: 'Track Record',   q: 'How has it performed over time?' },
+            { key: 'social',       label: 'Social Proof',   q: 'What do other verified participants say?' },
+            { key: 'compliance',   label: 'Compliance',     q: 'Is it safe to deploy?' }
+        ];
 
+        /* ── 12-Dimension Probe Metadata ── */
         var SUBDIM_META = {
-            model_provenance: {
-                label: 'Model Provenance', domain: 'supply_chain', weight: '12%',
-                desc: 'Verifies the agent\'s declared model against observable signatures.',
-                colour: '#a78bfa',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
-            },
-            dependency_transparency: {
-                label: 'Dependency Transparency', domain: 'supply_chain', weight: '6%',
-                desc: 'Plugins, tools, and RAG sources &mdash; the AI software bill of materials.',
-                colour: '#a5b4fc',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
-            },
-            infrastructure_certification: {
-                label: 'Infrastructure Cert.', domain: 'supply_chain', weight: '7%',
-                desc: 'TLS validity, certificate chain, hosting provider, DNS integrity.',
-                colour: '#6366f1',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',
-            },
-            prompt_injection_resistance: {
-                label: 'Prompt Injection', domain: 'threat_assessment', weight: '15%',
-                desc: 'Resistance to jailbreaks, role-play escapes, and instruction overrides.',
-                colour: '#ef4444',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-            },
-            data_exfiltration_resistance: {
-                label: 'Data Exfiltration', domain: 'threat_assessment', weight: '12%',
-                desc: 'Resistance to data leakage via requests, URL encoding, or tool payloads.',
-                colour: '#f87171',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-            },
-            code_execution_safety: {
-                label: 'Code Execution', domain: 'threat_assessment', weight: '8%',
-                desc: 'Sandbox boundaries for agents with tool-use capabilities.',
-                colour: '#fb923c',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>',
-            },
-            network_behaviour: {
-                label: 'Network Behaviour', domain: 'threat_assessment', weight: '5%',
-                desc: 'External call profiling &mdash; DNS, HTTP, WebSocket. Unexpected endpoints flagged.',
-                colour: '#ff8a65',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
-            },
-            credential_hygiene: {
-                label: 'Credential Hygiene', domain: 'threat_assessment', weight: '5%',
-                desc: 'Does the agent echo, log, or transmit secrets from its context?',
-                colour: '#fbbf24',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
-            },
-            output_liability: {
-                label: 'Output Liability', domain: 'risk_surface', weight: '10%',
-                desc: 'Legal exposure from medical advice, financial recs, hallucinations.',
-                colour: '#60a5fa',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
-            },
-            session_contamination: {
-                label: 'Session Isolation', domain: 'risk_surface', weight: '8%',
-                desc: 'Multi-tenant isolation &mdash; can one user\'s data influence another?',
-                colour: '#67e8f9',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
-            },
-            regulatory_classification: {
-                label: 'Regulatory Class.', domain: 'risk_surface', weight: '5%',
-                desc: 'GDPR, SOC 2, HIPAA, EU AI Act risk tier mapping.',
-                colour: '#818cf8',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
-            },
-            behavioural_consistency: {
-                label: 'Behavioural Drift', domain: 'risk_surface', weight: '7%',
-                desc: 'Does the agent behave differently when tested vs in production?',
-                colour: '#34d399',
-                icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
-            },
+            model_provenance:             { label: 'Model Provenance',       cat: 'Infrastructure', weight: 12 },
+            dependency_transparency:      { label: 'Dependency Transparency', cat: 'Infrastructure', weight: 6 },
+            infrastructure_certification: { label: 'Infrastructure Cert.',   cat: 'Infrastructure', weight: 7 },
+            prompt_injection_resistance:  { label: 'Prompt Injection',       cat: 'Security',       weight: 15 },
+            data_exfiltration_resistance: { label: 'Data Exfiltration',      cat: 'Security',       weight: 12 },
+            code_execution_safety:        { label: 'Code Execution',         cat: 'Security',       weight: 8 },
+            network_behaviour:            { label: 'Network Behaviour',      cat: 'Security',       weight: 5 },
+            credential_hygiene:           { label: 'Credential Hygiene',     cat: 'Security',       weight: 5 },
+            output_liability:             { label: 'Output Liability',       cat: 'Risk',           weight: 10 },
+            session_contamination:        { label: 'Session Isolation',      cat: 'Risk',           weight: 8 },
+            regulatory_classification:    { label: 'Regulatory Class.',      cat: 'Compliance',     weight: 5 },
+            behavioural_consistency:      { label: 'Behavioural Drift',      cat: 'Monitoring',     weight: 7 }
         };
+        var LEGACY_MAP = { model_transparency:'model_provenance', data_isolation:'data_exfiltration_resistance', output_safety:'output_liability', infra_hygiene:'infrastructure_certification' };
+        var CAT_COLOURS = { Infrastructure:'#a78bfa', Security:'#ef4444', Monitoring:'#f59e0b', Risk:'#22d3ee', Compliance:'#818cf8' };
 
-        /* Backward-compat mapping: old 4 keys  new 12 keys */
-        var LEGACY_DIM_MAP = {
-            model_transparency: 'model_provenance',
-            data_isolation: 'data_exfiltration_resistance',
-            output_safety: 'output_liability',
-            infra_hygiene: 'infrastructure_certification'
-        };
-
-        var PROBE_TYPE_LABELS = {
-            model_fingerprint: 'Model Fingerprint',
-            latency_profile: 'Latency Profile',
-            watermark_detection: 'Watermark Detection',
-            honeypot_injection: 'Honeypot Injection',
-            cross_session_bleed: 'Cross-Session Bleed',
-            pii_scan: 'PII Scan',
-            infra_attestation: 'Infrastructure Check',
-            model_declaration: 'Model Declaration',
-            api_schema_check: 'API Schema Validation',
-            network_provenance: 'Network Provenance',
-            baseline_latency: 'Baseline Latency',
-            prompt_injection_test: 'Prompt Injection Test',
-            credential_echo_test: 'Credential Echo Test',
-            code_sandbox_test: 'Code Sandbox Test',
-            exfiltration_test: 'Exfiltration Test',
-            behavioural_drift: 'Behavioural Drift',
-            regulatory_scan: 'Regulatory Scan',
-            dependency_audit: 'Dependency Audit',
-            session_contamination_test: 'Session Contamination',
-            output_liability_scan: 'Output Liability Scan',
-        };
-        var PROBE_TYPE_ICONS = {
-            model_fingerprint: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
-            latency_profile: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
-            watermark_detection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
-            honeypot_injection: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-            cross_session_bleed: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
-            pii_scan: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+        /* Signal icons per layer */
+        var SIGNAL_ICONS = {
+            github_oauth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>',
+            email_verified: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+            linkedin_oauth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
+            discord_oauth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M7.5 7.5c3.5-1 5.5-1 9 0"/><path d="M7 16.5c3.5 1 6.5 1 10 0"/><path d="M15.5 17c0 1 1.5 3 2 3 1.5 0 2.833-1.667 3.5-3 .667-1.667.5-5.833-1.5-11.5-1.457-1.015-3-1.34-4.5-1.5l-1 2.5"/><path d="M8.5 17c0 1-1.356 3-1.832 3-1.429 0-2.698-1.667-3.333-3-.635-1.667-.476-5.833 1.428-11.5C6.151 4.485 7.545 4.16 9 4l1 2.5"/></svg>',
+            x_oauth: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l11.733 16h4.267l-11.733-16zM4 20l6.768-6.768M20 4l-6.768 6.768"/></svg>',
+            organisation_domain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+            _default: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>'
         };
 
         function getAgentName() {
             var m = window.location.pathname.match(/\/verify\/([^\/]+)/);
             return m ? decodeURIComponent(m[1]) : null;
         }
-
         function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
         function scoreColour(s) {
-            if (s >= 80) return '#4ade80';
-            if (s >= 60) return '#fbbf24';
-            if (s >= 40) return '#fb923c';
-            return '#f87171';
+            if (s >= 80) return '#14b8a6';
+            if (s >= 60) return '#22c55e';
+            if (s >= 40) return '#eab308';
+            if (s >= 20) return '#f59e0b';
+            return '#ef4444';
+        }
+
+        function tierFromScore(s) {
+            if (s >= 80) return 'established';
+            if (s >= 50) return 'verified';
+            if (s >= 20) return 'identified';
+            return 'registered';
         }
 
         function timeAgo(iso) {
-            if (!iso) return '';
+            if (\!iso) return '';
             var d = new Date(iso);
             var now = new Date();
             var diff = Math.floor((now - d) / 1000);
@@ -379,600 +361,506 @@
             return Math.floor(diff / 86400) + 'd ago';
         }
 
-        /* === Production Compliance Donut === */
-        function renderComplianceSubdims(layer) {
-            var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
-            var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
-            var domainColours = { supply_chain: '#6366f1', threat_assessment: '#fb923c', risk_surface: '#14b8a6' };
-            var domainLabels = { supply_chain: 'Supply Chain Integrity', threat_assessment: 'Active Threat Assessment', risk_surface: 'Buyer Risk Surface' };
-
-            var segments = [];
-            var allPending = true;
-            var probedCount = 0;
-            var weightedSum = 0;
-            var probedWeightSum = 0;
-            domainOrder.forEach(function(domKey) {
-                var domain = DIMENSION_DOMAINS[domKey];
-                if (!domain) return;
-                (domain.dims || []).forEach(function(k) {
-                    var meta = SUBDIM_META[k];
-                    if (!meta) return;
-                    var val = (layer && layer[k] != null) ? layer[k] : null;
-                    if (val == null && layer && layer.dimension_scores && layer.dimension_scores[k] != null) {
-                        val = layer.dimension_scores[k];
+        /* ══════════════════════════════════════
+           TAB SYSTEM
+           ══════════════════════════════════════ */
+        function initTabs() {
+            var btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    btns.forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                    document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+                    var panel = document.getElementById(btn.dataset.tab);
+                    if (panel) panel.classList.add('active');
+                    // Screen reader announcement
+                    announce(btn.textContent.trim() + ' tab selected');
+                });
+                btn.addEventListener('keydown', function(e) {
+                    var tabs = Array.from(btns);
+                    var idx = tabs.indexOf(btn);
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        var next = e.key === 'ArrowRight' ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+                        tabs[next].focus();
+                        tabs[next].click();
                     }
-                    var status = 'pending';
-                    if (val != null) {
-                        status = 'passed';
-                        allPending = false;
-                        probedCount++;
-                        var w = parseFloat(meta.weight) || 5;
-                        weightedSum += w * val;
-                        probedWeightSum += w;
-                    }
-                    if (layer && layer.running_probes && layer.running_probes.indexOf(k) !== -1) {
-                        status = 'running';
-                    }
-                    segments.push({
-                        key: k, label: meta.label, domain: domKey,
-                        domainLabel: domain.label, weight: parseFloat(meta.weight) || 5,
-                        value: val, status: status,
-                        colour: meta.colour || domain.colour,
-                        domainColour: domainColours[domKey] || domain.colour,
-                        desc: meta.desc, icon: meta.icon || ''
-                    });
                 });
             });
-            var totalWeight = segments.reduce(function(s, d) { return s + d.weight; }, 0);
-            var centreScore = allPending ? null : Math.round(weightedSum / (probedWeightSum || 1));
-            var graceCap = (layer && layer.scoring_mode !== 'blended' && probedCount < segments.length);
-            if (graceCap && centreScore !== null && centreScore > 70) centreScore = 70;
+        }
 
-            var size = 400, cx = size/2, cy = size/2;
-            var outerR = 190, outerR2 = 150;
-            var innerR = 145, innerR2 = 100;
-            var uid = 'donut_' + Math.random().toString(36).substr(2, 6);
+        var announcer;
+        function announce(msg) {
+            if (\!announcer) {
+                announcer = document.createElement('div');
+                announcer.setAttribute('aria-live', 'polite');
+                announcer.setAttribute('aria-atomic', 'true');
+                announcer.className = 'sr-only';
+                announcer.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);';
+                document.body.appendChild(announcer);
+            }
+            announcer.textContent = '';
+            setTimeout(function() { announcer.textContent = msg; }, 100);
+        }
 
-            function arcPath(cxo, cyo, r1, r2, startDeg, sweepDeg) {
-                if (sweepDeg >= 359.99) sweepDeg = 359.99;
-                var s = startDeg * Math.PI / 180;
-                var e = (startDeg + sweepDeg) * Math.PI / 180;
-                var la = sweepDeg > 180 ? 1 : 0;
-                return 'M ' + (cxo + r1*Math.cos(s)).toFixed(2) + ' ' + (cyo + r1*Math.sin(s)).toFixed(2) +
-                    ' A ' + r1 + ' ' + r1 + ' 0 ' + la + ' 1 ' + (cxo + r1*Math.cos(e)).toFixed(2) + ' ' + (cyo + r1*Math.sin(e)).toFixed(2) +
-                    ' L ' + (cxo + r2*Math.cos(e)).toFixed(2) + ' ' + (cyo + r2*Math.sin(e)).toFixed(2) +
-                    ' A ' + r2 + ' ' + r2 + ' 0 ' + la + ' 0 ' + (cxo + r2*Math.cos(s)).toFixed(2) + ' ' + (cyo + r2*Math.sin(s)).toFixed(2) + ' Z';
+        /* ══════════════════════════════════════
+           TAB 1: RADAR CHART
+           ══════════════════════════════════════ */
+        function renderRadar(trust) {
+            var layers = trust.layers || {};
+            var scores = LAYERS.map(function(l) { return (layers[l.key] && layers[l.key].score) || 0; });
+            var overall = trust.overall_score || 0;
+            var tier = trust.tier || tierFromScore(overall);
+
+            var size = 420, cx = size/2, cy = size/2, r = 150;
+            var n = 5;
+            var angleOffset = -Math.PI / 2; // Start from top
+
+            function pointOnAxis(i, val) {
+                var angle = angleOffset + (2 * Math.PI * i / n);
+                var dist = (val / 100) * r;
+                return { x: cx + dist * Math.cos(angle), y: cy + dist * Math.sin(angle) };
             }
 
-            var svgParts = [];
-            var angle = -90;
+            // Grid
+            var svg = '<svg class="radar-svg" viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="Trust radar chart showing five evidence layer scores">';
 
-            // Outer ring: sub-dimensions
-            segments.forEach(function(seg, i) {
-                var sweep = (seg.weight / totalWeight) * 360;
-                var isPending = seg.status === 'pending';
-                var isRunning = seg.status === 'running';
-                var fillColour = isPending ? seg.domainColour : seg.colour;
-                var opacity = isPending ? '0.40' : '1';
-                var extraClass = isRunning ? ' probe-running' : '';
-                var dashStroke = isPending ? ' stroke-dasharray="4 3"' : '';
-                var strokeCol = isPending ? seg.domainColour : '#0A0A0A';
-                var strokeOp = isPending ? '0.7' : '1';
-
-                var d = arcPath(cx, cy, outerR, outerR2, angle, sweep);
-                svgParts.push(
-                    '<path class="donut-seg' + extraClass + '" ' +
-                    'data-idx="' + i + '" data-domain="' + seg.domain + '" ' +
-                    'role="listitem" tabindex="0" ' +
-                    'aria-label="' + seg.label + ', ' + seg.weight + ' percent weight, ' + (isPending ? 'awaiting probe' : 'score ' + seg.value + ' out of 100') + '" ' +
-                    'style="--seg-opacity:' + opacity + ';" ' +
-                    'd="' + d + '" fill="' + fillColour + '" opacity="' + opacity + '" ' +
-                    'stroke="' + strokeCol + '" stroke-width="1.5" stroke-opacity="' + strokeOp + '"' + dashStroke + '/>'
-                );
-                angle += sweep;
-            });
-
-            // Inner ring: domain aggregates
-            angle = -90;
-            domainOrder.forEach(function(domKey) {
-                var domWeight = domainTotals[domKey] || 0;
-                var sweep = (domWeight / totalWeight) * 360;
-                var col = domainColours[domKey];
-                var d = arcPath(cx, cy, innerR, innerR2, angle, sweep);
-                var domSegs = segments.filter(function(s) { return s.domain === domKey; });
-                var anyProbed = domSegs.some(function(s) { return s.status !== 'pending'; });
-                var domOpacity = anyProbed ? '0.65' : '0.45';
-
-                svgParts.push(
-                    '<path class="donut-domain-seg" data-domain="' + domKey + '" ' +
-                    'd="' + d + '" fill="' + col + '" opacity="' + domOpacity + '" ' +
-                    'stroke="#0A0A0A" stroke-width="1.5"><title>' + domainLabels[domKey] + ' (' + domWeight + '%)</title></path>'
-                );
-
-                angle += sweep;
-            });
-
-            // Centre text
-            if (centreScore !== null) {
-                var sc = scoreColour(centreScore);
-                svgParts.push('<text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" fill="' + sc + '" font-size="36" font-weight="700">' + centreScore + '</text>');
-                if (graceCap) {
-                    svgParts.push('<text x="' + cx + '" y="' + (cy + 8) + '" text-anchor="middle" fill="#71767B" font-size="11">/ 70 grace cap</text>');
+            // Grid rings
+            [25, 50, 75, 100].forEach(function(ring) {
+                var pts = [];
+                for (var i = 0; i < n; i++) {
+                    var p = pointOnAxis(i, ring);
+                    pts.push(p.x + ',' + p.y);
                 }
-                svgParts.push('<text x="' + cx + '" y="' + (cy + 24) + '" text-anchor="middle" fill="#71767B" font-size="10">' + probedCount + ' of ' + segments.length + ' probed</text>');
-            } else {
-                svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="32" font-weight="700">&mdash;</text>');
-                svgParts.push('<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="#71767B" font-size="11">Awaiting probes</text>');
-            }
-            svgParts.push('<text x="' + cx + '" y="' + (cy + 42) + '" text-anchor="middle" fill="transparent" font-size="1" role="status" aria-live="polite">' +
-                (centreScore !== null ? 'Compliance score: ' + centreScore : 'Awaiting probes') + '</text>');
-
-            // Assemble HTML
-            var html = '<div class="donut-layout" id="' + uid + '">';
-            html += '<div class="donut-wrap">';
-            html += '<svg class="donut-svg" viewBox="0 0 ' + size + ' ' + size + '" role="list" aria-label="Compliance probe donut chart">' + svgParts.join('') + '</svg>';
-            html += '<div class="donut-mini-legend">';
-            domainOrder.forEach(function(dk) {
-                html += '<div class="mini-legend-item"><span class="legend-dot" style="background:' + domainColours[dk] + '"></span>' + domainLabels[dk] + '</div>';
+                svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="' + (ring < 100 ? '4,4' : '0') + '"/>';
             });
-            html += '</div></div>';
 
-            // Legend panel
-            html += '<div class="donut-legend">';
-            domainOrder.forEach(function(domKey) {
-                var col = domainColours[domKey];
-                var domSegs = segments.filter(function(s) { return s.domain === domKey; });
-                var domTotal = domainTotals[domKey];
-                html += '<div class="legend-domain-group">';
-                html += '<div class="legend-domain-header" data-domain="' + domKey + '" style="color:' + col + ';">';
-                html += '<svg class="legend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
-                html += '<span class="legend-dot" style="background:' + col + '"></span>';
-                html += domainLabels[domKey] + ' <span style="font-weight:400;opacity:0.6;">(' + domTotal + '%)</span>';
-                html += '</div>';
-                html += '<div class="legend-domain-items" style="max-height:500px;">';
-                domSegs.forEach(function(seg) {
-                    var idx = segments.indexOf(seg);
-                    var statusText = seg.status === 'pending' ? 'Awaiting' :
-                                     seg.status === 'running' ? 'Running...' :
-                                     seg.status === 'failed' ? 'Failed' :
-                                     seg.value + '/100';
-                    html += '<div class="legend-item" data-idx="' + idx + '" tabindex="0" ' +
-                        'aria-label="' + seg.label + ', ' + seg.weight + ' percent, ' + statusText + '">';
-                    html += '<span class="legend-dot" style="background:' + (seg.status === 'pending' ? '#2F3336' : seg.colour) + '"></span>';
-                    html += '<span class="legend-label">' + seg.label + '</span>';
-                    html += '<span class="legend-weight">' + seg.weight + '%</span>';
-                    html += '<span class="legend-status ' + seg.status + '">' + statusText + '</span>';
+            // Axis lines
+            for (var i = 0; i < n; i++) {
+                var p = pointOnAxis(i, 100);
+                svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+            }
+
+            // Data polygon (outline only)
+            var dataPts = [];
+            for (var i = 0; i < n; i++) {
+                var p = pointOnAxis(i, scores[i]);
+                dataPts.push(p.x + ',' + p.y);
+            }
+            // Subtle fill for shape recognition
+            svg += '<polygon class="radar-line" points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round" stroke-dasharray="1000" style="animation-delay:0.2s"/>';
+
+            // Vertex dots
+            for (var i = 0; i < n; i++) {
+                var p = pointOnAxis(i, scores[i]);
+                var c = scoreColour(scores[i]);
+                var dotR = 6 + (scores[i] / 100) * 6; // 6-12px
+                var delay = (0.3 + i * 0.08);
+                svg += '<circle class="radar-vertex" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="#000" stroke-width="2" data-layer="' + i + '" style="animation-delay:' + delay + 's; color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
+            }
+
+            // Axis labels
+            var labelR = r + 36;
+            for (var i = 0; i < n; i++) {
+                var angle = angleOffset + (2 * Math.PI * i / n);
+                var lx = cx + labelR * Math.cos(angle);
+                var ly = cy + labelR * Math.sin(angle);
+                var anchor = 'middle';
+                if (Math.cos(angle) < -0.3) anchor = 'end';
+                else if (Math.cos(angle) > 0.3) anchor = 'start';
+                svg += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" dominant-baseline="middle" fill="#a3a3a3" font-size="12" font-family="Plus Jakarta Sans, sans-serif">' + LAYERS[i].label + '</text>';
+                // Score next to label
+                svg += '<text x="' + lx + '" y="' + (ly + 16) + '" text-anchor="' + anchor + '" dominant-baseline="middle" fill="' + scoreColour(scores[i]) + '" font-size="14" font-weight="700" font-family="Nunito, sans-serif">' + scores[i] + '</text>';
+            }
+
+            // Centre score + tier
+            svg += '<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#f5f5f5" font-size="40" font-weight="800" font-family="Nunito, sans-serif">' + overall + '</text>';
+            svg += '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" fill="' + (TIER_COLOURS[tier] || '#a3a3a3') + '" font-size="12" font-weight="700" text-transform="uppercase" letter-spacing="0.1em" font-family="Plus Jakarta Sans, sans-serif">' + (TIER_LABELS[tier] || 'Unknown').toUpperCase() + '</text>';
+
+            svg += '</svg>';
+
+            var wrap = document.getElementById('radarWrap');
+            wrap.insertAdjacentHTML('afterbegin', svg);
+
+            // Tooltip interactions
+            var tooltip = document.getElementById('radarTooltip');
+            wrap.querySelectorAll('.radar-vertex').forEach(function(dot) {
+                var li = parseInt(dot.dataset.layer);
+                var layer = layers[LAYERS[li].key] || {};
+                var verified = (layer.verified_signals || layer.verified || []).length;
+                var total = verified + ((layer.unverified || layer.unverified_signals || []).length);
+
+                dot.addEventListener('mouseenter', function(e) {
+                    tooltip.innerHTML = '<strong>' + LAYERS[li].label + ': ' + scores[li] + '/100</strong><br><span style="color:#a3a3a3;font-size:12px;">' + (total > 0 ? verified + ' of ' + total + ' signals verified' : LAYERS[li].q) + '</span>';
+                    tooltip.classList.add('show');
+                });
+                dot.addEventListener('mousemove', function(e) {
+                    var rect = wrap.getBoundingClientRect();
+                    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+                    tooltip.style.top = (e.clientY - rect.top - 40) + 'px';
+                });
+                dot.addEventListener('mouseleave', function() { tooltip.classList.remove('show'); });
+                dot.addEventListener('click', function() {
+                    // Switch to Evidence Layers tab and expand this layer
+                    document.getElementById('tabLayers').click();
+                    setTimeout(function() {
+                        var section = document.querySelector('[data-layer-key="' + LAYERS[li].key + '"]');
+                        if (section) {
+                            section.classList.add('open');
+                            section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                });
+            });
+
+            // Score cards
+            var cardsHtml = '';
+            LAYERS.forEach(function(l, i) {
+                var c = scoreColour(scores[i]);
+                cardsHtml += '<div class="score-card"><div class="score-card-val" style="color:' + c + ';">' + scores[i] + '</div><div class="score-card-label">' + l.label + '</div><div class="score-card-bar"><div class="score-card-fill" style="width:' + scores[i] + '%;background:' + c + ';"></div></div></div>';
+            });
+            document.getElementById('scoreCards').innerHTML = cardsHtml;
+
+            // Legend
+            var legHtml = '';
+            LAYERS.forEach(function(l, i) {
+                legHtml += '<div class="legend-item"><div class="legend-dot" style="background:' + scoreColour(scores[i]) + ';"></div>' + l.label + ' <strong style="color:#f5f5f5;">' + scores[i] + '</strong></div>';
+            });
+            document.getElementById('legendRow').innerHTML = legHtml;
+        }
+
+        /* ══════════════════════════════════════
+           TAB 2: EVIDENCE LAYERS
+           ══════════════════════════════════════ */
+        function renderLayers(trust) {
+            var layers = trust.layers || {};
+            var container = document.getElementById('layerAccordion');
+            var html = '';
+
+            LAYERS.forEach(function(meta) {
+                var layer = layers[meta.key] || {};
+                var score = layer.score || 0;
+                var verified = layer.verified_signals || layer.verified || [];
+                var unverified = layer.unverified || layer.unverified_signals || [];
+                var total = verified.length + unverified.length;
+                var c = scoreColour(score);
+
+                html += '<div class="layer-section" data-layer-key="' + meta.key + '">';
+                html += '<button class="layer-header" aria-expanded="false" onclick="this.parentElement.classList.toggle(\'open\');this.setAttribute(\'aria-expanded\',this.parentElement.classList.contains(\'open\'))">';
+                html += '<div class="layer-score-badge" style="background:' + c + ';">' + score + '</div>';
+                html += '<div class="layer-header-text"><div class="layer-header-title">' + meta.label + '</div><div class="layer-header-sub">' + meta.q + '</div></div>';
+                html += '<svg class="layer-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+                html += '</button>';
+
+                html += '<div class="layer-body">';
+
+                // Strength bar
+                html += '<div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:#a3a3a3;">Score strength</span><span style="font-size:13px;font-weight:600;color:' + c + ';">' + score + ' / 100</span></div>';
+                html += '<div class="strength-bar"><div class="strength-fill" style="width:' + score + '%;background:' + c + ';"></div></div>';
+
+                // Signal count
+                if (total > 0) {
+                    html += '<div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:12px;font-weight:600;color:#737373;text-transform:uppercase;letter-spacing:0.05em;">Verification Signals</span><span style="font-size:12px;color:#737373;">' + verified.length + ' of ' + total + '</span></div>';
+                }
+
+                // Signal list
+                html += '<div class="signal-list">';
+                verified.forEach(function(sig) {
+                    var key = sig.toLowerCase().replace(/\s+/g, '_');
+                    var icon = SIGNAL_ICONS[key] || SIGNAL_ICONS._default;
+                    html += '<div class="signal-row"><div class="signal-icon">' + icon + '</div><div class="signal-name">' + esc(sig.replace(/_/g, ' ')) + '</div><div class="signal-status verified"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Verified</div></div>';
+                });
+                unverified.forEach(function(sig) {
+                    var key = sig.toLowerCase().replace(/\s+/g, '_');
+                    var icon = SIGNAL_ICONS[key] || SIGNAL_ICONS._default;
+                    html += '<div class="signal-row"><div class="signal-icon" style="opacity:0.5;">' + icon + '</div><div class="signal-name" style="color:#737373;">' + esc(sig.replace(/_/g, ' ')) + '</div><div class="signal-status not-linked"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Not linked</div></div>';
+                });
+
+                // For compliance layer, add sub-dimension summary
+                if (meta.key === 'compliance' && layer.dimension_scores) {
+                    html += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">';
+                    html += '<p style="font-size:12px;font-weight:600;color:#737373;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Compliance Dimensions</p>';
+                    var dims = layer.dimension_scores || {};
+                    Object.keys(SUBDIM_META).forEach(function(dk) {
+                        var val = dims[dk];
+                        if (val == null && dims[LEGACY_MAP[dk]]) val = dims[LEGACY_MAP[dk]];
+                        var dm = SUBDIM_META[dk];
+                        var isPending = val == null;
+                        var dc = isPending ? '#525252' : scoreColour(val);
+                        html += '<div style="display:flex;align-items:center;gap:10px;padding:6px 0;"><span style="font-size:13px;color:' + (isPending ? '#525252' : '#d4d4d4') + ';flex:1;">' + dm.label + '</span>';
+                        if (isPending) {
+                            html += '<span style="font-size:11px;color:#525252;">Awaiting</span>';
+                        } else {
+                            html += '<span style="font-size:13px;font-weight:600;color:' + dc + ';">' + val + '</span>';
+                        }
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+
+                html += '</div>'; // signal-list
+                html += '</div>'; // layer-body
+                html += '</div>'; // layer-section
+            });
+
+            container.innerHTML = html;
+        }
+
+        /* ══════════════════════════════════════
+           TAB 3: COMPLIANCE PROBES
+           ══════════════════════════════════════ */
+        function renderProbes(trust, probeData) {
+            var layer = (trust.layers && trust.layers.compliance) || {};
+            var dims = layer.dimension_scores || {};
+            var runningProbes = layer.running_probes || [];
+
+            // Build probe list from dimension metadata
+            var probes = [];
+            Object.keys(SUBDIM_META).forEach(function(dk) {
+                var realKey = dk;
+                // Check legacy keys
+                if (dims[dk] == null && LEGACY_MAP[dk] && dims[LEGACY_MAP[dk]] \!= null) {
+                    // use legacy value
+                }
+                var val = dims[dk];
+                if (val == null && LEGACY_MAP[dk]) val = dims[LEGACY_MAP[dk]];
+
+                var dm = SUBDIM_META[dk];
+                var isRunning = runningProbes.indexOf(dk) \!== -1;
+                var status, statusClass;
+                if (isRunning) { status = 'Running...'; statusClass = 'color:#f59e0b;'; }
+                else if (val == null) { status = 'Awaiting'; statusClass = 'color:#525252;'; }
+                else if (val >= 50) { status = 'Passed'; statusClass = 'color:#22c55e;'; }
+                else if (val >= 20) { status = 'Grace Period'; statusClass = 'color:#f59e0b;'; }
+                else { status = 'Failed'; statusClass = 'color:#ef4444;'; }
+
+                probes.push({
+                    key: dk,
+                    label: dm.label,
+                    cat: dm.cat,
+                    weight: dm.weight,
+                    value: val,
+                    status: status,
+                    statusStyle: statusClass,
+                    isRunning: isRunning
+                });
+            });
+
+            // Merge real probe history if available
+            if (probeData && probeData.probes) {
+                probeData.probes.forEach(function(p) {
+                    var found = probes.find(function(pr) { return pr.key === p.probe_type || pr.key === p.dimension; });
+                    if (found) {
+                        if (p.completed_at) found.lastRun = p.completed_at;
+                        if (p.status === 'passed') { found.status = 'Passed'; found.statusStyle = 'color:#22c55e;'; }
+                        if (p.status === 'failed') { found.status = 'Failed'; found.statusStyle = 'color:#ef4444;'; }
+                    }
+                });
+            }
+
+            // Subtitle
+            var probeCount = probes.length;
+            var passedCount = probes.filter(function(p) { return p.status === 'Passed'; }).length;
+            document.getElementById('probeSubtitle').textContent = probeCount + ' independent assessments. ' + passedCount + ' passed, ' + (probeCount - passedCount) + ' pending or in progress.';
+
+            // Filters
+            var cats = ['All Probes'];
+            probes.forEach(function(p) { if (cats.indexOf(p.cat) === -1) cats.push(p.cat); });
+            var filterHtml = '';
+            cats.forEach(function(cat, i) {
+                filterHtml += '<button class="probe-filter-btn' + (i === 0 ? ' active' : '') + '" data-cat="' + cat + '">' + cat + '</button>';
+            });
+            document.getElementById('probeFilters').innerHTML = filterHtml;
+
+            // Render cards
+            function renderCards(filter) {
+                var grid = document.getElementById('probeGrid');
+                var html = '';
+                probes.forEach(function(p) {
+                    if (filter \!== 'All Probes' && p.cat \!== filter) return;
+                    var catC = CAT_COLOURS[p.cat] || '#737373';
+                    html += '<div class="probe-card" role="listitem">';
+                    html += '<div class="probe-card-head"><span class="probe-category" style="color:' + catC + ';background:' + catC + '15;border:1px solid ' + catC + '30;">' + p.cat + '</span>';
+                    html += '<span class="probe-status-badge" style="' + p.statusStyle + ';">' + p.status + '</span></div>';
+                    html += '<div class="probe-card-name">' + p.label + '</div>';
+                    html += '<div class="probe-coverage"><span>Coverage</span><span>' + (p.value \!= null ? p.value + '%' : '—') + '</span></div>';
+                    html += '<div class="probe-bar"><div class="probe-bar-fill" style="width:' + (p.value || 0) + '%;background:' + catC + ';"></div></div>';
+                    html += '<div class="probe-timing"><span>' + (p.lastRun ? 'Last run: ' + timeAgo(p.lastRun) : 'Awaiting first run') + '</span><span>Weight: ' + p.weight + '%</span></div>';
                     html += '</div>';
                 });
-                html += '</div></div>';
-            });
-            html += '<div class="donut-detail" id="' + uid + '_detail" role="region" aria-label="Probe detail">';
-            html += '<div class="detail-header"><div class="detail-title" id="' + uid + '_dtitle"></div>';
-            html += '<button class="detail-close" aria-label="Close detail panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
-            html += '<div class="detail-body" id="' + uid + '_dbody"></div>';
-            html += '</div>';
-            html += '</div>';
-            html += '</div>';
-            html += '<div class="donut-tooltip" id="' + uid + '_tip"></div>';
-
-            setTimeout(function() { wireDonutInteractions(uid, segments, domainColours, domainLabels); }, 50);
-            return html;
-        }
-
-        function wireDonutInteractions(uid, segments, domainColours, domainLabels) {
-            var root = document.getElementById(uid);
-            if (!root) return;
-            var svg = root.querySelector('.donut-svg');
-            var tip = document.getElementById(uid + '_tip');
-            var detail = document.getElementById(uid + '_detail');
-            var dtitle = document.getElementById(uid + '_dtitle');
-            var dbody = document.getElementById(uid + '_dbody');
-            var allSegs = svg.querySelectorAll('.donut-seg');
-            var allDomSegs = svg.querySelectorAll('.donut-domain-seg');
-            var legendItems = root.querySelectorAll('.legend-item');
-            var domHeaders = root.querySelectorAll('.legend-domain-header');
-            var selectedIdx = -1;
-
-            function showTooltip(seg, e) {
-                var h = '<div class="tt-label"><span style="color:' + seg.colour + ';">' + seg.icon + '</span> ' + seg.label + '</div>';
-                h += '<div class="tt-domain">' + seg.domainLabel + '</div>';
-                h += '<div class="tt-row"><span class="tt-k">Weight</span><span class="tt-v">' + seg.weight + '%</span></div>';
-                if (seg.status === 'pending') {
-                    h += '<div class="tt-row"><span class="tt-k">Status</span><span class="tt-v" style="color:#71767B;font-style:italic;">Awaiting probe</span></div>';
-                } else if (seg.status === 'running') {
-                    h += '<div class="tt-row"><span class="tt-k">Status</span><span class="tt-v" style="color:#fbbf24;">Probe running...</span></div>';
-                } else {
-                    h += '<div class="tt-row"><span class="tt-k">Score</span><span class="tt-v" style="color:' + scoreColour(seg.value) + ';">' + seg.value + '/100</span></div>';
-                }
-                h += '<div class="tt-desc">' + (seg.desc || '') + '</div>';
-                tip.innerHTML = h;
-                tip.classList.add('visible');
-                positionTip(e);
+                grid.innerHTML = html || '<p style="color:#525252;text-align:center;grid-column:1/-1;padding:40px;">No probes in this category.</p>';
             }
-            function positionTip(e) {
-                var x = (e.clientX || 0) + 14;
-                var y = (e.clientY || 0) + 14;
-                if (x + 260 > window.innerWidth) x = (e.clientX || 0) - 270;
-                if (y + 200 > window.innerHeight) y = (e.clientY || 0) - 180;
-                tip.style.left = x + 'px';
-                tip.style.top = y + 'px';
-            }
-            function hideTooltip() { tip.classList.remove('visible'); }
+            renderCards('All Probes');
 
-            function highlightSeg(idx) {
-                allSegs.forEach(function(el, i) {
-                    if (i === idx) { el.classList.add('hovered'); el.classList.remove('dimmed'); }
-                    else if (selectedIdx === -1 || selectedIdx === idx) { el.classList.add('dimmed'); el.classList.remove('hovered'); }
-                });
-                var dom = segments[idx].domain;
-                allDomSegs.forEach(function(el) {
-                    if (el.getAttribute('data-domain') !== dom) el.classList.add('dimmed');
-                    else el.classList.remove('dimmed');
-                });
-                legendItems.forEach(function(el) {
-                    if (parseInt(el.getAttribute('data-idx')) === idx) el.style.background = 'rgba(255,255,255,0.06)';
-                });
-            }
-            function unhighlightAll() {
-                if (selectedIdx !== -1) return;
-                allSegs.forEach(function(el) { el.classList.remove('hovered', 'dimmed'); });
-                allDomSegs.forEach(function(el) { el.classList.remove('dimmed'); });
-                legendItems.forEach(function(el) { el.style.background = ''; });
-            }
-
-            function selectSeg(idx) {
-                if (selectedIdx === idx) { deselectSeg(); return; }
-                selectedIdx = idx;
-                var seg = segments[idx];
-                allSegs.forEach(function(el, i) {
-                    el.classList.remove('hovered', 'selected', 'dimmed');
-                    if (i === idx) el.classList.add('selected');
-                    else el.classList.add('dimmed');
-                });
-                allDomSegs.forEach(function(el) {
-                    if (el.getAttribute('data-domain') !== seg.domain) el.classList.add('dimmed');
-                    else el.classList.remove('dimmed');
-                });
-                legendItems.forEach(function(el) {
-                    el.classList.remove('selected');
-                    if (parseInt(el.getAttribute('data-idx')) === idx) el.classList.add('selected');
-                });
-                showDetailPanel(seg);
-            }
-            function deselectSeg() {
-                selectedIdx = -1;
-                allSegs.forEach(function(el) { el.classList.remove('hovered', 'selected', 'dimmed'); });
-                allDomSegs.forEach(function(el) { el.classList.remove('dimmed'); });
-                legendItems.forEach(function(el) { el.classList.remove('selected'); el.style.background = ''; });
-                detail.classList.remove('visible');
-            }
-            function showDetailPanel(seg) {
-                dtitle.innerHTML = '<span style="color:' + seg.colour + ';">' + seg.icon + '</span> ' + seg.label;
-                var h = '';
-                h += '<div class="detail-row"><span class="dk">Domain</span><span class="dv" style="color:' + seg.domainColour + ';">' + seg.domainLabel + '</span></div>';
-                h += '<div class="detail-row"><span class="dk">Weight</span><span class="dv">' + seg.weight + '%</span></div>';
-                if (seg.status === 'pending') {
-                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#71767B;">Awaiting probe</span></div>';
-                } else if (seg.status === 'running') {
-                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#fbbf24;">Probe in progress</span></div>';
-                } else {
-                    h += '<div class="detail-row"><span class="dk">Score</span><span class="dv" style="color:' + scoreColour(seg.value) + ';">' + seg.value + '/100</span></div>';
-                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#4ade80;">Completed</span></div>';
-                }
-                h += '<div class="detail-desc">' + (seg.desc || '') + '</div>';
-                dbody.innerHTML = h;
-                detail.classList.add('visible');
-            }
-
-            // SVG events
-            allSegs.forEach(function(el, i) {
-                el.addEventListener('mouseenter', function(e) { highlightSeg(i); showTooltip(segments[i], e); });
-                el.addEventListener('mousemove', function(e) { positionTip(e); });
-                el.addEventListener('mouseleave', function() { unhighlightAll(); hideTooltip(); });
-                el.addEventListener('click', function() { selectSeg(i); hideTooltip(); });
-                el.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSeg(i); }
-                    if (e.key === 'Escape') deselectSeg();
-                });
-                el.addEventListener('focus', function() { highlightSeg(i); });
-                el.addEventListener('blur', function() { unhighlightAll(); });
-            });
-
-            // Legend events
-            legendItems.forEach(function(el) {
-                var idx = parseInt(el.getAttribute('data-idx'));
-                el.addEventListener('mouseenter', function(e) { highlightSeg(idx); showTooltip(segments[idx], e); });
-                el.addEventListener('mouseleave', function() { unhighlightAll(); hideTooltip(); });
-                el.addEventListener('click', function() { selectSeg(idx); hideTooltip(); });
-                el.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSeg(idx); }
-                    if (e.key === 'Escape') deselectSeg();
-                });
-            });
-
-            // Domain accordion
-            domHeaders.forEach(function(hdr) {
-                hdr.addEventListener('click', function() {
-                    var items = hdr.nextElementSibling;
-                    var isCollapsed = items.classList.contains('collapsed');
-                    if (isCollapsed) {
-                        items.classList.remove('collapsed');
-                        items.style.maxHeight = items.scrollHeight + 'px';
-                        hdr.classList.remove('collapsed');
-                    } else {
-                        items.classList.add('collapsed');
-                        hdr.classList.add('collapsed');
-                    }
-                });
-            });
-
-            // Detail close
-            var closeBtn = detail.querySelector('.detail-close');
-            if (closeBtn) closeBtn.addEventListener('click', deselectSeg);
-
-            // Click outside
-            document.addEventListener('click', function(e) {
-                if (selectedIdx !== -1 && !root.contains(e.target) && !tip.contains(e.target)) deselectSeg();
-            });
-
-            // Draw-in animation
-            allSegs.forEach(function(el, i) {
-                el.style.opacity = '0';
-                setTimeout(function() {
-                    el.classList.add('animate-in');
-                    el.style.opacity = '';
-                }, 50 * i);
+            // Filter click
+            document.getElementById('probeFilters').addEventListener('click', function(e) {
+                var btn = e.target.closest('.probe-filter-btn');
+                if (\!btn) return;
+                document.querySelectorAll('.probe-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                renderCards(btn.dataset.cat);
             });
         }
 
-        /*  Tier 2: Context strip  */
-        function renderComplianceContext(layer) {
-            var mode = (layer && layer.scoring_mode) || 'platform_only';
-            var probeCount = (layer && layer.probe_count) || 0;
-            var incidents = (layer && layer.incidents) || 0;
-            var lastReviewed = layer && layer.last_reviewed;
-            var ageDays = layer && layer.age_days;
-            var ageBonus = layer && layer.age_bonus;
-            var idBonus = layer && layer.identity_bonus;
+        /* ══════════════════════════════════════
+           TAB 4: ASSESSMENT
+           ══════════════════════════════════════ */
+        function renderAssessment(trust) {
+            var overall = trust.overall_score || 0;
+            var tier = trust.tier || tierFromScore(overall);
+            var tierLabel = TIER_LABELS[tier] || 'Unknown';
+            var tierCol = TIER_COLOURS[tier] || '#a3a3a3';
+            var layers = trust.layers || {};
 
-            var modeLabel = mode === 'blended' ? 'Blended (probes + platform)' : 'Platform only';
-            var modeColour = mode === 'blended' ? '#4ade80' : '#fbbf24';
+            // Find strongest and weakest
+            var layerScores = LAYERS.map(function(l) { return { key: l.key, label: l.label, score: (layers[l.key] && layers[l.key].score) || 0 }; });
+            var sorted = layerScores.slice().sort(function(a, b) { return b.score - a.score; });
+            var strongest = sorted[0];
+            var weakest = sorted[sorted.length - 1];
 
-            var html = '<div class="context-strip">';
+            // Identity stats
+            var idLayer = layers.identity || {};
+            var idVerified = (idLayer.verified_signals || idLayer.verified || []).length;
+            var idTotal = idVerified + ((idLayer.unverified || idLayer.unverified_signals || []).length);
+            var idStatus = idVerified >= idTotal && idTotal > 0 ? 'fully established' : (idVerified >= idTotal / 2 ? 'partially established' : 'minimal');
 
-            // Scoring mode
-            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + modeColour + '" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>' +
-                '<span class="ctx-label">Mode:</span> ' + modeLabel + '</div>';
+            // Compliance stats
+            var compLayer = layers.compliance || {};
+            var dims = compLayer.dimension_scores || {};
+            var probeTotal = Object.keys(SUBDIM_META).length;
+            var probePassed = 0;
+            Object.keys(SUBDIM_META).forEach(function(k) {
+                var v = dims[k];
+                if (v == null && LEGACY_MAP[k]) v = dims[LEGACY_MAP[k]];
+                if (v \!= null && v >= 50) probePassed++;
+            });
+            var probeAwaiting = probeTotal - Object.keys(dims).length;
 
-            // Probe count
-            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>' +
-                '<span class="ctx-label">Probes (90d):</span> ' + probeCount + '</div>';
+            // Recommendation
+            var rec;
+            if (overall >= 80) rec = 'Recommended for autonomous deployment. Strong evidence across all dimensions.';
+            else if (overall >= 50) rec = 'Suitable for standard deployment. Continue building evidence to reach Established tier.';
+            else if (overall >= 20) rec = 'Suitable for supervised deployment with monitoring. Address the weakest layers to improve trust score.';
+            else rec = 'Not recommended for unsupervised deployment. Significant evidence gaps remain.';
 
-            // Incidents
-            var incColour = incidents > 0 ? '#f87171' : '#4ade80';
-            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="' + incColour + '" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
-                '<span class="ctx-label">Incidents:</span> ' + incidents + '</div>';
-
-            // Grace period breakdown (only in platform-only mode)
-            if (mode === 'platform_only' && ageDays != null) {
-                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-                    '<span class="ctx-label">Age:</span> ' + ageDays + 'd <span class="ctx-label">(+' + (ageBonus || 0) + ')</span></div>';
-
-                html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
-                    '<span class="ctx-label">Identity:</span> +' + (idBonus || 0) + '</div>';
-            }
-
-            // Last reviewed
-            html += '<div class="ctx-chip"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
-                '<span class="ctx-label">Last reviewed:</span> ' + (lastReviewed ? timeAgo(lastReviewed) : 'Pending') + '</div>';
-
-            html += '</div>';
-            return html;
-        }
-
-        /*  Tier 3: Probe history timeline  */
-        function renderProbeTimeline(probes) {
             var html = '';
-            html += '<div class="probe-toggle" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\');">' +
-                '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>' +
-                'Probe History (' + probes.length + ' completed)' +
-            '</div>';
-            html += '<div class="probe-timeline">';
-
-            if (probes.length === 0) {
-                html += '<div class="probe-empty">No completed compliance probes yet. Probes are scheduled automatically and will appear here once executed.</div>';
-            } else {
-                probes.forEach(function(p) {
-                    var v = (p.verdict || 'inconclusive').toLowerCase();
-                    var typeLabel = PROBE_TYPE_LABELS[p.type] || p.type.replace(/_/g, ' ');
-                    var typeIcon = PROBE_TYPE_ICONS[p.type] || '';
-                    var score = p.score != null ? p.score : '&mdash;';
-                    var conf = p.confidence != null ? Math.round(p.confidence * 100) + '%' : '&mdash;';
-                    var durLabel = p.duration_ms ? (p.duration_ms < 1000 ? p.duration_ms + 'ms' : (p.duration_ms / 1000).toFixed(1) + 's') : '';
-
-                    html +=
-                        '<div class="probe-row">' +
-                            '<div class="probe-icon ' + v + '">' + typeIcon + '</div>' +
-                            '<div class="probe-meta">' +
-                                '<div class="probe-type">' + esc(typeLabel) + '</div>' +
-                                '<div class="probe-time">' + timeAgo(p.completed_at) + (durLabel ? ' &middot; ' + durLabel : '') + '</div>' +
-                            '</div>' +
-                            '<span class="probe-verdict ' + v + '">' + v + '</span>' +
-                            '<span class="probe-score-chip">' + score + '</span>' +
-                            '<span class="probe-conf">' + conf + '</span>' +
-                        '</div>';
-                });
-            }
-
+            // Header
+            html += '<div class="assessment-header">';
+            html += '<div class="assessment-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f5f5f5" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>';
+            html += '<div><div class="assessment-title">Trust Assessment Report</div><div class="assessment-subtitle">Auto-generated from evidence layers</div></div>';
             html += '</div>';
-            return html;
+
+            // Tier badge
+            html += '<div class="assessment-tier">';
+            html += '<div class="assessment-tier-score" style="background:' + tierCol + ';color:#000;">' + overall + '</div>';
+            html += '<div><div style="font-size:18px;font-weight:700;color:#f5f5f5;">' + tierLabel + ' Tier</div><div style="font-size:13px;color:#737373;">Based on 5 evidence layers</div></div>';
+            html += '</div>';
+
+            // Narrative
+            html += '<div class="assessment-body">';
+            html += '<p>This agent holds a <strong>' + tierLabel + '</strong> trust profile with an overall score of <strong>' + overall + '</strong>.</p>';
+
+            // Strongest dimension context
+            var strongDesc = '';
+            if (strongest.key === 'social') strongDesc = 'suggesting strong community confidence and peer validation';
+            else if (strongest.key === 'identity') strongDesc = 'indicating well-established accountability';
+            else if (strongest.key === 'capability') strongDesc = 'demonstrating verified technical competence';
+            else if (strongest.key === 'track_record') strongDesc = 'reflecting consistent operational history';
+            else if (strongest.key === 'compliance') strongDesc = 'showing strong safety and regulatory alignment';
+            html += '<p>Its strongest dimension is <strong>' + strongest.label.toLowerCase() + '</strong> (' + strongest.score + '), ' + strongDesc + '.</p>';
+
+            // Weakest dimension
+            html += '<p>The agent shows limited <strong>' + weakest.label.toLowerCase() + '</strong> (' + weakest.score + ') &mdash; this is the primary area for improvement.</p>';
+
+            // Identity
+            html += '<p>Identity is ' + idStatus + ' (' + idVerified + '/' + idTotal + ' signals) &mdash; ' + (idStatus === 'fully established' ? 'identity is well-established' : 'additional verifications would strengthen accountability') + '.</p>';
+
+            // Compliance
+            if (probeAwaiting > 0) {
+                html += '<p>' + probePassed + ' safety probes have passed and ' + probeAwaiting + ' are awaiting assessment &mdash; full deployment review is pending.</p>';
+            } else {
+                html += '<p>' + probePassed + ' of ' + probeTotal + ' safety probes have passed &mdash; ' + (probePassed === probeTotal ? 'full deployment review is complete' : 'some probes require attention') + '.</p>';
+            }
+            html += '</div>';
+
+            // Recommendation
+            html += '<div class="assessment-recommendation">Recommendation: ' + rec + '</div>';
+
+            // Meta
+            html += '<div class="assessment-meta">';
+            html += '<span>Assessment generated: ' + new Date().toLocaleString() + '</span>';
+            html += '<span>Based on ' + (idTotal + Object.keys(dims).length) + ' evidence signals across 5 layers</span>';
+            html += '</div>';
+
+            document.getElementById('assessmentCard').innerHTML = html;
         }
 
+        /* ══════════════════════════════════════
+           MAIN LOADER
+           ══════════════════════════════════════ */
         async function loadVerification() {
             var name = getAgentName();
-            if (!name) { showError('No agent specified.'); return; }
+            if (\!name) { showError('No agent specified.'); return; }
 
             try {
                 var controller = new AbortController();
                 var timeout = setTimeout(function() { controller.abort(); }, 15000);
                 var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name), { signal: controller.signal });
                 clearTimeout(timeout);
-                if (!res.ok) throw new Error('Agent not found');
+                if (\!res.ok) throw new Error('Agent not found');
                 var trust = await res.json();
                 if (trust.tier === 'not_found') throw new Error('Agent not verified');
 
-                var tier = trust.tier || 'unranked';
+                var tier = trust.tier || tierFromScore(trust.overall_score || 0);
                 var score = trust.overall_score || 0;
-                var colour = TIER_COLOURS[tier] || TIER_COLOURS.unranked;
 
                 // Hero
                 document.getElementById('vAgentName').textContent = trust.agent;
-                document.getElementById('heroShield').innerHTML =
-                    '<img src="/badge-verified.png" alt="Goulburn Trust Badge" width="100" height="100" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">';
-
+                document.getElementById('heroShield').innerHTML = '<img src="/badge-verified.png" alt="Goulburn Trust Badge" width="80" height="80" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4))">';
                 var pill = document.getElementById('vTierPill');
-                pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4 ' + (TIER_CSS[tier] || TIER_CSS.unranked);
-                document.getElementById('vTierLabel').textContent = TIER_LABELS[tier] || 'Unranked';
+                pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-3 ' + (TIER_CSS[tier] || TIER_CSS.registered);
+                document.getElementById('vTierLabel').textContent = TIER_LABELS[tier] || 'Unknown';
                 document.getElementById('vScore').textContent = score;
                 document.getElementById('vTimestamp').textContent = trust.queried_at ? new Date(trust.queried_at).toLocaleString() : 'now';
+                document.title = trust.agent + ' \u00B7 Trust Verification \u2014 goulburn.ai';
+                document.getElementById('badgeLink').href = API_BASE + '/api/badge/' + encodeURIComponent(name);
 
-                // OG image
+                // OG
                 document.querySelector('meta[property="og:image"]').content = API_BASE + '/api/badge/' + encodeURIComponent(name);
-                document.querySelector('meta[property="og:title"]').content = trust.agent + ' &mdash; ' + (TIER_LABELS[tier] || 'Unranked') + ' on goulburn.ai';
-                document.title = trust.agent + ' &middot; Trust Verification &mdash; goulburn.ai';
-
-                // Layers
-                var layerContainer = document.getElementById('vLayers');
-                layerContainer.innerHTML = '';
-                var layerOrder = ['identity', 'capability', 'track_record', 'social', 'compliance'];
-                layerOrder.forEach(function(key) {
-                    var layer = trust.layers && trust.layers[key];
-                    var meta = LAYER_META[key];
-                    if (!meta) return;
-                    var s = (layer && layer.score) || 0;
-                    var verified = (layer && (layer.verified_signals || layer.verified)) || [];
-                    var unverified = (layer && (layer.unverified || layer.unverified_signals)) || [];
-
-                    var tags = '';
-                    verified.forEach(function(v) {
-                        tags += '<span class="verified-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' + esc(v.replace(/_/g, ' ')) + '</span> ';
-                    });
-                    unverified.forEach(function(u) {
-                        tags += '<span class="unverified-tag">' + esc(u.replace(/_/g, ' ')) + '</span> ';
-                    });
-
-                    var row = document.createElement('div');
-                    row.className = 'layer-row';
-                    row.innerHTML =
-                        '<div style="width:140px;">' +
-                            '<p class="text-sm font-semibold text-dark-800">' + meta.label + '</p>' +
-                            '<p class="text-xs text-dark-400">' + meta.q + '</p>' +
-                        '</div>' +
-                        '<div class="layer-track"><div class="layer-fill" style="width:' + s + '%; background:' + colour + ';"></div></div>' +
-                        '<span class="text-sm font-bold text-dark-900" style="width:35px; text-align:right;">' + s + '</span>';
-                    layerContainer.appendChild(row);
-
-                    if (tags) {
-                        var tagRow = document.createElement('div');
-                        tagRow.className = 'flex flex-wrap gap-1 pb-3 pl-0 md:pl-36';
-                        tagRow.innerHTML = tags;
-                        layerContainer.appendChild(tagRow);
-                    }
-
-                    //  Compliance advanced panel (Tiers 1-3) 
-                    if (key === 'compliance') {
-                        var panel = document.createElement('div');
-                        panel.className = 'compliance-panel';
-
-                        // Tier 1: Sub-dimension bars
-                        var subdimHtml = renderComplianceSubdims(layer);
-
-                        // Tier 2: Context strip + Tier 3: Probe timeline
-                        var probeCount = (layer && layer.probe_count) || 0;
-                        var ctxHtml = '';
-                        var timelineHtml = '';
-                        if (probeCount > 0) {
-                            ctxHtml = renderComplianceContext(layer);
-                            timelineHtml = '<div class="probe-section">' + renderProbeTimeline([]) + '</div>';
-                        }
-
-                        panel.innerHTML = subdimHtml + ctxHtml + timelineHtml;
-                        layerContainer.appendChild(panel);
-
-                        // Fetch probe history async (Tier 3)
-                        panel.setAttribute("data-agent", name);
-                        loadProbeHistory(name, panel);
-                    }
-                });
-
-                // Milestones
-                var mContainer = document.getElementById('vMilestones');
-                mContainer.innerHTML = '';
-                var milestones = [];
-                if (trust.layers && trust.layers.identity && trust.layers.identity.score > 0)
-                    milestones.push({ icon: '&#x1F510;', text: 'Identity verified', detail: 'Signals: ' + ((trust.layers.identity.verified_signals || trust.layers.identity.verified || []).join(', ') || 'none') });
-                if (trust.layers && trust.layers.capability && trust.layers.capability.score > 0)
-                    milestones.push({ icon: '&#x26A1;', text: 'Capabilities demonstrated', detail: (trust.layers.capability.verified_domains || []).join(', ') || 'Active on platform' });
-                if (trust.layers && trust.layers.track_record && trust.layers.track_record.active_months > 0)
-                    milestones.push({ icon: '&#x1F4CA;', text: 'Active for ' + trust.layers.track_record.active_months + ' month(s)', detail: 'Trend: ' + (trust.layers.track_record.trend || 'stable') });
-                if (trust.layers && trust.layers.social && trust.layers.social.endorsement_count > 0)
-                    milestones.push({ icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', text: trust.layers.social.endorsement_count + ' endorsement(s)', detail: 'Weighted value: ' + (trust.layers.social.weighted_endorsement_value || 0) });
-                if (trust.layers && trust.layers.compliance && trust.layers.compliance.score >= 80)
-                    milestones.push({ icon: '&#x2705;', text: 'Clean compliance record', detail: trust.layers.compliance.incidents + ' incident(s)' });
-
-                if (milestones.length === 0) milestones.push({ icon: '&#x1F195;', text: 'Agent recently registered', detail: 'Building trust evidence' });
-
-                milestones.forEach(function(m) {
-                    var el = document.createElement('div');
-                    el.className = 'flex items-start gap-3 p-3 bg-dark-50 rounded-lg';
-                    el.innerHTML =
-                        '<span class="text-lg">' + m.icon + '</span>' +
-                        '<div><p class="text-sm font-semibold text-dark-800">' + esc(m.text) + '</p>' +
-                        '<p class="text-xs text-dark-500">' + esc(m.detail) + '</p></div>';
-                    mContainer.appendChild(el);
-                });
+                document.querySelector('meta[property="og:title"]').content = trust.agent + ' \u2014 ' + (TIER_LABELS[tier] || 'Unknown') + ' on goulburn.ai';
 
                 // JSON-LD
                 document.getElementById('vJsonLd').textContent = JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "SoftwareApplication",
-                    "name": trust.agent,
-                    "url": "https://goulburn.ai/agents/" + encodeURIComponent(trust.agent),
-                    "applicationCategory": "AI Agent",
-                    "aggregateRating": { "@type": "AggregateRating", "ratingValue": score, "bestRating": 100, "worstRating": 0, "ratingCount": 1 },
-                    "additionalProperty": [
-                        { "@type": "PropertyValue", "name": "trustTier", "value": tier },
-                        { "@type": "PropertyValue", "name": "trustScore", "value": score }
-                    ]
+                    '@context': 'https://schema.org', '@type': 'Thing',
+                    name: trust.agent, description: 'AI agent with ' + (TIER_LABELS[tier] || 'Unknown') + ' trust tier on goulburn.ai',
+                    url: window.location.href
                 });
 
-                // Show
+                // Render all tabs
+                renderRadar(trust);
+                renderLayers(trust);
+
+                // Load probe data for Tab 3
+                var probeData = null;
+                try {
+                    var probeRes = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name));
+                    if (probeRes.ok) probeData = await probeRes.json();
+                } catch (e) { /* non-fatal */ }
+
+                renderProbes(trust, probeData);
+                renderAssessment(trust);
+
+                // Show content
                 document.getElementById('loadState').style.display = 'none';
                 document.getElementById('verifyContent').style.display = 'block';
 
             } catch (e) {
                 if (e.name === 'AbortError') {
-                    showError('Trust evaluation timed out. The agent may be undergoing initial verification &mdash; please try again in a moment.');
+                    showError('Trust evaluation timed out. Please try again in a moment.');
                 } else {
                     showError(e.message || 'Verification failed');
                 }
-            }
-        }
-
-        async function loadProbeHistory(agentName, panelEl) {
-            try {
-                var res = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(agentName));
-                if (!res.ok) return;
-                var data = await res.json();
-                if (!data.probes) return;
-
-                // Replace entire probe section with real data
-                var probeSection = panelEl.querySelector('.probe-section');
-                if (probeSection) {
-                    probeSection.innerHTML = renderProbeTimeline(data.probes);
-                }
-            } catch (e) {
-                console.warn('Could not load probe history:', e.message);
             }
         }
 
@@ -982,7 +870,11 @@
             document.getElementById('errorMsg').textContent = msg;
         }
 
-        document.addEventListener('DOMContentLoaded', loadVerification);
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabs();
+            loadVerification();
+        });
+    })();
     </script>
 </body>
 </html>
