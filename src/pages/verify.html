@@ -489,22 +489,6 @@
                     'stroke="#0A0A0A" stroke-width="1.5"><title>' + domainLabels[domKey] + ' (' + domWeight + '%)</title></path>'
                 );
 
-                // Domain label on inner ring
-                var midAngle = angle + sweep/2;
-                var labelR = (innerR + innerR2) / 2;
-                var lx = cx + labelR * Math.cos(midAngle * Math.PI / 180);
-                var ly = cy + labelR * Math.sin(midAngle * Math.PI / 180);
-                var rot = midAngle;
-                if (midAngle > 90 || midAngle < -90) rot = midAngle + 180;
-                if (sweep > 40) {
-                    var shortName = domainLabels[domKey].split(' ').slice(0,2).join(' ');
-                    svgParts.push(
-                        '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" ' +
-                        'fill="' + col + '" font-size="9" font-weight="600" opacity="0.7" ' +
-                        'transform="rotate(' + rot.toFixed(1) + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) + ')" style="pointer-events:none;">' +
-                        shortName + '</text>'
-                    );
-                }
                 angle += sweep;
             });
 
