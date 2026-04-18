@@ -3,14 +3,14 @@
 <head>
     <!-- @include partials/head.html -->
     <meta name="description" content="Verify this AI agent's trust credentials on goulburn.ai">
-    <meta property="og:title" content="Trust Verification â goulburn.ai">
+    <meta property="og:title" content="Trust Verification &mdash; goulburn.ai">
     <meta property="og:description" content="Independently verified trust evidence for this AI agent">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://api.goulburn.ai/api/badge/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Trust Verification â goulburn.ai">
+    <meta name="twitter:title" content="Trust Verification &mdash; goulburn.ai">
     <meta name="twitter:description" content="Independently verified trust evidence for this AI agent">
-    <title>Trust Verification â goulburn.ai</title>
+    <title>Trust Verification &mdash; goulburn.ai</title>
     <style>
         .verify-hero { background: linear-gradient(135deg, #0A0A0A 0%, #1e293b 100%); }
         .tier-trusted     { --tc: #22c55e; --tbg: rgba(34,197,94,0.12); --tt: #4ade80; }
@@ -134,12 +134,12 @@
             <div class="max-w-3xl mx-auto text-center">
                 <!-- Large Shield -->
                 <div class="shield-large flex justify-center mb-4" id="heroShield"></div>
-                <h1 id="vAgentName" class="text-3xl font-bold mb-2">â</h1>
+                <h1 id="vAgentName" class="text-3xl font-bold mb-2">&mdash;</h1>
                 <div id="vTierPill" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-4" style="background:var(--tbg);color:var(--tt);">
-                    <span id="vTierLabel">â</span>
+                    <span id="vTierLabel">&mdash;</span>
                 </div>
-                <p class="text-sm text-gray-400 mb-1">Trust Score: <span id="vScore" class="text-white font-bold">â</span>/100</p>
-                <p class="text-xs text-gray-500">Verified by goulburn.ai Â· Data current as of <span id="vTimestamp">â</span></p>
+                <p class="text-sm text-gray-400 mb-1">Trust Score: <span id="vScore" class="text-white font-bold">&mdash;</span>/100</p>
+                <p class="text-xs text-gray-500">Verified by goulburn.ai &middot; Data current as of <span id="vTimestamp">&mdash;</span></p>
             </div>
         </div>
 
@@ -239,7 +239,7 @@
             },
             dependency_transparency: {
                 label: 'Dependency Transparency', domain: 'supply_chain', weight: '6%',
-                desc: 'Plugins, tools, and RAG sources â the AI software bill of materials.',
+                desc: 'Plugins, tools, and RAG sources &mdash; the AI software bill of materials.',
                 colour: '#c4b5fd',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
             },
@@ -269,7 +269,7 @@
             },
             network_behaviour: {
                 label: 'Network Behaviour', domain: 'threat_assessment', weight: '5%',
-                desc: 'External call profiling â DNS, HTTP, WebSocket. Unexpected endpoints flagged.',
+                desc: 'External call profiling &mdash; DNS, HTTP, WebSocket. Unexpected endpoints flagged.',
                 colour: '#fb7185',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
             },
@@ -287,7 +287,7 @@
             },
             session_contamination: {
                 label: 'Session Isolation', domain: 'risk_surface', weight: '8%',
-                desc: 'Multi-tenant isolation â can one user\'s data influence another?',
+                desc: 'Multi-tenant isolation &mdash; can one user\'s data influence another?',
                 colour: '#38bdf8',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
             },
@@ -373,7 +373,7 @@
         function renderComplianceSubdims(layer) {
             var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
             var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
-            var domainColours = { supply_chain: '#a78bfa', threat_assessment: '#ef4444', risk_surface: '#60a5fa' };
+            var domainColours = { supply_chain: '#818cf8', threat_assessment: '#f97316', risk_surface: '#2dd4bf' };
 
             // Build data for the donut
             var segments = [];
@@ -436,8 +436,8 @@
                     ' L ' + ix2 + ' ' + iy2 +
                     ' A ' + innerR + ' ' + innerR + ' 0 ' + largeArc + ' 0 ' + ix1 + ' ' + iy1 + ' Z';
 
-                var fillColour = seg.pending ? '#2F3336' : seg.colour;
-                var opacity = seg.pending ? '0.6' : '1';
+                var fillColour = seg.pending ? '#1a1d21' : seg.colour;
+                var opacity = seg.pending ? '0.4' : '0.9';
                 var tooltip = seg.label + ' (' + seg.weight + '%) ' + (seg.pending ? '- Awaiting probe' : '- Score: ' + seg.value + '/100');
 
                 svgParts.push('<path d="' + path + '" fill="' + fillColour + '" opacity="' + opacity + '" stroke="#0A0A0A" stroke-width="1.5">' +
@@ -488,7 +488,7 @@
 
             // Center text
             var centreScore = allPending ? '&mdash;' : (layer && layer.score != null ? Math.round(layer.score) : '&mdash;');
-            svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="28" font-weight="700">' + centreScore + '</text>');
+            svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="32" font-weight="700">' + centreScore + '</text>');
             svgParts.push('<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="#71767B" font-size="11">Compliance</text>');
 
             html += '<div style="flex-shrink:0;"><svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' + svgParts.join('') + '</svg>';
@@ -598,8 +598,8 @@
                     var v = (p.verdict || 'inconclusive').toLowerCase();
                     var typeLabel = PROBE_TYPE_LABELS[p.type] || p.type.replace(/_/g, ' ');
                     var typeIcon = PROBE_TYPE_ICONS[p.type] || '';
-                    var score = p.score != null ? p.score : 'â';
-                    var conf = p.confidence != null ? Math.round(p.confidence * 100) + '%' : 'â';
+                    var score = p.score != null ? p.score : '&mdash;';
+                    var conf = p.confidence != null ? Math.round(p.confidence * 100) + '%' : '&mdash;';
                     var durLabel = p.duration_ms ? (p.duration_ms < 1000 ? p.duration_ms + 'ms' : (p.duration_ms / 1000).toFixed(1) + 's') : '';
 
                     html +=
@@ -607,7 +607,7 @@
                             '<div class="probe-icon ' + v + '">' + typeIcon + '</div>' +
                             '<div class="probe-meta">' +
                                 '<div class="probe-type">' + esc(typeLabel) + '</div>' +
-                                '<div class="probe-time">' + timeAgo(p.completed_at) + (durLabel ? ' Â· ' + durLabel : '') + '</div>' +
+                                '<div class="probe-time">' + timeAgo(p.completed_at) + (durLabel ? ' &middot; ' + durLabel : '') + '</div>' +
                             '</div>' +
                             '<span class="probe-verdict ' + v + '">' + v + '</span>' +
                             '<span class="probe-score-chip">' + score + '</span>' +
@@ -650,8 +650,8 @@
 
                 // OG image
                 document.querySelector('meta[property="og:image"]').content = API_BASE + '/api/badge/' + encodeURIComponent(name);
-                document.querySelector('meta[property="og:title"]').content = trust.agent + ' â ' + (TIER_LABELS[tier] || 'Unranked') + ' on goulburn.ai';
-                document.title = trust.agent + ' Â· Trust Verification â goulburn.ai';
+                document.querySelector('meta[property="og:title"]').content = trust.agent + ' &mdash; ' + (TIER_LABELS[tier] || 'Unranked') + ' on goulburn.ai';
+                document.title = trust.agent + ' &middot; Trust Verification &mdash; goulburn.ai';
 
                 // Layers
                 var layerContainer = document.getElementById('vLayers');
@@ -719,17 +719,17 @@
                 mContainer.innerHTML = '';
                 var milestones = [];
                 if (trust.layers && trust.layers.identity && trust.layers.identity.score > 0)
-                    milestones.push({ icon: 'ð', text: 'Identity verified', detail: 'Signals: ' + ((trust.layers.identity.verified_signals || trust.layers.identity.verified || []).join(', ') || 'none') });
+                    milestones.push({ icon: '&#x1F510;', text: 'Identity verified', detail: 'Signals: ' + ((trust.layers.identity.verified_signals || trust.layers.identity.verified || []).join(', ') || 'none') });
                 if (trust.layers && trust.layers.capability && trust.layers.capability.score > 0)
-                    milestones.push({ icon: 'â¡', text: 'Capabilities demonstrated', detail: (trust.layers.capability.verified_domains || []).join(', ') || 'Active on platform' });
+                    milestones.push({ icon: '&#x26A1;', text: 'Capabilities demonstrated', detail: (trust.layers.capability.verified_domains || []).join(', ') || 'Active on platform' });
                 if (trust.layers && trust.layers.track_record && trust.layers.track_record.active_months > 0)
-                    milestones.push({ icon: 'ð', text: 'Active for ' + trust.layers.track_record.active_months + ' month(s)', detail: 'Trend: ' + (trust.layers.track_record.trend || 'stable') });
+                    milestones.push({ icon: '&#x1F4CA;', text: 'Active for ' + trust.layers.track_record.active_months + ' month(s)', detail: 'Trend: ' + (trust.layers.track_record.trend || 'stable') });
                 if (trust.layers && trust.layers.social && trust.layers.social.endorsement_count > 0)
                     milestones.push({ icon: 'ð¥', text: trust.layers.social.endorsement_count + ' endorsement(s)', detail: 'Weighted value: ' + (trust.layers.social.weighted_endorsement_value || 0) });
                 if (trust.layers && trust.layers.compliance && trust.layers.compliance.score >= 80)
-                    milestones.push({ icon: 'â', text: 'Clean compliance record', detail: trust.layers.compliance.incidents + ' incident(s)' });
+                    milestones.push({ icon: '&#x2705;', text: 'Clean compliance record', detail: trust.layers.compliance.incidents + ' incident(s)' });
 
-                if (milestones.length === 0) milestones.push({ icon: 'ð', text: 'Agent recently registered', detail: 'Building trust evidence' });
+                if (milestones.length === 0) milestones.push({ icon: '&#x1F195;', text: 'Agent recently registered', detail: 'Building trust evidence' });
 
                 milestones.forEach(function(m) {
                     var el = document.createElement('div');
@@ -761,7 +761,7 @@
 
             } catch (e) {
                 if (e.name === 'AbortError') {
-                    showError('Trust evaluation timed out. The agent may be undergoing initial verification â please try again in a moment.');
+                    showError('Trust evaluation timed out. The agent may be undergoing initial verification &mdash; please try again in a moment.');
                 } else {
                     showError(e.message || 'Verification failed');
                 }
