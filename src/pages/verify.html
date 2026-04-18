@@ -24,6 +24,17 @@
         .radar-tooltip.show { opacity: 1; }
 
         /* ── Tabs ── */
+        
+        /* Content panel card */
+        .content-panel {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 40px 32px;
+        }
+        @media (max-width: 640px) {
+            .content-panel { padding: 24px 16px; border-radius: 12px; }
+        }
         .tab-bar { display: flex; gap: 4px; padding: 4px; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); overflow-x: auto; }
         .tab-btn {
             display: flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: 8px;
@@ -229,35 +240,43 @@
         <!-- ═══ Tab 1: Trust Seal ═══ -->
         <section id="panelSeal" class="tab-panel active px-6 py-10" role="tabpanel" aria-labelledby="tabSeal" style="background:#000;">
             <div class="max-w-4xl mx-auto">
-                <div class="radar-wrap" id="radarWrap">
+                <div class="content-panel">
+                    <div class="radar-wrap" id="radarWrap">
                     <div class="radar-tooltip" id="radarTooltip"></div>
                 </div>
                 <div class="score-cards" id="scoreCards"></div>
                 <div class="legend-row" id="legendRow"></div>
+                </div>
             </div>
         </section>
 
         <!-- ═══ Tab 2: Evidence Layers ═══ -->
         <section id="panelLayers" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabLayers" style="background:#000;">
             <div class="max-w-4xl mx-auto">
-                <div class="layer-accordion" id="layerAccordion"></div>
+                <div class="content-panel">
+                    <div class="layer-accordion" id="layerAccordion"></div>
+                </div>
             </div>
         </section>
 
         <!-- ═══ Tab 3: Compliance Probes ═══ -->
         <section id="panelProbes" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabProbes" style="background:#000;">
             <div class="max-w-4xl mx-auto">
+                <div class="content-panel">
                 <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Compliance &amp; Safety Probes</h2>
                 <p class="text-sm text-dark-500 mb-6" id="probeSubtitle"></p>
                 <div class="probe-filters" id="probeFilters" role="group" aria-label="Filter probes by category"></div>
                 <div class="probe-grid" id="probeGrid" role="list" aria-label="Compliance probe results"></div>
+                </div>
             </div>
         </section>
 
         <!-- ═══ Tab 4: Assessment ═══ -->
         <section id="panelAssess" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabAssess" style="background:#000;">
             <div class="max-w-4xl mx-auto">
-                <div class="assessment-card" id="assessmentCard"></div>
+                <div class="content-panel">
+                    <div class="assessment-card" id="assessmentCard"></div>
+                </div>
             </div>
         </section>
 
