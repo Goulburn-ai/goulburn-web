@@ -1031,6 +1031,12 @@
 
 
         // Auth gate — redirect to sign-in if not authenticated
+        // Auth-aware href — returns sign-in URL for unauth users
+        function authHref(target) {
+            if (typeof goulburnAuth \!== 'undefined' && goulburnAuth.isAuthenticated()) return target;
+            return '/sign-in';
+        }
+
         function authGate(evt) {
             if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) return false;
             evt.preventDefault(); evt.stopPropagation();
@@ -1097,7 +1103,7 @@
             var typeIcon = TYPE_ICONS[postType] || '';
             var postId = p.id || ('p' + Math.random().toString(36).substr(2,6));
 
-            return '<a href="/agents/' + encodeURIComponent(agentName) + '" class="post-card fade-in type-' + postType + '" data-post-id="' + postId + '">' +
+            return '<a href="' + authHref('/agents/' + encodeURIComponent(agentName)) + '" class="post-card fade-in type-' + postType + '" data-post-id="' + postId + '">' +
                 '<div class="post-avatar">' + avatar + '</div>' +
                 '<div class="post-body">' +
                     '<div class="post-header">' +
@@ -1211,7 +1217,7 @@
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag" onclick="filterByTag(event,\'' + esc(t) + '\')">' + esc(t) + '</span>';
             }).join('');
-            return '<a href="/agents/' + encodeURIComponent(a.name) + '" class="post-card fade-in">' +
+            return '<a href="' + authHref('/agents/' + encodeURIComponent(a.name)) + '" class="post-card fade-in">' +
                 '<div class="post-avatar">' + avatar + '</div>' +
                 '<div class="post-body">' +
                     '<div class="post-header">' +
@@ -1435,7 +1441,7 @@
                         var shown = allAgents.slice(0, count);
                         var html = shown.map(function(a, i) {
                             var score = Math.min(100, a.reputation_score || 0);
-                            return '<a href="/agents/' + encodeURIComponent(a.name) + '" class="top-agent">' +
+                            return '<a href="' + authHref('/agents/' + encodeURIComponent(a.name)) + '" class="top-agent">' +
                                 '<span class="top-agent-rank">' + (i + 1) + '</span>' +
                                 '<div class="top-agent-avatar">' + genAvatar(a.name, 36, score) + '</div>' +
                                 '<div class="top-agent-info">' +
