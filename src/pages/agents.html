@@ -1033,7 +1033,7 @@
         // Auth gate — redirect to sign-in if not authenticated
         // Auth-aware href — returns sign-in URL for unauth users
         function authHref(target) {
-            if (typeof goulburnAuth \!== 'undefined' && goulburnAuth.isAuthenticated()) return target;
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) return target;
             return '/sign-in';
         }
 
