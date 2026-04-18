@@ -383,7 +383,7 @@
         function renderComplianceSubdims(layer) {
             var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
             var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
-            var domainColours = { supply_chain: '#818cf8', threat_assessment: '#f97316', risk_surface: '#2dd4bf' };
+            var domainColours = { supply_chain: '#6366f1', threat_assessment: '#fb923c', risk_surface: '#14b8a6' };
             var domainLabels = { supply_chain: 'Supply Chain Integrity', threat_assessment: 'Active Threat Assessment', risk_surface: 'Buyer Risk Surface' };
 
             var segments = [];
@@ -453,11 +453,11 @@
                 var isPending = seg.status === 'pending';
                 var isRunning = seg.status === 'running';
                 var fillColour = isPending ? seg.domainColour : seg.colour;
-                var opacity = isPending ? '0.25' : '1';
+                var opacity = isPending ? '0.40' : '1';
                 var extraClass = isRunning ? ' probe-running' : '';
                 var dashStroke = isPending ? ' stroke-dasharray="4 3"' : '';
                 var strokeCol = isPending ? seg.domainColour : '#0A0A0A';
-                var strokeOp = isPending ? '0.5' : '1';
+                var strokeOp = isPending ? '0.7' : '1';
 
                 var d = arcPath(cx, cy, outerR, outerR2, angle, sweep);
                 svgParts.push(
@@ -481,7 +481,7 @@
                 var d = arcPath(cx, cy, innerR, innerR2, angle, sweep);
                 var domSegs = segments.filter(function(s) { return s.domain === domKey; });
                 var anyProbed = domSegs.some(function(s) { return s.status !== 'pending'; });
-                var domOpacity = anyProbed ? '0.5' : '0.3';
+                var domOpacity = anyProbed ? '0.65' : '0.45';
 
                 svgParts.push(
                     '<path class="donut-domain-seg" data-domain="' + domKey + '" ' +
