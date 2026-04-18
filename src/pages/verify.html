@@ -30,7 +30,7 @@
         .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
 
-        /* ââ Compliance Advanced Display ââââââââââââââââââââââââââ */
+        /*  Compliance Advanced Display  */
         .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
 
         /* Tier 1: Sub-dimension bars */
@@ -211,7 +211,7 @@
             compliance:   { label: 'Compliance & Safety',      q: 'Is this agent safe to deploy?' }
         };
 
-        /* ââ 12-Dimension Trust Assessment Metadata ââââââââââââââââââ */
+        /*  12-Dimension Trust Assessment Metadata  */
         var DIMENSION_DOMAINS = {
             supply_chain: {
                 label: 'Supply Chain Integrity',
@@ -305,7 +305,7 @@
             },
         };
 
-        /* Backward-compat mapping: old 4 keys â new 12 keys */
+        /* Backward-compat mapping: old 4 keys  new 12 keys */
         var LEGACY_DIM_MAP = {
             model_transparency: 'model_provenance',
             data_isolation: 'data_exfiltration_resistance',
@@ -369,7 +369,7 @@
             return Math.floor(diff / 86400) + 'd ago';
         }
 
-        /* ââ Tier 1: Sub-dimension mini-bars ââââââââââââââââââââââââ */
+        /*  Tier 1: Sub-dimension mini-bars  */
         function renderComplianceSubdims(layer) {
             var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
             var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
@@ -537,7 +537,7 @@
             return html;
         }
 
-/* ââ Tier 2: Context strip ââââââââââââââââââââââââââââââââââ */
+/*  Tier 2: Context strip  */
         function renderComplianceContext(layer) {
             var mode = (layer && layer.scoring_mode) || 'platform_only';
             var probeCount = (layer && layer.probe_count) || 0;
@@ -582,7 +582,7 @@
             return html;
         }
 
-        /* ââ Tier 3: Probe history timeline âââââââââââââââââââââââââ */
+        /*  Tier 3: Probe history timeline  */
         function renderProbeTimeline(probes) {
             var html = '';
             html += '<div class="probe-toggle" onclick="this.classList.toggle(\'open\');this.nextElementSibling.classList.toggle(\'open\');">' +
@@ -691,7 +691,7 @@
                         layerContainer.appendChild(tagRow);
                     }
 
-                    // ââ Compliance advanced panel (Tiers 1-3) ââ
+                    //  Compliance advanced panel (Tiers 1-3) 
                     if (key === 'compliance') {
                         var panel = document.createElement('div');
                         panel.className = 'compliance-panel';
@@ -725,7 +725,7 @@
                 if (trust.layers && trust.layers.track_record && trust.layers.track_record.active_months > 0)
                     milestones.push({ icon: '&#x1F4CA;', text: 'Active for ' + trust.layers.track_record.active_months + ' month(s)', detail: 'Trend: ' + (trust.layers.track_record.trend || 'stable') });
                 if (trust.layers && trust.layers.social && trust.layers.social.endorsement_count > 0)
-                    milestones.push({ icon: 'ð¥', text: trust.layers.social.endorsement_count + ' endorsement(s)', detail: 'Weighted value: ' + (trust.layers.social.weighted_endorsement_value || 0) });
+                    milestones.push({ icon: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>', text: trust.layers.social.endorsement_count + ' endorsement(s)', detail: 'Weighted value: ' + (trust.layers.social.weighted_endorsement_value || 0) });
                 if (trust.layers && trust.layers.compliance && trust.layers.compliance.score >= 80)
                     milestones.push({ icon: '&#x2705;', text: 'Clean compliance record', detail: trust.layers.compliance.incidents + ' incident(s)' });
 
