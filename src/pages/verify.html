@@ -30,87 +30,97 @@
         .seal { border: 2px solid #2F3336; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; }
         #loadState { display: flex; } #errorState { display: none; } #verifyContent { display: none; }
 
-        /*  Compliance Advanced Display  */
+        /* === Compliance Donut Production === */
         .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
-
-        /* Tier 1: Sub-dimension bars */
-        .subdim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-        @media (max-width: 640px) { .subdim-grid { grid-template-columns: 1fr; } }
-        .subdim-card {
-            background: #16181C; border-radius: 10px; padding: 14px 16px;
-            border: 1px solid #2F3336; transition: border-color 0.2s;
+        .donut-layout {
+            display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
         }
-        .subdim-card:hover { border-color: #71767B; }
-        .subdim-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .subdim-label { font-size: 12px; font-weight: 600; color: #E7E9EA; display: flex; align-items: center; gap: 6px; }
-        .subdim-score { font-size: 14px; font-weight: 700; }
-        .subdim-weight { font-size: 10px; color: #71767B; font-weight: 400; }
-        .subdim-track { height: 8px; border-radius: 4px; background: #2F3336; overflow: hidden; }
-        .subdim-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
-        .subdim-fill.pending {
-            width: 100% !important;
-            background: linear-gradient(90deg, transparent 0%, #2F3336 50%, transparent 100%) !important;
-            background-size: 200% 100%;
-            animation: subdim-shimmer 2s ease-in-out infinite;
-            opacity: 0.5;
+        @media (max-width: 767px) {
+            .donut-layout { flex-direction: column; align-items: center; gap: 20px; }
         }
-        .subdim-fill.active {
-            box-shadow: 0 0 6px rgba(255,255,255,0.08);
+        .donut-wrap {
+            flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center;
         }
-        @keyframes subdim-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .subdim-pending-label { font-size: 10px; color: #71767B; font-style: italic; }
-        .subdim-desc { font-size: 11px; color: #71767B; margin-top: 6px; }
-
-        /* Tier 2: Context strip */
-        .context-strip {
-            display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
-            padding: 12px 14px; background: #16181C; border-radius: 8px;
-            border: 1px solid #2F3336;
+        .donut-svg { width: 360px; height: 360px; cursor: default; }
+        @media (max-width: 1023px) { .donut-svg { width: 300px; height: 300px; } }
+        @media (max-width: 767px) { .donut-svg { width: 260px; height: 260px; } }
+        .donut-seg { transition: opacity 0.2s ease, filter 0.2s ease; cursor: pointer; outline: none; }
+        .donut-seg:focus-visible { filter: drop-shadow(0 0 4px rgba(255,255,255,0.5)); }
+        .donut-seg.dimmed { opacity: 0.25 !important; }
+        .donut-seg.hovered { opacity: 1 !important; filter: brightness(1.15); }
+        .donut-seg.selected { opacity: 1 !important; filter: brightness(1.2); }
+        .donut-domain-seg { transition: opacity 0.2s ease; }
+        .donut-domain-seg.dimmed { opacity: 0.1 !important; }
+        @keyframes donut-draw {
+            from { stroke-dashoffset: var(--seg-len); opacity: 0.3; }
+            to   { stroke-dashoffset: 0; opacity: var(--seg-opacity); }
         }
-        .ctx-chip {
-            display: inline-flex; align-items: center; gap: 5px;
-            font-size: 11px; color: #E7E9EA; padding: 4px 10px;
-            border-radius: 6px; background: rgba(255,255,255,0.05);
+        .donut-seg.animate-in { animation: donut-draw 0.5s ease-out forwards; }
+        @keyframes donut-pulse {
+            0%, 100% { opacity: 0.4; }
+            50%      { opacity: 0.7; }
         }
-        .ctx-chip svg { flex-shrink: 0; }
-        .ctx-chip .ctx-label { color: #71767B; }
-
-        /* Tier 3: Probe timeline */
-        .probe-toggle {
-            display: flex; align-items: center; gap: 6px; cursor: pointer;
-            font-size: 12px; font-weight: 600; color: #71767B;
-            padding: 8px 0; user-select: none; transition: color 0.15s;
+        .donut-seg.probe-running { animation: donut-pulse 2s ease-in-out infinite; }
+        .donut-tooltip {
+            position: fixed; z-index: 1000; pointer-events: none;
+            background: #1e2024; border: 1px solid #2F3336; border-radius: 8px;
+            padding: 10px 14px; min-width: 180px; max-width: 260px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            opacity: 0; transition: opacity 0.15s ease;
+            font-size: 12px; color: #E7E9EA;
         }
-        .probe-toggle:hover { color: #E7E9EA; }
-        .probe-toggle svg { transition: transform 0.2s; }
-        .probe-toggle.open svg { transform: rotate(90deg); }
-        .probe-timeline { display: none; }
-        .probe-timeline.open { display: block; }
-        .probe-row {
-            display: flex; align-items: center; gap: 10px;
-            padding: 10px 14px; border-radius: 8px; margin-bottom: 6px;
-            background: #16181C; border: 1px solid #2F3336; transition: border-color 0.15s;
+        .donut-tooltip.visible { opacity: 1; }
+        .donut-tooltip .tt-label { font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+        .donut-tooltip .tt-domain { font-size: 10px; color: #71767B; margin-bottom: 6px; }
+        .donut-tooltip .tt-row { display: flex; justify-content: space-between; font-size: 11px; padding: 2px 0; }
+        .donut-tooltip .tt-row .tt-k { color: #71767B; }
+        .donut-tooltip .tt-row .tt-v { font-weight: 600; }
+        .donut-tooltip .tt-desc { font-size: 10px; color: #71767B; margin-top: 4px; border-top: 1px solid #2F3336; padding-top: 4px; }
+        .donut-legend { flex: 1; min-width: 260px; max-width: 420px; }
+        @media (max-width: 767px) { .donut-legend { width: 100%; max-width: 100%; } }
+        .legend-domain-group { margin-bottom: 14px; }
+        .legend-domain-header {
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+            padding: 6px 0; display: flex; align-items: center; gap: 6px; cursor: pointer;
+            user-select: none; transition: color 0.15s;
         }
-        .probe-row:hover { border-color: #71767B; }
-        .probe-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .probe-icon.pass { background: rgba(34,197,94,0.15); color: #4ade80; }
-        .probe-icon.warn { background: rgba(245,158,11,0.15); color: #fbbf24; }
-        .probe-icon.fail { background: rgba(239,68,68,0.15); color: #f87171; }
-        .probe-icon.inconclusive { background: rgba(148,163,184,0.15); color: #94a3b8; }
-        .probe-meta { flex: 1; min-width: 0; }
-        .probe-type { font-size: 12px; font-weight: 600; color: #E7E9EA; }
-        .probe-time { font-size: 10px; color: #71767B; }
-        .probe-verdict {
-            font-size: 10px; font-weight: 700; text-transform: uppercase;
-            padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px;
+        .legend-domain-header:hover { color: #E7E9EA; }
+        .legend-domain-header .legend-arrow { width: 12px; height: 12px; transition: transform 0.2s; flex-shrink: 0; }
+        .legend-domain-header.collapsed .legend-arrow { transform: rotate(-90deg); }
+        .legend-domain-items { overflow: hidden; transition: max-height 0.3s ease; }
+        .legend-domain-items.collapsed { max-height: 0 !important; }
+        .legend-item {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 10px; border-radius: 6px; cursor: pointer;
+            transition: background 0.15s; border: 1px solid transparent;
         }
-        .probe-verdict.pass { background: rgba(34,197,94,0.12); color: #4ade80; }
-        .probe-verdict.warn { background: rgba(245,158,11,0.12); color: #fbbf24; }
-        .probe-verdict.fail { background: rgba(239,68,68,0.12); color: #f87171; }
-        .probe-verdict.inconclusive { background: rgba(148,163,184,0.1); color: #94a3b8; }
-        .probe-score-chip { font-size: 11px; font-weight: 700; color: #E7E9EA; width: 32px; text-align: right; }
-        .probe-conf { font-size: 10px; color: #71767B; width: 40px; text-align: right; }
-        .probe-empty { text-align: center; padding: 24px; color: #71767B; font-size: 12px; }
+        .legend-item:hover { background: rgba(255,255,255,0.04); }
+        .legend-item.selected { background: rgba(255,255,255,0.06); border-color: #2F3336; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .legend-label { flex: 1; font-size: 11px; color: #E7E9EA; }
+        .legend-weight { font-size: 10px; color: #71767B; width: 30px; text-align: right; }
+        .legend-status { font-size: 10px; width: 70px; text-align: right; }
+        .legend-status.pending { color: #71767B; font-style: italic; }
+        .legend-status.passed { color: #4ade80; font-weight: 700; }
+        .legend-status.failed { color: #f87171; font-weight: 700; }
+        .legend-status.running { color: #fbbf24; }
+        .donut-detail {
+            margin-top: 12px; padding: 14px 16px; background: #16181C; border: 1px solid #2F3336;
+            border-radius: 10px; display: none;
+        }
+        .donut-detail.visible { display: block; }
+        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .detail-title { font-size: 14px; font-weight: 700; color: #E7E9EA; display: flex; align-items: center; gap: 8px; }
+        .detail-close { cursor: pointer; color: #71767B; transition: color 0.15s; background: none; border: none; padding: 4px; }
+        .detail-close:hover { color: #E7E9EA; }
+        .detail-body { font-size: 12px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #1a1a1a; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .dk { color: #71767B; }
+        .detail-row .dv { color: #E7E9EA; font-weight: 600; }
+        .detail-desc { color: #71767B; font-size: 11px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #1a1a1a; }
+        .donut-mini-legend { display: flex; justify-content: center; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+        .mini-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #71767B; }
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
@@ -369,15 +379,18 @@
             return Math.floor(diff / 86400) + 'd ago';
         }
 
-        /*  Tier 1: Sub-dimension mini-bars  */
+        /* === Production Compliance Donut === */
         function renderComplianceSubdims(layer) {
             var domainOrder = ['supply_chain', 'threat_assessment', 'risk_surface'];
             var domainTotals = { supply_chain: 25, threat_assessment: 45, risk_surface: 30 };
             var domainColours = { supply_chain: '#818cf8', threat_assessment: '#f97316', risk_surface: '#2dd4bf' };
+            var domainLabels = { supply_chain: 'Supply Chain Integrity', threat_assessment: 'Active Threat Assessment', risk_surface: 'Buyer Risk Surface' };
 
-            // Build data for the donut
             var segments = [];
             var allPending = true;
+            var probedCount = 0;
+            var weightedSum = 0;
+            var probedWeightSum = 0;
             domainOrder.forEach(function(domKey) {
                 var domain = DIMENSION_DOMAINS[domKey];
                 if (!domain) return;
@@ -388,156 +401,347 @@
                     if (val == null && layer && layer.dimension_scores && layer.dimension_scores[k] != null) {
                         val = layer.dimension_scores[k];
                     }
-                    var isPending = val == null;
-                    if (!isPending) allPending = false;
-                    var weight = parseFloat(meta.weight) || 5;
+                    var status = 'pending';
+                    if (val != null) {
+                        status = 'passed';
+                        allPending = false;
+                        probedCount++;
+                        var w = parseFloat(meta.weight) || 5;
+                        weightedSum += w * val;
+                        probedWeightSum += w;
+                    }
+                    if (layer && layer.running_probes && layer.running_probes.indexOf(k) !== -1) {
+                        status = 'running';
+                    }
                     segments.push({
                         key: k, label: meta.label, domain: domKey,
-                        domainLabel: domain.label, weight: weight,
-                        value: val, pending: isPending,
-                        colour: isPending ? '#2F3336' : (meta.colour || domain.colour),
+                        domainLabel: domain.label, weight: parseFloat(meta.weight) || 5,
+                        value: val, status: status,
+                        colour: meta.colour || domain.colour,
                         domainColour: domainColours[domKey] || domain.colour,
                         desc: meta.desc, icon: meta.icon || ''
                     });
                 });
             });
-
             var totalWeight = segments.reduce(function(s, d) { return s + d.weight; }, 0);
+            var centreScore = allPending ? null : Math.round(weightedSum / (probedWeightSum || 1));
+            var graceCap = (layer && layer.scoring_mode !== 'blended' && probedCount < segments.length);
+            if (graceCap && centreScore !== null && centreScore > 70) centreScore = 70;
 
-            // SVG donut chart
-            var size = 300, cx = size/2, cy = size/2;
-            var outerR = 130, innerR = 85, innerR2 = 55;
-            var html = '<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start;justify-content:center;">';
+            var size = 400, cx = size/2, cy = size/2;
+            var outerR = 190, outerR2 = 150;
+            var innerR = 145, innerR2 = 100;
+            var uid = 'donut_' + Math.random().toString(36).substr(2, 6);
 
-            // Build outer ring (sub-dimensions) and inner ring (domains)
+            function arcPath(cxo, cyo, r1, r2, startDeg, sweepDeg) {
+                if (sweepDeg >= 359.99) sweepDeg = 359.99;
+                var s = startDeg * Math.PI / 180;
+                var e = (startDeg + sweepDeg) * Math.PI / 180;
+                var la = sweepDeg > 180 ? 1 : 0;
+                return 'M ' + (cxo + r1*Math.cos(s)).toFixed(2) + ' ' + (cyo + r1*Math.sin(s)).toFixed(2) +
+                    ' A ' + r1 + ' ' + r1 + ' 0 ' + la + ' 1 ' + (cxo + r1*Math.cos(e)).toFixed(2) + ' ' + (cyo + r1*Math.sin(e)).toFixed(2) +
+                    ' L ' + (cxo + r2*Math.cos(e)).toFixed(2) + ' ' + (cyo + r2*Math.sin(e)).toFixed(2) +
+                    ' A ' + r2 + ' ' + r2 + ' 0 ' + la + ' 0 ' + (cxo + r2*Math.cos(s)).toFixed(2) + ' ' + (cyo + r2*Math.sin(s)).toFixed(2) + ' Z';
+            }
+
             var svgParts = [];
-            var angle = -90; // start at top
+            var angle = -90;
 
-            // Outer ring: individual sub-dimensions
-            segments.forEach(function(seg) {
+            // Outer ring: sub-dimensions
+            segments.forEach(function(seg, i) {
                 var sweep = (seg.weight / totalWeight) * 360;
-                var startAngle = angle;
-                var endAngle = angle + sweep;
-                var largeArc = sweep > 180 ? 1 : 0;
+                var isPending = seg.status === 'pending';
+                var isRunning = seg.status === 'running';
+                var fillColour = isPending ? '#1a1d21' : seg.colour;
+                var opacity = isPending ? '0.4' : '0.9';
+                var extraClass = isRunning ? ' probe-running' : '';
+                var dashStroke = isPending ? ' stroke-dasharray="4 3"' : '';
+                var strokeCol = isPending ? seg.domainColour : '#0A0A0A';
+                var strokeOp = isPending ? '0.3' : '1';
 
-                var rad1 = startAngle * Math.PI / 180;
-                var rad2 = endAngle * Math.PI / 180;
-                var x1 = cx + outerR * Math.cos(rad1);
-                var y1 = cy + outerR * Math.sin(rad1);
-                var x2 = cx + outerR * Math.cos(rad2);
-                var y2 = cy + outerR * Math.sin(rad2);
-                var ix1 = cx + innerR * Math.cos(rad1);
-                var iy1 = cy + innerR * Math.sin(rad1);
-                var ix2 = cx + innerR * Math.cos(rad2);
-                var iy2 = cy + innerR * Math.sin(rad2);
-
-                var path = 'M ' + x1 + ' ' + y1 +
-                    ' A ' + outerR + ' ' + outerR + ' 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 +
-                    ' L ' + ix2 + ' ' + iy2 +
-                    ' A ' + innerR + ' ' + innerR + ' 0 ' + largeArc + ' 0 ' + ix1 + ' ' + iy1 + ' Z';
-
-                var fillColour = seg.pending ? '#1a1d21' : seg.colour;
-                var opacity = seg.pending ? '0.4' : '0.9';
-                var tooltip = seg.label + ' (' + seg.weight + '%) ' + (seg.pending ? '- Awaiting probe' : '- Score: ' + seg.value + '/100');
-
-                svgParts.push('<path d="' + path + '" fill="' + fillColour + '" opacity="' + opacity + '" stroke="#0A0A0A" stroke-width="1.5">' +
-                    '<title>' + tooltip + '</title></path>');
-
-                angle = endAngle;
+                var d = arcPath(cx, cy, outerR, outerR2, angle, sweep);
+                svgParts.push(
+                    '<path class="donut-seg' + extraClass + '" ' +
+                    'data-idx="' + i + '" data-domain="' + seg.domain + '" ' +
+                    'role="listitem" tabindex="0" ' +
+                    'aria-label="' + seg.label + ', ' + seg.weight + ' percent weight, ' + (isPending ? 'awaiting probe' : 'score ' + seg.value + ' out of 100') + '" ' +
+                    'style="--seg-opacity:' + opacity + ';" ' +
+                    'd="' + d + '" fill="' + fillColour + '" opacity="' + opacity + '" ' +
+                    'stroke="' + strokeCol + '" stroke-width="1.5" stroke-opacity="' + strokeOp + '"' + dashStroke + '/>'
+                );
+                angle += sweep;
             });
 
             // Inner ring: domain aggregates
             angle = -90;
             domainOrder.forEach(function(domKey) {
-                var domain = DIMENSION_DOMAINS[domKey];
-                if (!domain) return;
                 var domWeight = domainTotals[domKey] || 0;
                 var sweep = (domWeight / totalWeight) * 360;
-                var startAngle = angle;
-                var endAngle = angle + sweep;
-                var largeArc = sweep > 180 ? 1 : 0;
+                var col = domainColours[domKey];
+                var d = arcPath(cx, cy, innerR, innerR2, angle, sweep);
+                var domSegs = segments.filter(function(s) { return s.domain === domKey; });
+                var anyProbed = domSegs.some(function(s) { return s.status !== 'pending'; });
+                var domOpacity = anyProbed ? '0.4' : '0.18';
 
-                var rad1 = startAngle * Math.PI / 180;
-                var rad2 = endAngle * Math.PI / 180;
-                var x1 = cx + (innerR - 4) * Math.cos(rad1);
-                var y1 = cy + (innerR - 4) * Math.sin(rad1);
-                var x2 = cx + (innerR - 4) * Math.cos(rad2);
-                var y2 = cy + (innerR - 4) * Math.sin(rad2);
-                var ix1 = cx + innerR2 * Math.cos(rad1);
-                var iy1 = cy + innerR2 * Math.sin(rad1);
-                var ix2 = cx + innerR2 * Math.cos(rad2);
-                var iy2 = cy + innerR2 * Math.sin(rad2);
+                svgParts.push(
+                    '<path class="donut-domain-seg" data-domain="' + domKey + '" ' +
+                    'd="' + d + '" fill="' + col + '" opacity="' + domOpacity + '" ' +
+                    'stroke="#0A0A0A" stroke-width="1.5"><title>' + domainLabels[domKey] + ' (' + domWeight + '%)</title></path>'
+                );
 
-                var path = 'M ' + x1 + ' ' + y1 +
-                    ' A ' + (innerR - 4) + ' ' + (innerR - 4) + ' 0 ' + largeArc + ' 1 ' + x2 + ' ' + y2 +
-                    ' L ' + ix2 + ' ' + iy2 +
-                    ' A ' + innerR2 + ' ' + innerR2 + ' 0 ' + largeArc + ' 0 ' + ix1 + ' ' + iy1 + ' Z';
-
-                var col = domainColours[domKey] || domain.colour;
-                svgParts.push('<path d="' + path + '" fill="' + col + '" opacity="0.35" stroke="#0A0A0A" stroke-width="1">' +
-                    '<title>' + domain.label + ' (' + domWeight + '%)</title></path>');
-
-                // Label on the inner ring
-                var midAngle = (startAngle + endAngle) / 2;
-                var labelR = (innerR2 + innerR - 4) / 2;
+                // Domain label on inner ring
+                var midAngle = angle + sweep/2;
+                var labelR = (innerR + innerR2) / 2;
                 var lx = cx + labelR * Math.cos(midAngle * Math.PI / 180);
                 var ly = cy + labelR * Math.sin(midAngle * Math.PI / 180);
-
-                angle = endAngle;
+                var rot = midAngle;
+                if (midAngle > 90 || midAngle < -90) rot = midAngle + 180;
+                if (sweep > 40) {
+                    var shortName = domainLabels[domKey].split(' ').slice(0,2).join(' ');
+                    svgParts.push(
+                        '<text x="' + lx.toFixed(1) + '" y="' + ly.toFixed(1) + '" text-anchor="middle" dominant-baseline="central" ' +
+                        'fill="' + col + '" font-size="9" font-weight="600" opacity="0.7" ' +
+                        'transform="rotate(' + rot.toFixed(1) + ' ' + lx.toFixed(1) + ' ' + ly.toFixed(1) + ')" style="pointer-events:none;">' +
+                        shortName + '</text>'
+                    );
+                }
+                angle += sweep;
             });
 
-            // Center text
-            var centreScore = allPending ? '&mdash;' : (layer && layer.score != null ? Math.round(layer.score) : '&mdash;');
-            svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="32" font-weight="700">' + centreScore + '</text>');
-            svgParts.push('<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="#71767B" font-size="11">Compliance</text>');
+            // Centre text
+            if (centreScore !== null) {
+                var sc = scoreColour(centreScore);
+                svgParts.push('<text x="' + cx + '" y="' + (cy - 12) + '" text-anchor="middle" fill="' + sc + '" font-size="36" font-weight="700">' + centreScore + '</text>');
+                if (graceCap) {
+                    svgParts.push('<text x="' + cx + '" y="' + (cy + 8) + '" text-anchor="middle" fill="#71767B" font-size="11">/ 70 grace cap</text>');
+                }
+                svgParts.push('<text x="' + cx + '" y="' + (cy + 24) + '" text-anchor="middle" fill="#71767B" font-size="10">' + probedCount + ' of ' + segments.length + ' probed</text>');
+            } else {
+                svgParts.push('<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#E7E9EA" font-size="32" font-weight="700">&mdash;</text>');
+                svgParts.push('<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="#71767B" font-size="11">Awaiting probes</text>');
+            }
+            svgParts.push('<text x="' + cx + '" y="' + (cy + 42) + '" text-anchor="middle" fill="transparent" font-size="1" role="status" aria-live="polite">' +
+                (centreScore !== null ? 'Compliance score: ' + centreScore : 'Awaiting probes') + '</text>');
 
-            html += '<div style="flex-shrink:0;"><svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' + svgParts.join('') + '</svg>';
-
-            // Legend beneath donut
-            html += '<div style="display:flex;justify-content:center;gap:16px;margin-top:12px;flex-wrap:wrap;">';
-            domainOrder.forEach(function(domKey) {
-                var domain = DIMENSION_DOMAINS[domKey];
-                var col = domainColours[domKey] || domain.colour;
-                html += '<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#71767B;">' +
-                    '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></span>' +
-                    domain.label + '</div>';
+            // Assemble HTML
+            var html = '<div class="donut-layout" id="' + uid + '">';
+            html += '<div class="donut-wrap">';
+            html += '<svg class="donut-svg" viewBox="0 0 ' + size + ' ' + size + '" role="list" aria-label="Compliance probe donut chart">' + svgParts.join('') + '</svg>';
+            html += '<div class="donut-mini-legend">';
+            domainOrder.forEach(function(dk) {
+                html += '<div class="mini-legend-item"><span class="legend-dot" style="background:' + domainColours[dk] + '"></span>' + domainLabels[dk] + '</div>';
             });
             html += '</div></div>';
 
-            // Detail list (right side)
-            html += '<div style="flex:1;min-width:260px;">';
+            // Legend panel
+            html += '<div class="donut-legend">';
             domainOrder.forEach(function(domKey) {
-                var domain = DIMENSION_DOMAINS[domKey];
-                if (!domain) return;
-                var col = domainColours[domKey] || domain.colour;
-                html += '<div style="margin-bottom:16px;">';
-                html += '<h4 style="font-size:12px;font-weight:700;color:' + col + ';margin-bottom:8px;display:flex;align-items:center;gap:6px;">' +
-                    '<span style="width:8px;height:8px;border-radius:50%;background:' + col + ';display:inline-block;"></span>' +
-                    domain.label + '</h4>';
-                (domain.dims || []).forEach(function(k) {
-                    var meta = SUBDIM_META[k];
-                    if (!meta) return;
-                    var seg = segments.find(function(s) { return s.key === k; });
-                    if (!seg) return;
-                    var statusText = seg.pending ? '<span style="color:#71767B;font-style:italic;font-size:10px;">Awaiting probe</span>' :
-                        '<span style="color:' + scoreColour(seg.value) + ';font-weight:700;">' + seg.value + '</span><span style="color:#71767B;font-size:10px;">/100</span>';
-                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1a1a1a;">' +
-                        '<div style="display:flex;align-items:center;gap:6px;">' +
-                        '<span style="color:' + (seg.pending ? '#71767B' : seg.colour) + ';">' + (meta.icon || '') + '</span>' +
-                        '<span style="font-size:11px;color:#E7E9EA;">' + meta.label + '</span>' +
-                        '<span style="font-size:9px;color:#71767B;">(' + meta.weight + ')</span>' +
-                        '</div>' +
-                        '<div>' + statusText + '</div>' +
-                        '</div>';
-                });
+                var col = domainColours[domKey];
+                var domSegs = segments.filter(function(s) { return s.domain === domKey; });
+                var domTotal = domainTotals[domKey];
+                html += '<div class="legend-domain-group">';
+                html += '<div class="legend-domain-header" data-domain="' + domKey + '" style="color:' + col + ';">';
+                html += '<svg class="legend-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+                html += '<span class="legend-dot" style="background:' + col + '"></span>';
+                html += domainLabels[domKey] + ' <span style="font-weight:400;opacity:0.6;">(' + domTotal + '%)</span>';
                 html += '</div>';
+                html += '<div class="legend-domain-items" style="max-height:500px;">';
+                domSegs.forEach(function(seg) {
+                    var idx = segments.indexOf(seg);
+                    var statusText = seg.status === 'pending' ? 'Awaiting' :
+                                     seg.status === 'running' ? 'Running...' :
+                                     seg.status === 'failed' ? 'Failed' :
+                                     seg.value + '/100';
+                    html += '<div class="legend-item" data-idx="' + idx + '" tabindex="0" ' +
+                        'aria-label="' + seg.label + ', ' + seg.weight + ' percent, ' + statusText + '">';
+                    html += '<span class="legend-dot" style="background:' + (seg.status === 'pending' ? '#2F3336' : seg.colour) + '"></span>';
+                    html += '<span class="legend-label">' + seg.label + '</span>';
+                    html += '<span class="legend-weight">' + seg.weight + '%</span>';
+                    html += '<span class="legend-status ' + seg.status + '">' + statusText + '</span>';
+                    html += '</div>';
+                });
+                html += '</div></div>';
             });
-            html += '</div></div>';
+            html += '<div class="donut-detail" id="' + uid + '_detail" role="region" aria-label="Probe detail">';
+            html += '<div class="detail-header"><div class="detail-title" id="' + uid + '_dtitle"></div>';
+            html += '<button class="detail-close" aria-label="Close detail panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>';
+            html += '<div class="detail-body" id="' + uid + '_dbody"></div>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            html += '<div class="donut-tooltip" id="' + uid + '_tip"></div>';
 
+            setTimeout(function() { wireDonutInteractions(uid, segments, domainColours, domainLabels); }, 50);
             return html;
         }
 
-/*  Tier 2: Context strip  */
+        function wireDonutInteractions(uid, segments, domainColours, domainLabels) {
+            var root = document.getElementById(uid);
+            if (!root) return;
+            var svg = root.querySelector('.donut-svg');
+            var tip = document.getElementById(uid + '_tip');
+            var detail = document.getElementById(uid + '_detail');
+            var dtitle = document.getElementById(uid + '_dtitle');
+            var dbody = document.getElementById(uid + '_dbody');
+            var allSegs = svg.querySelectorAll('.donut-seg');
+            var allDomSegs = svg.querySelectorAll('.donut-domain-seg');
+            var legendItems = root.querySelectorAll('.legend-item');
+            var domHeaders = root.querySelectorAll('.legend-domain-header');
+            var selectedIdx = -1;
+
+            function showTooltip(seg, e) {
+                var h = '<div class="tt-label"><span style="color:' + seg.colour + ';">' + seg.icon + '</span> ' + seg.label + '</div>';
+                h += '<div class="tt-domain">' + seg.domainLabel + '</div>';
+                h += '<div class="tt-row"><span class="tt-k">Weight</span><span class="tt-v">' + seg.weight + '%</span></div>';
+                if (seg.status === 'pending') {
+                    h += '<div class="tt-row"><span class="tt-k">Status</span><span class="tt-v" style="color:#71767B;font-style:italic;">Awaiting probe</span></div>';
+                } else if (seg.status === 'running') {
+                    h += '<div class="tt-row"><span class="tt-k">Status</span><span class="tt-v" style="color:#fbbf24;">Probe running...</span></div>';
+                } else {
+                    h += '<div class="tt-row"><span class="tt-k">Score</span><span class="tt-v" style="color:' + scoreColour(seg.value) + ';">' + seg.value + '/100</span></div>';
+                }
+                h += '<div class="tt-desc">' + (seg.desc || '') + '</div>';
+                tip.innerHTML = h;
+                tip.classList.add('visible');
+                positionTip(e);
+            }
+            function positionTip(e) {
+                var x = (e.clientX || 0) + 14;
+                var y = (e.clientY || 0) + 14;
+                if (x + 260 > window.innerWidth) x = (e.clientX || 0) - 270;
+                if (y + 200 > window.innerHeight) y = (e.clientY || 0) - 180;
+                tip.style.left = x + 'px';
+                tip.style.top = y + 'px';
+            }
+            function hideTooltip() { tip.classList.remove('visible'); }
+
+            function highlightSeg(idx) {
+                allSegs.forEach(function(el, i) {
+                    if (i === idx) { el.classList.add('hovered'); el.classList.remove('dimmed'); }
+                    else if (selectedIdx === -1 || selectedIdx === idx) { el.classList.add('dimmed'); el.classList.remove('hovered'); }
+                });
+                var dom = segments[idx].domain;
+                allDomSegs.forEach(function(el) {
+                    if (el.getAttribute('data-domain') !== dom) el.classList.add('dimmed');
+                    else el.classList.remove('dimmed');
+                });
+                legendItems.forEach(function(el) {
+                    if (parseInt(el.getAttribute('data-idx')) === idx) el.style.background = 'rgba(255,255,255,0.06)';
+                });
+            }
+            function unhighlightAll() {
+                if (selectedIdx !== -1) return;
+                allSegs.forEach(function(el) { el.classList.remove('hovered', 'dimmed'); });
+                allDomSegs.forEach(function(el) { el.classList.remove('dimmed'); });
+                legendItems.forEach(function(el) { el.style.background = ''; });
+            }
+
+            function selectSeg(idx) {
+                if (selectedIdx === idx) { deselectSeg(); return; }
+                selectedIdx = idx;
+                var seg = segments[idx];
+                allSegs.forEach(function(el, i) {
+                    el.classList.remove('hovered', 'selected', 'dimmed');
+                    if (i === idx) el.classList.add('selected');
+                    else el.classList.add('dimmed');
+                });
+                allDomSegs.forEach(function(el) {
+                    if (el.getAttribute('data-domain') !== seg.domain) el.classList.add('dimmed');
+                    else el.classList.remove('dimmed');
+                });
+                legendItems.forEach(function(el) {
+                    el.classList.remove('selected');
+                    if (parseInt(el.getAttribute('data-idx')) === idx) el.classList.add('selected');
+                });
+                showDetailPanel(seg);
+            }
+            function deselectSeg() {
+                selectedIdx = -1;
+                allSegs.forEach(function(el) { el.classList.remove('hovered', 'selected', 'dimmed'); });
+                allDomSegs.forEach(function(el) { el.classList.remove('dimmed'); });
+                legendItems.forEach(function(el) { el.classList.remove('selected'); el.style.background = ''; });
+                detail.classList.remove('visible');
+            }
+            function showDetailPanel(seg) {
+                dtitle.innerHTML = '<span style="color:' + seg.colour + ';">' + seg.icon + '</span> ' + seg.label;
+                var h = '';
+                h += '<div class="detail-row"><span class="dk">Domain</span><span class="dv" style="color:' + seg.domainColour + ';">' + seg.domainLabel + '</span></div>';
+                h += '<div class="detail-row"><span class="dk">Weight</span><span class="dv">' + seg.weight + '%</span></div>';
+                if (seg.status === 'pending') {
+                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#71767B;">Awaiting probe</span></div>';
+                } else if (seg.status === 'running') {
+                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#fbbf24;">Probe in progress</span></div>';
+                } else {
+                    h += '<div class="detail-row"><span class="dk">Score</span><span class="dv" style="color:' + scoreColour(seg.value) + ';">' + seg.value + '/100</span></div>';
+                    h += '<div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:#4ade80;">Completed</span></div>';
+                }
+                h += '<div class="detail-desc">' + (seg.desc || '') + '</div>';
+                dbody.innerHTML = h;
+                detail.classList.add('visible');
+            }
+
+            // SVG events
+            allSegs.forEach(function(el, i) {
+                el.addEventListener('mouseenter', function(e) { highlightSeg(i); showTooltip(segments[i], e); });
+                el.addEventListener('mousemove', function(e) { positionTip(e); });
+                el.addEventListener('mouseleave', function() { unhighlightAll(); hideTooltip(); });
+                el.addEventListener('click', function() { selectSeg(i); hideTooltip(); });
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSeg(i); }
+                    if (e.key === 'Escape') deselectSeg();
+                });
+                el.addEventListener('focus', function() { highlightSeg(i); });
+                el.addEventListener('blur', function() { unhighlightAll(); });
+            });
+
+            // Legend events
+            legendItems.forEach(function(el) {
+                var idx = parseInt(el.getAttribute('data-idx'));
+                el.addEventListener('mouseenter', function(e) { highlightSeg(idx); showTooltip(segments[idx], e); });
+                el.addEventListener('mouseleave', function() { unhighlightAll(); hideTooltip(); });
+                el.addEventListener('click', function() { selectSeg(idx); hideTooltip(); });
+                el.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSeg(idx); }
+                    if (e.key === 'Escape') deselectSeg();
+                });
+            });
+
+            // Domain accordion
+            domHeaders.forEach(function(hdr) {
+                hdr.addEventListener('click', function() {
+                    var items = hdr.nextElementSibling;
+                    var isCollapsed = items.classList.contains('collapsed');
+                    if (isCollapsed) {
+                        items.classList.remove('collapsed');
+                        items.style.maxHeight = items.scrollHeight + 'px';
+                        hdr.classList.remove('collapsed');
+                    } else {
+                        items.classList.add('collapsed');
+                        hdr.classList.add('collapsed');
+                    }
+                });
+            });
+
+            // Detail close
+            var closeBtn = detail.querySelector('.detail-close');
+            if (closeBtn) closeBtn.addEventListener('click', deselectSeg);
+
+            // Click outside
+            document.addEventListener('click', function(e) {
+                if (selectedIdx !== -1 && !root.contains(e.target) && !tip.contains(e.target)) deselectSeg();
+            });
+
+            // Draw-in animation
+            allSegs.forEach(function(el, i) {
+                el.style.opacity = '0';
+                setTimeout(function() {
+                    el.classList.add('animate-in');
+                    el.style.opacity = '';
+                }, 50 * i);
+            });
+        }
+
+        /*  Tier 2: Context strip  */
         function renderComplianceContext(layer) {
             var mode = (layer && layer.scoring_mode) || 'platform_only';
             var probeCount = (layer && layer.probe_count) || 0;
