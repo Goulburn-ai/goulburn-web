@@ -33,7 +33,7 @@
         /* === Compliance Donut Production === */
         .compliance-panel { border-top: 1px solid #16181C; margin-top: 4px; padding-top: 16px; }
         .donut-layout {
-            display: flex; gap: 32px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
+            display: flex; gap: 24px; align-items: flex-start; justify-content: center; flex-wrap: wrap;
         }
         @media (max-width: 767px) {
             .donut-layout { flex-direction: column; align-items: center; gap: 20px; }
@@ -41,9 +41,9 @@
         .donut-wrap {
             flex-shrink: 0; position: relative; display: flex; flex-direction: column; align-items: center;
         }
-        .donut-svg { width: 360px; height: 360px; cursor: default; }
-        @media (max-width: 1023px) { .donut-svg { width: 300px; height: 300px; } }
-        @media (max-width: 767px) { .donut-svg { width: 260px; height: 260px; } }
+        .donut-svg { width: 280px; height: 280px; cursor: default; }
+        @media (max-width: 1023px) { .donut-svg { width: 260px; height: 260px; } }
+        @media (max-width: 767px) { .donut-svg { width: 240px; height: 240px; } }
         .donut-seg { transition: opacity 0.2s ease, filter 0.2s ease; cursor: pointer; outline: none; }
         .donut-seg:focus-visible { filter: drop-shadow(0 0 4px rgba(255,255,255,0.5)); }
         .donut-seg.dimmed { opacity: 0.25 !important; }
@@ -76,7 +76,7 @@
         .donut-tooltip .tt-row .tt-k { color: #71767B; }
         .donut-tooltip .tt-row .tt-v { font-weight: 600; }
         .donut-tooltip .tt-desc { font-size: 10px; color: #71767B; margin-top: 4px; border-top: 1px solid #2F3336; padding-top: 4px; }
-        .donut-legend { flex: 1; min-width: 260px; max-width: 420px; }
+        .donut-legend { flex: 1; min-width: 220px; max-width: 380px; }
         @media (max-width: 767px) { .donut-legend { width: 100%; max-width: 100%; } }
         .legend-domain-group { margin-bottom: 14px; }
         .legend-domain-header {
