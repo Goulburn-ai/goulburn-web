@@ -160,7 +160,7 @@
             @keyframes line-draw { from { stroke-dashoffset: 1000; opacity: 0; } to { stroke-dashoffset: 0; opacity: 1; } }
         }
         @media (prefers-reduced-motion: reduce) {
-            .radar-vertex, .radar-line { animation: none \!important; }
+            .radar-vertex, .radar-line { animation: none !important; }
         }
     </style>
 </head>
@@ -265,7 +265,7 @@
         <section class="py-12 px-6 text-center" style="background:#000;border-top:1px solid rgba(255,255,255,0.04);">
             <p class="text-sm text-dark-500 mb-3">Share this trust profile</p>
             <div class="flex justify-center gap-3">
-                <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){this.textContent='Copied\!';setTimeout(function(){this.textContent='Copy Link';}.bind(this),2000);}.bind(this))" class="px-5 py-2 rounded-lg text-sm font-medium bg-brand-500 text-dark-50 hover:bg-brand-600 transition-colors">Copy Link</button>
+                <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){this.textContent='Copied!';setTimeout(function(){this.textContent='Copy Link';}.bind(this),2000);}.bind(this))" class="px-5 py-2 rounded-lg text-sm font-medium bg-brand-500 text-dark-50 hover:bg-brand-600 transition-colors">Copy Link</button>
                 <a id="badgeLink" href="#" target="_blank" class="px-5 py-2 rounded-lg text-sm font-medium border border-dark-200 text-dark-600 hover:text-dark-800 hover:border-dark-300 transition-colors">View Badge</a>
             </div>
         </section>
@@ -351,7 +351,7 @@
         }
 
         function timeAgo(iso) {
-            if (\!iso) return '';
+            if (!iso) return '';
             var d = new Date(iso);
             var now = new Date();
             var diff = Math.floor((now - d) / 1000);
@@ -392,7 +392,7 @@
 
         var announcer;
         function announce(msg) {
-            if (\!announcer) {
+            if (!announcer) {
                 announcer = document.createElement('div');
                 announcer.setAttribute('aria-live', 'polite');
                 announcer.setAttribute('aria-atomic', 'true');
@@ -620,14 +620,14 @@
             Object.keys(SUBDIM_META).forEach(function(dk) {
                 var realKey = dk;
                 // Check legacy keys
-                if (dims[dk] == null && LEGACY_MAP[dk] && dims[LEGACY_MAP[dk]] \!= null) {
+                if (dims[dk] == null && LEGACY_MAP[dk] && dims[LEGACY_MAP[dk]] != null) {
                     // use legacy value
                 }
                 var val = dims[dk];
                 if (val == null && LEGACY_MAP[dk]) val = dims[LEGACY_MAP[dk]];
 
                 var dm = SUBDIM_META[dk];
-                var isRunning = runningProbes.indexOf(dk) \!== -1;
+                var isRunning = runningProbes.indexOf(dk) !== -1;
                 var status, statusClass;
                 if (isRunning) { status = 'Running...'; statusClass = 'color:#f59e0b;'; }
                 else if (val == null) { status = 'Awaiting'; statusClass = 'color:#525252;'; }
@@ -678,13 +678,13 @@
                 var grid = document.getElementById('probeGrid');
                 var html = '';
                 probes.forEach(function(p) {
-                    if (filter \!== 'All Probes' && p.cat \!== filter) return;
+                    if (filter !== 'All Probes' && p.cat !== filter) return;
                     var catC = CAT_COLOURS[p.cat] || '#737373';
                     html += '<div class="probe-card" role="listitem">';
                     html += '<div class="probe-card-head"><span class="probe-category" style="color:' + catC + ';background:' + catC + '15;border:1px solid ' + catC + '30;">' + p.cat + '</span>';
                     html += '<span class="probe-status-badge" style="' + p.statusStyle + ';">' + p.status + '</span></div>';
                     html += '<div class="probe-card-name">' + p.label + '</div>';
-                    html += '<div class="probe-coverage"><span>Coverage</span><span>' + (p.value \!= null ? p.value + '%' : '—') + '</span></div>';
+                    html += '<div class="probe-coverage"><span>Coverage</span><span>' + (p.value != null ? p.value + '%' : '—') + '</span></div>';
                     html += '<div class="probe-bar"><div class="probe-bar-fill" style="width:' + (p.value || 0) + '%;background:' + catC + ';"></div></div>';
                     html += '<div class="probe-timing"><span>' + (p.lastRun ? 'Last run: ' + timeAgo(p.lastRun) : 'Awaiting first run') + '</span><span>Weight: ' + p.weight + '%</span></div>';
                     html += '</div>';
@@ -696,7 +696,7 @@
             // Filter click
             document.getElementById('probeFilters').addEventListener('click', function(e) {
                 var btn = e.target.closest('.probe-filter-btn');
-                if (\!btn) return;
+                if (!btn) return;
                 document.querySelectorAll('.probe-filter-btn').forEach(function(b) { b.classList.remove('active'); });
                 btn.classList.add('active');
                 renderCards(btn.dataset.cat);
@@ -733,7 +733,7 @@
             Object.keys(SUBDIM_META).forEach(function(k) {
                 var v = dims[k];
                 if (v == null && LEGACY_MAP[k]) v = dims[LEGACY_MAP[k]];
-                if (v \!= null && v >= 50) probePassed++;
+                if (v != null && v >= 50) probePassed++;
             });
             var probeAwaiting = probeTotal - Object.keys(dims).length;
 
@@ -801,14 +801,14 @@
            ══════════════════════════════════════ */
         async function loadVerification() {
             var name = getAgentName();
-            if (\!name) { showError('No agent specified.'); return; }
+            if (!name) { showError('No agent specified.'); return; }
 
             try {
                 var controller = new AbortController();
                 var timeout = setTimeout(function() { controller.abort(); }, 15000);
                 var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name), { signal: controller.signal });
                 clearTimeout(timeout);
-                if (\!res.ok) throw new Error('Agent not found');
+                if (!res.ok) throw new Error('Agent not found');
                 var trust = await res.json();
                 if (trust.tier === 'not_found') throw new Error('Agent not verified');
 
