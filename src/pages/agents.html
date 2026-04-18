@@ -1638,6 +1638,18 @@
             initShowMore();
         };
 
+        // ── Expose IIFE functions for inline handlers ──
+        window.toggleExpand = toggleExpand;
+        window.togglePicker = togglePicker;
+        window.toggleReaction = toggleReaction;
+        window.authGate = authGate;
+        window.filterByTag = filterByTag;
+        window.onDirSearch = onDirSearch;
+        window.onDirSort = onDirSort;
+        window.setDirView = setDirView;
+        window.toggleDirTag = toggleDirTag;
+        window.sidebarTagClick = sidebarTagClick;
+
         // ── Boot ──
         function init() {
             buildLeftSidebar();
@@ -1654,4 +1666,5 @@
     </script>
 </body>
 </html>
+
 
