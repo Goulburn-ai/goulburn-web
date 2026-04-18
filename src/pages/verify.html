@@ -53,7 +53,7 @@
         .donut-domain-seg.dimmed { opacity: 0.1 !important; }
         @keyframes donut-draw {
             from { stroke-dashoffset: var(--seg-len); opacity: 0.3; }
-            to   { stroke-dashoffset: 0; opacity: var(--seg-opacity); }
+            to   { stroke-dashoffset: 0; opacity: var(--seg-opacity, 1); }
         }
         .donut-seg.animate-in { animation: donut-draw 0.5s ease-out forwards; }
         @keyframes donut-pulse {
@@ -225,17 +225,17 @@
         var DIMENSION_DOMAINS = {
             supply_chain: {
                 label: 'Supply Chain Integrity',
-                colour: '#a78bfa',
+                colour: '#6ee7b7',
                 dims: ['model_provenance', 'dependency_transparency', 'infrastructure_certification']
             },
             threat_assessment: {
                 label: 'Active Threat Assessment',
-                colour: '#f87171',
+                colour: '#ff6b6b',
                 dims: ['prompt_injection_resistance', 'data_exfiltration_resistance', 'code_execution_safety', 'network_behaviour', 'credential_hygiene']
             },
             risk_surface: {
                 label: 'Buyer Risk Surface',
-                colour: '#60a5fa',
+                colour: '#22d3ee',
                 dims: ['output_liability', 'session_contamination', 'regulatory_classification', 'behavioural_consistency']
             }
         };
@@ -250,13 +250,13 @@
             dependency_transparency: {
                 label: 'Dependency Transparency', domain: 'supply_chain', weight: '6%',
                 desc: 'Plugins, tools, and RAG sources &mdash; the AI software bill of materials.',
-                colour: '#c4b5fd',
+                colour: '#a5b4fc',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>',
             },
             infrastructure_certification: {
                 label: 'Infrastructure Cert.', domain: 'supply_chain', weight: '7%',
                 desc: 'TLS validity, certificate chain, hosting provider, DNS integrity.',
-                colour: '#8b5cf6',
+                colour: '#6366f1',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>',
             },
             prompt_injection_resistance: {
@@ -280,7 +280,7 @@
             network_behaviour: {
                 label: 'Network Behaviour', domain: 'threat_assessment', weight: '5%',
                 desc: 'External call profiling &mdash; DNS, HTTP, WebSocket. Unexpected endpoints flagged.',
-                colour: '#fb7185',
+                colour: '#ff8a65',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
             },
             credential_hygiene: {
@@ -298,7 +298,7 @@
             session_contamination: {
                 label: 'Session Isolation', domain: 'risk_surface', weight: '8%',
                 desc: 'Multi-tenant isolation &mdash; can one user\'s data influence another?',
-                colour: '#38bdf8',
+                colour: '#67e8f9',
                 icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6M23 11h-6"/></svg>',
             },
             regulatory_classification: {
@@ -452,12 +452,12 @@
                 var sweep = (seg.weight / totalWeight) * 360;
                 var isPending = seg.status === 'pending';
                 var isRunning = seg.status === 'running';
-                var fillColour = isPending ? '#1a1d21' : seg.colour;
-                var opacity = isPending ? '0.4' : '0.9';
+                var fillColour = isPending ? seg.domainColour : seg.colour;
+                var opacity = isPending ? '0.25' : '1';
                 var extraClass = isRunning ? ' probe-running' : '';
                 var dashStroke = isPending ? ' stroke-dasharray="4 3"' : '';
                 var strokeCol = isPending ? seg.domainColour : '#0A0A0A';
-                var strokeOp = isPending ? '0.3' : '1';
+                var strokeOp = isPending ? '0.5' : '1';
 
                 var d = arcPath(cx, cy, outerR, outerR2, angle, sweep);
                 svgParts.push(
@@ -481,7 +481,7 @@
                 var d = arcPath(cx, cy, innerR, innerR2, angle, sweep);
                 var domSegs = segments.filter(function(s) { return s.domain === domKey; });
                 var anyProbed = domSegs.some(function(s) { return s.status !== 'pending'; });
-                var domOpacity = anyProbed ? '0.4' : '0.18';
+                var domOpacity = anyProbed ? '0.5' : '0.3';
 
                 svgParts.push(
                     '<path class="donut-domain-seg" data-domain="' + domKey + '" ' +
@@ -903,11 +903,14 @@
                         // Tier 1: Sub-dimension bars
                         var subdimHtml = renderComplianceSubdims(layer);
 
-                        // Tier 2: Context strip
-                        var ctxHtml = renderComplianceContext(layer);
-
-                        // Tier 3: Probe timeline placeholder (filled async)
-                        var timelineHtml = '<div class="probe-section">' + renderProbeTimeline([]) + '</div>';
+                        // Tier 2: Context strip + Tier 3: Probe timeline
+                        var probeCount = (layer && layer.probe_count) || 0;
+                        var ctxHtml = '';
+                        var timelineHtml = '';
+                        if (probeCount > 0) {
+                            ctxHtml = renderComplianceContext(layer);
+                            timelineHtml = '<div class="probe-section">' + renderProbeTimeline([]) + '</div>';
+                        }
 
                         panel.innerHTML = subdimHtml + ctxHtml + timelineHtml;
                         layerContainer.appendChild(panel);
