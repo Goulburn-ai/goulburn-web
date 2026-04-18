@@ -1,7 +1,7 @@
-<\!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <\!-- @include partials/head.html -->
+    <!-- @include partials/head.html -->
     <meta name="description" content="Verify this AI agent's trust credentials on goulburn.ai">
     <meta property="og:type" content="website">
     <meta property="og:description" content="Independently verified trust evidence for this AI agent">
@@ -165,9 +165,9 @@
     </style>
 </head>
 <body class="bg-dark-50">
-    <\!-- @include partials/nav.html -->
+    <!-- @include partials/nav.html -->
 
-    <\!-- Loading state -->
+    <!-- Loading state -->
     <div id="loadState" class="flex items-center justify-center min-h-screen">
         <div class="text-center">
             <div style="width:40px;height:40px;border:3px solid #333;border-top-color:#f59e0b;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div>
@@ -176,7 +176,7 @@
         </div>
     </div>
 
-    <\!-- Error state -->
+    <!-- Error state -->
     <div id="errorState" style="display:none;" class="flex items-center justify-center min-h-screen">
         <div class="text-center max-w-md px-6">
             <div style="width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,0.1);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
@@ -187,9 +187,9 @@
             <a href="/agents" class="inline-block px-6 py-3 rounded-lg bg-brand-500 text-dark-50 font-semibold text-sm hover:bg-brand-600 transition-colors">Explore Agents</a>
         </div>
     </div>
-    <\!-- ══ Main Content ══ -->
+    <!-- ══ Main Content ══ -->
     <div id="verifyContent" style="display:none;">
-        <\!-- Hero -->
+        <!-- Hero -->
         <section class="pt-28 pb-8 px-6" style="background:#000;">
             <div class="max-w-4xl mx-auto text-center">
                 <div id="heroShield" class="mb-4"></div>
@@ -202,7 +202,7 @@
             </div>
         </section>
 
-        <\!-- Tab Bar -->
+        <!-- Tab Bar -->
         <section class="px-6 pt-6 pb-0" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <div class="tab-bar" role="tablist" aria-label="Trust profile sections">
@@ -226,7 +226,7 @@
             </div>
         </section>
 
-        <\!-- ═══ Tab 1: Trust Seal ═══ -->
+        <!-- ═══ Tab 1: Trust Seal ═══ -->
         <section id="panelSeal" class="tab-panel active px-6 py-10" role="tabpanel" aria-labelledby="tabSeal" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <div class="radar-wrap" id="radarWrap">
@@ -237,14 +237,14 @@
             </div>
         </section>
 
-        <\!-- ═══ Tab 2: Evidence Layers ═══ -->
+        <!-- ═══ Tab 2: Evidence Layers ═══ -->
         <section id="panelLayers" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabLayers" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <div class="layer-accordion" id="layerAccordion"></div>
             </div>
         </section>
 
-        <\!-- ═══ Tab 3: Compliance Probes ═══ -->
+        <!-- ═══ Tab 3: Compliance Probes ═══ -->
         <section id="panelProbes" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabProbes" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Compliance &amp; Safety Probes</h2>
@@ -254,14 +254,14 @@
             </div>
         </section>
 
-        <\!-- ═══ Tab 4: Assessment ═══ -->
+        <!-- ═══ Tab 4: Assessment ═══ -->
         <section id="panelAssess" class="tab-panel px-6 py-10" role="tabpanel" aria-labelledby="tabAssess" style="background:#000;">
             <div class="max-w-4xl mx-auto">
                 <div class="assessment-card" id="assessmentCard"></div>
             </div>
         </section>
 
-        <\!-- Share CTA -->
+        <!-- Share CTA -->
         <section class="py-12 px-6 text-center" style="background:#000;border-top:1px solid rgba(255,255,255,0.04);">
             <p class="text-sm text-dark-500 mb-3">Share this trust profile</p>
             <div class="flex justify-center gap-3">
@@ -271,10 +271,10 @@
         </section>
     </div>
 
-    <\!-- @include partials/footer.html -->
-    <\!-- @include partials/auth.html -->
+    <!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
 
-    <\!-- JSON-LD -->
+    <!-- JSON-LD -->
     <script type="application/ld+json" id="vJsonLd">{}</script>
 
     <script>
