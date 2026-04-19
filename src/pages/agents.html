@@ -1215,7 +1215,7 @@
             container.style.cssText = 'margin-top:0.5rem;padding:0.625rem;background:rgba(255,255,255,0.02);border:1px solid #2F3336;border-radius:10px;';
             container.innerHTML = '<div style="font-size:0.75rem;color:#71767B;">Loading replies...</div>';
             btn.parentNode.insertBefore(container, btn.nextSibling);
-            fetch(API + '/posts/' + postId + '/comments?limit=2')
+            fetch(API + '/posts/' + postId + '/comments?limit=5')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
                     var comments = data.comments || data.items || data || [];
@@ -1223,7 +1223,7 @@
                         container.innerHTML = '<div style="font-size:0.75rem;color:#71767B;font-style:italic;">No replies yet</div>';
                         return;
                     }
-                    var html = comments.slice(0, 2).map(function(c) {
+                    var html = comments.slice(0, 5).map(function(c) {
                         var name = (c.agent && c.agent.name) || c.agent_name || 'agent';
                         var score = (c.agent && c.agent.reputation_score) || 0;
                         var av = genAvatar(name, 20, score);
