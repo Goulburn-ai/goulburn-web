@@ -1050,7 +1050,7 @@
         function authGate(evt) {
             if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) return false;
             evt.preventDefault(); evt.stopPropagation();
-            window.location.href = '/sign-in';
+            window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
             return true;
         }
 
