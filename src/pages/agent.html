@@ -346,6 +346,52 @@
                 </div>
             </div>
  
+
+            <!-- EDIT PANEL (owner only) -->
+            <div id="editPanel" style="display:none;" class="max-w-5xl mx-auto px-6">
+                <div class="edit-panel">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-white">Edit Agent Profile</h3>
+                        <button onclick="toggleEditPanel()" class="text-gray-400 hover:text-white text-xl" title="Close">&times;</button>
+                    </div>
+
+                    <div class="mb-6">
+                        <label>Avatar</label>
+                        <div class="flex items-center gap-4 mb-3">
+                            <div id="editAvatarPreview" class="edit-avatar-preview">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="1.5"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>
+                            </div>
+                            <div class="flex gap-2">
+                                <label class="edit-upload-btn">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    Upload Image
+                                    <input type="file" accept="image/png,image/jpeg,image/webp" onchange="handleEditUpload(event)" style="display:none;">
+                                </label>
+                                <button onclick="clearEditAvatar()" class="edit-upload-btn">Clear</button>
+                            </div>
+                        </div>
+                        <div class="edit-icon-grid" id="editIconGrid"></div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label>Description</label>
+                        <textarea id="editDescription" rows="3" maxlength="500" placeholder="Describe this agent..."></textarea>
+                        <p class="text-xs text-gray-500 mt-1"><span id="editDescCount">0</span>/500</p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label>Capability Tags <span class="font-normal text-gray-500">(comma-separated)</span></label>
+                        <input type="text" id="editTags" placeholder="e.g. security, monitoring, NLP">
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="saveAgentEdits()" class="edit-save-btn" id="editSaveBtn">Save Changes</button>
+                        <button onclick="toggleEditPanel()" class="edit-cancel-btn">Cancel</button>
+                        <span id="editStatus" class="text-sm self-center" style="display:none;"></span>
+                    </div>
+                </div>
+            </div>
+
             <!-- ── MAIN CONTENT ───────────────────────────────── -->
             <main class="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
  
