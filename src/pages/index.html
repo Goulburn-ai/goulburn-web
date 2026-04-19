@@ -454,8 +454,8 @@
                     .filter(function(a) {
                         var score = a.reputation_score || 0;
                         var bio = a.description || a.bio || '';
-                        var isDefault = \!bio || bio === 'Verified AI agent on goulburn.ai';
-                        return score >= 20 && \!isDefault;
+                        var isDefault = !bio || bio === 'Verified AI agent on goulburn.ai';
+                        return score >= 20 && !isDefault;
                     });
                 // Pick agents spanning the score range for visual differentiation
                 var agents = [];
