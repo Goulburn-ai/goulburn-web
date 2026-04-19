@@ -452,30 +452,51 @@
 
             var svg = '<svg class="radar-svg" viewBox="-70 -20 ' + (size+140) + ' ' + (size+40) + '" role="img" aria-label="Trust radar chart showing five evidence layer scores">';
 
-            // Grid rings
+            // SVG defs — glow filters
+            svg += '<defs>';
+            svg += '<filter id="radarGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>';
+            svg += '<filter id="dotGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>';
+            svg += '<radialGradient id="radarFill" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(245,158,11,0.18)"/><stop offset="100%" stop-color="rgba(245,158,11,0.03)"/></radialGradient>';
+            svg += '</defs>';
+
+            // Grid rings — progressive opacity (inner faint, outer stronger)
             [25, 50, 75, 100].forEach(function(ring) {
                 var pts = [];
                 for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, ring); pts.push(p.x + ',' + p.y); }
-                svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="' + (ring < 100 ? '4,4' : '0') + '"/>';
+                var opacity = ring === 100 ? 0.25 : (0.06 + (ring / 100) * 0.10);
+                var sw = ring === 100 ? 1.5 : 1;
+                var dash = ring < 100 ? '3,6' : '0';
+                svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,' + opacity + ')" stroke-width="' + sw + '" stroke-dasharray="' + dash + '"/>';
             });
 
-            // Axis lines
+            // Axis lines — tapered gradient from centre to vertex
             for (var i = 0; i < RADAR_N; i++) {
                 var p = radarPoint(i, 100);
-                svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
+                svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>';
+                // Bright tip near outer ring
+                var p85 = radarPoint(i, 85);
+                svg += '<line x1="' + p85.x + '" y1="' + p85.y + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.20)" stroke-width="1"/>';
             }
 
-            // Data polygon
+            // Data polygon — gradient fill + glow
             var dataPts = [];
             for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, scores[i]); dataPts.push(p.x + ',' + p.y); }
-            svg += '<polygon id="radarPoly" class="radar-line" points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>';
+            svg += '<polygon points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round" filter="url(#radarGlow)" opacity="0.5"/>';
+            svg += '<polygon id="radarPoly" class="radar-line" points="' + dataPts.join(' ') + '" fill="url(#radarFill)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>';
 
-            // Vertex dots
+            // Connector lines from centre to each vertex (data shape)
+            for (var i = 0; i < RADAR_N; i++) {
+                var p = radarPoint(i, scores[i]);
+                svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="' + scoreColour(scores[i]) + '" stroke-width="1" opacity="0.25"/>';
+            }
+
+            // Vertex dots — with glow
             for (var i = 0; i < RADAR_N; i++) {
                 var p = radarPoint(i, scores[i]);
                 var c = scoreColour(scores[i]);
                 var dotR = 6 + (scores[i] / 100) * 6;
-                svg += '<circle class="radar-vertex" id="radarDot' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="#000" stroke-width="2" data-layer="' + i + '" style="color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
+                svg += '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + (dotR + 4) + '" fill="' + c + '" opacity="0.15" filter="url(#dotGlow)"/>';
+                svg += '<circle class="radar-vertex" id="radarDot' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" data-layer="' + i + '" style="color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
             }
 
             // Axis labels + score values
@@ -942,56 +963,4 @@
 
                 // OG
                 document.querySelector('meta[property="og:image"]').content = API_BASE + '/api/badge/' + encodeURIComponent(name);
-                document.querySelector('meta[property="og:title"]').content = trust.agent + ' \u2014 ' + (TIER_LABELS[tier] || 'Unknown') + ' on goulburn.ai';
-
-                // JSON-LD
-                document.getElementById('vJsonLd').textContent = JSON.stringify({
-                    '@context': 'https://schema.org', '@type': 'Thing',
-                    name: trust.agent, description: 'AI agent with ' + (TIER_LABELS[tier] || 'Unknown') + ' trust tier on goulburn.ai',
-                    url: window.location.href
-                });
-
-                // Render all tabs
-                renderRadar(trust);
-                renderLayers(trust);
-
-                // Load probe data for Tab 3
-                var probeData = null;
-                try {
-                    var probeRes = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name));
-                    if (probeRes.ok) probeData = await probeRes.json();
-                } catch (e) { /* non-fatal */ }
-
-                renderProbes(trust, probeData);
-                renderAssessment(trust);
-
-                // Start live polling for score updates
-                startLivePolling();
-
-                // Show content
-                document.getElementById('loadState').style.display = 'none';
-                document.getElementById('verifyContent').style.display = 'block';
-
-            } catch (e) {
-                if (e.name === 'AbortError') {
-                    showError('Trust evaluation timed out. Please try again in a moment.');
-                } else {
-                    showError(e.message || 'Verification failed');
-                }
-            }
-        }
-
-        function showError(msg) {
-            document.getElementById('loadState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'flex';
-            document.getElementById('errorMsg').textContent = msg;
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            initTabs();
-            loadVerification();
-        });
-    })();
-    </script>
-</body>
-</html>
+                document.querySelector('meta[property="og:title"]').content = trust.agent + ' \u2014 ' + (TIER_
