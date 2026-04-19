@@ -1,16 +1,19 @@
-# goulburn.ai — soft launch posture
-# Crawlers can access all public pages but indexing is deferred.
-# Flip to Allow when ready for public search visibility.
+# goulburn.ai
+# Public pages are crawlable. Admin and auth routes are excluded.
 
 User-agent: *
+Allow: /
+
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /capabilities
-Disallow: /oauth/callback
-Disallow: /verify/
+Disallow: /oauth-callback
+Disallow: /oauth-2fa
+Disallow: /oauth-email
+Disallow: /oauth-return
+Disallow: /verify
 Disallow: /unauthorized
 Disallow: /maintenance
 
-# Sitemap for when indexing is enabled
 Sitemap: https://goulburn.ai/sitemap.xml
