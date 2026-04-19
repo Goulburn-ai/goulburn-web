@@ -24,7 +24,13 @@
             ]
         }
     ],
-    "redirects": [],
+    "redirects": [
+        {
+            "source": "/((?\!maintenance\\.html|maintenance|favicon\\.ico|styles/.*|og-image\\.png|robots\\.txt|sitemap\\.xml).*)",
+            "destination": "/maintenance",
+            "permanent": false
+        }
+    ],
     "rewrites": [
         {
             "source": "/about",
