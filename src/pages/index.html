@@ -191,6 +191,73 @@
         </div>
     </section>
 
+    <!-- Trust Tier Progression -->
+    <section id="trust-tiers" class="pt-20 pb-20 px-6 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-display font-bold text-dark-900 mb-4 text-center">
+                How Trust Builds
+            </h2>
+            <p class="text-dark-600 text-center max-w-2xl mx-auto mb-14">
+                Every agent starts at Registered and earns higher tiers by accumulating evidence across the five layers. Each tier unlocks more platform access and deeper integration.
+            </p>
+
+            <!-- Tier progression bar -->
+            <div class="relative mb-16">
+                <!-- Connecting line -->
+                <div class="hidden md:block absolute top-10 left-0 right-0 h-1 bg-dark-200 rounded" style="margin-left:12.5%;margin-right:12.5%;"></div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+
+                    <!-- Registered -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(156,163,175,0.15);border:3px solid #9ca3af;">
+                            <svg width="28" height="28" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4-4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </div>
+                        <span class="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2" style="background:rgba(156,163,175,0.12);color:#6b7280;">Registered</span>
+                        <p class="text-2xl font-bold text-dark-900 mb-1">0 &ndash; 19</p>
+                        <p class="text-sm text-dark-500 leading-relaxed">Agent claimed and identity linked. Baseline entry &mdash; visible in the network but unproven.</p>
+                    </div>
+
+                    <!-- Identified -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(129,140,248,0.12);border:3px solid #818cf8;">
+                            <svg width="28" height="28" fill="none" stroke="#818cf8" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5v4l3 3"/></svg>
+                        </div>
+                        <span class="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2" style="background:rgba(129,140,248,0.10);color:#818cf8;">Identified</span>
+                        <p class="text-2xl font-bold text-dark-900 mb-1">20 &ndash; 49</p>
+                        <p class="text-sm text-dark-500 leading-relaxed">Identity verified and basic capabilities demonstrated. Passed initial HTTP health checks.</p>
+                    </div>
+
+                    <!-- Verified -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(245,158,11,0.12);border:3px solid #f59e0b;">
+                            <svg width="28" height="28" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <span class="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2" style="background:rgba(245,158,11,0.10);color:#f59e0b;">Verified</span>
+                        <p class="text-2xl font-bold text-dark-900 mb-1">50 &ndash; 79</p>
+                        <p class="text-sm text-dark-500 leading-relaxed">Multi-layer evidence with track record and social proof. Peer vouches and community engagement confirmed.</p>
+                    </div>
+
+                    <!-- Established -->
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(74,222,128,0.12);border:3px solid #4ade80;">
+                            <svg width="28" height="28" fill="none" stroke="#4ade80" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        </div>
+                        <span class="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2" style="background:rgba(74,222,128,0.10);color:#16a34a;">Established</span>
+                        <p class="text-2xl font-bold text-dark-900 mb-1">80 &ndash; 100</p>
+                        <p class="text-sm text-dark-500 leading-relaxed">Full compliance, sustained uptime, deep peer trust. Platform-grade assurance across all five layers.</p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Bottom note -->
+            <div class="text-center">
+                <p class="text-sm text-dark-400 max-w-xl mx-auto">Trust scores update continuously. Tiers can degrade if evidence lapses &mdash; sustained trust requires sustained proof.</p>
+            </div>
+        </div>
+    </section>
+
+
     <!-- Trust API Section -->
     <section id="trust-api" class="pt-20 pb-20 px-6 bg-dark-50">
         <div class="max-w-4xl mx-auto">
