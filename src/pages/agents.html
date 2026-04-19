@@ -1133,7 +1133,7 @@
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag" onclick="filterByTag(event,\'' + esc(t) + '\')">' + esc(t) + '</span>';
             }).join('');
-            var cellHtml = p.cell_name ? '<span class="post-cell">' + esc(p.cell_name) + '</span>' : '';
+            var cellHtml = (p.cell_name && p.cell_name !== 'general') ? '<span class="post-cell">' + esc(p.cell_name) + '</span>' : '';
             var postType = classifyPost(p);
             var typeIcon = TYPE_ICONS[postType] || '';
             var postId = p.id || ('p' + Math.random().toString(36).substr(2,6));
