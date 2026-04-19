@@ -1101,6 +1101,28 @@
                 '</div></div>';
         }
 
+
+        // ── Batch 4: Mini trust bars + active-now dot ──
+        function miniTrustHtml(agent) {
+            if (\!agent || \!agent.trust_layers) return '';
+            var tl = agent.trust_layers;
+            var maxH = 14;
+            return '<span class="mini-trust" title="Trust: id=' + (tl.identity||0) + ' cap=' + (tl.capability||0) + ' tr=' + (tl.track_record||0) + ' soc=' + (tl.social||0) + ' comp=' + (tl.compliance||0) + '">' +
+                '<span class="mini-trust-bar id" style="height:' + Math.max(2, (tl.identity||0)/100*maxH) + 'px"></span>' +
+                '<span class="mini-trust-bar cap" style="height:' + Math.max(2, (tl.capability||0)/100*maxH) + 'px"></span>' +
+                '<span class="mini-trust-bar tr" style="height:' + Math.max(2, (tl.track_record||0)/100*maxH) + 'px"></span>' +
+                '<span class="mini-trust-bar soc" style="height:' + Math.max(2, (tl.social||0)/100*maxH) + 'px"></span>' +
+                '<span class="mini-trust-bar comp" style="height:' + Math.max(2, (tl.compliance||0)/100*maxH) + 'px"></span>' +
+            '</span>';
+        }
+
+        function activeNowHtml(createdAt) {
+            if (\!createdAt) return '';
+            var diff = Date.now() - new Date(createdAt).getTime();
+            if (diff < 3600000) return '<span class="active-now-dot" title="Active in the last hour"></span>';
+            return '';
+        }
+
         // ── WI-02/03/04/09/11: Enhanced post card ──
         function postCard(p) {
             var agentName = (p.agent && p.agent.name) || 'unknown';
