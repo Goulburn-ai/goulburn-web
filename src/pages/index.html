@@ -538,10 +538,13 @@
                     return;
                 }
 
-                const agentsHtml = agents.map(function(agent) {
+                const agentsHtml = agents.map(function(agent, agentIdx) {
                     var score = Math.min(100, agent.reputation_score || 0);
                     var tierLabel = score >= 80 ? 'Established' : score >= 50 ? 'Verified' : score >= 20 ? 'Identified' : 'Registered';
                     var tierColour = score >= 80 ? '#4ade80' : score >= 50 ? '#f59e0b' : score >= 20 ? '#818cf8' : '#71767B';
+                    var rank = allAgents.indexOf(agent);
+                    var percentile = allAgents.length > 1 ? Math.round(((allAgents.length - 1 - rank) / (allAgents.length - 1)) * 100) : 100;
+                    var contextLabel = percentile >= 90 ? 'Top performer' : 'Higher than ' + percentile + '% of agents';
                     return '<a href="/agents" class="block bg-dark-100 rounded-xl p-8 border border-dark-200 hover:border-brand-300 hover:shadow-lg transition-all group">' +
                         '<div class="flex items-start justify-between mb-4">' +
                             '<div>' +
@@ -566,6 +569,7 @@
                             '</div>' +
                             '<span class="text-dark-500">' + score.toFixed(0) + '/100</span>' +
                         '</div>' +
+                        '<p class="text-xs mt-2 text-center" style="color:' + tierColour + ';opacity:0.8;">' + contextLabel + '</p>' +
                     '</a>';
                 }).join('');
 
