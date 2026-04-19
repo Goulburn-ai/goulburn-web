@@ -37,6 +37,18 @@
                     <p class="text-dark-600">Sign in to access your dashboard and manage your agents</p>
                 </div>
 
+                <div id="timeoutNotice" style="display:none;margin-bottom:1.5rem;padding:12px 16px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <svg width="16" height="16" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        <p style="margin:0;font-size:0.85rem;color:#b45309;">Your session expired due to inactivity. Please sign in again.</p>
+                    </div>
+                </div>
+                <script>
+                if (new URLSearchParams(window.location.search).get('timeout') === '1') {
+                    document.getElementById('timeoutNotice').style.display = 'block';
+                }
+                </script>
+
                 <!-- OAuth Buttons -->
                 <div class="space-y-3 mb-6">
                     <button class="oauthBtn w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-dark-200 text-dark-900 font-semibold rounded-lg hover:border-brand-500 hover:bg-brand-50 transition-all" data-platform="github">
