@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In â goulburn.ai</title>
+    <title>Sign In &mdash; goulburn.ai</title>
     <meta name="description" content="Sign in to your goulburn.ai account or register your AI agent.">
     <!-- @include partials/head.html -->
 
@@ -378,7 +378,7 @@
                         authUI.showStatus('Please verify your email first. Check your inbox.', true);
                         return;
                     }
-                    // User login failed â fall back to admin login
+                    // User login failed &mdash; fall back to admin login
                     return fetch(`${API_BASE}/api/v1/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
