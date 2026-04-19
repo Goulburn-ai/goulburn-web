@@ -139,10 +139,10 @@
     
         @keyframes stripe-move { 0% { transform: translateX(0); } 100% { transform: translateX(28px); } }
         @keyframes spin-icon { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .step-active .step-icon { background: var(--brand-500) \!important; color: #000 \!important; font-weight: 700; }
-        .step-done .step-icon { background: #22c55e \!important; color: #fff \!important; }
-        .step-active span:last-child { color: var(--dark-900) \!important; font-weight: 500; }
-        .step-done span:last-child { color: #4ade80 \!important; }
+        .step-active .step-icon { background: var(--brand-500) !important; color: #000 !important; font-weight: 700; }
+        .step-done .step-icon { background: #22c55e !important; color: #fff !important; }
+        .step-active span:last-child { color: var(--dark-900) !important; font-weight: 500; }
+        .step-done span:last-child { color: #4ade80 !important; }
     </style>
 </head>
 <body class="bg-dark-50">
@@ -198,7 +198,7 @@
             </div>
             <p class="hint" style="font-weight: 600; color: var(--dark-700);" id="promptTitle"></p>
             <div class="prompt-box" id="promptBody"></div>
-            <\!-- Run button -->
+            <!-- Run button -->
             <div id="runControls">
                 <button class="btn btn-primary" id="autoSolveBtn" style="font-size:1rem; padding:0.85rem 1.5rem;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
@@ -207,7 +207,7 @@
                 <button class="btn btn-secondary" id="cancelBtn" style="margin-left:0.5rem;">Start over</button>
             </div>
 
-            <\!-- Progress tracker (appears during auto-solve) -->
+            <!-- Progress tracker (appears during auto-solve) -->
             <div id="progressTracker" class="hidden" style="margin-top:1.25rem;">
                 <div style="background:rgba(255,255,255,0.03); border:1px solid var(--dark-200); border-radius:10px; padding:1.25rem; position:relative; overflow:hidden;">
                     <div id="progressOverlay" style="position:absolute; inset:0; background:repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(245,158,11,0.03) 10px, rgba(245,158,11,0.03) 20px); animation: stripe-move 1s linear infinite; pointer-events:none;"></div>
@@ -238,7 +238,7 @@
                 </div>
             </div>
 
-            <\!-- Agent response (read-only, locked) -->
+            <!-- Agent response (read-only, locked) -->
             <div id="generatedResponseWrap" class="hidden" style="margin-top:1.25rem;">
                 <div style="background:rgba(255,255,255,0.02); border:1px solid var(--dark-200); border-radius:10px; padding:1.25rem; position:relative;">
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:0.75rem;">
@@ -251,7 +251,7 @@
                 </div>
             </div>
 
-            <\!-- Error fallback -->
+            <!-- Error fallback -->
             <div id="autoSolveError" class="hidden" style="margin-top:1rem;">
                 <div class="status status-error" id="autoSolveErrorMsg"></div>
                 <div style="margin-top:0.75rem;">
@@ -259,7 +259,7 @@
                 </div>
             </div>
 
-            <\!-- Manual fallback (hidden by default) -->
+            <!-- Manual fallback (hidden by default) -->
             <div id="manualEntryWrap" class="hidden" style="margin-top:1rem;">
                 <div class="form-row">
                     <label for="responseText">Agent response (manual paste)</label>
@@ -532,7 +532,7 @@
 
         // ── Step 3: auto-solve (locked pipeline) ──
         async function autoSolve() {
-            if (\!state.attempt) {
+            if (!state.attempt) {
                 setStatus('submitStatus', 'error', 'No active challenge.');
                 return;
             }
