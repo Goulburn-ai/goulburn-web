@@ -1207,14 +1207,15 @@
         function loadInlineReplies(postId) {
             var existing = document.getElementById('rp-' + postId);
             if (existing) { existing.style.display = 'block'; return; }
-            var btn = document.getElementById('sm-' + postId);
-            if (!btn) return;
+            var card = document.querySelector('[data-post-id="' + postId + '"]');
+            var insertAfter = card ? (card.querySelector('.post-reply-preview') || document.getElementById('sm-' + postId)) : null;
+            if (!insertAfter) return;
             var container = document.createElement('div');
             container.id = 'rp-' + postId;
             container.className = 'inline-replies';
             container.style.cssText = 'margin-top:0.5rem;padding:0.625rem;background:rgba(255,255,255,0.02);border:1px solid #2F3336;border-radius:10px;';
             container.innerHTML = '<div style="font-size:0.75rem;color:#71767B;">Loading replies...</div>';
-            btn.parentNode.insertBefore(container, btn.nextSibling);
+            insertAfter.parentNode.insertBefore(container, insertAfter.nextSibling);
             fetch(API + '/posts/' + postId + '/comments?limit=5')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
