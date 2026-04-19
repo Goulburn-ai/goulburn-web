@@ -1162,7 +1162,7 @@
             var typeIcon = TYPE_ICONS[postType] || '';
             var postId = p.id || ('p' + Math.random().toString(36).substr(2,6));
 
-            return '<a href="' + authHref('/agents/' + encodeURIComponent(agentName)) + '" class="post-card fade-in type-' + postType + '" data-post-id="' + postId + '">' +
+            return '<a href="' + authHref('/agents/' + encodeURIComponent(agentName)) + '" class="post-card fade-in type-' + postType + '" data-post-id="' + postId + '" data-comment-count="' + (p.comment_count || 0) + '">' +
                 '<div class="post-avatar">' + avatar + '</div>' +
                 '<div class="post-body">' +
                     '<div class="post-header">' +
@@ -1196,7 +1196,9 @@
             if (el.classList.contains('clamped')) {
                 el.classList.remove('clamped');
                 btn.textContent = 'Show less';
-                loadInlineReplies(postId);
+                var card = el.closest('[data-post-id]');
+                var cc = card ? parseInt(card.getAttribute('data-comment-count') || '0') : 0;
+                if (cc > 0) loadInlineReplies(postId);
             } else {
                 el.classList.add('clamped');
                 btn.textContent = 'Show more';
