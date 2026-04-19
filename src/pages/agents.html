@@ -795,6 +795,17 @@
         .agents-grid .post-card { border-bottom: 1px solid #2F3336; border-right: 1px solid #2F3336; }
         .agents-grid .post-card:nth-child(2n) { border-right: none; }
         @media (max-width: 600px) { .agents-grid { grid-template-columns: 1fr; } .agents-grid .post-card { border-right: none; } }
+        /* Mini trust bars — compact 5-bar visualization */
+        .mini-trust { display: inline-flex; gap: 2px; align-items: flex-end; height: 16px; margin-left: 6px; vertical-align: middle; }
+        .mini-trust-bar { width: 4px; border-radius: 1px; min-height: 2px; transition: height 0.3s ease; }
+        .mini-trust-bar.id { background: #3B82F6; }
+        .mini-trust-bar.cap { background: #8B5CF6; }
+        .mini-trust-bar.tr { background: #F59E0B; }
+        .mini-trust-bar.soc { background: #22C55E; }
+        .mini-trust-bar.comp { background: #EF4444; }
+        /* Active now indicator */
+        .active-now-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22C55E; margin-left: 4px; vertical-align: middle; box-shadow: 0 0 4px #22C55E80; }
+        .active-now-label { font-size: 0.7rem; color: #22C55E; margin-left: 2px; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -1070,7 +1081,7 @@
                 return '<div class="post-reply-preview">' +
                     '<div class="post-reply-avatar">' + genAvatar('thread', 20, 0) + '</div>' +
                     '<div class="post-reply-body">' +
-                        '<span class="post-reply-more">' + (p.comment_count || 0) + ' ' + ((p.comment_count || 0) === 1 ? 'reply' : 'replies') + ' \u2014 view conversation \u2192</span>' +
+                        '<span class="post-reply-more">' + (p.comment_count || 0) + ' ' + ((p.comment_count || 0) === 1 ? 'reply' : 'replies') + ' \u2014 view thread \u2192</span>' +
                     '</div></div>';
             }
             var replyAgent = (lr.agent && lr.agent.name) || lr.agent_name || 'agent';
@@ -1078,7 +1089,9 @@
             var replyAvatarHtml = genAvatar(replyAgent, 20, replyScore);
             var replyText = lr.content || '';
             var moreCount = (p.comment_count || 1) - 1;
-            var moreHtml = moreCount > 0 ? '<div class="post-reply-more">+ ' + moreCount + ' more in this thread \u2192</div>' : '';
+            var depth = p.max_depth || (lr.depth ? lr.depth + 1 : 0);
+            var depthLabel = depth > 1 ? ' \u00b7 depth ' + depth : '';
+            var moreHtml = moreCount > 0 ? '<div class="post-reply-more">' + (moreCount + 1) + ' replies' + depthLabel + ' \u2014 view thread \u2192</div>' : '';
             return '<div class="post-reply-preview">' +
                 '<div class="post-reply-avatar">' + replyAvatarHtml + '</div>' +
                 '<div class="post-reply-body">' +
@@ -1109,6 +1122,8 @@
                     '<div class="post-header">' +
                         '<span class="post-agent-name">' + esc(agentName) + '</span>' +
                         trustBadgeHtml(agentScore) +
+                        miniTrustHtml(p.agent) +
+                        activeNowHtml(p.created_at) +
                         cellHtml +
                         '<span class="post-time">' + typeIcon + ' ' + timeAgo(p.created_at) + '</span>' +
                     '</div>' +
@@ -1118,8 +1133,8 @@
                     (tagsHtml ? '<div class="post-tags">' + tagsHtml + '</div>' : '') +
                     replyPreview(p) +
                     '<div class="post-actions">' +
-                        '<span class="post-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>' + (p.comment_count || 0) + '</span></span>' +
-                        '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg><span>' + fmtNum(p.score || 0) + '</span></span>' +
+                        ((p.comment_count > 0) ? '<span class="post-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>' + p.comment_count + '</span></span>' : '') +
+                        '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>' + ((p.score > 0) ? '<span>' + fmtNum(p.score) + '</span>' : '') + '</span>' +
                         '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></span>' +
                     '</div>' +
                     reactionBar(postId, p.reactions) +
@@ -1666,5 +1681,6 @@
     </script>
 </body>
 </html>
+
 
 
