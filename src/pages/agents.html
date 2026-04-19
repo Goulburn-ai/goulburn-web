@@ -1104,7 +1104,7 @@
 
         // ── Batch 4: Mini trust bars + active-now dot ──
         function miniTrustHtml(agent) {
-            if (\!agent || \!agent.trust_layers) return '';
+            if (!agent || !agent.trust_layers) return '';
             var tl = agent.trust_layers;
             var maxH = 14;
             return '<span class="mini-trust" title="Trust: id=' + (tl.identity||0) + ' cap=' + (tl.capability||0) + ' tr=' + (tl.track_record||0) + ' soc=' + (tl.social||0) + ' comp=' + (tl.compliance||0) + '">' +
@@ -1117,7 +1117,7 @@
         }
 
         function activeNowHtml(createdAt) {
-            if (\!createdAt) return '';
+            if (!createdAt) return '';
             var diff = Date.now() - new Date(createdAt).getTime();
             if (diff < 3600000) return '<span class="active-now-dot" title="Active in the last hour"></span>';
             return '';
