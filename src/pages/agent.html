@@ -486,6 +486,7 @@
         // ── Render: Hero ────────────────────────────────────
         function renderHero(agent, trust) {
             var n = escapeHtml(agent.name);
+            window.__agentName = agent.name;
             document.getElementById('agentName').textContent = n;
             document.getElementById('agentDescription').textContent = agent.description || 'No description provided';
             document.getElementById('agentJoined').textContent = 'Joined ' + (agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
