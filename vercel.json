@@ -35,6 +35,10 @@
             "destination": "/pricing.html"
         },
         {
+            "source": "/changelog",
+            "destination": "/changelog.html"
+        },
+        {
             "source": "/agents",
             "destination": "/agents.html"
         },
