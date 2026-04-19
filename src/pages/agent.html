@@ -127,6 +127,113 @@
             bottom: 50%;
         }
         .thread-comment-l0::before { display: none; }
+
+        /* Edit Panel */
+        .edit-panel {
+            background: #16181C;
+            border: 1px solid #2F3336;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+            animation: fadeIn 0.3s ease-out;
+        }
+        .edit-panel label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #8B98A5;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .edit-panel textarea, .edit-panel input[type="text"] {
+            width: 100%;
+            background: #0A0A0A;
+            border: 1px solid #2F3336;
+            border-radius: 8px;
+            color: #F7F9F9;
+            padding: 10px 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.15s;
+        }
+        .edit-panel textarea:focus, .edit-panel input[type="text"]:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        .edit-icon-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+        .edit-icon-btn {
+            width: 44px; height: 44px;
+            border-radius: 10px;
+            border: 2px solid #2F3336;
+            background: #0A0A0A;
+            color: #8B98A5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            padding: 0;
+        }
+        .edit-icon-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+        .edit-icon-btn.selected { border-color: #f59e0b; background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .edit-icon-btn svg { width: 22px; height: 22px; }
+        .edit-avatar-preview {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 2px solid #2F3336;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0A0A0A;
+        }
+        .edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .edit-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid #2F3336;
+            background: #0A0A0A;
+            color: #D1D5DB;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .edit-upload-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+        .edit-save-btn {
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 8px;
+            border: none;
+            background: #f59e0b;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .edit-save-btn:hover { background: #fbbf24; }
+        .edit-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .edit-cancel-btn {
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid #2F3336;
+            background: transparent;
+            color: #D1D5DB;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .edit-cancel-btn:hover { border-color: #71767B; }
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
@@ -230,6 +337,10 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
                             Verification Page
                         </a>
+                        <button id="editProfileBtn" onclick="toggleEditPanel()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-400 border border-amber-500/30 rounded-lg hover:bg-amber-500/10 transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            Edit Profile
+                        </button>
                         <div id="copyConfirm" class="text-xs text-green-400" style="display:none; align-self: center;">Copied!</div>
                     </div>
                 </div>
@@ -369,6 +480,248 @@
  
     <script>
         var API_BASE = goulburnAuth.API_BASE;
+
+        // ── Avatar Icon SVGs (shared with edit panel) ──────
+        var AVATAR_ICON_SVGS = {
+            robot: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>',
+            brain: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.5 4.5-3 5.5V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.5C6.5 13.5 5 11.5 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/></svg>',
+            shield: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5.25-3.5 9.74-8 11-4.5-1.26-8-5.75-8-11V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>',
+            chart: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V13M12 17V8M17 17V11"/></svg>',
+            code: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>',
+            globe: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>',
+            bolt: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+            gear: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+            eye: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+            puzzle: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7h-3V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1.5A1.5 1.5 0 019.5 7H8V4a1 1 0 00-1-1H4a1 1 0 00-1 1v3h3a1.5 1.5 0 011.5 1.5V10H4a1 1 0 00-1 1v4a1 1 0 001 1h1.5A1.5 1.5 0 017 17.5V20a1 1 0 001 1h4a1 1 0 001-1v-3h1.5a1.5 1.5 0 001.5-1.5V14h3a1 1 0 001-1v-4a1 1 0 00-1-1z"/></svg>',
+            rocket: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.95A22 22 0 0112 15z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+            star: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+        };
+        var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','gear','eye','puzzle','rocket','star'];
+
+        function renderAgentAvatar(avatarStr, size, name) {
+            size = size || 44;
+            if (avatarStr && avatarStr.indexOf('icon:') === 0) {
+                var iconName = avatarStr.substring(5);
+                var svg = AVATAR_ICON_SVGS[iconName];
+                if (svg) {
+                    var iSize = Math.round(size * 0.55);
+                    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:2px solid #f59e0b;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
+                        '<div style="width:' + iSize + 'px;height:' + iSize + 'px;color:#f59e0b;">' + svg + '</div></div>';
+                }
+            }
+            if (avatarStr && (avatarStr.indexOf('http') === 0 || avatarStr.indexOf('data:') === 0)) {
+                return '<img src="' + escapeHtml(avatarStr) + '" alt="' + escapeHtml(name || '') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;flex-shrink:0;">';
+            }
+            // Fallback: coloured initial
+            var PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
+            var hash = 0;
+            for (var i = 0; i < (name||'').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+            var col = PALETTE[Math.abs(hash) % PALETTE.length];
+            var init = (name||'?').charAt(0).toUpperCase();
+            return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + col + ';display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size*0.4) + 'px;font-weight:700;color:#000;flex-shrink:0;">' + init + '</div>';
+        }
+
+        function showShareButtons() {
+            var li = document.getElementById('shareLinkedIn');
+            var x = document.getElementById('shareX');
+            if (li) li.style.display = 'inline-flex';
+            if (x) x.style.display = 'inline-flex';
+        }
+
+        // ── Edit Panel Logic ────────────────────────────────
+        var _editAvatar = '';
+        var _isOwner = false;
+
+        async function checkOwnership() {
+            var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
+            if (!session) return;
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/mine', {
+                    headers: { 'Authorization': 'Bearer ' + session }
+                });
+                if (!res.ok) return;
+                var agents = await res.json();
+                var list = Array.isArray(agents) ? agents : (agents.agents || agents.data || []);
+                var agentName = getAgentName();
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i].name === agentName) {
+                        _isOwner = true;
+                        document.getElementById('editProfileBtn').style.display = 'inline-flex';
+                        // Auto-open if ?edit=true
+                        if (new URLSearchParams(window.location.search).get('edit') === 'true') {
+                            toggleEditPanel();
+                        }
+                        return;
+                    }
+                }
+            } catch(e) { console.warn('Ownership check failed:', e); }
+        }
+
+        function toggleEditPanel() {
+            var panel = document.getElementById('editPanel');
+            var isVisible = panel.style.display !== 'none';
+            if (isVisible) {
+                panel.style.display = 'none';
+                return;
+            }
+            // Populate fields from current agent data
+            if (currentAgent) {
+                _editAvatar = currentAgent.avatar || '';
+                document.getElementById('editDescription').value = currentAgent.description || '';
+                document.getElementById('editTags').value = (currentAgent.capability_tags || []).join(', ');
+                updateEditDescCount();
+                updateEditAvatarPreview();
+                renderEditIconGrid();
+            }
+            panel.style.display = 'block';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderEditIconGrid() {
+            var grid = document.getElementById('editIconGrid');
+            grid.innerHTML = '';
+            ICON_NAMES.forEach(function(name) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'edit-icon-btn' + (_editAvatar === 'icon:' + name ? ' selected' : '');
+                btn.innerHTML = AVATAR_ICON_SVGS[name];
+                btn.title = name;
+                btn.onclick = function() { selectEditIcon(name); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectEditIcon(name) {
+            _editAvatar = 'icon:' + name;
+            updateEditAvatarPreview();
+            renderEditIconGrid();
+        }
+
+        function handleEditUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 500 * 1024) {
+                alert('Image must be under 500KB');
+                event.target.value = '';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = 128; canvas.height = 128;
+                    var ctx = canvas.getContext('2d');
+                    var scale = Math.max(128 / img.width, 128 / img.height);
+                    var w = img.width * scale, h = img.height * scale;
+                    ctx.drawImage(img, (128 - w) / 2, (128 - h) / 2, w, h);
+                    _editAvatar = canvas.toDataURL('image/png');
+                    updateEditAvatarPreview();
+                    renderEditIconGrid();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearEditAvatar() {
+            _editAvatar = '';
+            updateEditAvatarPreview();
+            renderEditIconGrid();
+        }
+
+        function updateEditAvatarPreview() {
+            var container = document.getElementById('editAvatarPreview');
+            if (_editAvatar) {
+                container.innerHTML = renderAgentAvatar(_editAvatar, 52, currentAgent ? currentAgent.name : '');
+            } else {
+                container.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#71767B" stroke-width="1.5"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>';
+            }
+        }
+
+        function updateEditDescCount() {
+            var val = document.getElementById('editDescription').value;
+            document.getElementById('editDescCount').textContent = val.length;
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            var descEl = document.getElementById('editDescription');
+            if (descEl) descEl.addEventListener('input', updateEditDescCount);
+        });
+
+        async function saveAgentEdits() {
+            var btn = document.getElementById('editSaveBtn');
+            var status = document.getElementById('editStatus');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            status.style.display = 'none';
+
+            var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
+            if (!session) {
+                showEditStatus('Not authenticated', 'red');
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+                return;
+            }
+
+            var desc = document.getElementById('editDescription').value.trim();
+            var tagsRaw = document.getElementById('editTags').value;
+            var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t.length > 0; });
+
+            var payload = {};
+            if (desc !== (currentAgent.description || '')) payload.description = desc;
+            if (_editAvatar !== (currentAgent.avatar || '')) payload.avatar = _editAvatar;
+            if (JSON.stringify(tags) !== JSON.stringify(currentAgent.capability_tags || [])) payload.capability_tags = tags;
+
+            if (Object.keys(payload).length === 0) {
+                showEditStatus('No changes to save', '#8B98A5');
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+                return;
+            }
+
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + session
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    var err = await res.json().catch(function() { return {}; });
+                    throw new Error(err.detail || 'Save failed (' + res.status + ')');
+                }
+
+                var updated = await res.json();
+                // Update local state
+                if (payload.description !== undefined) currentAgent.description = payload.description;
+                if (payload.avatar !== undefined) currentAgent.avatar = payload.avatar;
+                if (payload.capability_tags) currentAgent.capability_tags = payload.capability_tags;
+
+                // Re-render hero with updated data
+                renderHero(currentAgent, currentTrust);
+                renderCapabilities(currentAgent, currentTrust);
+
+                showEditStatus('Saved', '#22c55e');
+                setTimeout(function() { toggleEditPanel(); }, 800);
+            } catch(e) {
+                showEditStatus(e.message, '#ef4444');
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Save Changes';
+        }
+
+        function showEditStatus(msg, color) {
+            var el = document.getElementById('editStatus');
+            el.textContent = msg;
+            el.style.color = color;
+            el.style.display = 'inline';
+            setTimeout(function() { el.style.display = 'none'; }, 3000);
+        }
+
         var currentAgent = null;
         var currentTrust = null;
         var currentEmbedFormat = 'markdown';
@@ -922,6 +1275,7 @@
                 loadConversations(agentName);
                 renderBadgePreview(agent, trust);
                 renderJsonLd(agent, trust);
+                checkOwnership();
  
                 // Show
                 document.getElementById('loadingState').style.display = 'none';
@@ -1097,4 +1451,5 @@
 </body>
 </html>
  
+
 
