@@ -13,9 +13,10 @@
         /* ── Radar Chart ── */
         .radar-wrap { position: relative; width: 100%; max-width: 600px; margin: 0 auto; }
         .radar-svg { width: 100%; height: auto; }
-        .radar-vertex { transition: r 0.2s ease; cursor: pointer; }
+        .radar-vertex { transition: cx 0.8s ease, cy 0.8s ease, r 0.8s ease, fill 0.8s ease; cursor: pointer; }
+        .radar-line { transition: all 0.8s ease; }
         .radar-vertex:hover { filter: drop-shadow(0 0 6px currentColor); }
-        .radar-line { transition: all 0.6s ease; }
+
         .radar-tooltip {
             position: absolute; padding: 8px 12px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px; font-size: 13px; color: #f5f5f5; pointer-events: none; opacity: 0;
@@ -426,76 +427,73 @@
         /* ══════════════════════════════════════
            TAB 1: RADAR CHART
            ══════════════════════════════════════ */
+        // Radar chart constants
+        var RADAR_SIZE = 600, RADAR_CX = 300, RADAR_CY = 300, RADAR_R = 200;
+        var RADAR_N = 5, RADAR_ANGLE_OFFSET = -Math.PI / 2;
+        var _lastTrustData = null;
+
+        function radarPoint(i, val) {
+            var angle = RADAR_ANGLE_OFFSET + (2 * Math.PI * i / RADAR_N);
+            var dist = (val / 100) * RADAR_R;
+            return { x: RADAR_CX + dist * Math.cos(angle), y: RADAR_CY + dist * Math.sin(angle) };
+        }
+
         function renderRadar(trust) {
             var layers = trust.layers || {};
             var scores = LAYERS.map(function(l) { return (layers[l.key] && layers[l.key].score) || 0; });
             var overall = trust.overall_score || 0;
             var tier = trust.tier || tierFromScore(overall);
+            _lastTrustData = trust;
 
-            var size = 600, cx = size/2, cy = size/2, r = 200;
-            var n = 5;
-            var angleOffset = -Math.PI / 2; // Start from top
+            var existing = document.querySelector('.radar-svg');
+            if (existing) { updateRadar(trust); return; }
 
-            function pointOnAxis(i, val) {
-                var angle = angleOffset + (2 * Math.PI * i / n);
-                var dist = (val / 100) * r;
-                return { x: cx + dist * Math.cos(angle), y: cy + dist * Math.sin(angle) };
-            }
+            var size = RADAR_SIZE, cx = RADAR_CX, cy = RADAR_CY, r = RADAR_R;
 
-            // Grid
             var svg = '<svg class="radar-svg" viewBox="-70 -20 ' + (size+140) + ' ' + (size+40) + '" role="img" aria-label="Trust radar chart showing five evidence layer scores">';
 
             // Grid rings
             [25, 50, 75, 100].forEach(function(ring) {
                 var pts = [];
-                for (var i = 0; i < n; i++) {
-                    var p = pointOnAxis(i, ring);
-                    pts.push(p.x + ',' + p.y);
-                }
+                for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, ring); pts.push(p.x + ',' + p.y); }
                 svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="' + (ring < 100 ? '4,4' : '0') + '"/>';
             });
 
             // Axis lines
-            for (var i = 0; i < n; i++) {
-                var p = pointOnAxis(i, 100);
+            for (var i = 0; i < RADAR_N; i++) {
+                var p = radarPoint(i, 100);
                 svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>';
             }
 
-            // Data polygon (outline only)
+            // Data polygon
             var dataPts = [];
-            for (var i = 0; i < n; i++) {
-                var p = pointOnAxis(i, scores[i]);
-                dataPts.push(p.x + ',' + p.y);
-            }
-            // Subtle fill for shape recognition
-            svg += '<polygon class="radar-line" points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round" stroke-dasharray="1000" style="animation-delay:0.2s"/>';
+            for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, scores[i]); dataPts.push(p.x + ',' + p.y); }
+            svg += '<polygon id="radarPoly" class="radar-line" points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>';
 
             // Vertex dots
-            for (var i = 0; i < n; i++) {
-                var p = pointOnAxis(i, scores[i]);
+            for (var i = 0; i < RADAR_N; i++) {
+                var p = radarPoint(i, scores[i]);
                 var c = scoreColour(scores[i]);
-                var dotR = 6 + (scores[i] / 100) * 6; // 6-12px
-                var delay = (0.3 + i * 0.08);
-                svg += '<circle class="radar-vertex" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="#000" stroke-width="2" data-layer="' + i + '" style="animation-delay:' + delay + 's; color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
+                var dotR = 6 + (scores[i] / 100) * 6;
+                svg += '<circle class="radar-vertex" id="radarDot' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="#000" stroke-width="2" data-layer="' + i + '" style="color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
             }
 
-            // Axis labels
+            // Axis labels + score values
             var labelR = r + 36;
-            for (var i = 0; i < n; i++) {
-                var angle = angleOffset + (2 * Math.PI * i / n);
+            for (var i = 0; i < RADAR_N; i++) {
+                var angle = RADAR_ANGLE_OFFSET + (2 * Math.PI * i / RADAR_N);
                 var lx = cx + labelR * Math.cos(angle);
                 var ly = cy + labelR * Math.sin(angle);
                 var anchor = 'middle';
                 if (Math.cos(angle) < -0.3) anchor = 'end';
                 else if (Math.cos(angle) > 0.3) anchor = 'start';
                 svg += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" dominant-baseline="middle" fill="#a3a3a3" font-size="12" font-family="Plus Jakarta Sans, sans-serif">' + LAYERS[i].label + '</text>';
-                // Score next to label
-                svg += '<text x="' + lx + '" y="' + (ly + 16) + '" text-anchor="' + anchor + '" dominant-baseline="middle" fill="' + scoreColour(scores[i]) + '" font-size="14" font-weight="700" font-family="Nunito, sans-serif">' + scores[i] + '</text>';
+                svg += '<text id="radarScore' + i + '" x="' + lx + '" y="' + (ly + 16) + '" text-anchor="' + anchor + '" dominant-baseline="middle" fill="' + scoreColour(scores[i]) + '" font-size="14" font-weight="700" font-family="Nunito, sans-serif">' + scores[i] + '</text>';
             }
 
             // Centre score + tier
-            svg += '<text x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#f5f5f5" font-size="40" font-weight="800" font-family="Nunito, sans-serif">' + overall + '</text>';
-            svg += '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" fill="' + (TIER_COLOURS[tier] || '#a3a3a3') + '" font-size="12" font-weight="700" text-transform="uppercase" letter-spacing="0.1em" font-family="Plus Jakarta Sans, sans-serif">' + (TIER_LABELS[tier] || 'Unknown').toUpperCase() + '</text>';
+            svg += '<text id="radarOverall" x="' + cx + '" y="' + (cy - 8) + '" text-anchor="middle" fill="#f5f5f5" font-size="40" font-weight="800" font-family="Nunito, sans-serif">' + overall + '</text>';
+            svg += '<text id="radarTier" x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle" fill="' + (TIER_COLOURS[tier] || '#a3a3a3') + '" font-size="12" font-weight="700" text-transform="uppercase" letter-spacing="0.1em" font-family="Plus Jakarta Sans, sans-serif">' + (TIER_LABELS[tier] || 'Unknown').toUpperCase() + '</text>';
 
             svg += '</svg>';
 
@@ -547,6 +545,103 @@
                 legHtml += '<div class="legend-item"><div class="legend-dot" style="background:' + scoreColour(scores[i]) + ';"></div>' + l.label + ' <strong style="color:#f5f5f5;">' + scores[i] + '</strong></div>';
             });
             document.getElementById('legendRow').innerHTML = legHtml;
+        }
+
+        // ── Live update: smoothly transition radar when scores change ──
+        function updateRadar(trust) {
+            var layers = trust.layers || {};
+            var scores = LAYERS.map(function(l) { return (layers[l.key] && layers[l.key].score) || 0; });
+            var overall = trust.overall_score || 0;
+            var tier = trust.tier || tierFromScore(overall);
+            _lastTrustData = trust;
+
+            // Update data polygon points
+            var poly = document.getElementById('radarPoly');
+            if (poly) {
+                var pts = [];
+                for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, scores[i]); pts.push(p.x + ',' + p.y); }
+                poly.setAttribute('points', pts.join(' '));
+            }
+
+            // Update vertex dots (position, size, colour)
+            for (var i = 0; i < RADAR_N; i++) {
+                var dot = document.getElementById('radarDot' + i);
+                if (\!dot) continue;
+                var p = radarPoint(i, scores[i]);
+                var c = scoreColour(scores[i]);
+                dot.setAttribute('cx', p.x);
+                dot.setAttribute('cy', p.y);
+                dot.setAttribute('r', 6 + (scores[i] / 100) * 6);
+                dot.setAttribute('fill', c);
+                dot.style.color = c;
+                dot.setAttribute('aria-label', LAYERS[i].label + ' score: ' + scores[i] + ' out of 100');
+            }
+
+            // Update score labels
+            for (var i = 0; i < RADAR_N; i++) {
+                var el = document.getElementById('radarScore' + i);
+                if (el) {
+                    el.textContent = scores[i];
+                    el.setAttribute('fill', scoreColour(scores[i]));
+                }
+            }
+
+            // Update centre overall + tier
+            var oel = document.getElementById('radarOverall');
+            if (oel) oel.textContent = overall;
+            var tel = document.getElementById('radarTier');
+            if (tel) {
+                tel.textContent = (TIER_LABELS[tier] || 'Unknown').toUpperCase();
+                tel.setAttribute('fill', TIER_COLOURS[tier] || '#a3a3a3');
+            }
+
+            // Update hero section
+            document.getElementById('vScore').textContent = overall;
+            var pill = document.getElementById('vTierPill');
+            pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-3 ' + (TIER_CSS[tier] || TIER_CSS.registered);
+            document.getElementById('vTierLabel').textContent = TIER_LABELS[tier] || 'Unknown';
+            document.getElementById('vTimestamp').textContent = trust.queried_at ? new Date(trust.queried_at).toLocaleString() : 'now';
+        }
+
+        // ── Poll for live updates every 30s ──
+        var POLL_INTERVAL = 30000;
+        function startLivePolling() {
+            var name = getAgentName();
+            if (\!name) return;
+            setInterval(async function() {
+                try {
+                    var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name));
+                    if (\!res.ok) return;
+                    var trust = await res.json();
+                    if (trust.tier === 'not_found') return;
+                    // Only update if data actually changed
+                    var newScore = trust.overall_score || 0;
+                    var oldScore = _lastTrustData ? (_lastTrustData.overall_score || 0) : -1;
+                    if (newScore \!== oldScore || scoresChanged(_lastTrustData, trust)) {
+                        renderRadar(trust);
+                        // Flash a subtle pulse on the radar to signal the update
+                        var wrap = document.getElementById('radarWrap');
+                        if (wrap) {
+                            wrap.style.transition = 'box-shadow 0.3s ease';
+                            wrap.style.boxShadow = '0 0 20px rgba(245,158,11,0.15)';
+                            setTimeout(function() { wrap.style.boxShadow = 'none'; }, 1500);
+                        }
+                    }
+                } catch (e) { /* silent — non-fatal */ }
+            }, POLL_INTERVAL);
+        }
+
+        function scoresChanged(oldTrust, newTrust) {
+            if (\!oldTrust || \!newTrust) return true;
+            var oldLayers = oldTrust.layers || {};
+            var newLayers = newTrust.layers || {};
+            for (var i = 0; i < LAYERS.length; i++) {
+                var key = LAYERS[i].key;
+                var os = (oldLayers[key] && oldLayers[key].score) || 0;
+                var ns = (newLayers[key] && newLayers[key].score) || 0;
+                if (os \!== ns) return true;
+            }
+            return false;
         }
 
         /* ══════════════════════════════════════
@@ -869,6 +964,9 @@
 
                 renderProbes(trust, probeData);
                 renderAssessment(trust);
+
+                // Start live polling for score updates
+                startLivePolling();
 
                 // Show content
                 document.getElementById('loadState').style.display = 'none';
