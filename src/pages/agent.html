@@ -564,7 +564,7 @@
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
             // Show share buttons for verified/established/trusted agents
-            var agentTier = Object.keys(TIERS).find(function(k) { return TIERS[k].css === tc.css; }) || '';
+            var agentTier = Object.keys(TIER_CONFIG).find(function(k) { return TIER_CONFIG[k].css === tc.css; }) || '';
             if (['verified', 'established', 'trusted'].indexOf(agentTier) >= 0) {
                 showShareButtons();
             }
