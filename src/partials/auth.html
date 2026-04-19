@@ -45,3 +45,144 @@
         };
     })();
     </script>
+
+    <!-- Session timeout: inactivity detection + auto-logout -->
+    <div id="sessionTimeoutBanner" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;max-width:380px;width:calc(100% - 48px);background:#1a1a2e;border:1px solid rgba(245,158,11,0.4);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:inherit;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+            <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;">
+                <svg width="20" height="20" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div style="flex:1;min-width:0;">
+                <p style="margin:0 0 4px;font-size:0.9rem;font-weight:600;color:#f1f5f9;">Session expiring</p>
+                <p style="margin:0 0 14px;font-size:0.8rem;color:#94a3b8;line-height:1.4;">You'll be signed out in <span id="timeoutCountdown" style="font-weight:700;color:#f59e0b;">60</span> seconds due to inactivity.</p>
+                <div style="display:flex;gap:8px;">
+                    <button id="timeoutStayBtn" style="flex:1;padding:8px 0;border:none;border-radius:8px;background:#f59e0b;color:#000;font-size:0.8rem;font-weight:600;cursor:pointer;transition:background 0.15s;">Stay signed in</button>
+                    <button id="timeoutLogoutBtn" style="flex:1;padding:8px 0;border:1px solid rgba(148,163,184,0.3);border-radius:8px;background:transparent;color:#94a3b8;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s;">Sign out now</button>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:14px;height:3px;background:rgba(148,163,184,0.15);border-radius:2px;overflow:hidden;">
+            <div id="timeoutProgressBar" style="height:100%;background:#f59e0b;border-radius:2px;width:100%;transition:width 1s linear;"></div>
+        </div>
+    </div>
+
+    <script>
+    // Session timeout controller
+    (function() {
+        var IDLE_LIMIT_MS = 15 * 60 * 1000;  // 15 minutes of inactivity before warning
+        var COUNTDOWN_SEC = 60;               // 60 second countdown in the warning
+
+        var idleTimer = null;
+        var countdownTimer = null;
+        var countdownRemaining = COUNTDOWN_SEC;
+        var banner = null;
+        var countdownEl = null;
+        var progressBar = null;
+        var isWarning = false;
+
+        function init() {
+            if (!goulburnAuth.isAuthenticated()) return;
+
+            banner = document.getElementById('sessionTimeoutBanner');
+            countdownEl = document.getElementById('timeoutCountdown');
+            progressBar = document.getElementById('timeoutProgressBar');
+
+            if (!banner) return;
+
+            // Activity events
+            var events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+            events.forEach(function(evt) {
+                document.addEventListener(evt, onActivity, { passive: true });
+            });
+
+            // Buttons
+            document.getElementById('timeoutStayBtn').addEventListener('click', function() {
+                dismissWarning();
+                resetIdleTimer();
+            });
+            document.getElementById('timeoutLogoutBtn').addEventListener('click', function() {
+                doLogout();
+            });
+
+            resetIdleTimer();
+        }
+
+        function onActivity() {
+            if (isWarning) {
+                // Activity during warning dismisses it
+                dismissWarning();
+            }
+            resetIdleTimer();
+        }
+
+        function resetIdleTimer() {
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(showWarning, IDLE_LIMIT_MS);
+        }
+
+        function showWarning() {
+            if (!goulburnAuth.isAuthenticated()) return;
+            isWarning = true;
+            countdownRemaining = COUNTDOWN_SEC;
+            countdownEl.textContent = countdownRemaining;
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '100%';
+
+            // Force reflow then animate
+            void progressBar.offsetWidth;
+            progressBar.style.transition = 'width 1s linear';
+
+            banner.style.display = 'block';
+            // Slide-in animation
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(20px)';
+            void banner.offsetWidth;
+            banner.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            banner.style.opacity = '1';
+            banner.style.transform = 'translateY(0)';
+
+            tickCountdown();
+        }
+
+        function tickCountdown() {
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(function() {
+                countdownRemaining--;
+                if (countdownEl) countdownEl.textContent = countdownRemaining;
+                if (progressBar) progressBar.style.width = ((countdownRemaining / COUNTDOWN_SEC) * 100) + '%';
+
+                if (countdownRemaining <= 0) {
+                    clearInterval(countdownTimer);
+                    doLogout();
+                }
+            }, 1000);
+        }
+
+        function dismissWarning() {
+            isWarning = false;
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (banner) {
+                banner.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                banner.style.opacity = '0';
+                banner.style.transform = 'translateY(20px)';
+                setTimeout(function() { banner.style.display = 'none'; }, 200);
+            }
+        }
+
+        function doLogout() {
+            isWarning = false;
+            if (countdownTimer) clearInterval(countdownTimer);
+            if (idleTimer) clearTimeout(idleTimer);
+            goulburnAuth.clearSession();
+            // Redirect to sign-in with a message
+            window.location.href = '/sign-in?timeout=1';
+        }
+
+        // Boot
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    })();
+    </script>
