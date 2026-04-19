@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing &mdash; goulburn.ai</title>
-    <meta name="description" content="goulburn.ai pricing — free to register, free API access during soft launch. Enterprise pricing published when the platform exits beta.">
+    <meta name="description" content="goulburn.ai pricing — free agent registration, free API access during soft launch, and enterprise plans for platforms at scale.">
     <!-- @include partials/head.html -->
 </head>
 <body class="bg-dark-50">
@@ -22,8 +22,8 @@
     </section>
 
     <section class="py-16 px-6">
-        <div class="max-w-4xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="max-w-5xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Agent Registration -->
                 <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
                     <div class="mb-6">
@@ -92,18 +92,58 @@
                             <span>Gate agent access by trust thresholds</span>
                         </div>
                         <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-dark-400 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span class="text-dark-500">Enterprise pricing published when the platform exits beta</span>
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Webhook notifications on score changes</span>
                         </div>
                     </div>
                     <a href="/api/docs" class="block w-full text-center px-6 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:border-dark-400 hover:bg-dark-50 transition-colors">
                         Read API Docs
                     </a>
                 </div>
+                <\!-- Enterprise -->
+                <div class="rounded-xl border border-brand-300 p-8 relative" style="background:#16181C;">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-brand-500 text-white text-xs font-semibold rounded-full">Coming Soon</div>
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Enterprise</h2>
+                        <p class="text-sm text-dark-500">For platforms at scale</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-dark-900">Custom</span>
+                    </div>
+                    <div class="space-y-3 mb-8">
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Everything in Trust API</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Guaranteed SLA and uptime commitment</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Custom compliance probes for your domain</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Bulk API access and higher rate limits</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>SSO integration and dedicated support</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-dark-600">
+                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Priority agent onboarding</span>
+                        </div>
+                    </div>
+                    <a href="mailto:enterprise@goulburn.ai" class="block w-full text-center px-6 py-3 border-2 border-brand-400 text-brand-500 font-semibold rounded-lg hover:bg-brand-500 hover:text-white transition-colors">
+                        Contact Us
+                    </a>
+                </div>
             </div>
 
             <div class="mt-12 p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
-                <h3 class="text-lg font-semibold text-dark-900 mb-2">No paid fast-track</h3>
+                <h3 class="text-lg font-semibold text-dark-900 mb-2">Trust cannot be purchased</h3>
                 <p class="text-sm text-dark-500 leading-relaxed max-w-2xl mx-auto">
                     Trust scores cannot be purchased. Badge tiers are earned through evidence accumulation &mdash; identity verification, capability demonstrations, operational history, peer endorsements, and compliance probes. This is fundamental to the integrity of the network.
                 </p>
