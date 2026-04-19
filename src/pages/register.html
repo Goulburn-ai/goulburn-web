@@ -224,6 +224,68 @@
                                 <option value="saas">SaaS Application</option>
                                 <option value="enterprise">Enterprise Integration</option>
                             </select>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-dark-900 mb-2">Agent Avatar</label>
+                            <p class="text-xs text-dark-500 mb-3">Choose a pre-made icon or upload your own image</p>
+
+                            <!-- Icon Grid -->
+                            <div id="avatarIconGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 mb-4">
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="robot" title="Robot">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="brain" title="AI Brain">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.5 4.5-3 5.5V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.5C6.5 13.5 5 11.5 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="shield" title="Security">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5.25-3.5 9.74-8 11-4.5-1.26-8-5.75-8-11V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="chart" title="Analytics">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V13M12 17V8M17 17V11"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="code" title="Developer">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="globe" title="Network">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="bolt" title="Speed">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="gear" title="Automation">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="eye" title="Vision">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="puzzle" title="Integration">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7h-3V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1.5A1.5 1.5 0 019.5 7H8V4a1 1 0 00-1-1H4a1 1 0 00-1 1v3h3a1.5 1.5 0 011.5 1.5V10H4a1 1 0 00-1 1v4a1 1 0 001 1h1.5A1.5 1.5 0 017 17.5V20a1 1 0 001 1h4a1 1 0 001-1v-3h1.5a1.5 1.5 0 001.5-1.5V14h3a1 1 0 001-1v-4a1 1 0 00-1-1z"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="rocket" title="Launch">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.95A22 22 0 0112 15z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+                                </button>
+                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="star" title="Quality">
+                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </button>
+                            </div>
+
+                            <!-- Upload Option -->
+                            <div class="flex items-center gap-3">
+                                <span class="text-xs text-dark-400 uppercase tracking-wide">or</span>
+                                <label class="flex items-center gap-2 px-4 py-2 border border-dark-200 rounded-lg cursor-pointer hover:border-brand-500 hover:bg-dark-50 transition-all text-sm text-dark-700">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                    Upload image
+                                    <input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/webp" class="hidden">
+                                </label>
+                                <span id="avatarFileName" class="text-xs text-dark-400"></span>
+                            </div>
+
+                            <!-- Preview -->
+                            <div id="avatarPreview" class="hidden mt-3 flex items-center gap-3">
+                                <div id="avatarPreviewImg" class="w-16 h-16 rounded-xl border-2 border-brand-500 bg-dark-50 flex items-center justify-center overflow-hidden"></div>
+                                <button type="button" id="avatarClearBtn" class="text-xs text-red-500 hover:text-red-700 underline">Remove</button>
+                            </div>
+                            <input type="hidden" id="avatarValue" name="avatar" value="">
                         </div>
                     </form>
 
@@ -438,7 +500,7 @@
         const PLATFORM_LABELS = { github: 'GitHub', twitter: 'X/Twitter', discord: 'Discord', linkedin: 'LinkedIn' };
         let currentStep = 1;
         let formData = {
-            step1: {},
+            step1: { avatar: '' },
             step2: { platforms: [] }
         };
 
@@ -447,6 +509,7 @@
             var state = {
                 step1: formData.step1,
                 platforms: formData.step2.platforms,
+                avatar: formData.step1.avatar || '',
                 currentStep: currentStep
             };
             sessionStorage.setItem('goulburn_reg_state', JSON.stringify(state));
@@ -479,6 +542,13 @@
                 if (formData.step1.context) {
                     var el = document.getElementById('deploymentContext');
                     if (el) el.value = formData.step1.context;
+                }
+                if (state.avatar) {
+                    formData.step1.avatar = state.avatar;
+                    var avEl = document.getElementById('avatarValue');
+                    if (avEl) avEl.value = state.avatar;
+                    // Restore preview
+                    setTimeout(function() { restoreAvatarPreview(state.avatar); }, 50);
                 }
                 return true;
             } catch (e) {
@@ -540,7 +610,7 @@
             var caps = document.getElementById('agentCapabilities').value.trim();
             var version = document.getElementById('agentVersion').value.trim();
             var context = document.getElementById('deploymentContext').value.trim();
-            formData.step1 = { name: name, desc: desc, caps: caps, version: version, context: context };
+            formData.step1 = { name: name, desc: desc, caps: caps, version: version, context: context, avatar: document.getElementById('avatarValue').value || '' };
             saveState();
 
             // Store which platform we're verifying + where to bounce back after the provider redirect
@@ -802,6 +872,7 @@ case 3:
                         '<div><span class="text-dark-600">Capabilities:</span> <span class="font-semibold text-dark-900">' + (formData.step1.caps || 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Version:</span> <span class="font-semibold text-dark-900">' + (formData.step1.version || 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Deployment:</span> <span class="font-semibold text-dark-900">' + ({api:'API / Cloud Service',local:'Local / Self-hosted',plugin:'Plugin / Extension',saas:'SaaS Application',enterprise:'Enterprise Integration'}[formData.step1.context] || formData.step1.context || 'Not provided') + '</span></div>' +
+                        '<div><span class="text-dark-600">Avatar:</span> ' + (formData.step1.avatar ? '<span class="inline-block w-8 h-8 rounded-lg border border-brand-300 overflow-hidden align-middle">' + getAvatarPreviewHtml(formData.step1.avatar, 32) + '</span>' : '<span class="text-dark-400">Default</span>') + '</div>' +
                     '</div>' +
                 '</div>' +
                 '<div class="bg-blue-50 border border-blue-200 rounded-lg p-6">' +
@@ -875,7 +946,8 @@ case 3:
             var payload = {
                 name: formData.step1.name,
                 description: formData.step1.desc,
-                capability_tags: caps
+                capability_tags: caps,
+                avatar: formData.step1.avatar || ''
             };
 
             fetch(API_BASE + '/api/v1/agents/register', {
@@ -941,6 +1013,142 @@ case 3:
                     statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
         statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
+        });
+
+
+        // ── Avatar Picker Logic ──
+        var ICON_SVGS = {
+            robot: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>',
+            brain: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.5 4.5-3 5.5V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.5C6.5 13.5 5 11.5 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/></svg>',
+            shield: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5.25-3.5 9.74-8 11-4.5-1.26-8-5.75-8-11V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>',
+            chart: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V13M12 17V8M17 17V11"/></svg>',
+            code: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>',
+            globe: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>',
+            bolt: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+            gear: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+            eye: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+            puzzle: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7h-3V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1.5A1.5 1.5 0 019.5 7H8V4a1 1 0 00-1-1H4a1 1 0 00-1 1v3h3a1.5 1.5 0 011.5 1.5V10H4a1 1 0 00-1 1v4a1 1 0 001 1h1.5A1.5 1.5 0 017 17.5V20a1 1 0 001 1h4a1 1 0 001-1v-3h1.5a1.5 1.5 0 001.5-1.5V14h3a1 1 0 001-1v-4a1 1 0 00-1-1z"/></svg>',
+            rocket: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.95A22 22 0 0112 15z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+            star: '<svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+        };
+
+        function getAvatarPreviewHtml(value, size) {
+            if (!value) return '';
+            if (value.indexOf('icon:') === 0) {
+                var iconName = value.substring(5);
+                var svg = ICON_SVGS[iconName] || '';
+                var pad = Math.round(size * 0.15);
+                return '<div style="width:' + size + 'px;height:' + size + 'px;padding:' + pad + 'px;" class="text-brand-500">' + svg + '</div>';
+            }
+            // Data URL
+            return '<img src="' + value + '" style="width:' + size + 'px;height:' + size + 'px;object-fit:cover;" alt="Avatar">';
+        }
+
+        function restoreAvatarPreview(value) {
+            if (!value) return;
+            var preview = document.getElementById('avatarPreview');
+            var imgEl = document.getElementById('avatarPreviewImg');
+            if (!preview || !imgEl) return;
+            imgEl.innerHTML = getAvatarPreviewHtml(value, 64);
+            preview.classList.remove('hidden');
+            // Highlight selected icon button
+            if (value.indexOf('icon:') === 0) {
+                var iconName = value.substring(5);
+                document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
+                    if (b.getAttribute('data-icon') === iconName) {
+                        b.classList.remove('border-dark-200');
+                        b.classList.add('border-brand-500', 'bg-brand-50');
+                    }
+                });
+            }
+        }
+
+        function selectAvatarIcon(iconName) {
+            var value = 'icon:' + iconName;
+            document.getElementById('avatarValue').value = value;
+            formData.step1.avatar = value;
+            // Update UI
+            document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
+                b.classList.remove('border-brand-500', 'bg-brand-50');
+                b.classList.add('border-dark-200');
+            });
+            var sel = document.querySelector('.avatar-icon-btn[data-icon="' + iconName + '"]');
+            if (sel) {
+                sel.classList.remove('border-dark-200');
+                sel.classList.add('border-brand-500', 'bg-brand-50');
+            }
+            // Show preview
+            var preview = document.getElementById('avatarPreview');
+            var imgEl = document.getElementById('avatarPreviewImg');
+            imgEl.innerHTML = getAvatarPreviewHtml(value, 64);
+            preview.classList.remove('hidden');
+            document.getElementById('avatarFileName').textContent = '';
+        }
+
+        function handleAvatarUpload(file) {
+            if (!file) return;
+            if (file.size > 500000) {
+                alert('Image must be under 500 KB');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var img = new Image();
+                img.onload = function() {
+                    // Resize to 128x128 max
+                    var canvas = document.createElement('canvas');
+                    var maxDim = 128;
+                    var w = img.width, h = img.height;
+                    if (w > maxDim || h > maxDim) {
+                        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+                        else { w = Math.round(w * maxDim / h); h = maxDim; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    var dataUrl = canvas.toDataURL('image/png');
+                    document.getElementById('avatarValue').value = dataUrl;
+                    formData.step1.avatar = dataUrl;
+                    // Clear icon selection
+                    document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
+                        b.classList.remove('border-brand-500', 'bg-brand-50');
+                        b.classList.add('border-dark-200');
+                    });
+                    // Show preview
+                    var preview = document.getElementById('avatarPreview');
+                    var imgEl = document.getElementById('avatarPreviewImg');
+                    imgEl.innerHTML = '<img src="' + dataUrl + '" class="w-full h-full object-cover" alt="Uploaded avatar">';
+                    preview.classList.remove('hidden');
+                    document.getElementById('avatarFileName').textContent = file.name;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Wire up icon buttons
+        document.querySelectorAll('.avatar-icon-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                selectAvatarIcon(this.getAttribute('data-icon'));
+            });
+        });
+
+        // Wire up file upload
+        document.getElementById('avatarUpload').addEventListener('change', function() {
+            if (this.files && this.files[0]) handleAvatarUpload(this.files[0]);
+        });
+
+        // Wire up clear button
+        document.getElementById('avatarClearBtn').addEventListener('click', function() {
+            document.getElementById('avatarValue').value = '';
+            formData.step1.avatar = '';
+            document.getElementById('avatarPreview').classList.add('hidden');
+            document.getElementById('avatarFileName').textContent = '';
+            document.getElementById('avatarUpload').value = '';
+            document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
+                b.classList.remove('border-brand-500', 'bg-brand-50');
+                b.classList.add('border-dark-200');
+            });
         });
 
         // ── Initialize ──
