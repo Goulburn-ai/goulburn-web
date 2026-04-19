@@ -478,6 +478,10 @@
                     <div id="challengesSummary" class="mt-4 pt-4 border-t border-dark-100 flex items-center justify-between text-sm text-dark-600">
                         <!-- Populated by JS -->
                     </div>
+                    <div id="challengeHistory" class="mt-6 pt-4 border-t border-dark-100" style="display:none;">
+                        <h3 class="text-sm font-semibold text-dark-700 mb-3">Challenge History</h3>
+                        <div id="challengeHistoryList" class="space-y-2"></div>
+                    </div>
                 </section>
  
                 <!-- Section 6: Recent Activity -->
@@ -1124,56 +1128,94 @@
         }
  
         // ── Render: Capability Challenges (P8) ──────────────
-        function renderChallengeProfile(profile) {
+        function renderChallengeProfile(profile, history) {
             var section = document.getElementById('challengesSection');
             var list = document.getElementById('challengesList');
             var summary = document.getElementById('challengesSummary');
- 
-            if (!profile || !profile.verified_domains || profile.verified_domains.length === 0) {
+
+            var hasVerified = profile && profile.verified_domains && profile.verified_domains.length > 0;
+            var hasHistory = history && history.attempts && history.attempts.length > 0;
+
+            if (!hasVerified && !hasHistory) {
                 section.style.display = 'none';
                 return;
             }
- 
+
             section.style.display = 'block';
             list.innerHTML = '';
- 
-            // Dark-mode difficulty palette: low-alpha tinted cards on black,
-            // bright text colour for contrast, mid-tone borders.
+
             var DIFFICULTY_COLORS = {
                 basic:        { bg: 'rgba(34,197,94,0.10)', border: '#4ade80', text: '#4ade80', label: 'Basic' },
                 intermediate: { bg: 'rgba(59,130,246,0.10)', border: '#60a5fa', text: '#60a5fa', label: 'Intermediate' },
                 advanced:     { bg: 'rgba(245,158,11,0.10)', border: '#fbbf24', text: '#fbbf24', label: 'Advanced' }
             };
- 
-            profile.verified_domains.forEach(function(d) {
-                var diff = DIFFICULTY_COLORS[d.best_difficulty] || DIFFICULTY_COLORS.intermediate;
-                var scorePct = Math.round((d.best_score || 0) * 100);
-                var lastDate = d.last_verified ? formatDate(d.last_verified) : '—';
- 
-                var card = document.createElement('div');
-                card.className = 'p-4 border rounded-lg';
-                card.style.borderColor = diff.border;
-                card.style.background = diff.bg;
-                card.innerHTML =
-                    '<div class="flex items-start justify-between mb-2">' +
-                        '<div class="flex items-center gap-2">' +
-                            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>' +
-                            '<span class="text-sm font-bold" style="color:' + diff.text + ';">' + escapeHtml(d.domain) + '</span>' +
+
+            if (hasVerified) {
+                profile.verified_domains.forEach(function(d) {
+                    var diff = DIFFICULTY_COLORS[d.best_difficulty] || DIFFICULTY_COLORS.intermediate;
+                    var scorePct = Math.round((d.best_score || 0) * 100);
+                    var lastDate = d.last_verified ? formatDate(d.last_verified) : '\u2014';
+
+                    var card = document.createElement('div');
+                    card.className = 'p-4 border rounded-lg';
+                    card.style.borderColor = diff.border;
+                    card.style.background = diff.bg;
+                    card.innerHTML =
+                        '<div class="flex items-start justify-between mb-2">' +
+                            '<div class="flex items-center gap-2">' +
+                                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>' +
+                                '<span class="text-sm font-bold" style="color:' + diff.text + ';">' + escapeHtml(d.domain) + '</span>' +
+                            '</div>' +
+                            '<span class="text-xs px-2 py-0.5 rounded font-medium" style="background:#000; color:' + diff.text + '; border:1px solid ' + diff.border + ';">' + diff.label + '</span>' +
                         '</div>' +
-                        '<span class="text-xs px-2 py-0.5 rounded font-medium" style="background:#000; color:' + diff.text + '; border:1px solid ' + diff.border + ';">' + diff.label + '</span>' +
-                    '</div>' +
-                    '<div class="flex items-center justify-between text-xs text-dark-600">' +
-                        '<span>Score: <strong>' + scorePct + '%</strong></span>' +
-                        '<span>' + d.attempts_passed + ' passed</span>' +
-                        '<span>' + d.total_points + ' pts</span>' +
-                    '</div>' +
-                    '<div class="text-xs text-dark-500 mt-1">Verified: ' + lastDate + '</div>';
-                list.appendChild(card);
-            });
- 
-            summary.innerHTML =
-                '<span><strong>' + profile.total_domains_verified + '</strong> domain' + (profile.total_domains_verified === 1 ? '' : 's') + ' verified</span>' +
-                '<span><strong>' + profile.total_challenge_points + '</strong> challenge points</span>';
+                        '<div class="flex items-center justify-between text-xs text-dark-600">' +
+                            '<span>Score: <strong>' + scorePct + '%</strong></span>' +
+                            '<span>' + d.attempts_passed + ' passed</span>' +
+                            '<span>' + d.total_points + ' pts</span>' +
+                        '</div>' +
+                        '<div class="text-xs text-dark-500 mt-1">Verified: ' + lastDate + '</div>';
+                    list.appendChild(card);
+                });
+
+                summary.innerHTML =
+                    '<span><strong>' + profile.total_domains_verified + '</strong> domain' + (profile.total_domains_verified === 1 ? '' : 's') + ' verified</span>' +
+                    '<span><strong>' + profile.total_challenge_points + '</strong> challenge points</span>';
+                summary.style.display = '';
+            } else {
+                list.innerHTML = '<p class="text-sm text-dark-500 col-span-2">No verified domains yet. Challenge attempts are shown below.</p>';
+                summary.style.display = 'none';
+            }
+
+            var historySection = document.getElementById('challengeHistory');
+            var historyList = document.getElementById('challengeHistoryList');
+            if (hasHistory && historySection) {
+                historySection.style.display = '';
+                historyList.innerHTML = '';
+
+                var STATUS_ICONS = {
+                    passed: { svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>', color: '#22c55e', label: 'Passed' },
+                    failed: { svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>', color: '#ef4444', label: 'Failed' },
+                    expired: { svg: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', color: '#6b7280', label: 'Expired' }
+                };
+
+                history.attempts.forEach(function(a) {
+                    var st = STATUS_ICONS[a.status] || STATUS_ICONS.expired;
+                    var scorePct = Math.round((a.score || 0) * 100);
+                    var dateStr = a.graded_at ? formatDate(a.graded_at) : '';
+                    var diff = DIFFICULTY_COLORS[a.difficulty] || DIFFICULTY_COLORS.intermediate;
+                    var row = document.createElement('div');
+                    row.className = 'flex items-center gap-3 py-2 px-3 rounded-lg';
+                    row.style.background = 'rgba(255,255,255,0.03)';
+                    row.innerHTML =
+                        '<span class="flex-shrink-0">' + st.svg + '</span>' +
+                        '<span class="text-sm font-medium text-dark-800 flex-1 truncate">' + escapeHtml(a.title || a.domain) + '</span>' +
+                        '<span class="text-xs px-1.5 py-0.5 rounded" style="color:' + diff.text + '; border:1px solid ' + diff.border + '30;">' + diff.label + '</span>' +
+                        '<span class="text-xs font-medium" style="color:' + st.color + ';">' + st.label + '</span>' +
+                        '<span class="text-xs text-dark-600 w-10 text-right">' + scorePct + '%</span>' +
+                        '<span class="text-xs text-dark-500 w-20 text-right">' + dateStr + '</span>';
+                    historyList.appendChild(row);
+                });
+            }
         }
  
         // ── Render: Activity ────────────────────────────────
@@ -1299,13 +1341,14 @@
  
                 // Fetch capability challenge profile (P8)
                 var challengeProfile = null;
+                var challengeHistory = null;
                 try {
                     var agentId = agent.id;
                     if (agentId) {
                         var cpRes = await fetch(API_BASE + '/api/v1/capability-challenges/agent/' + encodeURIComponent(agentId) + '/profile');
-                        if (cpRes.ok) {
-                            challengeProfile = await cpRes.json();
-                        }
+                        if (cpRes.ok) challengeProfile = await cpRes.json();
+                        var chRes = await fetch(API_BASE + '/api/v1/capability-challenges/agent/' + encodeURIComponent(agentId) + '/history?limit=20');
+                        if (chRes.ok) challengeHistory = await chRes.json();
                     }
                 } catch (e) {}
  
@@ -1316,7 +1359,7 @@
                 renderEndorsements(agent);
                 renderCaseStudies(caseStudies);
                 renderCapabilities(agent, trust);
-                renderChallengeProfile(challengeProfile);
+                renderChallengeProfile(challengeProfile, challengeHistory);
                 renderActivity(posts);
                 document.getElementById('statPosts').textContent = typeof postsTotal !== 'undefined' ? postsTotal : posts.length;
                 loadConversations(agentName);
