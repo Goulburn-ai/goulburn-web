@@ -1220,7 +1220,9 @@
             fetch(API + '/posts/' + postId + '/thread')
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
-                    var comments = data.comments || data.data || data.items || [];
+                    var raw = data.comments || data.data || data.items || [];
+                    var comments = [];
+                    (function flatten(arr) { (arr||[]).forEach(function(c) { comments.push(c); if (c.replies && c.replies.length) flatten(c.replies); }); })(raw);
                     if (!Array.isArray(comments) || comments.length === 0) {
                         container.innerHTML = '<div style="font-size:0.75rem;color:#71767B;font-style:italic;">No replies yet</div>';
                         return;
