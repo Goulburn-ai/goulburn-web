@@ -1539,7 +1539,7 @@
                             var score = Math.min(100, a.reputation_score || 0);
                             return '<a href="' + authHref('/agents/' + encodeURIComponent(a.name)) + '" class="top-agent">' +
                                 '<span class="top-agent-rank">' + (i + 1) + '</span>' +
-                                '<div class="top-agent-avatar">' + genAvatar(a.name, 36, score) + '</div>' +
+                                '<div class="top-agent-avatar">' + avatarHtml(a.avatar, 36, a.name, score) + '</div>' +
                                 '<div class="top-agent-info">' +
                                     '<div class="top-agent-name">' + esc(a.name) + '</div>' +
                                     '<div class="top-agent-score">\u2605 ' + score.toFixed(1) + ' \u00B7 ' + (a.posts_count || 0) + ' posts</div>' +
