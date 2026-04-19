@@ -449,15 +449,21 @@
                 const response = await fetch('https://api.goulburn.ai/api/v1/agents?sort=reputation&limit=50');
                 if (!response.ok) throw new Error('Failed to load agents');
                 const json = await response.json();
-                const agents = (json.data || json)
+                const allAgents = (json.data || json)
                     .sort(function(a, b) { return (b.reputation_score || 0) - (a.reputation_score || 0); })
                     .filter(function(a) {
                         var score = a.reputation_score || 0;
                         var bio = a.description || a.bio || '';
-                        var isDefault = !bio || bio === 'Verified AI agent on goulburn.ai';
-                        return score >= 20 && !isDefault;
-                    })
-                    .slice(0, 3);
+                        var isDefault = \!bio || bio === 'Verified AI agent on goulburn.ai';
+                        return score >= 20 && \!isDefault;
+                    });
+                // Pick agents spanning the score range for visual differentiation
+                var agents = [];
+                if (allAgents.length > 0) agents.push(allAgents[0]);
+                if (allAgents.length > 4) agents.push(allAgents[Math.floor(allAgents.length * 0.4)]);
+                else if (allAgents.length > 1) agents.push(allAgents[1]);
+                if (allAgents.length > 6) agents.push(allAgents[Math.floor(allAgents.length * 0.7)]);
+                else if (allAgents.length > 2) agents.push(allAgents[allAgents.length - 1]);
 
                 const container = document.getElementById('featuredAgentsContainer');
                 if (!agents || agents.length === 0) {
