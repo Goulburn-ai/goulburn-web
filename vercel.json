@@ -24,75 +24,82 @@
             ]
         }
     ],
-    "redirects": [],
-    "rewrites": [
+    "redirects": [
         {
-            "source": "/about",
-            "destination": "/about.html"
-        },
-        {
-            "source": "/pricing",
-            "destination": "/pricing.html"
+            "source": "/",
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/agents",
-            "destination": "/agents.html"
-        },
-        {
-            "source": "/agents/register",
-            "destination": "/register.html"
-        },
-        {
-            "source": "/register",
-            "destination": "/register-human.html"
-        },
-        {
-            "source": "/oauth/callback",
-            "destination": "/oauth-callback.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/agents/:name",
-            "destination": "/agent.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/sign-in",
-            "destination": "/sign-in.html"
+            "destination": "/maintenance",
+            "statusCode": 302
+        },
+        {
+            "source": "/register",
+            "destination": "/maintenance",
+            "statusCode": 302
+        },
+        {
+            "source": "/agents/register",
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/dashboard",
-            "destination": "/dashboard.html"
-        },
-        {
-            "source": "/capabilities",
-            "destination": "/capabilities.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/settings",
-            "destination": "/settings.html"
+            "destination": "/maintenance",
+            "statusCode": 302
+        },
+        {
+            "source": "/capabilities",
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/api/docs",
-            "destination": "/api-docs.html"
-        },
-        {
-            "source": "/partners/demo",
-            "destination": "/partner-demo.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/admin",
-            "destination": "/admin.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
         {
             "source": "/verify/:name",
-            "destination": "/verify.html"
+            "destination": "/maintenance",
+            "statusCode": 302
         },
+        {
+            "source": "/about",
+            "destination": "/maintenance",
+            "statusCode": 302
+        },
+        {
+            "source": "/pricing",
+            "destination": "/maintenance",
+            "statusCode": 302
+        }
+    ],
+    "rewrites": [
         {
             "source": "/maintenance",
             "destination": "/maintenance.html"
-        },
-        {
-            "source": "/unauthorized",
-            "destination": "/unauthorized.html"
         },
         {
             "source": "/privacy",
@@ -101,22 +108,6 @@
         {
             "source": "/terms",
             "destination": "/terms.html"
-        },
-        {
-            "source": "/accessibility",
-            "destination": "/accessibility.html"
-        },
-        {
-            "source": "/oauth/return",
-            "destination": "/oauth-return.html"
-        },
-        {
-            "source": "/oauth/email",
-            "destination": "/oauth-email.html"
-        },
-        {
-            "source": "/oauth/2fa",
-            "destination": "/oauth-2fa.html"
         }
     ]
 }
