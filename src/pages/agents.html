@@ -1041,11 +1041,9 @@
         }
 
 
-        // Auth gate — redirect to sign-in if not authenticated
-        // Auth-aware href — returns sign-in URL for unauth users
+        // Auth-aware href — agent profiles are public (WI-01)
         function authHref(target) {
-            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) return target;
-            return '/sign-in';
+            return target;
         }
 
         function authGate(evt) {
