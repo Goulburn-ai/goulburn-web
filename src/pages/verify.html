@@ -16,7 +16,6 @@
         .radar-vertex { transition: cx 0.8s ease, cy 0.8s ease, r 0.8s ease, fill 0.8s ease; cursor: pointer; }
         .radar-line { transition: all 0.8s ease; }
         .radar-vertex:hover { filter: drop-shadow(0 0 6px currentColor); }
-
         .radar-tooltip {
             position: absolute; padding: 8px 12px; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.12);
             border-radius: 8px; font-size: 13px; color: #f5f5f5; pointer-events: none; opacity: 0;
@@ -452,14 +451,13 @@
 
             var svg = '<svg class="radar-svg" viewBox="-70 -20 ' + (size+140) + ' ' + (size+40) + '" role="img" aria-label="Trust radar chart showing five evidence layer scores">';
 
-            // SVG defs — glow filters
+            // SVG defs - glow filters
             svg += '<defs>';
             svg += '<filter id="radarGlow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>';
             svg += '<filter id="dotGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>';
-            svg += '<radialGradient id="radarFill" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(245,158,11,0.18)"/><stop offset="100%" stop-color="rgba(245,158,11,0.03)"/></radialGradient>';
             svg += '</defs>';
 
-            // Grid rings — progressive opacity (inner faint, outer stronger)
+            // Grid rings - progressive opacity
             [25, 50, 75, 100].forEach(function(ring) {
                 var pts = [];
                 for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, ring); pts.push(p.x + ',' + p.y); }
@@ -469,28 +467,27 @@
                 svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,' + opacity + ')" stroke-width="' + sw + '" stroke-dasharray="' + dash + '"/>';
             });
 
-            // Axis lines — tapered gradient from centre to vertex
+            // Axis lines - tapered
             for (var i = 0; i < RADAR_N; i++) {
                 var p = radarPoint(i, 100);
                 svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>';
-                // Bright tip near outer ring
                 var p85 = radarPoint(i, 85);
                 svg += '<line x1="' + p85.x + '" y1="' + p85.y + '" x2="' + p.x + '" y2="' + p.y + '" stroke="rgba(255,255,255,0.20)" stroke-width="1"/>';
             }
 
-            // Data polygon — gradient fill + glow
+            // Data polygon - glow + main
             var dataPts = [];
             for (var i = 0; i < RADAR_N; i++) { var p = radarPoint(i, scores[i]); dataPts.push(p.x + ',' + p.y); }
             svg += '<polygon points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="2.5" stroke-linejoin="round" filter="url(#radarGlow)" opacity="0.5"/>';
-            svg += '<polygon id="radarPoly" class="radar-line" points="' + dataPts.join(' ') + '" fill="url(#radarFill)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>';
+            svg += '<polygon id="radarPoly" class="radar-line" points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2" stroke-linejoin="round"/>';
 
-            // Connector lines from centre to each vertex (data shape)
+            // Connector lines from centre to each vertex
             for (var i = 0; i < RADAR_N; i++) {
                 var p = radarPoint(i, scores[i]);
                 svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + p.x + '" y2="' + p.y + '" stroke="' + scoreColour(scores[i]) + '" stroke-width="1" opacity="0.25"/>';
             }
 
-            // Vertex dots — with glow
+            // Vertex dots with glow
             for (var i = 0; i < RADAR_N; i++) {
                 var p = radarPoint(i, scores[i]);
                 var c = scoreColour(scores[i]);
@@ -499,7 +496,7 @@
                 svg += '<circle class="radar-vertex" id="radarDot' + i + '" cx="' + p.x + '" cy="' + p.y + '" r="' + dotR + '" fill="' + c + '" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" data-layer="' + i + '" style="color:' + c + ';" aria-label="' + LAYERS[i].label + ' score: ' + scores[i] + ' out of 100"/>';
             }
 
-            // Axis labels + score values
+            // Axis labels
             var labelR = r + 36;
             for (var i = 0; i < RADAR_N; i++) {
                 var angle = RADAR_ANGLE_OFFSET + (2 * Math.PI * i / RADAR_N);
@@ -568,7 +565,8 @@
             document.getElementById('legendRow').innerHTML = legHtml;
         }
 
-        // ── Live update: smoothly transition radar when scores change ──
+
+        // Live update: smoothly transition radar when scores change
         function updateRadar(trust) {
             var layers = trust.layers || {};
             var scores = LAYERS.map(function(l) { return (layers[l.key] && layers[l.key].score) || 0; });
@@ -576,7 +574,6 @@
             var tier = trust.tier || tierFromScore(overall);
             _lastTrustData = trust;
 
-            // Update data polygon points
             var poly = document.getElementById('radarPoly');
             if (poly) {
                 var pts = [];
@@ -584,7 +581,6 @@
                 poly.setAttribute('points', pts.join(' '));
             }
 
-            // Update vertex dots (position, size, colour)
             for (var i = 0; i < RADAR_N; i++) {
                 var dot = document.getElementById('radarDot' + i);
                 if (!dot) continue;
@@ -598,25 +594,16 @@
                 dot.setAttribute('aria-label', LAYERS[i].label + ' score: ' + scores[i] + ' out of 100');
             }
 
-            // Update score labels
             for (var i = 0; i < RADAR_N; i++) {
                 var el = document.getElementById('radarScore' + i);
-                if (el) {
-                    el.textContent = scores[i];
-                    el.setAttribute('fill', scoreColour(scores[i]));
-                }
+                if (el) { el.textContent = scores[i]; el.setAttribute('fill', scoreColour(scores[i])); }
             }
 
-            // Update centre overall + tier
             var oel = document.getElementById('radarOverall');
             if (oel) oel.textContent = overall;
             var tel = document.getElementById('radarTier');
-            if (tel) {
-                tel.textContent = (TIER_LABELS[tier] || 'Unknown').toUpperCase();
-                tel.setAttribute('fill', TIER_COLOURS[tier] || '#a3a3a3');
-            }
+            if (tel) { tel.textContent = (TIER_LABELS[tier] || 'Unknown').toUpperCase(); tel.setAttribute('fill', TIER_COLOURS[tier] || '#a3a3a3'); }
 
-            // Update hero section
             document.getElementById('vScore').textContent = overall;
             var pill = document.getElementById('vTierPill');
             pill.className = 'inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold mb-3 ' + (TIER_CSS[tier] || TIER_CSS.registered);
@@ -624,7 +611,7 @@
             document.getElementById('vTimestamp').textContent = trust.queried_at ? new Date(trust.queried_at).toLocaleString() : 'now';
         }
 
-        // ── Poll for live updates every 30s ──
+        // Poll for live updates every 10s
         var POLL_INTERVAL = 10000;
         function startLivePolling() {
             var name = getAgentName();
@@ -635,12 +622,10 @@
                     if (!res.ok) return;
                     var trust = await res.json();
                     if (trust.tier === 'not_found') return;
-                    // Only update if data actually changed
                     var newScore = trust.overall_score || 0;
                     var oldScore = _lastTrustData ? (_lastTrustData.overall_score || 0) : -1;
                     if (newScore !== oldScore || scoresChanged(_lastTrustData, trust)) {
                         renderRadar(trust);
-                        // Flash a subtle pulse on the radar to signal the update
                         var wrap = document.getElementById('radarWrap');
                         if (wrap) {
                             wrap.style.transition = 'box-shadow 0.3s ease';
@@ -648,7 +633,7 @@
                             setTimeout(function() { wrap.style.boxShadow = 'none'; }, 1500);
                         }
                     }
-                } catch (e) { /* silent — non-fatal */ }
+                } catch (e) { /* silent */ }
             }, POLL_INTERVAL);
         }
 
@@ -963,4 +948,56 @@
 
                 // OG
                 document.querySelector('meta[property="og:image"]').content = API_BASE + '/api/badge/' + encodeURIComponent(name);
-                document.querySelector('meta[property="og:title"]').content = trust.agent + ' \u2014 ' + (TIER_
+                document.querySelector('meta[property="og:title"]').content = trust.agent + ' \u2014 ' + (TIER_LABELS[tier] || 'Unknown') + ' on goulburn.ai';
+
+                // JSON-LD
+                document.getElementById('vJsonLd').textContent = JSON.stringify({
+                    '@context': 'https://schema.org', '@type': 'Thing',
+                    name: trust.agent, description: 'AI agent with ' + (TIER_LABELS[tier] || 'Unknown') + ' trust tier on goulburn.ai',
+                    url: window.location.href
+                });
+
+                // Render all tabs
+                renderRadar(trust);
+                renderLayers(trust);
+
+                // Load probe data for Tab 3
+                var probeData = null;
+                try {
+                    var probeRes = await fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name));
+                    if (probeRes.ok) probeData = await probeRes.json();
+                } catch (e) { /* non-fatal */ }
+
+                renderProbes(trust, probeData);
+                renderAssessment(trust);
+
+                // Show content
+                document.getElementById('loadState').style.display = 'none';
+                document.getElementById('verifyContent').style.display = 'block';
+
+                // Start live polling for score updates
+                startLivePolling();
+
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    showError('Trust evaluation timed out. Please try again in a moment.');
+                } else {
+                    showError(e.message || 'Verification failed');
+                }
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('loadState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'flex';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabs();
+            loadVerification();
+        });
+    })();
+    </script>
+</body>
+</html>
