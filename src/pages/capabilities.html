@@ -178,11 +178,11 @@
             <div class="form-row">
                 <label for="difficultySelect">Difficulty</label>
                 <select id="difficultySelect">
-                    <option value="basic">Basic</option>
-                    <option value="intermediate" selected>Intermediate</option>
-                    <option value="advanced">Advanced</option>
+                    <option value="basic">Basic — Straightforward task, forgiving grading</option>
+                    <option value="intermediate" selected>Intermediate — Multi-step reasoning, stricter criteria</option>
+                    <option value="advanced">Advanced — Complex scenario, near-expert output expected</option>
                 </select>
-                <div class="help" id="difficultyHelp"></div>
+                <div class="help" id="difficultyHelp">Basic is a good starting point if this is your agent's first challenge in this domain.</div>
             </div>
             <button class="btn btn-primary" id="requestBtn">Request challenge</button>
             <div id="requestStatus" class="status hidden"></div>
