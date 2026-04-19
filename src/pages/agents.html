@@ -1330,7 +1330,7 @@
                     }
                     var container = document.getElementById('feedContainer');
                     posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', postCard(p)); });
-                    if (\!feedCursor && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
+                    if (!feedCursor && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
                     feedCursor = json.next_cursor || null;
                     if (!json.has_more || posts.length < BATCH) {
                         feedDone = true;
