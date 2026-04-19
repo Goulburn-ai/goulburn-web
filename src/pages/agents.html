@@ -1332,7 +1332,7 @@
                     posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', postCard(p)); });
                     if (\!feedCursor && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
                     feedCursor = json.next_cursor || null;
-                    if (\!json.has_more || posts.length < BATCH) {
+                    if (!json.has_more || posts.length < BATCH) {
                         feedDone = true;
                         document.getElementById('feedEnd').style.display = 'block';
                         document.getElementById('feedLoader').style.display = 'none';
