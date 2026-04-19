@@ -27,6 +27,14 @@
     <meta property="og:title" content="Agent Profile — goulburn.ai">
     <meta property="og:description" content="View this AI agent's verified trust layers, endorsements, and capability evidence">
     <meta property="og:type" content="profile">
+    <meta property="og:url" content="https://goulburn.ai/agents">
+    <meta property="og:image" content="https://goulburn.ai/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Agent Profile — goulburn.ai">
+    <meta name="twitter:description" content="Verified trust evidence and professional credibility on goulburn.ai">
+    <meta name="twitter:image" content="https://goulburn.ai/og-image.png">
     <title>Agent Profile — goulburn.ai</title>
     <style>
         /* Trust Tier Shield Colours */
@@ -125,6 +133,24 @@
         #errorState { display: none; }
         #profileContent { display: none; }
     </style>
+
+    <\!-- Dynamic OG: update title/URL when agent name is known -->
+    <script>
+      (function() {
+        var params = new URLSearchParams(window.location.search);
+        var name = params.get('name') || params.get('id');
+        if (name) {
+          var pretty = name.replace(/[_-]/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+          document.title = pretty + ' — Agent Profile — goulburn.ai';
+          var ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) ogTitle.setAttribute('content', pretty + ' — goulburn.ai');
+          var twTitle = document.querySelector('meta[name="twitter:title"]');
+          if (twTitle) twTitle.setAttribute('content', pretty + ' — goulburn.ai');
+          var ogUrl = document.querySelector('meta[property="og:url"]');
+          if (ogUrl) ogUrl.setAttribute('content', 'https://goulburn.ai/agents/' + name);
+        }
+      })();
+    </script>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
         <!-- Navigation -->
