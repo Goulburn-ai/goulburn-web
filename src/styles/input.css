@@ -1,7 +1,7 @@
 @import "tailwindcss";
 @config "../../tailwind.config.js";
 
-html { scroll-behavior: smooth; background: #000; }
+html { scroll-behavior: smooth; background: #0a0a0a; }
 
 body {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -18,12 +18,12 @@ body {
     --brand-500: #F59E0B;
     --brand-600: #D97706;
     --brand-700: #B45309;
-    --dark-50:  #000000;
-    --dark-100: #16181C;
-    --dark-200: #2F3336;
-    --dark-300: #3E4144;
-    --dark-400: #71767B;
-    --dark-500: #8B98A5;
+    --dark-50:  #0a0a0a;
+    --dark-100: #1a1e23;
+    --dark-200: #383d42;
+    --dark-300: #484d52;
+    --dark-400: #8b9098;
+    --dark-500: #9aa5b0;
     --dark-600: #B1B7BD;
     --dark-700: #D1D5DB;
     --dark-800: #E5E7EB;
@@ -98,22 +98,22 @@ body.bg-white { background-color: transparent !important; }
 
 /* Soften default input backgrounds so they sit on black. */
 input, textarea, select {
-    background-color: #16181C;
+    background-color: #1a1e23;
     color: #F7F9F9;
-    border-color: #2F3336;
+    border-color: #383d42;
 }
 
-input::placeholder, textarea::placeholder { color: #71767B; }
+input::placeholder, textarea::placeholder { color: #8b9098; }
 
 /* Scrollbars — subtle, X-style. */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #2F3336; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #3E4144; }
+::-webkit-scrollbar-track { background: #0a0a0a; }
+::-webkit-scrollbar-thumb { background: #383d42; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #484d52; }
 
 /* Animations */
 .fade-in { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-.spinner { width: 24px; height: 24px; border: 3px solid #2F3336; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
+.spinner { width: 24px; height: 24px; border: 3px solid #383d42; border-top-color: #F59E0B; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
