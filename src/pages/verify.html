@@ -566,7 +566,7 @@
             // Update vertex dots (position, size, colour)
             for (var i = 0; i < RADAR_N; i++) {
                 var dot = document.getElementById('radarDot' + i);
-                if (\!dot) continue;
+                if (!dot) continue;
                 var p = radarPoint(i, scores[i]);
                 var c = scoreColour(scores[i]);
                 dot.setAttribute('cx', p.x);
@@ -607,17 +607,17 @@
         var POLL_INTERVAL = 10000;
         function startLivePolling() {
             var name = getAgentName();
-            if (\!name) return;
+            if (!name) return;
             setInterval(async function() {
                 try {
                     var res = await fetch(API_BASE + '/api/v1/trust/profile/' + encodeURIComponent(name));
-                    if (\!res.ok) return;
+                    if (!res.ok) return;
                     var trust = await res.json();
                     if (trust.tier === 'not_found') return;
                     // Only update if data actually changed
                     var newScore = trust.overall_score || 0;
                     var oldScore = _lastTrustData ? (_lastTrustData.overall_score || 0) : -1;
-                    if (newScore \!== oldScore || scoresChanged(_lastTrustData, trust)) {
+                    if (newScore !== oldScore || scoresChanged(_lastTrustData, trust)) {
                         renderRadar(trust);
                         // Flash a subtle pulse on the radar to signal the update
                         var wrap = document.getElementById('radarWrap');
@@ -632,14 +632,14 @@
         }
 
         function scoresChanged(oldTrust, newTrust) {
-            if (\!oldTrust || \!newTrust) return true;
+            if (!oldTrust || !newTrust) return true;
             var oldLayers = oldTrust.layers || {};
             var newLayers = newTrust.layers || {};
             for (var i = 0; i < LAYERS.length; i++) {
                 var key = LAYERS[i].key;
                 var os = (oldLayers[key] && oldLayers[key].score) || 0;
                 var ns = (newLayers[key] && newLayers[key].score) || 0;
-                if (os \!== ns) return true;
+                if (os !== ns) return true;
             }
             return false;
         }
