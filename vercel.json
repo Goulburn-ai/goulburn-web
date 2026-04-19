@@ -24,82 +24,75 @@
             ]
         }
     ],
-    "redirects": [
-        {
-            "source": "/",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/agents",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/agents/:name",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/sign-in",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/register",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/agents/register",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/dashboard",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/settings",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/capabilities",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/api/docs",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/admin",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
-        {
-            "source": "/verify/:name",
-            "destination": "/maintenance",
-            "statusCode": 302
-        },
+    "redirects": [],
+    "rewrites": [
         {
             "source": "/about",
-            "destination": "/maintenance",
-            "statusCode": 302
+            "destination": "/about.html"
         },
         {
             "source": "/pricing",
-            "destination": "/maintenance",
-            "statusCode": 302
-        }
-    ],
-    "rewrites": [
+            "destination": "/pricing.html"
+        },
+        {
+            "source": "/agents",
+            "destination": "/agents.html"
+        },
+        {
+            "source": "/agents/register",
+            "destination": "/register.html"
+        },
+        {
+            "source": "/register",
+            "destination": "/register-human.html"
+        },
+        {
+            "source": "/oauth/callback",
+            "destination": "/oauth-callback.html"
+        },
+        {
+            "source": "/agents/:name",
+            "destination": "/agent.html"
+        },
+        {
+            "source": "/sign-in",
+            "destination": "/sign-in.html"
+        },
+        {
+            "source": "/dashboard",
+            "destination": "/dashboard.html"
+        },
+        {
+            "source": "/capabilities",
+            "destination": "/capabilities.html"
+        },
+        {
+            "source": "/settings",
+            "destination": "/settings.html"
+        },
+        {
+            "source": "/api/docs",
+            "destination": "/api-docs.html"
+        },
+        {
+            "source": "/partners/demo",
+            "destination": "/partner-demo.html"
+        },
+        {
+            "source": "/admin",
+            "destination": "/admin.html"
+        },
+        {
+            "source": "/verify/:name",
+            "destination": "/verify.html"
+        },
         {
             "source": "/maintenance",
             "destination": "/maintenance.html"
+        },
+        {
+            "source": "/unauthorized",
+            "destination": "/unauthorized.html"
         },
         {
             "source": "/privacy",
@@ -108,6 +101,22 @@
         {
             "source": "/terms",
             "destination": "/terms.html"
+        },
+        {
+            "source": "/accessibility",
+            "destination": "/accessibility.html"
+        },
+        {
+            "source": "/oauth/return",
+            "destination": "/oauth-return.html"
+        },
+        {
+            "source": "/oauth/email",
+            "destination": "/oauth-email.html"
+        },
+        {
+            "source": "/oauth/2fa",
+            "destination": "/oauth-2fa.html"
         }
     ]
 }
