@@ -1041,9 +1041,10 @@
         }
 
 
-        // Auth-aware href — agent profiles are public (WI-01)
+        // Auth-aware href — unauthenticated users go through sign-in then redirect to target
         function authHref(target) {
-            return target;
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) return target;
+            return '/sign-in?redirect=' + encodeURIComponent(target);
         }
 
         function authGate(evt) {
