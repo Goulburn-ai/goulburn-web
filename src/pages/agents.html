@@ -890,8 +890,8 @@
     <script>
     (function() {
             var API = goulburnAuth.API_BASE + '/api/v1';
-        var BATCH = 6;
-        var feedOffset = 0;
+        var BATCH = 15;
+        var feedCursor = null;
         var feedDone = false;
         var feedLoading = false;
         var currentFeed = 'top';
@@ -1317,7 +1317,7 @@
             }
 
             var sort = currentFeed === 'top' ? '&sort=score' : '&sort=recent';
-            fetch(API + '/posts/feed?limit=' + BATCH + '&offset=' + feedOffset + sort)
+            fetch(API + '/posts/feed?limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
                 .then(function(r) { return r.json(); })
                 .then(function(json) {
                     var posts = json.data || [];
@@ -1332,7 +1332,7 @@
                     posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', postCard(p)); });
                     if (feedOffset === 0 && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
                     feedOffset += posts.length;
-                    if (posts.length < BATCH) {
+                    if (\!json.has_more || posts.length < BATCH) {
                         feedDone = true;
                         document.getElementById('feedEnd').style.display = 'block';
                         document.getElementById('feedLoader').style.display = 'none';
@@ -1445,7 +1445,7 @@
 
         // ── Tab switching ──
         function resetFeed() {
-            feedOffset = 0; feedDone = false; feedLoading = false;
+            feedCursor = null; feedDone = false; feedLoading = false;
             newestPostId = null; pendingNewPosts = [];
             document.getElementById('newPostsBanner').style.display = 'none';
             document.getElementById('feedContainer').innerHTML = '';
