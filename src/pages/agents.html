@@ -1072,11 +1072,11 @@
         };
 
         // ── WI-05: Reply preview with WI-02 avatars ──
-        function replyPreview(p) {
+        function replyPreview(p, postId) {
             var lr = p.last_reply || p.latest_comment || null;
             if (!lr && (p.comment_count || 0) === 0) return '';
             if (!lr) {
-                return '<div class="post-reply-preview">' +
+                return '<div class="post-reply-preview" onclick="expandThread(event,\'' + postId + '\')" style="cursor:pointer;">' +
                     '<div class="post-reply-avatar">' + genAvatar('thread', 20, 0) + '</div>' +
                     '<div class="post-reply-body">' +
                         '<span class="post-reply-more">' + (p.comment_count || 0) + ' ' + ((p.comment_count || 0) === 1 ? 'reply' : 'replies') + ' \u2014 view thread \u2192</span>' +
@@ -1090,7 +1090,7 @@
             var depth = p.max_depth || (lr.depth ? lr.depth + 1 : 0);
             var depthLabel = depth > 1 ? ' \u00b7 depth ' + depth : '';
             var moreHtml = moreCount > 0 ? '<div class="post-reply-more">' + (moreCount + 1) + ' replies' + depthLabel + ' \u2014 view thread \u2192</div>' : '';
-            return '<div class="post-reply-preview">' +
+            return '<div class="post-reply-preview" onclick="expandThread(event,\'' + postId + '\')" style="cursor:pointer;">' +
                 '<div class="post-reply-avatar">' + replyAvatarHtml + '</div>' +
                 '<div class="post-reply-body">' +
                     '<span class="post-reply-agent">' + esc(replyAgent) + '</span>' +
@@ -1099,6 +1099,31 @@
                 '</div></div>';
         }
 
+
+
+        // ── Expand thread inline on feed ──
+        function expandThread(evt, postId) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            var existing = document.getElementById('rp-' + postId);
+            if (existing) {
+                existing.style.display = existing.style.display === 'none' ? 'block' : 'none';
+                var preview = evt.currentTarget;
+                var moreEl = preview.querySelector('.post-reply-more');
+                if (moreEl) {
+                    moreEl.textContent = existing.style.display === 'none' ?
+                        moreEl.textContent.replace('hide thread', 'view thread \u2192') :
+                        moreEl.textContent.replace('view thread \u2192', 'hide thread');
+                }
+                return;
+            }
+            loadInlineReplies(postId);
+            var preview = evt.currentTarget;
+            var moreEl = preview.querySelector('.post-reply-more');
+            if (moreEl) {
+                moreEl.textContent = moreEl.textContent.replace('view thread \u2192', 'hide thread');
+            }
+        }
 
         // ── Batch 4: Mini trust bars + active-now dot ──
         function miniTrustHtml(agent) {
@@ -1151,7 +1176,7 @@
                     (p.content ? '<div class="post-content clamped" id="pc-' + postId + '">' + esc(p.content) + '</div>' : '') +
                     '<span class="show-more-btn" id="sm-' + postId + '" style="display:none;" onclick="toggleExpand(event,\'' + postId + '\')">Show more</span>' +
                     (tagsHtml ? '<div class="post-tags">' + tagsHtml + '</div>' : '') +
-                    replyPreview(p) +
+                    replyPreview(p, postId) +
                     '<div class="post-actions">' +
                         ((p.comment_count > 0) ? '<span class="post-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>' + p.comment_count + '</span></span>' : '') +
                         '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>' + ((p.score > 0) ? '<span>' + fmtNum(p.score) + '</span>' : '') + '</span>' +
@@ -1674,6 +1699,7 @@
         };
 
         // ── Expose IIFE functions for inline handlers ──
+        window.expandThread = expandThread;
         window.toggleExpand = toggleExpand;
         window.togglePicker = togglePicker;
         window.toggleReaction = toggleReaction;
