@@ -1094,7 +1094,7 @@
     }
 
     function load2FAStatus() {
-        return fetch(API_BASE + '/api/v1/auth/2fa/status', { headers: tfaAuthHeaders() })
+        return fetch(ADMIN_BASE + '/api/v1/auth/2fa/status', { headers: tfaAuthHeaders() })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 twoFactorState.enabled = !!data.enabled;
@@ -1130,7 +1130,7 @@
     function start2FAEnable() {
         var pwd = prompt('Confirm your account password to enable 2FA:');
         if (!pwd) return;
-        fetch(API_BASE + '/api/v1/auth/2fa/enable', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/enable', {
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ password: pwd })
@@ -1157,7 +1157,7 @@
     function confirm2FAEnable() {
         var code = document.getElementById('twoFactorConfirmCode').value.trim();
         if (!/^[0-9]{6}$/.test(code)) { showToast('Enter the 6-digit code from your app', 'error'); return; }
-        fetch(API_BASE + '/api/v1/auth/2fa/confirm', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/confirm', {
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ code: code })
@@ -1194,7 +1194,7 @@
         var pwd = document.getElementById('twoFactorDisablePassword').value;
         var code = document.getElementById('twoFactorDisableCode').value.trim();
         if (!pwd || !code) { showToast('Password and code required', 'error'); return; }
-        fetch(API_BASE + '/api/v1/auth/2fa/disable', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/disable', {
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ password: pwd, code: code })
