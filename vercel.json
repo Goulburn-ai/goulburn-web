@@ -1,122 +1,130 @@
 {
-    "buildCommand": "node build.js",
-    "outputDirectory": "public",
-    "headers": [
+  "buildCommand": "node build.js",
+  "outputDirectory": "public",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
         {
-            "source": "/(.*)",
-            "headers": [
-                {
-                    "key": "X-Content-Type-Options",
-                    "value": "nosniff"
-                },
-                {
-                    "key": "X-Frame-Options",
-                    "value": "DENY"
-                },
-                {
-                    "key": "Referrer-Policy",
-                    "value": "strict-origin-when-cross-origin"
-                },
-                {
-                    "key": "Content-Security-Policy",
-                    "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://js.sentry-cdn.com https://cdn.vercel-insights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.goulburn.ai https://goulburn-api-production.up.railway.app https://goulburn-admin-production.up.railway.app https://*.ingest.sentry.io; img-src 'self' data:; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'"
-                }
-            ]
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://js.sentry-cdn.com https://cdn.vercel-insights.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.goulburn.ai https://goulburn-api-production.up.railway.app https://goulburn-admin-production.up.railway.app https://*.ingest.sentry.io; img-src 'self' data:; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'"
         }
-    ],
-    "redirects": [],
-    "rewrites": [
-        {
-            "source": "/about",
-            "destination": "/about.html"
-        },
-        {
-            "source": "/pricing",
-            "destination": "/pricing.html"
-        },
-        {
-            "source": "/changelog",
-            "destination": "/changelog.html"
-        },
-        {
-            "source": "/agents",
-            "destination": "/agents.html"
-        },
-        {
-            "source": "/agents/register",
-            "destination": "/register.html"
-        },
-        {
-            "source": "/register",
-            "destination": "/register-human.html"
-        },
-        {
-            "source": "/oauth/callback",
-            "destination": "/oauth-callback.html"
-        },
-        {
-            "source": "/agents/:name",
-            "destination": "/agent.html"
-        },
-        {
-            "source": "/sign-in",
-            "destination": "/sign-in.html"
-        },
-        {
-            "source": "/dashboard",
-            "destination": "/dashboard.html"
-        },
-        {
-            "source": "/capabilities",
-            "destination": "/capabilities.html"
-        },
-        {
-            "source": "/settings",
-            "destination": "/settings.html"
-        },
-        {
-            "source": "/api/docs",
-            "destination": "/api-docs.html"
-        },
-        {
-            "source": "/admin",
-            "destination": "/admin.html"
-        },
-        {
-            "source": "/verify/:name",
-            "destination": "/verify.html"
-        },
-        {
-            "source": "/maintenance",
-            "destination": "/maintenance.html"
-        },
-        {
-            "source": "/unauthorized",
-            "destination": "/unauthorized.html"
-        },
-        {
-            "source": "/privacy",
-            "destination": "/privacy.html"
-        },
-        {
-            "source": "/terms",
-            "destination": "/terms.html"
-        },
-        {
-            "source": "/accessibility",
-            "destination": "/accessibility.html"
-        },
-        {
-            "source": "/oauth/return",
-            "destination": "/oauth-return.html"
-        },
-        {
-            "source": "/oauth/email",
-            "destination": "/oauth-email.html"
-        },
-        {
-            "source": "/oauth/2fa",
-            "destination": "/oauth-2fa.html"
-        }
-    ]
+      ]
+    }
+  ],
+  "redirects": [],
+  "rewrites": [
+    {
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/pricing",
+      "destination": "/pricing.html"
+    },
+    {
+      "source": "/changelog",
+      "destination": "/changelog.html"
+    },
+    {
+      "source": "/agents",
+      "destination": "/agents.html"
+    },
+    {
+      "source": "/agents/register",
+      "destination": "/register.html"
+    },
+    {
+      "source": "/register",
+      "destination": "/register-human.html"
+    },
+    {
+      "source": "/oauth/callback",
+      "destination": "/oauth-callback.html"
+    },
+    {
+      "source": "/agents/:name",
+      "destination": "/agent.html"
+    },
+    {
+      "source": "/sign-in",
+      "destination": "/sign-in.html"
+    },
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/dashboard/:id(\\d{18})",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/capabilities",
+      "destination": "/capabilities.html"
+    },
+    {
+      "source": "/settings",
+      "destination": "/settings.html"
+    },
+    {
+      "source": "/dashboard/settings/:id(\\d{18})",
+      "destination": "/settings.html"
+    },
+    {
+      "source": "/api/docs",
+      "destination": "/api-docs.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/verify/:name",
+      "destination": "/verify.html"
+    },
+    {
+      "source": "/maintenance",
+      "destination": "/maintenance.html"
+    },
+    {
+      "source": "/unauthorized",
+      "destination": "/unauthorized.html"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/privacy.html"
+    },
+    {
+      "source": "/terms",
+      "destination": "/terms.html"
+    },
+    {
+      "source": "/accessibility",
+      "destination": "/accessibility.html"
+    },
+    {
+      "source": "/oauth/return",
+      "destination": "/oauth-return.html"
+    },
+    {
+      "source": "/oauth/email",
+      "destination": "/oauth-email.html"
+    },
+    {
+      "source": "/oauth/2fa",
+      "destination": "/oauth-2fa.html"
+    }
+  ]
 }
