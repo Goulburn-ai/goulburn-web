@@ -1025,7 +1025,7 @@
         fetch(ADMIN_BASE + '/api/v1/me/trust', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(trust) {
-                if (\!trust) return;
+                if (!trust) return;
                 var card = document.getElementById('trustScoreCard');
                 card.style.display = 'block';
                 document.getElementById('trustScoreValue').textContent = trust.score || 0;
@@ -1062,7 +1062,7 @@
         fetch(ADMIN_BASE + '/api/v1/me/api-key/stats', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(stats) {
-                if (\!stats || \!stats.has_key) return;
+                if (!stats || !stats.has_key) return;
                 document.getElementById('apiStatsPanel').style.display = 'block';
                 document.getElementById('apiRequestsToday').textContent = stats.requests_today || 0;
                 document.getElementById('apiRequests30d').textContent = stats.requests_30d || 0;
