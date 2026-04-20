@@ -488,6 +488,17 @@
             <h2>Account</h2>
 
             <div class="setting-row">
+                <div class="setting-info">
+                    <p class="setting-label">Registration ID</p>
+                    <p class="setting-description">Your unique account identifier</p>
+                </div>
+                <div class="setting-value">
+                    <div class="form-input" style="width: auto; background: transparent; border: none; padding: 0; cursor: default;">
+                        <span id="regIdDisplay" style="color: var(--dark-900); font-weight: 500; font-family: monospace; font-size: 0.9em;">---</span>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-row">
                 <div>
                     <p class="setting-label">Email Address</p>
                     <p class="setting-description">Your login email</p>
@@ -679,6 +690,27 @@
     document.addEventListener('DOMContentLoaded', function() {
         if (!goulburnAuth.requireAuth()) return;
 
+        // Extract registration ID from URL: /dashboard/settings/{18-digit-id}
+        var settingsPathParts = window.location.pathname.split('/');
+        var settingsUrlRegId = settingsPathParts[3] || '';
+        var settingsStoredRegId = sessionStorage.getItem('goulburn_reg_id') || '';
+
+        // If no ID in URL but we have one stored, redirect
+        if (!settingsUrlRegId && settingsStoredRegId) {
+            window.location.replace('/dashboard/settings/' + settingsStoredRegId);
+            return;
+        }
+        if (settingsUrlRegId && settingsUrlRegId !== settingsStoredRegId) {
+            sessionStorage.setItem('goulburn_reg_id', settingsUrlRegId);
+        }
+
+        // Update back-to-dashboard link
+        var backLink = document.getElementById('backToDashLink');
+        if (backLink && settingsStoredRegId) {
+            backLink.href = '/dashboard/' + settingsStoredRegId;
+        }
+
+
         // Handle OAuth callback if returning from platform auth
         handleOAuthCallback();
 
@@ -763,6 +795,8 @@
                     var email = profile.email || profile.username || '';
                     if (email) {
                         document.getElementById('emailDisplay').textContent = email;
+                var regId = profile.registration_id || '---';
+                document.getElementById('regIdDisplay').textContent = regId;
                     }
 
                     // Set connected platforms from profile

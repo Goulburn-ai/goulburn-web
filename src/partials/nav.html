@@ -20,8 +20,8 @@
                 </div>
                 <!-- Authenticated (hidden by default) -->
                 <div id="navAuth" class="hidden flex items-center gap-3">
-                    <a href="/dashboard" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Dashboard</a>
-                    <a href="/settings" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Settings</a>
+                    <a href="/dashboard" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navDashLink">Dashboard</a>
+                    <a href="/settings" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navSettingsLink">Settings</a>
                     <button onclick="goulburnAuth.signOut()" class="text-sm font-medium text-dark-500 hover:text-dark-900 transition-colors">Sign Out</button>
                 </div>
                 <!-- Mobile hamburger -->
@@ -37,8 +37,8 @@
                 <a href="/sign-in" class="text-sm text-dark-600 hover:text-dark-900 block py-1">Sign In</a>
             </div>
             <div id="mobileAuth" class="hidden flex flex-col gap-3">
-                <a href="/dashboard" class="text-sm text-dark-600 hover:text-dark-900">Dashboard</a>
-                <a href="/settings" class="text-sm text-dark-600 hover:text-dark-900">Settings</a>
+                <a href="/dashboard" class="text-sm text-dark-600 hover:text-dark-900" id="mobileNavDashLink">Dashboard</a>
+                <a href="/settings" class="text-sm text-dark-600 hover:text-dark-900" id="mobileNavSettingsLink">Settings</a>
                 <button onclick="goulburnAuth.signOut()" class="text-sm text-dark-600 hover:text-dark-900 text-left">Sign Out</button>
             </div>
         </div>
@@ -66,4 +66,19 @@
             if (mAuth) mAuth.classList.remove('hidden');
         }
     })();
-    </script>
+    
+            // Update nav links with registration ID
+            var navRegId = sessionStorage.getItem('goulburn_reg_id');
+            if (navRegId) {
+                var navLinks = [
+                    ['navDashLink', '/dashboard/' + navRegId],
+                    ['navSettingsLink', '/dashboard/settings/' + navRegId],
+                    ['mobileNavDashLink', '/dashboard/' + navRegId],
+                    ['mobileNavSettingsLink', '/dashboard/settings/' + navRegId]
+                ];
+                navLinks.forEach(function(pair) {
+                    var el = document.getElementById(pair[0]);
+                    if (el) el.href = pair[1];
+                });
+            }
+        </script>

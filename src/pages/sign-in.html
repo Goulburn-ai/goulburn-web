@@ -349,8 +349,9 @@
                         try {
                             sessionStorage.setItem('goulburn_session', data.session_token);
                             if (data.user_id) sessionStorage.setItem('goulburn_user_id', data.user_id);
+                            if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
                         } catch (e) {}
-                        window.location.replace('/dashboard');
+                        window.location.replace(data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');
                         return;
                     }
                     authUI.showStatus('Unexpected response from sign-in', true);
@@ -382,9 +383,11 @@
                 .then(res => {
                     if (res.ok && res.data.session_token) {
                         sessionStorage.setItem('goulburn_session', res.data.session_token);
+                        if (res.data.registration_id) sessionStorage.setItem('goulburn_reg_id', res.data.registration_id);
                         if (res.data.display_name) sessionStorage.setItem('goulburn_display_name', res.data.display_name);
                         const params = new URLSearchParams(window.location.search);
-                        window.location.href = params.get('redirect') || '/dashboard';
+                        var _dest = params.get('redirect') || (res.data.registration_id ? '/dashboard/' + res.data.registration_id : '/dashboard');
+                        window.location.href = _dest;
                         return;
                     }
                     if (res.status === 403 && res.data.detail && res.data.detail.includes('verify')) {
@@ -406,8 +409,10 @@
                         authUI.showStatus('Enter your 2FA code', false);
                     } else if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
+                        if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
                         const params = new URLSearchParams(window.location.search);
-                        window.location.href = params.get('redirect') || '/dashboard';
+                        var _dest = params.get('redirect') || (data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');
+                        window.location.href = _dest;
                     } else {
                         authUI.showStatus(data.message || data.detail || 'Invalid email or password', true);
                     }
