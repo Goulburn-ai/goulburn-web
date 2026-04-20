@@ -830,7 +830,7 @@
                     // We only have the prefix — show it masked, disable reveal
                     var displayPrefix = 'gb_' + data.prefix + '••••••••••••••••';
                     var el = document.getElementById('apiKeyDisplay');
-                    if (el && \!currentApiKey) {
+                    if (el && !currentApiKey) {
                         el.textContent = displayPrefix;
                         el.classList.add('api-key-masked');
                         document.getElementById('revealBtn').textContent = 'Reveal';
