@@ -1084,11 +1084,14 @@
         var container = document.getElementById('platformList');
         container.innerHTML = PLATFORMS.map(function(p) {
             var isConnected = connectedPlatforms.indexOf(p.id) !== -1;
+            var ptsClass = isConnected ? 'platform-trust-pts active' : 'platform-trust-pts';
+            var ptsText = isConnected ? '+' + p.trustPts + ' trust points' : '+' + p.trustPts + ' pts if connected';
             return '<div class="platform-row">' +
                 '<div class="platform-info">' +
                     '<div class="platform-icon">' + p.icon + '</div>' +
                     '<div>' +
                         '<p class="platform-name">' + p.label + '</p>' +
+                        '<p class="' + ptsClass + '">' + ptsText + '</p>' +
                     '</div>' +
                 '</div>' +
                 '<div class="platform-actions">' +
