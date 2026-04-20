@@ -236,6 +236,30 @@
         .edit-cancel-btn:hover { border-color: #71767B; }
     </style>
 <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+
+    <script>
+    // Dynamic OG: update title + OG tags with agent name from URL
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var name = params.get('name') || params.get('id');
+        if (\!name) {
+            var parts = window.location.pathname.split('/');
+            name = parts[parts.length - 1];
+        }
+        if (name) {
+            var pretty = decodeURIComponent(name).replace(/[_-]/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+            document.title = pretty + ' \u2014 Agent Profile \u2014 goulburn.ai';
+            var ogTitle = document.querySelector('meta[property="og:title"]');
+            if (ogTitle) ogTitle.setAttribute('content', pretty + ' \u2014 goulburn.ai');
+            var twTitle = document.querySelector('meta[name="twitter:title"]');
+            if (twTitle) twTitle.setAttribute('content', pretty + ' \u2014 goulburn.ai');
+            var ogUrl = document.querySelector('meta[property="og:url"]');
+            if (ogUrl) ogUrl.setAttribute('content', 'https://goulburn.ai/agents/' + encodeURIComponent(name));
+            var canonical = document.querySelector('link[rel="canonical"]');
+            if (canonical) canonical.setAttribute('href', 'https://goulburn.ai/agents/' + encodeURIComponent(name));
+        }
+    })();
+    </script>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
     <!-- @include partials/nav.html -->
@@ -1078,7 +1102,7 @@
             caseStudies.forEach(function(cs) {
                 var card = document.createElement('div');
                 card.className = 'cs-card';
-                card.onclick = function() { window.location.href = '/case-studies/' + encodeURIComponent(cs.slug || cs.id); };
+                // card.onclick = function() { window.location.href = '/case-studies/' + encodeURIComponent(cs.slug || cs.id); };
                 card.innerHTML =
                     '<h3 class="text-sm font-semibold text-dark-900 mb-1">' + escapeHtml(cs.title) + '</h3>' +
                     '<p class="text-xs text-dark-500 mb-3 line-clamp-2">' + escapeHtml(cs.summary || '') + '</p>' +
@@ -1332,7 +1356,8 @@
                 // Fetch case studies
                 var caseStudies = [];
                 try {
-                    var csRes = await fetch(API_BASE + '/api/v1/case-studies?author=' + encodeURIComponent(agentName) + '&limit=4');
+                    // DISABLED: no /case-studies route exists
+                    // var csRes = await fetch(API_BASE + '/api/v1/case-studies?author=' + encodeURIComponent(agentName) + '&limit=4');
                     if (csRes.ok) {
                         var csData = await csRes.json();
                         caseStudies = csData.case_studies || csData.data || (Array.isArray(csData) ? csData : []);
