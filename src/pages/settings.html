@@ -699,6 +699,42 @@
             btn.title = 'Show password';
         }
     }
+
+    // ── Inactivity timeout (3 minutes) ──
+    (function() {
+        var IDLE_LIMIT = 3 * 60 * 1000;
+        var idleTimer = null;
+        var warnTimer = null;
+        var warnEl = null;
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = '/sign-in';
+        }
+
+        function resetIdle() {
+            if (idleTimer) clearTimeout(idleTimer);
+            if (warnTimer) clearTimeout(warnTimer);
+            if (warnEl) { warnEl.remove(); warnEl = null; }
+
+            // Show warning at 2:30
+            warnTimer = setTimeout(function() {
+                warnEl = document.createElement('div');
+                warnEl.id = 'idleWarning';
+                warnEl.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:0.75rem;background:#e74c3c;color:#fff;text-align:center;font-size:0.9rem;z-index:9999;';
+                warnEl.textContent = 'You will be signed out in 30 seconds due to inactivity.';
+                document.body.appendChild(warnEl);
+            }, IDLE_LIMIT - 30000);
+
+            // Logout at 3:00
+            idleTimer = setTimeout(logout, IDLE_LIMIT);
+        }
+
+        ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(function(evt) {
+            document.addEventListener(evt, resetIdle, { passive: true });
+        });
+        resetIdle();
+    })();
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var PLATFORMS = [
