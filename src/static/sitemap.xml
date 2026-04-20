@@ -41,11 +41,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/partners/demo</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://goulburn.ai/privacy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>

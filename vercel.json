@@ -79,10 +79,6 @@
             "destination": "/api-docs.html"
         },
         {
-            "source": "/partners/demo",
-            "destination": "/partner-demo.html"
-        },
-        {
             "source": "/admin",
             "destination": "/admin.html"
         },
