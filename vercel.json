@@ -63,11 +63,11 @@
       "destination": "/sign-in.html"
     },
     {
-      "source": "/dashboard",
+      "source": "/dashboard/:id(\\d{18})",
       "destination": "/dashboard.html"
     },
     {
-      "source": "/dashboard/:id(\\d{18})",
+      "source": "/dashboard",
       "destination": "/dashboard.html"
     },
     {
@@ -75,11 +75,11 @@
       "destination": "/capabilities.html"
     },
     {
-      "source": "/settings",
+      "source": "/dashboard/settings/:id(\\d{18})",
       "destination": "/settings.html"
     },
     {
-      "source": "/dashboard/settings/:id(\\d{18})",
+      "source": "/settings",
       "destination": "/settings.html"
     },
     {
