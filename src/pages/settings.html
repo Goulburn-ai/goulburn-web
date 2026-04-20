@@ -272,6 +272,105 @@
         }
 
         /* API Key Display */
+        /* ── Trust Score ── */
+        .trust-score-card {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+        }
+        .trust-score-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .trust-score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .trust-tier-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tier-observer { background: rgba(255,255,255,0.15); color: #ccc; }
+        .tier-contributor { background: rgba(59,130,246,0.25); color: #93c5fd; }
+        .tier-verified { background: rgba(16,185,129,0.25); color: #6ee7b7; }
+        .trust-bar-track {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .trust-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        .trust-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .trust-signal {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.35rem 0.5rem;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+        }
+        .trust-signal-label { color: #94a3b8; }
+        .trust-signal-value { color: #6ee7b7; font-weight: 600; }
+        .platform-trust-pts {
+            font-size: 0.7rem;
+            color: var(--dark-500);
+            margin-top: 2px;
+        }
+        .platform-trust-pts.active { color: #10b981; font-weight: 600; }
+        /* ── API Key Stats ── */
+        .api-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        .api-stat-box {
+            background: var(--dark-50);
+            border-radius: 6px;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        .api-stat-box .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--dark-900);
+        }
+        .api-stat-box .stat-label {
+            font-size: 0.7rem;
+            color: var(--dark-500);
+            margin-top: 0.25rem;
+        }
+        .api-tier-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--dark-50);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--dark-600);
+            margin-top: 0.75rem;
+        }
+
         .api-key-display {
             display: flex;
             align-items: center;
@@ -569,6 +668,27 @@
                 Use your API key to authenticate requests to the goulburn.ai Trust API.
             </p>
 
+            <div id="apiStatsPanel" style="display:none;">
+                <div class="api-stats-grid">
+                    <div class="api-stat-box">
+                        <div class="stat-value" id="apiRequestsToday">0</div>
+                        <div class="stat-label">Requests Today</div>
+                    </div>
+                    <div class="api-stat-box">
+                        <div class="stat-value" id="apiRequests30d">0</div>
+                        <div class="stat-label">Last 30 Days</div>
+                    </div>
+                    <div class="api-stat-box">
+                        <div class="stat-value" id="apiLastUsed">Never</div>
+                        <div class="stat-label">Last Used</div>
+                    </div>
+                </div>
+                <div class="api-tier-info" id="apiTierInfo">
+                    <span>⚡</span>
+                    <span id="apiTierText">Loading rate limits...</span>
+                </div>
+            </div>
+
             <div class="warning-box">
                 <span class="warning-icon">⚠️</span>
                 Keep your API key confidential. Never share it publicly or commit it to version control.
@@ -738,10 +858,10 @@
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var PLATFORMS = [
-        { id: 'github',   label: 'GitHub',   icon: '🐙' },
-        { id: 'twitter',   label: 'X/Twitter', icon: '𝕏' },
-        { id: 'discord',  label: 'Discord',  icon: '⚙️' },
-        { id: 'linkedin', label: 'LinkedIn', icon: '💼' }
+        { id: 'github',   label: 'GitHub',   icon: '🐙', trustPts: 15 },
+        { id: 'twitter',   label: 'X/Twitter', icon: '𝕏', trustPts: 8 },
+        { id: 'discord',  label: 'Discord',  icon: '⚙️', trustPts: 8 },
+        { id: 'linkedin', label: 'LinkedIn', icon: '💼', trustPts: 12 }
     ];
     var connectedPlatforms = [];
     var currentApiKey = null;
@@ -826,6 +946,8 @@
                 connectedPlatforms.push(platform);
                 showToast(platform.charAt(0).toUpperCase() + platform.slice(1) + ' connected successfully');
                 renderPlatforms();
+                // Refresh trust score after connect
+                setTimeout(function() { loadSettingsData(); }, 1500);
             }
         })
         .catch(function(err) {
@@ -898,6 +1020,63 @@
                 }
             })
             .catch(function() { /* endpoint may not exist yet */ });
+
+        // Fetch trust score
+        fetch(ADMIN_BASE + '/api/v1/me/trust', { headers: headers })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(trust) {
+                if (\!trust) return;
+                var card = document.getElementById('trustScoreCard');
+                card.style.display = 'block';
+                document.getElementById('trustScoreValue').textContent = trust.score || 0;
+                // Tier badge
+                var badge = document.getElementById('trustTierBadge');
+                var tier = (trust.tier || 'observer').toLowerCase();
+                badge.textContent = tier.toUpperCase();
+                badge.className = 'trust-tier-badge tier-' + tier;
+                // Progress bar
+                var pct = Math.min(100, (trust.score || 0));
+                var barColor = tier === 'verified' ? '#10b981' : tier === 'contributor' ? '#3b82f6' : '#94a3b8';
+                var bar = document.getElementById('trustBarFill');
+                bar.style.width = pct + '%';
+                bar.style.background = barColor;
+                // Breakdown
+                var bd = trust.breakdown || {};
+                var bdHtml = '';
+                var labels = {
+                    'platform:github': 'GitHub', 'platform:linkedin': 'LinkedIn',
+                    'platform:discord': 'Discord', 'platform:twitter': 'X/Twitter',
+                    '2fa_enabled': '2FA Enabled', 'email_verified': 'Email Verified',
+                    'account_age_30d': 'Account 30d+', 'account_age_90d': 'Account 90d+'
+                };
+                Object.keys(bd).forEach(function(k) {
+                    if (k === 'grace_period_cap') return;
+                    var label = labels[k] || k;
+                    bdHtml += '<div class="trust-signal"><span class="trust-signal-label">' + label + '</span><span class="trust-signal-value">+' + bd[k] + '</span></div>';
+                });
+                document.getElementById('trustBreakdown').innerHTML = bdHtml;
+            })
+            .catch(function(err) { console.error('Trust score error:', err); });
+
+        // Fetch API key stats
+        fetch(ADMIN_BASE + '/api/v1/me/api-key/stats', { headers: headers })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(stats) {
+                if (\!stats || \!stats.has_key) return;
+                document.getElementById('apiStatsPanel').style.display = 'block';
+                document.getElementById('apiRequestsToday').textContent = stats.requests_today || 0;
+                document.getElementById('apiRequests30d').textContent = stats.requests_30d || 0;
+                // Last used
+                var lastUsed = stats.last_used;
+                if (lastUsed) {
+                    var d = new Date(lastUsed);
+                    document.getElementById('apiLastUsed').textContent = d.toLocaleDateString();
+                }
+                // Tier info
+                var tierText = (stats.tier || 'observer').charAt(0).toUpperCase() + (stats.tier || 'observer').slice(1);
+                document.getElementById('apiTierText').textContent = tierText + ' tier: ' + (stats.rate_limit_rpm || 30) + ' req/min, ' + (stats.daily_quota || 1000).toLocaleString() + ' req/day';
+            })
+            .catch(function() { /* stats endpoint may not exist yet */ });
     }
 
     // ── Platform Rendering ──
