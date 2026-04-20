@@ -704,12 +704,6 @@
             sessionStorage.setItem('goulburn_reg_id', settingsUrlRegId);
         }
 
-        // Update back-to-dashboard link
-        var backLink = document.getElementById('backToDashLink');
-        if (backLink && settingsStoredRegId) {
-            backLink.href = '/dashboard/' + settingsStoredRegId;
-        }
-
 
         // Handle OAuth callback if returning from platform auth
         handleOAuthCallback();
