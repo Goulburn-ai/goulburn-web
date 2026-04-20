@@ -715,13 +715,20 @@
     // ── OAuth Callback Handler ──
     function handleOAuthCallback() {
         var params = new URLSearchParams(window.location.search);
-        var code = params.get('code');
-        var state = params.get('state');
-        var error = params.get('error');
+        var code = params.get('code') || sessionStorage.getItem('goulburn_oauth_code');
+        var state = params.get('state') || sessionStorage.getItem('goulburn_oauth_state');
+        var error = params.get('error') || sessionStorage.getItem('goulburn_oauth_error');
+
+        // Clean up bouncer sessionStorage
+        sessionStorage.removeItem('goulburn_oauth_code');
+        sessionStorage.removeItem('goulburn_oauth_state');
+        sessionStorage.removeItem('goulburn_oauth_error');
+        sessionStorage.removeItem('goulburn_oauth_bounced_at');
+        sessionStorage.removeItem('goulburn_oauth_return_to');
 
         if (error) {
             showToast('Platform connection failed: ' + (params.get('error_description') || error), 'error');
-            window.history.replaceState({}, '', '/settings');
+            window.history.replaceState({}, '', window.location.pathname);
             return;
         }
 
@@ -738,7 +745,7 @@
 
         if (!platform) {
             showToast('Unable to determine platform for callback', 'error');
-            window.history.replaceState({}, '', '/settings');
+            window.history.replaceState({}, '', window.location.pathname);
             return;
         }
 
@@ -768,7 +775,7 @@
         })
         .finally(function() {
             sessionStorage.removeItem('goulburn_settings_oauth_platform');
-            window.history.replaceState({}, '', '/settings');
+            window.history.replaceState({}, '', window.location.pathname);
         });
     }
 
@@ -815,13 +822,20 @@
                 renderPlatforms();
             });
 
-        // Also try dedicated API key endpoint
+        // Also try dedicated API key endpoint (returns prefix only, not full key)
         fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
-                if (data && data.api_key) {
-                    currentApiKey = data.api_key;
-                    updateApiKeyDisplay(currentApiKey);
+                if (data && data.has_key) {
+                    // We only have the prefix — show it masked, disable reveal
+                    var displayPrefix = 'gb_' + data.prefix + '••••••••••••••••';
+                    var el = document.getElementById('apiKeyDisplay');
+                    if (el && \!currentApiKey) {
+                        el.textContent = displayPrefix;
+                        el.classList.add('api-key-masked');
+                        document.getElementById('revealBtn').textContent = 'Reveal';
+                        document.getElementById('revealBtn').title = 'Full key only visible when first generated';
+                    }
                 }
             })
             .catch(function() { /* endpoint may not exist yet */ });
@@ -857,9 +871,10 @@
     function connectPlatform(platform) {
         var session = goulburnAuth.getSession();
         sessionStorage.setItem('goulburn_settings_oauth_platform', platform);
+        sessionStorage.setItem('goulburn_oauth_return_to', window.location.pathname);
 
         var redirectUri = window.location.origin + '/settings';
-        var authorizeUrl = ADMIN_BASE + '/api/v1/oauth/' + platform + '/authorize?redirect_uri=' + encodeURIComponent(redirectUri);
+        var authorizeUrl = ADMIN_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=user_' + encodeURIComponent(goulburnAuth.getSession().substring(0, 8)) + '&redirect_uri=' + encodeURIComponent(redirectUri);
 
         fetch(authorizeUrl, {
             headers: { 'Authorization': 'Bearer ' + session }
@@ -970,7 +985,7 @@
         var btn = document.getElementById('revealBtn');
 
         if (!currentApiKey) {
-            showToast('No API key available', 'error');
+            showToast('Full key is only visible when first generated. Generate a new key to see it.', 'info');
             return;
         }
 
@@ -995,7 +1010,7 @@
 
     function copyApiKey() {
         if (!currentApiKey) {
-            showToast('No API key to copy', 'error');
+            showToast('Full key is only available when first generated. Generate a new key to copy it.', 'info');
             return;
         }
         navigator.clipboard.writeText(currentApiKey).then(function() {
