@@ -471,6 +471,16 @@
                 width: 100%;
             }
         }
+
+        /* Password eye toggle */
+        .password-wrapper { position: relative; }
+        .password-wrapper input { padding-right: 2.5rem; }
+        .eye-toggle {
+            position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer; font-size: 1.1rem;
+            color: var(--dark-500); padding: 0.25rem; line-height: 1;
+        }
+        .eye-toggle:hover { color: var(--dark-700); }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -524,15 +534,15 @@
             <div class="password-form" id="passwordForm" style="padding: 1rem 0; border-top: 1px solid var(--dark-200); margin-top: 1rem;">
                 <div class="form-group">
                     <label class="form-label">Current Password</label>
-                    <input type="password" class="form-input" id="currentPassword" placeholder="••••••••">
+                    <div class="password-wrapper"><input type="password" class="form-input" id="currentPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('currentPassword', this)" title="Show password">&#128065;</button></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" class="form-input" id="newPassword" placeholder="••••••••">
+                    <div class="password-wrapper"><input type="password" class="form-input" id="newPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('newPassword', this)" title="Show password">&#128065;</button></div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirm Password</label>
-                    <input type="password" class="form-input" id="confirmPassword" placeholder="••••••••">
+                    <div class="password-wrapper"><input type="password" class="form-input" id="confirmPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('confirmPassword', this)" title="Show password">&#128065;</button></div>
                 </div>
                 <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
                     <button class="btn btn-primary" onclick="updatePassword()">Update Password</button>
@@ -614,15 +624,15 @@
                 </div>
             </div>
 
-            <div id="twoFactorBackupBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
+            <div id="twoFactorBackupBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px; color: var(--dark-800);">
                 <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Save these backup codes somewhere safe.</strong> Each can be used once if you lose your authenticator.</p>
-                <pre id="twoFactorBackupList" style="background: white; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap;"></pre>
+                <pre id="twoFactorBackupList" style="background: #ffffff; color: #1a1a2e; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; border: 1px solid var(--dark-200);"></pre>
                 <button id="twoFactorBackupAckBtn" class="btn btn-primary" type="button" style="margin-top: 0.5rem;">I have saved them</button>
             </div>
 
             <div id="twoFactorDisableBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
                 <p style="font-size: 0.875rem; margin-bottom: 0.75rem;">Confirm your password and enter a current 2FA code to disable.</p>
-                <input type="password" id="twoFactorDisablePassword" placeholder="Password" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px; margin-bottom: 0.5rem;" />
+                <div class="password-wrapper" style="margin-bottom: 0.5rem;"><input type="password" id="twoFactorDisablePassword" placeholder="Password" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px;" /><button type="button" class="eye-toggle" onclick="togglePwVis('twoFactorDisablePassword', this)" title="Show password">&#128065;</button></div>
                 <input type="text" id="twoFactorDisableCode" inputmode="numeric" maxlength="14" placeholder="123456 or backup code" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px; margin-bottom: 0.5rem;" />
                 <div style="display: flex; gap: 0.5rem;">
                     <button id="twoFactorDisableConfirmBtn" class="btn btn-danger" type="button">Disable 2FA</button>
@@ -676,11 +686,24 @@
 
     <script>
     // ── Settings — wired to real API endpoints ──
+
+    function togglePwVis(fieldId, btn) {
+        var inp = document.getElementById(fieldId);
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            btn.innerHTML = '&#128064;';
+            btn.title = 'Hide password';
+        } else {
+            inp.type = 'password';
+            btn.innerHTML = '&#128065;';
+            btn.title = 'Show password';
+        }
+    }
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var PLATFORMS = [
         { id: 'github',   label: 'GitHub',   icon: '🐙' },
-        { id: 'x',        label: 'X/Twitter', icon: '𝕏' },
+        { id: 'twitter',   label: 'X/Twitter', icon: '𝕏' },
         { id: 'discord',  label: 'Discord',  icon: '⚙️' },
         { id: 'linkedin', label: 'LinkedIn', icon: '💼' }
     ];
