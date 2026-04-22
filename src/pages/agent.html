@@ -367,11 +367,15 @@
                             Edit Profile
                         </button>
 
-                        <!-- Suspend toggle: persistent amber when status is suspended, grey when active.
-                             Single click toggles (no 3s arm), because suspend is reversible. -->
-                        <button id="suspendToggleBtn" onclick="toggleSuspend()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium border rounded-lg transition-colors" title="Suspend Agent">
-                            <svg id="suspendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                            <span id="suspendLabel">Suspend</span>
+                        <!-- Visibility toggle: eye-open when visible (active), eye-off in amber
+                             when hidden (suspended). Persistent state — click to flip, no 3s arm,
+                             since visibility is reversible. -->
+                        <button id="suspendToggleBtn" onclick="toggleSuspend()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium border rounded-lg transition-colors" title="Visibility — click to hide">
+                            <svg id="suspendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <span id="suspendLabel">Visibility</span>
                         </button>
 
                         <!-- Delete: irreversible, click-twice-to-confirm within 3s. Red. -->
@@ -682,21 +686,21 @@
             var btn = document.getElementById('suspendToggleBtn');
             var label = document.getElementById('suspendLabel');
             var icon = document.getElementById('suspendIcon');
-            if (!btn || !label) return;
+            if (!btn || !label || !icon) return;
             if (isSuspended) {
-                // Persistent amber state — stays until clicked again to resume.
+                // Persistent amber state — eye-off icon, "Hidden" label,
+                // stays until clicked again to restore visibility.
                 btn.className = 'inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-300 border border-amber-400 rounded-lg transition-colors';
                 btn.style.background = 'rgba(245,158,11,0.15)';
-                btn.title = 'Agent suspended — click to resume';
-                label.textContent = 'Suspended';
-                // Keep pause glyph; tint via currentColor from class above
-                icon.setAttribute('stroke', 'currentColor');
+                btn.title = 'Agent hidden from public directory — click to make visible again';
+                label.textContent = 'Hidden';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
             } else {
                 btn.className = 'inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-dark-200/5 transition-colors';
                 btn.style.background = '';
-                btn.title = 'Suspend Agent (reversible)';
-                label.textContent = 'Suspend';
-                icon.setAttribute('stroke', 'currentColor');
+                btn.title = 'Visibility — click to hide agent from public directory';
+                label.textContent = 'Visibility';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
             }
         }
 
@@ -717,7 +721,7 @@
                 }
                 _ownedAgent.status = isSuspended ? 'active' : 'suspended';
                 renderSuspendState(!isSuspended);
-                showToastLite(isSuspended ? 'Agent resumed' : 'Agent suspended');
+                showToastLite(isSuspended ? 'Agent visible in public directory' : 'Agent hidden from public directory');
             } catch (e) {
                 showToastLite('Network error', true);
             }
