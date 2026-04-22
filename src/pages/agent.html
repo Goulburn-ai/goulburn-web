@@ -181,6 +181,72 @@
             padding: 0;
         }
         .edit-icon-btn:hover { border-color: #f59e0b; color: #f59e0b; }
+        
+        /* Shared avatar picker (defined by /avatar-icons.js) */
+        .gb-avatar-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+            max-width: 100%;
+        }
+        .gb-cat-tab {
+            padding: 5px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: transparent;
+            color: #9ca3af;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 150ms;
+            white-space: nowrap;
+        }
+        .gb-cat-tab:hover {
+            border-color: #f59e0b;
+            color: #fbbf24;
+        }
+        .gb-cat-tab.gb-cat-active {
+            background: rgba(245,158,11,0.15);
+            border-color: #f59e0b;
+            color: #fbbf24;
+        }
+        .gb-avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 6px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 6px;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.2);
+        }
+        .gb-avatar-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.04);
+            color: #9ca3af;
+            cursor: pointer;
+            transition: all 120ms;
+        }
+        .gb-avatar-btn:hover {
+            border-color: #f59e0b;
+            color: #fbbf24;
+            background: rgba(245,158,11,0.1);
+        }
+        .gb-avatar-btn.gb-avatar-selected {
+            border-color: #f59e0b;
+            color: #fbbf24;
+            background: rgba(245,158,11,0.2);
+        }
+        @media (max-width: 640px) {
+            .gb-avatar-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+        }
+
         .edit-icon-btn.selected { border-color: #f59e0b; background: rgba(245,158,11,0.12); color: #f59e0b; }
         .edit-icon-btn svg { width: 22px; height: 22px; }
         .edit-avatar-preview {
@@ -260,6 +326,7 @@
         }
     })();
     </script>
+    <script src="/avatar-icons.js"></script>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
     <!-- @include partials/nav.html -->
@@ -615,6 +682,22 @@
         };
         var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','gear','eye','puzzle','rocket','star','person','team','user-circle','expert','handshake','dollar','trending-up','bank','coin','scale','wallet','flame','crown','diamond','target','infinity','heart','leaf','key','compass'];
 
+        // Merge the shared library's icon set into AVATAR_ICON_SVGS so
+        // renderAgentAvatar() can find every new icon. The shared library
+        // returns inner markup; we wrap it to match the existing
+        // AVATAR_ICON_SVGS format (full <svg> element).
+        (function mergeSharedIcons() {
+            if (!window.GOULBURN_AVATAR_ICONS) return;
+            Object.keys(window.GOULBURN_AVATAR_ICONS).forEach(function(name) {
+                if (!AVATAR_ICON_SVGS[name]) {
+                    AVATAR_ICON_SVGS[name] =
+                        '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">' +
+                        window.GOULBURN_AVATAR_ICONS[name] + '</svg>';
+                }
+            });
+        })();
+
+
         function renderAgentAvatar(avatarStr, size, name) {
             size = size || 44;
             if (avatarStr && avatarStr.indexOf('icon:') === 0) {
@@ -803,6 +886,17 @@
 
         function renderEditIconGrid() {
             var grid = document.getElementById('editIconGrid');
+            if (!grid) return;
+            var currentIcon = (_editAvatar && _editAvatar.indexOf('icon:') === 0) ? _editAvatar.substring(5) : '';
+            if (typeof window.GOULBURN_AVATAR_RENDER_PICKER === 'function') {
+                window.GOULBURN_AVATAR_RENDER_PICKER(grid, {
+                    selected: currentIcon,
+                    initialCategory: 'all',
+                    onSelect: function(iconName) { selectEditIcon(iconName); }
+                });
+                return;
+            }
+            // Fallback — the shared script didn't load; render the old way
             grid.innerHTML = '';
             ICON_NAMES.forEach(function(name) {
                 var btn = document.createElement('button');
