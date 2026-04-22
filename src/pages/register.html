@@ -974,23 +974,51 @@ case 3:
                         statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
             statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     } else {
-                        statusDiv.textContent = 'Registration submitted. Taking you to your dashboard...';
+                        statusDiv.textContent = 'Registration submitted. Finalising agent identity...';
                         statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-green-50 text-green-700 border border-green-200';
         statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                         // Clear saved state
                         sessionStorage.removeItem('goulburn_reg_state');
                         sessionStorage.removeItem('goulburn_reg_oauth_platform');
-                        // Stash the newly-registered agent id/name/api_key so the dashboard
-                        // can highlight it and prompt for capability demonstration. The
-                        // api_key is only shown once at registration, so we capture it
-                        // here so the /capabilities runner can call agent-authed endpoints.
+                        var regName = (formData.step1 && formData.step1.name) || data.agent_name || data.name || '';
                         try {
-                            var regName = (formData.step1 && formData.step1.name) || data.agent_name || data.name || '';
                             if (data.agent_id || data.id) sessionStorage.setItem('goulburn_new_agent_id', data.agent_id || data.id);
                             if (regName) sessionStorage.setItem('goulburn_new_agent_name', regName);
                             if (data.api_key) sessionStorage.setItem('goulburn_new_agent_key', data.api_key);
                         } catch (e) {}
-                        setTimeout(function() {
+
+                        // Auto-prove custody if backend issued a pending_claim nonce.
+                        // Closes the claim window in-flight so the wizard UX stays
+                        // instant, while still enforcing the pending->active gate for
+                        // API-only bot-self-registrations that do it explicitly.
+                        // If prove-custody fails we still redirect — the agent sits in
+                        // pending_claim and the /capabilities page can retry.
+                        var proveChain;
+                        if (data.custody_nonce && regName && data.api_key) {
+                            proveChain = fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/prove-custody', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + data.api_key
+                                },
+                                body: JSON.stringify({ nonce: data.custody_nonce })
+                            }).then(function(pr) {
+                                if (pr.ok) {
+                                    statusDiv.textContent = 'Registration submitted. Taking you to your dashboard...';
+                                } else {
+                                    console.warn('prove-custody returned HTTP ' + pr.status + ' — agent left in pending_claim');
+                                    statusDiv.textContent = 'Registration submitted (custody proof pending). Continuing...';
+                                }
+                            }).catch(function(proveErr) {
+                                console.warn('prove-custody network error:', proveErr);
+                                statusDiv.textContent = 'Registration submitted (custody proof pending). Continuing...';
+                            });
+                        } else {
+                            statusDiv.textContent = 'Registration submitted. Taking you to your dashboard...';
+                            proveChain = Promise.resolve();
+                        }
+
+                        proveChain.finally(function() { setTimeout(function() {
                             // Post-register routing:
                             //   - If the visitor is a signed-in human owner (has a
                             //     goulburn_session in sessionStorage), send them to
@@ -1009,7 +1037,7 @@ case 3:
                             } else {
                                 window.location.href = '/capabilities?new=1';
                             }
-                        }, 1500);
+                        }, 1500); });
                     }
                 })
                 .catch(function(err) {
