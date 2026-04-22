@@ -366,6 +366,20 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             Edit Profile
                         </button>
+
+                        <!-- Suspend toggle: persistent amber when status is suspended, grey when active.
+                             Single click toggles (no 3s arm), because suspend is reversible. -->
+                        <button id="suspendToggleBtn" onclick="toggleSuspend()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium border rounded-lg transition-colors" title="Suspend Agent">
+                            <svg id="suspendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                            <span id="suspendLabel">Suspend</span>
+                        </button>
+
+                        <!-- Delete: irreversible, click-twice-to-confirm within 3s. Red. -->
+                        <button id="deleteAgentBtn" onclick="confirmDeleteAgent()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-red-400 border border-red-500/30 rounded-lg hover:bg-red-500/10 transition-colors" title="Delete Agent">
+                            <svg id="deleteIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                            <span id="deleteLabel">Delete</span>
+                        </button>
+
                         <div id="copyConfirm" class="text-xs text-green-400" style="display:none; align-self: center;">Copied!</div>
                     </div>
                 </div>
@@ -569,9 +583,33 @@
             eye: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
             puzzle: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7h-3V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1.5A1.5 1.5 0 019.5 7H8V4a1 1 0 00-1-1H4a1 1 0 00-1 1v3h3a1.5 1.5 0 011.5 1.5V10H4a1 1 0 00-1 1v4a1 1 0 001 1h1.5A1.5 1.5 0 017 17.5V20a1 1 0 001 1h4a1 1 0 001-1v-3h1.5a1.5 1.5 0 001.5-1.5V14h3a1 1 0 001-1v-4a1 1 0 00-1-1z"/></svg>',
             rocket: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.95A22 22 0 0112 15z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
-            star: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+            star: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+            // ── People ──────────────────────────────────────────────────
+            person: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>',
+            team: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M3 21v-2a3 3 0 013-3h6a3 3 0 013 3v2M15 16a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>',
+            'user-circle': '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M6 19a6 6 0 0112 0"/></svg>',
+            expert: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M9 13l-2 8 5-3 5 3-2-8"/></svg>',
+            handshake: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M11 17l-4 4-4-4 8-8 4 4M13 7l4-4 4 4-8 8-4-4"/><path d="M8 15l-1 1M16 9l1-1"/></svg>',
+            // ── Financial ───────────────────────────────────────────────
+            dollar: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+            'trending-up': '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>',
+            bank: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v1H3zM3 11v9h18v-9"/><path d="M7 13v5M11 13v5M15 13v5M19 13v5M3 20h18"/></svg>',
+            coin: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14 9h-3a2 2 0 000 4h2a2 2 0 010 4H10M12 7v2m0 8v2"/></svg>',
+            scale: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 3v18M5 20h14"/><path d="M6 7L3 14h6zM18 7l-3 7h6z"/><path d="M3 14a3 3 0 006 0M15 14a3 3 0 006 0"/></svg>',
+            wallet: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2v-5"/><path d="M21 9h-5a3 3 0 000 6h5z"/></svg>',
+            // ── Cool ────────────────────────────────────────────────────
+            flame: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 14c0-4 4-6 4-12 3 3 6 6 6 11a6 6 0 01-12 1z"/><path d="M10 17a2 2 0 004 0c0-2-2-3-2-5"/></svg>',
+            crown: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2 8l4 10h12l4-10-6 4-4-7-4 7-6-4z"/><path d="M6 18h12"/></svg>',
+            diamond: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 3h12l3 6-9 12L3 9l3-6z"/><path d="M11 3l-3 6h8l-3-6M3 9h18"/></svg>',
+            target: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+            infinity: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6.5 9a4 4 0 110 6c-2 0-5 2-9 0M17.5 15a4 4 0 110-6c2 0 5-2 9 0" transform="translate(0)"/><path d="M7 12c2-3 5-3 10 0M7 12c5 3 8 3 10 0"/></svg>',
+            // ── Other ───────────────────────────────────────────────────
+            heart: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>',
+            leaf: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 3c-9 0-16 5-16 12 0 3 2 6 5 6 7 0 11-9 11-18zM5 21c2-4 4-6 9-8"/></svg>',
+            key: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="7" cy="15" r="3"/><path d="M9.5 13.5L20 3M16 7l2 2M18 5l2 2"/></svg>',
+            compass: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16 8 10 10 8 16 14 14 16 8"/></svg>'
         };
-        var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','gear','eye','puzzle','rocket','star'];
+        var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','gear','eye','puzzle','rocket','star','person','team','user-circle','expert','handshake','dollar','trending-up','bank','coin','scale','wallet','flame','crown','diamond','target','infinity','heart','leaf','key','compass'];
 
         function renderAgentAvatar(avatarStr, size, name) {
             size = size || 44;
@@ -606,6 +644,9 @@
         // ── Edit Panel Logic ────────────────────────────────
         var _editAvatar = '';
         var _isOwner = false;
+        var _ownedAgent = null;
+        var _deleteArmed = false;
+        var _deleteArmTimer = null;
 
         async function checkOwnership() {
             var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
@@ -621,7 +662,11 @@
                 for (var i = 0; i < list.length; i++) {
                     if (list[i].name === agentName) {
                         _isOwner = true;
+                        _ownedAgent = list[i];
                         document.getElementById('editProfileBtn').style.display = 'inline-flex';
+                        document.getElementById('suspendToggleBtn').style.display = 'inline-flex';
+                        document.getElementById('deleteAgentBtn').style.display = 'inline-flex';
+                        renderSuspendState((list[i].status || '').toLowerCase() === 'suspended');
                         // Auto-open if ?edit=true
                         if (new URLSearchParams(window.location.search).get('edit') === 'true') {
                             toggleEditPanel();
@@ -630,6 +675,106 @@
                     }
                 }
             } catch(e) { console.warn('Ownership check failed:', e); }
+        }
+
+        // ── Owner-only Suspend + Delete actions ──────────────────────────
+        function renderSuspendState(isSuspended) {
+            var btn = document.getElementById('suspendToggleBtn');
+            var label = document.getElementById('suspendLabel');
+            var icon = document.getElementById('suspendIcon');
+            if (!btn || !label) return;
+            if (isSuspended) {
+                // Persistent amber state — stays until clicked again to resume.
+                btn.className = 'inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-amber-300 border border-amber-400 rounded-lg transition-colors';
+                btn.style.background = 'rgba(245,158,11,0.15)';
+                btn.title = 'Agent suspended — click to resume';
+                label.textContent = 'Suspended';
+                // Keep pause glyph; tint via currentColor from class above
+                icon.setAttribute('stroke', 'currentColor');
+            } else {
+                btn.className = 'inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-300 border border-white/20 rounded-lg hover:bg-dark-200/5 transition-colors';
+                btn.style.background = '';
+                btn.title = 'Suspend Agent (reversible)';
+                label.textContent = 'Suspend';
+                icon.setAttribute('stroke', 'currentColor');
+            }
+        }
+
+        async function toggleSuspend() {
+            if (!_ownedAgent) return;
+            var isSuspended = (_ownedAgent.status || '').toLowerCase() === 'suspended';
+            var path = isSuspended ? '/resume' : '/suspend';
+            var session = goulburnAuth.getSession();
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + path, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + session }
+                });
+                if (!res.ok) {
+                    var body = await res.json().catch(function(){ return {}; });
+                    showToastLite(body.detail || body.message || 'Action failed', true);
+                    return;
+                }
+                _ownedAgent.status = isSuspended ? 'active' : 'suspended';
+                renderSuspendState(!isSuspended);
+                showToastLite(isSuspended ? 'Agent resumed' : 'Agent suspended');
+            } catch (e) {
+                showToastLite('Network error', true);
+            }
+        }
+
+        function confirmDeleteAgent() {
+            var btn = document.getElementById('deleteAgentBtn');
+            var label = document.getElementById('deleteLabel');
+            if (!_deleteArmed) {
+                _deleteArmed = true;
+                btn.classList.add('ring-2', 'ring-red-500');
+                btn.style.background = 'rgba(239,68,68,0.15)';
+                btn.title = 'Click again within 3 seconds to confirm permanent deletion';
+                if (label) label.textContent = 'Click again to confirm';
+                if (_deleteArmTimer) clearTimeout(_deleteArmTimer);
+                _deleteArmTimer = setTimeout(function() {
+                    _deleteArmed = false;
+                    btn.classList.remove('ring-2', 'ring-red-500');
+                    btn.style.background = '';
+                    btn.title = 'Delete Agent';
+                    if (label) label.textContent = 'Delete';
+                }, 3000);
+                return;
+            }
+            // Second click within window → execute
+            _deleteArmed = false;
+            if (_deleteArmTimer) clearTimeout(_deleteArmTimer);
+            deleteAgent();
+        }
+
+        async function deleteAgent() {
+            if (!_ownedAgent) return;
+            var session = goulburnAuth.getSession();
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + session }
+                });
+                if (!res.ok) {
+                    var body = await res.json().catch(function(){ return {}; });
+                    showToastLite(body.detail || body.message || 'Delete failed', true);
+                    return;
+                }
+                showToastLite('Agent deleted — redirecting to dashboard...');
+                setTimeout(function() { window.location.href = '/dashboard'; }, 1500);
+            } catch (e) {
+                showToastLite('Network error', true);
+            }
+        }
+
+        function showToastLite(msg, isError) {
+            var el = document.getElementById('copyConfirm');
+            if (!el) { console.log(msg); return; }
+            el.textContent = msg;
+            el.style.color = isError ? '#f87171' : '#4ade80';
+            el.style.display = 'inline';
+            setTimeout(function() { el.style.display = 'none'; }, 2500);
         }
 
         function toggleEditPanel() {
