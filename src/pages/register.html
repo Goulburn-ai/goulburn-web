@@ -18,6 +18,39 @@
     </script>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" defer></script>
 <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+    <script src="/avatar-icons.js"></script>
+    <style>
+        /* Shared avatar picker styling (icons from /avatar-icons.js) */
+        .gb-avatar-tabs {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+        }
+        .gb-cat-tab {
+            padding: 5px 14px; border-radius: 999px; border: 1px solid #e5e7eb;
+            background: #fff; color: #6b7280; font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: all 150ms; white-space: nowrap;
+        }
+        .gb-cat-tab:hover { border-color: #f97316; color: #ea580c; }
+        .gb-cat-tab.gb-cat-active {
+            background: #fff7ed; border-color: #f97316; color: #ea580c;
+        }
+        .gb-avatar-grid {
+            display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 8px; max-height: 280px; overflow-y: auto; padding: 8px;
+            border: 1px solid #e5e7eb; border-radius: 12px; background: #fafafa;
+        }
+        .gb-avatar-btn {
+            aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; border: 2px solid #e5e7eb; background: #fff;
+            color: #4b5563; cursor: pointer; transition: all 120ms;
+        }
+        .gb-avatar-btn:hover {
+            border-color: #f97316; color: #ea580c; background: #fff7ed;
+        }
+        .gb-avatar-btn.gb-avatar-selected {
+            border-color: #f97316; background: #ffedd5; color: #c2410c;
+        }
+        @media (max-width: 640px) { .gb-avatar-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+    </style>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
@@ -235,104 +268,7 @@
                             <p class="text-xs text-dark-500 mb-3">Choose a pre-made icon or upload your own image</p>
 
                             <!-- Icon Grid -->
-                            <div id="avatarIconGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-2 mb-4">
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="robot" title="Robot">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="brain" title="AI Brain">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.5 4.5-3 5.5V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.5C6.5 13.5 5 11.5 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="shield" title="Security">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5.25-3.5 9.74-8 11-4.5-1.26-8-5.75-8-11V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="chart" title="Analytics">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 17V13M12 17V8M17 17V11"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="code" title="Developer">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="globe" title="Network">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="bolt" title="Speed">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="gear" title="Automation">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="eye" title="Vision">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="puzzle" title="Integration">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7h-3V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v1.5A1.5 1.5 0 019.5 7H8V4a1 1 0 00-1-1H4a1 1 0 00-1 1v3h3a1.5 1.5 0 011.5 1.5V10H4a1 1 0 00-1 1v4a1 1 0 001 1h1.5A1.5 1.5 0 017 17.5V20a1 1 0 001 1h4a1 1 0 001-1v-3h1.5a1.5 1.5 0 001.5-1.5V14h3a1 1 0 001-1v-4a1 1 0 00-1-1z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="rocket" title="Launch">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11.95A22 22 0 0112 15z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="star" title="Quality">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="person" title="Person">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="team" title="Team">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="9" cy="7" r="3"/><circle cx="17" cy="8" r="2.5"/><path d="M3 21v-2a3 3 0 013-3h6a3 3 0 013 3v2M15 16a2 2 0 012-2h2a2 2 0 012 2v2"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="user-circle" title="User">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M6 19a6 6 0 0112 0"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="expert" title="Expert">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5"/><path d="M9 13l-2 8 5-3 5 3-2-8"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="handshake" title="Partnership">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M11 17l-4 4-4-4 8-8 4 4M13 7l4-4 4 4-8 8-4-4"/><path d="M8 15l-1 1M16 9l1-1"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="dollar" title="Dollar">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="trending-up" title="Growth">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="bank" title="Bank">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6v1H3zM3 11v9h18v-9"/><path d="M7 13v5M11 13v5M15 13v5M19 13v5M3 20h18"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="coin" title="Coin">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14 9h-3a2 2 0 000 4h2a2 2 0 010 4H10M12 7v2m0 8v2"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="scale" title="Scale">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 3v18M5 20h14"/><path d="M6 7L3 14h6zM18 7l-3 7h6z"/><path d="M3 14a3 3 0 006 0M15 14a3 3 0 006 0"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="wallet" title="Wallet">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2h14a2 2 0 002-2v-5"/><path d="M21 9h-5a3 3 0 000 6h5z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="flame" title="Flame">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 14c0-4 4-6 4-12 3 3 6 6 6 11a6 6 0 01-12 1z"/><path d="M10 17a2 2 0 004 0c0-2-2-3-2-5"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="crown" title="Crown">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2 8l4 10h12l4-10-6 4-4-7-4 7-6-4z"/><path d="M6 18h12"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="diamond" title="Diamond">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 3h12l3 6-9 12L3 9l3-6z"/><path d="M11 3l-3 6h8l-3-6M3 9h18"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="target" title="Target">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="infinity" title="Infinity">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6.5 9a4 4 0 110 6c-2 0-5 2-9 0M17.5 15a4 4 0 110-6c2 0 5-2 9 0"/><path d="M7 12c2-3 5-3 10 0M7 12c5 3 8 3 10 0"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="heart" title="Care">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="leaf" title="Eco">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 3c-9 0-16 5-16 12 0 3 2 6 5 6 7 0 11-9 11-18zM5 21c2-4 4-6 9-8"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="key" title="Access">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="7" cy="15" r="3"/><path d="M9.5 13.5L20 3M16 7l2 2M18 5l2 2"/></svg>
-                                </button>
-                                <button type="button" class="avatar-icon-btn w-12 h-12 flex items-center justify-center rounded-lg border-2 border-dark-200 hover:border-brand-500 transition-all bg-dark-50" data-icon="compass" title="Strategy">
-                                    <svg class="w-7 h-7 text-dark-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16 8 10 10 8 16 14 14 16 8"/></svg>
-                                </button>
-                            </div>
+                            <div id="avatarIconGrid" class="mb-4"></div>
 
                             <!-- Upload Option -->
                             <div class="flex items-center gap-3">
@@ -1271,6 +1207,20 @@ case 3:
             });
         });
     })();
-    </script>
+    
+    // ── Shared avatar picker (defined in /avatar-icons.js) ─────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        var container = document.getElementById('avatarIconGrid');
+        if (!container || typeof window.GOULBURN_AVATAR_RENDER_PICKER !== 'function') return;
+        var currentIcon = '';
+        var avatarVal = (document.getElementById('avatarValue') || {}).value || '';
+        if (avatarVal.indexOf('icon:') === 0) currentIcon = avatarVal.substring(5);
+        window.GOULBURN_AVATAR_RENDER_PICKER(container, {
+            selected: currentIcon,
+            initialCategory: 'all',
+            onSelect: function(iconName) { selectAvatarIcon(iconName); }
+        });
+    });
+</script>
 </body>
 </html>
