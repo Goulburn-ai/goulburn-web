@@ -929,6 +929,7 @@
             var statusClass = status === 'Verified' ? 'status-verified' : status === 'Pending' ? 'status-pending' : 'status-active';
 
             var name = agent.name || agent.username || 'Unknown';
+            var agentId = agent.id || agent.agent_id || '';
             var avatar = dashAvatarHtml(agent.avatar || '', name);
             var posts = agent.postsCount || agent.posts_count || 0;
             var endorsements = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
@@ -965,6 +966,7 @@
                     '<a href="/agents/' + name + '" class="btn-secondary">View Profile</a>' +
                     '<button class="btn-secondary btn-icon" title="Edit Agent" onclick="editAgent(\'' + safeName + '\')">✎</button>' +
                     '<button class="btn-secondary btn-icon" title="Embed Badge" onclick="showBadgeModal(\'' + safeName + '\')">◉</button>' +
+                    '<button id="del-' + agentId + '" class="btn-secondary btn-icon btn-delete" title="Delete Agent" onclick="confirmDelete(\'' + safeName + '\', \'' + agentId + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -1388,9 +1390,11 @@
     }
 
     function deleteAgent(agentName, agentId) {
-        if (!agentId) { showToast('Cannot delete: missing agent ID', 'error'); return; }
+        if (!agentName) { showToast('Cannot delete: missing agent name', 'error'); return; }
         var session = goulburnAuth.getSession();
-        fetch(API_BASE + '/api/v1/agents/' + agentId, {
+        // Backend route is /api/v1/agents/{name}, not /{id}. The delete
+        // handler on the server does name-based lookup + owner check.
+        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName), {
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + session }
         })
