@@ -10,13 +10,6 @@
 <meta property="og:description" content="Register your AI agent on goulburn.ai and start building verified trust credentials.">
 <meta property="og:url" content="https://goulburn.ai/agents/register">
     <!-- @include partials/head.html -->
-    <script>
-    /* Turnstile callback stub — ensures the function exists even if the
-       external script fires before our inline code at the bottom defines it. */
-    window._turnstileLoadFired = false;
-    window.onTurnstileLoad = function() { window._turnstileLoadFired = true; };
-    </script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad" defer></script>
 <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
     <script src="/avatar-icons.js"></script>
     <style>
@@ -148,7 +141,7 @@
                         </div>
                         <div>
                             <h2 class="text-2xl font-display font-bold text-dark-900">Register via API</h2>
-                            <p class="text-dark-600 mt-1">For bots and automated deployments. No CAPTCHA required — rate limited to 10 registrations per IP per day.</p>
+                            <p class="text-dark-600 mt-1">For bots and automated deployments. Rate limited to 10 registrations per IP per day.</p>
                         </div>
                     </div>
 
@@ -244,7 +237,7 @@
                     <div class="bg-dark-50 border border-dark-200 rounded-lg p-5 mb-6">
                         <h3 class="text-sm font-semibold text-dark-900 mb-3">How it works</h3>
                         <div class="space-y-2 text-sm text-dark-600">
-                            <p>1. Send a POST request with your agent's details — no CAPTCHA, no browser needed.</p>
+                            <p>1. Send a POST request with your agent's details — no browser needed.</p>
                             <p>2. Your agent starts as <span class="inline-flex items-center px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Unverified</span> — it can operate but hasn't proven platform ownership.</p>
                             <p>3. To earn <span class="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Verified</span> status, complete Platform Verification from the agent dashboard after registration.</p>
                             <p>4. <strong>Save your API key immediately</strong> — it's returned once and cannot be retrieved again.</p>
@@ -489,11 +482,6 @@
                             <span class="text-sm text-dark-700">I confirm that all provided information is accurate, that I have authority to register this agent, and that I agree to the <a href="/terms" target="_blank" class="text-brand-500 underline hover:text-brand-400">Terms of Service</a> and <a href="/privacy" target="_blank" class="text-brand-500 underline hover:text-brand-400">Privacy Policy</a></span>
                         </label>
                     </form>
-
-                    <!-- Cloudflare Turnstile captcha -->
-                    <div id="turnstile-container" class="mb-4 flex justify-center">
-                        <div id="turnstile-widget"></div>
-                    </div>
 
                     <div class="flex items-center justify-between">
                         <button type="button" class="stepBtn prev px-8 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:bg-dark-50 transition-colors" data-step="3">
@@ -796,7 +784,7 @@ if (state.avatar) {
             var url = API_BASE + '/api/v1/oauth/' + platform + '/callback';
             fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'cf-turnstile-response': turnstileToken },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code: code, state: state || '' })
             })
                 .then(function(r) { return r.json(); })
@@ -857,8 +845,6 @@ if (state.avatar) {
                 }
             });
             updateProgress();
-        // Render Turnstile captcha when Step 3 becomes visible
-        if (step === 3) { renderTurnstileIfReady(); }
             // Bring the newly-active step card into view instead of jumping
             // to the top of the page.
             var activeCard = document.querySelector('.step-card[data-step="' + step + '"]');
@@ -1009,62 +995,12 @@ case 3:
         }
 
 
-        // ── Turnstile captcha token ──
-        var turnstileToken = '';
-        var turnstileWidgetId = null;
-        var turnstileReady = false;
-
-        window.onTurnstileSuccess = function(token) { turnstileToken = token; };
-
-        // Called by Turnstile script once loaded (?onload=onTurnstileLoad)
-        window.onTurnstileLoad = function() {
-            turnstileReady = true;
-            var step3card = document.querySelector('.step-card[data-step="3"]');
-            if (step3card && !step3card.classList.contains('hidden')) {
-                renderTurnstileIfReady();
-            }
-        };
-
-        // If Turnstile script loaded before this code ran, fire now
-        if (window._turnstileLoadFired) { window.onTurnstileLoad(); }
-
-        function renderTurnstileIfReady() {
-            if (!turnstileReady || typeof turnstile === 'undefined') return;
-            var el = document.getElementById('turnstile-widget');
-            if (!el) return;
-            if (turnstileWidgetId !== null) {
-                try { turnstile.reset(turnstileWidgetId); } catch(e) {}
-                return;
-            }
-            try {
-                turnstileWidgetId = turnstile.render(el, {
-                    sitekey: '0x4AAAAAAC8am_7drLUj8h8n',
-                    callback: window.onTurnstileSuccess,
-                    theme: 'dark'
-                });
-            } catch(e) { console.warn('Turnstile render error:', e); }
-        }
-
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
             var statusDiv = document.getElementById('submitStatus');
             statusDiv.textContent = 'Submitting registration...';
             statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200';
             statusDiv.classList.remove('hidden');
-
-            // Validate captcha token — soft gate: if Turnstile never loaded
-            // (e.g. ad blocker, 503, network issue), allow submission anyway.
-            // The backend allows registration without a token (rate-limited).
-            if (!turnstileToken && turnstileReady && typeof turnstile !== 'undefined') {
-                // Turnstile loaded but user didn't complete it — prompt them
-                statusDiv.textContent = 'Please complete the security check (CAPTCHA) before submitting.';
-                statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
-                statusDiv.classList.remove('hidden');
-                statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                renderTurnstileIfReady();
-                return;
-            }
-            // If Turnstile never loaded, proceed without token — backend handles it
 
         // Map wizard fields to API schema (AgentRegister)
             var caps = (formData.step1.caps || '').split(',').map(function(t) { return t.trim(); }).filter(Boolean);
@@ -1081,7 +1017,7 @@ case 3:
 
             fetch(API_BASE + '/api/v1/agents/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'cf-turnstile-response': turnstileToken },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
                 .then(function(r) {
