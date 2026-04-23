@@ -296,6 +296,10 @@
     }
     CATEGORIES[0].icons = ALL;
 
+    // Prepend a virtual "Portraits" category. No icons — renderPicker
+    // detects this id and builds Personas-style img buttons instead.
+    CATEGORIES.unshift({ id: "portraits", label: "Portraits", icons: [] });
+
     // Wrap inner markup into a full <svg> for inline rendering.
     function svg(name, size) {
         size = size || 22;
@@ -358,15 +362,59 @@
         }
 
         function paint(cat) {
+            var grid = container.querySelector("[data-gbgrid]");
+            var empty = container.querySelector("[data-gbempty]");
+
+            // ── Portraits tab — render Personas img buttons ──
+            if (cat === "portraits") {
+                var baseName = (opts.agentName || "agent").toString();
+                // 12 deterministic seed variations — different flavours of
+                // the agent's portrait so users can pick one they like.
+                var variants = [
+                    baseName,
+                    baseName + "-classic", baseName + "-bold", baseName + "-warm",
+                    baseName + "-focused", baseName + "-relaxed", baseName + "-sharp",
+                    baseName + "-bright", baseName + "-wise", baseName + "-cheerful",
+                    baseName + "-gentle", baseName + "-fresh"
+                ];
+                if (empty) empty.style.display = "none";
+                grid.innerHTML = variants.map(function (seed, i) {
+                    var avVal = "personas:" + seed;
+                    var sel = (avVal === selected);
+                    var encSeed = encodeURIComponent(seed);
+                    return (
+                        '<button type="button" class="gb-avatar-btn' +
+                        (sel ? " gb-avatar-selected" : "") +
+                        '" data-avatar="' + avVal + '" title="Portrait ' + (i + 1) + '">' +
+                        '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + encSeed +
+                        '" alt="Portrait" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">' +
+                        '</button>'
+                    );
+                }).join("");
+                grid.querySelectorAll(".gb-avatar-btn").forEach(function (btn) {
+                    btn.addEventListener("click", function () {
+                        var val = btn.getAttribute("data-avatar");
+                        selected = val;
+                        grid.querySelectorAll(".gb-avatar-selected").forEach(function (x) {
+                            x.classList.remove("gb-avatar-selected");
+                        });
+                        btn.classList.add("gb-avatar-selected");
+                        onSelect(val);
+                    });
+                });
+                return;
+            }
+
+            // ── Lucide-icon categories (existing behaviour) ──
             var base = CATEGORIES.find(function (c) { return c.id === cat; });
             if (!base) return;
             var list = base.icons.filter(matches);
-            // Keep selected pinned at the top of the grid when present + matching
+            // Keep selected pinned at the top of the grid when present + matching.
+            // `selected` may be a full avatar value (personas:xxx) which wouldn't
+            // match any icon name — the indexOf just returns -1 so no harm.
             if (selected && list.indexOf(selected) > 0) {
                 list = [selected].concat(list.filter(function (n) { return n !== selected; }));
             }
-            var grid = container.querySelector("[data-gbgrid]");
-            var empty = container.querySelector("[data-gbempty]");
             if (list.length === 0) {
                 grid.innerHTML = "";
                 if (empty) {
