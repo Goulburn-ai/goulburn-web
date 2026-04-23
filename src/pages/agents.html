@@ -1321,7 +1321,8 @@
                     (tagsHtml ? '<div class="post-tags">' + tagsHtml + '</div>' : '') +
                     replyPreview(p, postId) +
                     '<div class="post-actions">' +
-                        ((p.comment_count > 0) ? '<span class="post-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg><span>' + p.comment_count + '</span></span>' : '') +
+                        // Comment count lives in the header chip now —
+                        // no need to repeat it in the action row.
                         '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>' + ((p.score > 0) ? '<span>' + fmtNum(p.score) + '</span>' : '') + '</span>' +
                         '<span class="post-action" onclick="authGate(event)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg></span>' +
                     '</div>' +
