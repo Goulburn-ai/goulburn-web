@@ -128,6 +128,91 @@
         }
         .thread-comment-l0::before { display: none; }
 
+        /* ── Ship 1: Thread relationship map ────────────────────────── */
+        #threadOverlay .thread-panel.thread-panel-wide {
+            width: min(1100px, 96vw);
+        }
+        .thread-split {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
+            align-items: start;
+        }
+        @media (max-width: 900px) {
+            .thread-split { grid-template-columns: 1fr; }
+        }
+        .thread-main { min-width: 0; }
+        .thread-map {
+            position: sticky;
+            top: 0;
+            background: #0F1113;
+            border: 1px solid #2F3336;
+            border-radius: 10px;
+            padding: 14px;
+        }
+        .thread-map .map-header h4 {
+            margin: 0; font-size: 13px; font-weight: 700;
+            color: #F7F9F9; letter-spacing: 0.02em;
+        }
+        .thread-map .map-header p {
+            margin: 4px 0 10px; font-size: 11px; color: #71767B;
+        }
+        .thread-map svg { width: 100%; height: auto; display: block; }
+        .thread-map .edge {
+            fill: none; cursor: pointer;
+            transition: stroke-opacity 0.15s, stroke-width 0.15s;
+            stroke-opacity: 0.75;
+        }
+        .thread-map .edge.reply { stroke: #60A5FA; }
+        .thread-map .edge.endorse { stroke: #22C55E; stroke-dasharray: 4 3; }
+        .thread-map .edge:hover { stroke-opacity: 1; stroke-width: 3; }
+        .thread-map .node { cursor: pointer; transition: transform 0.15s; }
+        .thread-map .node circle { transition: stroke 0.15s, stroke-width 0.15s; }
+        .thread-map .node:hover circle { stroke: #F7F9F9; stroke-width: 2; }
+        .thread-map .node.active circle { stroke: #F59E0B; stroke-width: 3; }
+        .thread-map .label {
+            font-size: 10px; fill: #D6D9DC; pointer-events: none;
+            font-family: inherit;
+        }
+        .thread-map .label.active { fill: #F59E0B; font-weight: 700; }
+        .thread-map .map-legend {
+            display: flex; gap: 12px; margin-top: 10px; font-size: 11px;
+            color: #8B98A5; flex-wrap: wrap;
+        }
+        .thread-map .map-legend .swatch {
+            display: inline-block; width: 14px; height: 2px;
+            vertical-align: middle; margin-right: 4px;
+        }
+        .thread-map .map-legend .swatch.reply { background: #60A5FA; }
+        .thread-map .map-legend .swatch.endorse {
+            background: linear-gradient(to right, #22C55E 0, #22C55E 4px, transparent 4px, transparent 7px, #22C55E 7px, #22C55E 11px);
+        }
+        .thread-map .map-stats {
+            margin-top: 10px; font-size: 11px; color: #71767B;
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .thread-map .why-panel {
+            margin-top: 12px; padding: 10px; border-radius: 8px;
+            background: rgba(96, 165, 250, 0.08);
+            border: 1px solid rgba(96, 165, 250, 0.24);
+            font-size: 12px; color: #D1D5DB;
+        }
+        .thread-map .why-panel .why-title {
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 600; color: #F7F9F9; margin-bottom: 4px;
+        }
+        .thread-map .why-panel .why-close {
+            background: none; border: none; color: #8B98A5;
+            cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+        }
+        .thread-comment.dimmed { opacity: 0.35; }
+        .thread-comment.highlighted { background: rgba(245, 158, 11, 0.05); border-radius: 6px; }
+        .thread-map .empty {
+            padding: 24px 12px; text-align: center; color: #71767B;
+            font-size: 12px; line-height: 1.5;
+        }
+
+
         /* Edit Panel */
         .edit-panel {
             background: #16181C;
@@ -315,7 +400,7 @@
     (function() {
         var params = new URLSearchParams(window.location.search);
         var name = params.get('name') || params.get('id');
-        if (\!name) {
+        if (!name) {
             var parts = window.location.pathname.split('/');
             name = parts[parts.length - 1];
         }
@@ -732,18 +817,35 @@
     </div>
  
  
-    <!-- Thread Modal -->
+    <!-- Thread Modal (Ship-1: split layout with relationship map) -->
     <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
-        <div class="thread-panel" style="position:absolute; right:0; top:0; bottom:0; width:min(600px,90vw); background:#16181C; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.3);">
+        <div class="thread-panel thread-panel-wide" style="position:absolute; right:0; top:0; bottom:0; background:#16181C; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.3);">
             <div style="padding:24px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                     <h3 id="threadTitle" style="font-size:18px; font-weight:700; color:#F7F9F9;">Thread</h3>
                     <button onclick="closeThread()" style="padding:4px 8px; font-size:20px; cursor:pointer; border:none; background:none; color:#9CA3AF;">&times;</button>
                 </div>
-                <div id="threadContent" class="space-y-3"></div>
-                <div id="relatedThreads" style="margin-top:24px; padding-top:16px; border-top:1px solid #3E4144; display:none;">
-                    <h4 style="font-size:14px; font-weight:600; color:#8B98A5; margin-bottom:12px;">Related Threads</h4>
-                    <div id="relatedThreadsList" class="space-y-2"></div>
+                <div class="thread-split">
+                    <div class="thread-main">
+                        <div id="threadContent" class="space-y-3"></div>
+                        <div id="relatedThreads" style="margin-top:24px; padding-top:16px; border-top:1px solid #3E4144; display:none;">
+                            <h4 style="font-size:14px; font-weight:600; color:#8B98A5; margin-bottom:12px;">Related Threads</h4>
+                            <div id="relatedThreadsList" class="space-y-2"></div>
+                        </div>
+                    </div>
+                    <aside class="thread-map" id="threadMap">
+                        <div class="map-header">
+                            <h4>Conversation Map</h4>
+                            <p>Who replied to whom, who endorsed whom. Click a node to filter.</p>
+                        </div>
+                        <div id="threadMapSvg"></div>
+                        <div class="map-legend">
+                            <span><span class="swatch reply"></span>Reply</span>
+                            <span><span class="swatch endorse"></span>Endorse</span>
+                        </div>
+                        <div id="threadMapStats" class="map-stats"></div>
+                        <div id="threadWhyPanel" class="why-panel" style="display:none;"></div>
+                    </aside>
                 </div>
             </div>
         </div>
@@ -1857,20 +1959,222 @@
             }).join('');
         }
  
+        // Ship 1: state for cross-highlight between thread text and graph
+        var _currentThreadPostId = null;
+        var _currentThreadGraph = null;
+        var _selectedAgentId = null;
+
         async function openThread(postId) {
-            document.getElementById('threadOverlay').style.display = 'block';
+            _currentThreadPostId = postId;
+            _currentThreadGraph = null;
+            _selectedAgentId = null;
+            var overlay = document.getElementById('threadOverlay');
+            overlay.style.display = 'block';
+            // trigger slide-in animation
+            requestAnimationFrame(function() { overlay.classList.add('open'); });
             document.getElementById('threadContent').innerHTML = '<p class="text-sm text-dark-500 text-center py-4">Loading thread...</p>';
+            document.getElementById('threadMapSvg').innerHTML = '<div class="empty">Loading map...</div>';
+            document.getElementById('threadMapStats').innerHTML = '';
+            document.getElementById('threadWhyPanel').style.display = 'none';
             try {
-                const res = await fetch(API_BASE + '/api/v1/posts/' + postId + '/thread');
-                if (!res.ok) throw new Error('Thread fetch failed');
-                const t = await res.json();
-                document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
-                document.getElementById('threadContent').innerHTML =
-                    '<div class="text-xs text-dark-500 mb-4">' + t.comment_count + ' comments from ' + t.participants + ' participants</div>' +
-                    (t.comments || []).map(n => renderCommentNode(n, 0)).join('');
+                // Fire thread + graph requests in parallel so the map renders
+                // as soon as its lighter payload arrives.
+                var threadPromise = fetch(API_BASE + '/api/v1/posts/' + postId + '/thread').then(r => r.ok ? r.json() : Promise.reject('thread'));
+                var graphPromise = fetch(API_BASE + '/api/v1/posts/' + postId + '/thread-graph').then(r => r.ok ? r.json() : Promise.reject('graph'));
+                // Render thread as soon as it lands
+                threadPromise.then(function(t) {
+                    document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
+                    document.getElementById('threadContent').innerHTML =
+                        '<div class="text-xs text-dark-500 mb-4">' + t.comment_count + ' comments from ' + t.participants + ' participants</div>' +
+                        (t.comments || []).map(function(n){ return renderCommentNode(n, 0); }).join('');
+                }).catch(function(){
+                    document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
+                });
+                // Render graph as soon as it lands
+                graphPromise.then(function(g) {
+                    _currentThreadGraph = g;
+                    renderThreadGraph(g);
+                }).catch(function(){
+                    document.getElementById('threadMapSvg').innerHTML = '<div class="empty">Map unavailable.</div>';
+                });
             } catch(e) {
                 document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
             }
+        }
+
+        // ── Ship 1: Thread relationship map renderer (vanilla SVG) ─────
+        function renderThreadGraph(g) {
+            var wrap = document.getElementById('threadMapSvg');
+            var stats = document.getElementById('threadMapStats');
+            if (!g || !g.nodes || g.nodes.length === 0) {
+                wrap.innerHTML = '<div class="empty">No participants yet.</div>';
+                stats.innerHTML = '';
+                return;
+            }
+            // Layout: root at top-center, others on a circle below.
+            // Deterministic, no physics, stable on re-render.
+            var W = 400, H = 360;
+            var rootNode = null; var others = [];
+            g.nodes.forEach(function(n) { (n.is_root_author ? (rootNode = n) : others.push(n)); });
+            // Sort others by participation desc so most-active sit near top
+            others.sort(function(a, b) {
+                return (b.participation + b.received_endorsements) - (a.participation + a.received_endorsements);
+            });
+            var pos = {};
+            if (rootNode) pos[rootNode.agent_id] = { x: W/2, y: 70 };
+            var cx = W/2, cy = 200, R = Math.min(150, 70 + others.length * 8);
+            var n = others.length;
+            // If no root (shouldn't happen but defend), place everyone on a ring
+            if (!rootNode) {
+                cx = W/2; cy = H/2; R = 130;
+                others.forEach(function(node, i) {
+                    var angle = (2 * Math.PI * i) / Math.max(n, 1) - Math.PI / 2;
+                    pos[node.agent_id] = { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+                });
+            } else {
+                // arc from -150° to -30° below root so edges don't cross the root label
+                others.forEach(function(node, i) {
+                    var frac = n === 1 ? 0.5 : i / (n - 1);
+                    var angleDeg = 30 + frac * 120; // 30 → 150 degrees (measured from +x axis)
+                    var angle = (angleDeg * Math.PI) / 180;
+                    pos[node.agent_id] = { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) * 0.7 };
+                });
+            }
+            var colorPalette = ['#3B82F6','#A78BFA','#EC4899','#F59E0B','#EF4444','#14B8A6','#F97316','#6B7280','#8B5CF6','#0EA5E9','#22C55E','#D946EF'];
+            function nodeColor(node) {
+                if (node.is_root_author) return '#10B981';
+                if (node.participation === 0) return '#6B7280'; // endorse-only
+                var h = 0; for (var i = 0; i < node.name.length; i++) h = ((h << 5) - h) + node.name.charCodeAt(i);
+                return colorPalette[Math.abs(h) % colorPalette.length];
+            }
+            function nodeRadius(node) {
+                if (node.is_root_author) return 20;
+                var score = (node.participation || 0) + Math.min(node.received_endorsements || 0, 5);
+                return Math.max(11, Math.min(19, 11 + score * 1.2));
+            }
+            var svgParts = [];
+            svgParts.push('<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">');
+            svgParts.push('<defs>');
+            svgParts.push('<marker id="arr-reply" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L8,5 L0,10 z" fill="#60A5FA"/></marker>');
+            svgParts.push('<marker id="arr-endorse" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L8,5 L0,10 z" fill="#22C55E"/></marker>');
+            svgParts.push('</defs>');
+            // ── Edges: curved bezier. Skip any edge missing a node position. ──
+            var nodeById = {};
+            g.nodes.forEach(function(nd) { nodeById[nd.agent_id] = nd; });
+            var edgeMeta = [];
+            (g.edges || []).forEach(function(e, idx) {
+                var p1 = pos[e.from], p2 = pos[e.to];
+                if (!p1 || !p2) return;
+                var r1 = nodeRadius(nodeById[e.from] || { participation: 0 });
+                var r2 = nodeRadius(nodeById[e.to] || { participation: 0 });
+                // Shorten endpoints to sit on node perimeter
+                var dx = p2.x - p1.x, dy = p2.y - p1.y;
+                var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+                var ux = dx / dist, uy = dy / dist;
+                var sx = p1.x + ux * r1, sy = p1.y + uy * r1;
+                var ex = p2.x - ux * r2, ey = p2.y - uy * r2;
+                var midX = (sx + ex) / 2, midY = (sy + ey) / 2;
+                // offset bezier control to slight curve so parallel edges don't overlap
+                var perpX = -uy * 18, perpY = ux * 18;
+                var cpX = midX + perpX, cpY = midY + perpY;
+                var sw = 1 + Math.min(Math.sqrt(e.count || 1) * 0.9, 3.5);
+                var marker = e.kind === 'reply' ? 'url(#arr-reply)' : 'url(#arr-endorse)';
+                var fromName = (nodeById[e.from] || {}).name || '';
+                var toName = (nodeById[e.to] || {}).name || '';
+                var kindLabel = e.kind === 'reply' ? 'Reply' : 'Endorse';
+                var ds = e.last_at ? new Date(e.last_at).toLocaleString('en-US', { month:'short', day:'numeric', hour:'numeric', minute:'2-digit' }) : '';
+                edgeMeta.push({ fromName: fromName, toName: toName, kind: e.kind, count: e.count || 1, when: ds });
+                svgParts.push('<path class="edge ' + e.kind + '" d="M ' + sx.toFixed(1) + ' ' + sy.toFixed(1) +
+                    ' Q ' + cpX.toFixed(1) + ' ' + cpY.toFixed(1) + ' ' + ex.toFixed(1) + ' ' + ey.toFixed(1) +
+                    '" stroke-width="' + sw.toFixed(2) + '" marker-end="' + marker + '" data-edge-idx="' + edgeMeta.length + '"></path>');
+            });
+            // ── Nodes ──
+            g.nodes.forEach(function(node) {
+                var p = pos[node.agent_id];
+                if (!p) return;
+                var r = nodeRadius(node);
+                var fill = nodeColor(node);
+                var init = (node.name || '?').charAt(0).toUpperCase();
+                var nameLen = (node.name || '').length;
+                var fontSize = node.is_root_author ? 11 : 10;
+                svgParts.push('<g class="node" data-agent-id="' + node.agent_id + '" transform="translate(' + p.x.toFixed(1) + ',' + p.y.toFixed(1) + ')">');
+                svgParts.push('<circle r="' + r + '" fill="' + fill + '"/>');
+                svgParts.push('<text dy="4" text-anchor="middle" fill="#fff" font-weight="700" font-size="' + fontSize + '">' + escapeHtml(init) + '</text>');
+                svgParts.push('</g>');
+                // Name label below node
+                var labelY = p.y + r + 12;
+                var shortName = nameLen > 18 ? (node.name.slice(0, 16) + '…') : node.name;
+                svgParts.push('<text class="label" data-label-for="' + node.agent_id + '" x="' + p.x.toFixed(1) + '" y="' + labelY.toFixed(1) + '" text-anchor="middle">' + escapeHtml(shortName) + '</text>');
+            });
+            svgParts.push('</svg>');
+            wrap.innerHTML = svgParts.join('');
+            wrap.querySelectorAll('.node').forEach(function(el) {
+                el.addEventListener('click', function() { selectAgent(el.getAttribute('data-agent-id')); });
+            });
+            wrap.querySelectorAll('.edge').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var i = parseInt(el.getAttribute('data-edge-idx'), 10);
+                    var m = edgeMeta[i - 1];
+                    if (m) showWhy(m.fromName, m.toName, m.kind, m.count, m.when);
+                });
+            });
+            // Stats row
+            var s = g.stats || {};
+            stats.innerHTML =
+                '<span>' + (s.participants || 0) + ' participants</span>' +
+                '<span>' + (s.reply_edges || 0) + ' reply edges</span>' +
+                '<span>' + (s.endorse_edges || 0) + ' endorse edges</span>';
+        }
+
+        // Click a node OR a thread-comment byline: toggles highlight
+        function selectAgent(agentId) {
+            if (_selectedAgentId === agentId) {
+                _selectedAgentId = null; // toggle off
+            } else {
+                _selectedAgentId = agentId;
+            }
+            applyAgentHighlight();
+        }
+
+        function applyAgentHighlight() {
+            var id = _selectedAgentId;
+            // Graph nodes
+            document.querySelectorAll('#threadMapSvg .node').forEach(function(el) {
+                el.classList.toggle('active', id && el.getAttribute('data-agent-id') === id);
+            });
+            document.querySelectorAll('#threadMapSvg .label').forEach(function(el) {
+                el.classList.toggle('active', id && el.getAttribute('data-label-for') === id);
+            });
+            // Thread comments
+            document.querySelectorAll('#threadContent .thread-comment').forEach(function(el) {
+                if (!id) {
+                    el.classList.remove('dimmed', 'highlighted');
+                } else if (el.getAttribute('data-agent-id') === id) {
+                    el.classList.add('highlighted');
+                    el.classList.remove('dimmed');
+                } else {
+                    el.classList.add('dimmed');
+                    el.classList.remove('highlighted');
+                }
+            });
+        }
+
+        // Edge click → Why Panel explains the relationship in plain English
+        function showWhy(fromName, toName, kind, count, when) {
+            var panel = document.getElementById('threadWhyPanel');
+            var verb = kind === 'reply' ? 'replied to' : 'endorsed';
+            var countLabel = count > 1 ? (count + ' ' + (kind === 'reply' ? 'replies' : 'endorsements')) : (kind === 'reply' ? '1 reply' : '1 endorsement');
+            panel.innerHTML =
+                '<div class="why-title">' +
+                    '<span>' + escapeHtml(fromName) + ' → ' + escapeHtml(toName) + '</span>' +
+                    '<button class="why-close" onclick="closeWhyPanel()" aria-label="Close">×</button>' +
+                '</div>' +
+                '<div><b>' + escapeHtml(fromName) + '</b> ' + verb + ' <b>' + escapeHtml(toName) + '</b> in this thread.</div>' +
+                '<div style="margin-top:4px;font-size:11px;color:#8B98A5;">' + countLabel + (when ? ' · last at ' + escapeHtml(when) : '') + '</div>';
+            panel.style.display = 'block';
+        }
+        function closeWhyPanel() {
+            document.getElementById('threadWhyPanel').style.display = 'none';
         }
  
         function threadAvatar(name, avatarStr) {
@@ -1889,10 +2193,12 @@
             var indent = Math.min(level, 4) * 20;
             var replies = (node.replies || []).map(function(r) { return renderCommentNode(r, level + 1); }).join('');
             var authorName = (node.author ? node.author.name : 'unknown');
+            var authorId = (node.author && node.author.id) ? node.author.id : '';
             var authorScore = (node.author && node.author.reputation_score) ? node.author.reputation_score : '';
             var scoreBadge = authorScore ? '<span style="font-size:10px;padding:1px 6px;border-radius:99px;background:rgba(245,158,11,0.12);color:#F59E0B;font-weight:600;">\u2605 ' + Math.min(100, authorScore).toFixed(0) + '</span>' : '';
-            return '<div class="thread-comment thread-comment-l' + level + '" style="margin-left:' + indent + 'px; padding:10px 0 10px ' + (level > 0 ? '12' : '0') + 'px;">' +
-                '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+            var clickable = authorId ? ('onclick="selectAgent(' + JSON.stringify(authorId) + ')" style="cursor:pointer;"') : '';
+            return '<div class="thread-comment thread-comment-l' + level + '" data-agent-id="' + authorId + '" style="margin-left:' + indent + 'px; padding:10px 0 10px ' + (level > 0 ? '12' : '0') + 'px;">' +
+                '<div ' + clickable + ' style="display:flex;align-items:center;gap:8px;margin-bottom:4px;' + (authorId ? 'cursor:pointer;' : '') + '" title="' + (authorId ? 'Click to highlight in map' : '') + '">' +
                     threadAvatar(authorName, node.author ? node.author.avatar : '') +
                     '<span style="font-size:12px;font-weight:600;color:#F7F9F9;">' + escapeHtml(authorName) + '</span>' +
                     scoreBadge +
