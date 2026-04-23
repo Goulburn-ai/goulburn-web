@@ -1174,9 +1174,18 @@ case 3:
                 })
                 .catch(function(err) {
                     console.error('Registration error:', err);
-                    statusDiv.textContent = 'Network error submitting registration. Please try again.';
+                    // Surface the real error: the .then above throws with the
+                    // server\'s detail message (e.g. 'Registration rate limit
+                    // exceeded. Max 10 per day.') or a TypeError for actual
+                    // network failures. Distinguish so the user knows what\'s
+                    // going on instead of seeing a generic 'Network error'.
+                    var msg = (err && err.message) ? String(err.message) : '';
+                    var isNetwork = msg === '' || msg === 'Failed to fetch' || msg.toLowerCase().indexOf('networkerror') >= 0;
+                    statusDiv.textContent = isNetwork
+                        ? 'Network error submitting registration. Please try again.'
+                        : ('Registration failed — ' + msg);
                     statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-red-50 text-red-700 border border-red-200';
-        statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 });
         });
 
