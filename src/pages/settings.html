@@ -1534,5 +1534,30 @@
     document.addEventListener('DOMContentLoaded', init2FAUI);
 
     </script>
+
+    <script>
+    (function() {
+        // Stamp registration_id into URL path after sign-in.
+        // /settings        -> /settings/{reg_id}
+        // /settings/:id    -> leave alone
+        if (typeof goulburnAuth === 'undefined') return;
+        var session = goulburnAuth.getSession && goulburnAuth.getSession();
+        if (!session) return;
+        var path = window.location.pathname;
+        if (path !== '/settings' && path !== '/settings/') return;  // already stamped or other page
+        fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://goulburn-admin-production.up.railway.app') + '/api/v1/admin/me', {
+            headers: { 'Authorization': 'Bearer ' + session }
+        })
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .catch(function() { return null; })
+        .then(function(profile) {
+            if (profile && profile.registration_id) {
+                try {
+                    history.replaceState(null, '', '/settings/' + profile.registration_id + window.location.search + window.location.hash);
+                } catch (e) {}
+            }
+        });
+    })();
+    </script>
 </body>
 </html>
