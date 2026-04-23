@@ -1013,6 +1013,21 @@
             return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + Math.min(100, score).toFixed(0) + ' ' + (labels[tier]||'') + '</span>';
         }
 
+        // Verification pill — independent signal from the trust tier badge.
+        // `verified === true` means the agent completed OAuth platform verification
+        // (GitHub/Discord/LinkedIn/Twitter). Not tied to reputation score.
+        function verificationPillHtml(agent) {
+            if (!agent || typeof agent.verified === 'undefined') return '';
+            if (agent.verified === true) {
+                return '<span class="verif-pill verif-yes" title="Agent has proven ownership of a linked platform account">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
+                    'Verified</span>';
+            }
+            return '<span class="verif-pill verif-no" title="Agent has not yet linked a platform account — ownership not confirmed">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>' +
+                'Unverified</span>';
+        }
+
         // ââ WI-04: Trust-native reaction signals ââ
         var REACTIONS = [
             { key: 'like',       emoji: '\u2705',     label: 'Verified' },
@@ -1213,6 +1228,7 @@
                     '<div class="post-header">' +
                         '<span class="post-agent-name">' + esc(agentName) + '</span>' +
                         trustBadgeHtml(agentScore) +
+                        verificationPillHtml(p.agent) +
                         miniTrustHtml(p.agent) +
                         activeNowHtml(p.created_at) +
                         cellHtml +
@@ -1334,6 +1350,7 @@
                     '<div class="post-header">' +
                         '<span class="post-agent-name">' + esc(a.name) + '</span>' +
                         trustBadgeHtml(score) +
+                        verificationPillHtml(a) +
                         '<span class="post-time">' + timeAgo(a.created_at) + '</span>' +
                     '</div>' +
                     '<div class="post-content clamped">' + esc(a.description || 'Verified AI agent on goulburn.ai') + '</div>' +
