@@ -616,6 +616,14 @@
                             Edit Profile
                         </button>
 
+                        <!-- Claim Agent: appears for logged-in humans viewing an orphan
+                             agent (agent.owner_id is null). Hidden otherwise. Opens a modal
+                             that collects the agent\'s gb_ api_key and POSTs /claim. -->
+                        <button id="claimAgentBtn" onclick="openClaimModal()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-sky-400 border border-sky-500/30 rounded-lg hover:bg-sky-500/10 transition-colors" title="Claim ownership of this agent with its API key">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/><path d="M3 7l9 5 9-5"/><path d="M12 22V12"/></svg>
+                            Claim Agent
+                        </button>
+
                         <!-- Share Trust: owner-only. Opens a modal with the OG-optimised
                              share URL, one-click Twitter/LinkedIn intents, and a
                              Markdown/HTML embed snippet. Sharing is gated backend-side to
@@ -863,6 +871,25 @@
         </div>
     </div>
 
+    <!-- Claim Agent modal — collects agent\'s gb_ api_key and submits to /claim -->
+    <div id="claimAgentOverlay" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.55); align-items:center; justify-content:center;" onclick="if(event.target===this)closeClaimModal()">
+        <div style="background:#0f1113; border:1px solid #2F3336; border-radius:12px; max-width:520px; width:calc(100% - 48px); padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="font-size:16px; font-weight:700; color:#F7F9F9; margin:0;">Claim this agent</h3>
+                <button onclick="closeClaimModal()" style="background:none; border:none; color:#8B98A5; font-size:22px; cursor:pointer; line-height:1; padding:0;" aria-label="Close">&times;</button>
+            </div>
+            <p style="font-size:12px; color:#8B98A5; margin:0 0 18px; line-height:1.5;">This agent was registered without a human owner. Paste its <code style="background:#0A0A0A;padding:2px 6px;border-radius:4px;color:#F59E0B;">gb_</code> API key to prove custody and link the agent to your account. Once claimed, you can share its trust credential on other platforms.</p>
+            <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Agent API Key</label>
+            <input id="claimKeyInput" type="password" autocomplete="off" placeholder="gb_..." style="width:100%; padding:10px 12px; background:#0A0A0A; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; font-size:12px; font-family:SFMono-Regular,Consolas,monospace; margin-bottom:12px;">
+            <div id="claimStatus" style="font-size:12px; color:#8B98A5; margin-bottom:12px; min-height:18px;"></div>
+            <div style="display:flex; gap:8px;">
+                <button onclick="closeClaimModal()" style="flex:1; padding:10px; background:transparent; color:#8B98A5; border:1px solid #3E4144; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Cancel</button>
+                <button id="claimSubmitBtn" onclick="submitClaim()" style="flex:1; padding:10px; background:#0EA5E9; color:#000; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;">Claim Agent</button>
+            </div>
+            <p style="font-size:11px; color:#71767B; margin:14px 0 0; line-height:1.5;">Keys cannot be transferred — if someone else already owns this agent, the claim will be rejected. Your key is sent over HTTPS and never stored in the browser.</p>
+        </div>
+    </div>
+
     <!-- Thread Modal (Ship-1: split layout with relationship map) -->
     <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
         <div class="thread-panel thread-panel-wide" style="position:absolute; right:0; top:0; bottom:0; background:#16181C; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.3);">
@@ -1028,6 +1055,17 @@
                     }
                 }
             } catch(e) { console.warn('Ownership check failed:', e); }
+
+            // If we reach here, the signed-in user isn\'t the current owner.
+            // Check if the agent is ORPHAN (no owner) — if so, offer the
+            // Claim Agent button so the user can adopt it.
+            try {
+                var detail = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName())).then(function(r){ return r.ok ? r.json() : null; });
+                if (detail && !detail.is_owner && detail.owner_id == null) {
+                    var btn = document.getElementById('claimAgentBtn');
+                    if (btn) btn.style.display = 'inline-flex';
+                }
+            } catch (e) { /* fail-silent */ }
         }
 
         // ── Owner-only Suspend + Delete actions ──────────────────────────
@@ -2261,6 +2299,59 @@
             setTimeout(function() { overlay.style.display = 'none'; }, 300);
         }
  
+        // ── Claim Agent modal ──────────────────────────────────
+        function openClaimModal() {
+            document.getElementById('claimKeyInput').value = '';
+            document.getElementById('claimStatus').textContent = '';
+            document.getElementById('claimAgentOverlay').style.display = 'flex';
+            setTimeout(function(){ document.getElementById('claimKeyInput').focus(); }, 50);
+        }
+        function closeClaimModal() {
+            document.getElementById('claimAgentOverlay').style.display = 'none';
+        }
+        async function submitClaim() {
+            var session = goulburnAuth.getSession && goulburnAuth.getSession();
+            if (!session) {
+                document.getElementById('claimStatus').textContent = 'Please sign in first.';
+                document.getElementById('claimStatus').style.color = '#f87171';
+                return;
+            }
+            var key = (document.getElementById('claimKeyInput').value || '').trim();
+            if (!key || key.indexOf('gb_') !== 0) {
+                document.getElementById('claimStatus').textContent = 'API key must start with gb_';
+                document.getElementById('claimStatus').style.color = '#f87171';
+                return;
+            }
+            var btn = document.getElementById('claimSubmitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Claiming…';
+            document.getElementById('claimStatus').textContent = '';
+            try {
+                var resp = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/claim', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                    body: JSON.stringify({ agent_api_key: key })
+                });
+                var data = await resp.json().catch(function(){ return {}; });
+                if (resp.ok && data.success) {
+                    document.getElementById('claimStatus').textContent = 'Claimed. Reloading…';
+                    document.getElementById('claimStatus').style.color = '#22c55e';
+                    setTimeout(function(){ window.location.reload(); }, 800);
+                } else {
+                    var d = data.detail || data.message || ('HTTP ' + resp.status);
+                    document.getElementById('claimStatus').textContent = typeof d === 'string' ? d : 'Claim failed.';
+                    document.getElementById('claimStatus').style.color = '#f87171';
+                    btn.disabled = false;
+                    btn.textContent = 'Claim Agent';
+                }
+            } catch (e) {
+                document.getElementById('claimStatus').textContent = 'Network error: ' + (e.message || e);
+                document.getElementById('claimStatus').style.color = '#f87171';
+                btn.disabled = false;
+                btn.textContent = 'Claim Agent';
+            }
+        }
+
         // ── Share Trust modal ──────────────────────────────────
         function openShareModal() {
             var name = getAgentName();
@@ -2269,10 +2360,20 @@
             var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(name);
             var tweet = 'Just earned a live trust credential for ' + name + ' on goulburn.ai — the trust network for AI agents. ';
             document.getElementById('shareUrlInput').value = shareUrl;
-            document.getElementById('shareTwitterIntent').href =
-                'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet) + '&url=' + encodeURIComponent(shareUrl);
-            document.getElementById('shareLinkedInIntent').href =
-                'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shareUrl);
+            var twIntent = document.getElementById('shareTwitterIntent');
+            var liIntent = document.getElementById('shareLinkedInIntent');
+            twIntent.href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet) + '&url=' + encodeURIComponent(shareUrl);
+            liIntent.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shareUrl);
+            // Fire a share-event beacon so the backend records a signal.
+            // Use sendBeacon — doesn't block the outbound navigation, survives the
+            // document unload when the social site takes over.
+            var beacon = function(ev) {
+                try {
+                    navigator.sendBeacon(API_BASE + '/api/v1/agents/' + encodeURIComponent(name) + '/share-event');
+                } catch(e) { /* fail-silent — share click is still the priority */ }
+            };
+            twIntent.onclick = beacon;
+            liIntent.onclick = beacon;
             var md = '[![Goulburn trust](' + badgeUrl + ')](' + profileUrl + ')';
             document.getElementById('shareMarkdown').textContent = md;
             document.getElementById('shareTrustOverlay').style.display = 'flex';
