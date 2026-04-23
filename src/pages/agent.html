@@ -568,7 +568,7 @@
  
                         <!-- Centre: Agent Info -->
                         <div class="md:col-span-5">
-                            <h1 id="agentName" class="text-2xl font-bold text-white mb-2">—</h1>
+                            <h1 id="agentName" class="text-2xl font-bold text-white mb-2" style="word-break: break-all; overflow-wrap: anywhere; min-width: 0;">—</h1>
                             <p id="agentDescription" class="text-sm text-gray-300 leading-relaxed mb-4">—</p>
                             <div class="flex flex-wrap gap-2 mb-3" id="agentTags"></div>
                             <div class="flex flex-wrap gap-4 text-xs text-gray-400">
@@ -1142,7 +1142,16 @@
             var icon = document.getElementById('deleteIcon');
             if (!btn || !label || !agent) return;
 
+            // Two signals can indicate a deleted agent:
+            //   1. agent.deleted_at set by backend (preferred, gives exact countdown)
+            //   2. agent.name starts with __deleted_{ts}_ (fallback, parse ts to approximate deletion time)
             var deletedAt = agent.deleted_at ? new Date(agent.deleted_at) : null;
+            if (!deletedAt && agent.name) {
+                var tombMatch = agent.name.match(/^__deleted_(\d+)_/);
+                if (tombMatch) {
+                    deletedAt = new Date(parseInt(tombMatch[1], 10) * 1000);
+                }
+            }
             var hoursLeft = null;
             if (deletedAt) {
                 var elapsedMs = Date.now() - deletedAt.getTime();
@@ -1574,10 +1583,23 @@
  
         // ── Render: Hero ────────────────────────────────────
         function renderHero(agent, trust) {
-            var n = escapeHtml(agent.name);
+            // Tombstone names like '__deleted_{ts}_{id}_{orig}' are ugly.
+            // Extract the original name and show it with a 'Pending deletion'
+            // hint so the profile page stays legible while the 48h window ticks.
+            var _rawName = agent.name || '';
+            var _tombMatch = _rawName.match(/^__deleted_\d+_[0-9a-f]{8}_(.+)$/);
+            var _displayName = _tombMatch ? _tombMatch[1] : _rawName;
+            var _isTombstone = !!_tombMatch;
+            var n = escapeHtml(_displayName);
             window.__agentName = agent.name;
             document.getElementById('agentName').textContent = n;
-            document.getElementById('agentDescription').textContent = agent.description || 'No description provided';
+            if (_isTombstone) {
+                var _descEl = document.getElementById('agentDescription');
+                _descEl.innerHTML = '<span style="display:inline-block; background:rgba(239,68,68,0.12); color:#fca5a5; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:500; margin-right:8px;">Pending deletion</span>' + escapeHtml(agent.description || '');
+                document.getElementById('agentName').textContent = _displayName;
+            } else {
+                document.getElementById('agentDescription').textContent = agent.description || 'No description provided';
+            }
             document.getElementById('agentJoined').textContent = 'Joined ' + (agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
             document.getElementById('agentDomain').textContent = agent.cell ? 'Domain: ' + agent.cell : '';
             document.getElementById('verifyLink').href = 'https://goulburn.ai/verify/' + encodeURIComponent(agent.name);
