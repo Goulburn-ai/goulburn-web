@@ -292,6 +292,7 @@
         var selected = opts.selected || "";
         var onSelect = opts.onSelect || function () {};
         var currentCat = opts.initialCategory || "all";
+        var filter = "";
 
         var tabsHtml = CATEGORIES.map(function (cat) {
             return (
@@ -301,13 +302,45 @@
             );
         }).join("");
 
+        // Search input + scrollable 3-row grid. Height is managed by CSS;
+        // the grid container itself handles vertical scroll so the rest of
+        // the page stays in place while the user browses.
         container.innerHTML =
             '<div class="gb-avatar-tabs">' + tabsHtml + "</div>" +
-            '<div class="gb-avatar-grid ' + (opts.gridClass || "") + '" data-gbgrid></div>';
+            '<div class="gb-avatar-search-wrap">' +
+              '<svg class="gb-avatar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' +
+              '<input type="search" class="gb-avatar-search" placeholder="Search icons… (e.g. robot, shield, crown)" data-gbsearch>' +
+            "</div>" +
+            '<div class="gb-avatar-grid ' + (opts.gridClass || "") + '" data-gbgrid></div>' +
+            '<div class="gb-avatar-empty" data-gbempty style="display:none;">No icons match "<span data-gbquery></span>". Try a different term or switch category.</div>';
+
+        function matches(name) {
+            if (!filter) return true;
+            var q = filter.toLowerCase();
+            var title = (META[name] && META[name].title) ? String(META[name].title).toLowerCase() : "";
+            return name.toLowerCase().indexOf(q) >= 0 || title.indexOf(q) >= 0;
+        }
 
         function paint(cat) {
-            var list = CATEGORIES.find(function (c) { return c.id === cat; }).icons;
+            var base = CATEGORIES.find(function (c) { return c.id === cat; });
+            if (!base) return;
+            var list = base.icons.filter(matches);
+            // Keep selected pinned at the top of the grid when present + matching
+            if (selected && list.indexOf(selected) > 0) {
+                list = [selected].concat(list.filter(function (n) { return n !== selected; }));
+            }
             var grid = container.querySelector("[data-gbgrid]");
+            var empty = container.querySelector("[data-gbempty]");
+            if (list.length === 0) {
+                grid.innerHTML = "";
+                if (empty) {
+                    var q = empty.querySelector("[data-gbquery]");
+                    if (q) q.textContent = filter;
+                    empty.style.display = "";
+                }
+                return;
+            }
+            if (empty) empty.style.display = "none";
             grid.innerHTML = list.map(function (n) {
                 return (
                     '<button type="button" class="gb-avatar-btn ' + (opts.itemClass || "") +
@@ -336,8 +369,24 @@
                 tab.classList.add("gb-cat-active");
                 currentCat = tab.getAttribute("data-cat");
                 paint(currentCat);
+                // Return focus to grid + scroll to top on tab switch
+                var grid = container.querySelector("[data-gbgrid]");
+                if (grid) grid.scrollTop = 0;
             });
         });
+
+        // Search: debounced repaint
+        var searchInput = container.querySelector("[data-gbsearch]");
+        if (searchInput) {
+            var t;
+            searchInput.addEventListener("input", function (e) {
+                clearTimeout(t);
+                t = setTimeout(function () {
+                    filter = (e.target.value || "").trim();
+                    paint(currentCat);
+                }, 120);
+            });
+        }
 
         paint(currentCat);
     }
