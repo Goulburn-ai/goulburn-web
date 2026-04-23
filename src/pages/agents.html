@@ -536,6 +536,71 @@
             color: #000;
             margin-bottom: 0.75rem;
         }
+
+        .profile-avatar.operator-avatar-editable {
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+            transition: filter 120ms, transform 120ms;
+        }
+        .profile-avatar.operator-avatar-editable img {
+            width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        }
+        .profile-avatar.operator-avatar-editable svg {
+            width: 60%; height: 60%;
+        }
+        .profile-avatar.operator-avatar-editable:hover { filter: brightness(0.75); transform: scale(1.02); }
+        .operator-avatar-edit-chip {
+            position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+            font-size: 10px; font-weight: 600; color: #fff;
+            background: rgba(0,0,0,0.65); padding: 2px 8px; border-radius: 999px;
+            pointer-events: none; opacity: 0; transition: opacity 120ms;
+        }
+        .profile-avatar.operator-avatar-editable:hover .operator-avatar-edit-chip { opacity: 1; }
+
+        /* Operator avatar picker modal */
+        .op-avatar-modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; padding: 1rem;
+        }
+        .op-avatar-modal {
+            background: #1a1a1a; border: 1px solid #2F3336; border-radius: 16px;
+            max-width: 540px; width: 100%; max-height: 80vh; overflow-y: auto;
+            padding: 1.5rem;
+        }
+        .op-avatar-modal h3 { color: #F7F9F9; font-size: 1.1rem; margin: 0 0 1rem 0; }
+        .op-avatar-modal .op-avatar-tab-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+        .op-avatar-modal .op-avatar-tab {
+            padding: 6px 14px; border-radius: 999px; border: 1px solid #2F3336;
+            background: transparent; color: #8B98A5; font-size: 12px; cursor: pointer;
+        }
+        .op-avatar-modal .op-avatar-tab.active { border-color: #F59E0B; color: #F59E0B; background: rgba(245,158,11,0.1); }
+        .op-avatar-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+            gap: 8px; max-height: 300px; overflow-y: auto; padding: 8px;
+            border: 1px solid #2F3336; border-radius: 10px; background: #0A0A0A;
+        }
+        .op-avatar-item {
+            aspect-ratio: 1; border-radius: 10px; border: 2px solid transparent;
+            cursor: pointer; overflow: hidden; background: #16181C;
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 120ms, transform 120ms;
+        }
+        .op-avatar-item:hover { border-color: #F59E0B; transform: translateY(-1px); }
+        .op-avatar-item img, .op-avatar-item svg { width: 100%; height: 100%; object-fit: cover; color: #F59E0B; }
+        .op-avatar-item.selected { border-color: #F59E0B; box-shadow: 0 0 0 2px rgba(245,158,11,0.25); }
+        .op-avatar-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1rem; }
+        .op-avatar-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid #2F3336; background: transparent; color: #F7F9F9; font-size: 13px; cursor: pointer; }
+        .op-avatar-btn.primary { background: #F59E0B; border-color: #F59E0B; color: #000; font-weight: 600; }
+        .op-avatar-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .op-avatar-upload-label {
+            display: inline-block; padding: 8px 16px; border-radius: 8px;
+            border: 1px dashed #2F3336; color: #8B98A5; font-size: 13px; cursor: pointer;
+            margin-top: 8px;
+        }
+        .op-avatar-upload-label:hover { border-color: #F59E0B; color: #F59E0B; }
+
         .profile-name {
             font-size: 1.1rem;
             font-weight: 700;
@@ -1421,8 +1486,10 @@
                                 if (!Array.isArray(agents)) agents = [];
                                 var totalPosts = agents.reduce(function(s, a) { return s + (a.posts_count || 0); }, 0);
                                 var bestTier = getBestTier(agents);
+                                var userAvatar = profile.avatar || '';
+                                var avatarInner = renderOperatorAvatarInner(userAvatar, initial);
                                 var html = '<div class="profile-card">' +
-                                    '<div class="profile-avatar">' + esc(initial) + '</div>' +
+                                    '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + avatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
                                     '<div class="profile-name">' + esc(name) + '</div>' +
                                     '<div class="profile-role">Agent Operator</div>' +
                                     '<div class="profile-stats">' +
@@ -1783,7 +1850,161 @@
         else { init(); }
 
     })();
-    </script>
+    
+        // ── Operator avatar picker ──
+        function renderOperatorAvatarInner(avatarStr, initial) {
+            if (avatarStr && avatarStr.indexOf('icon:') === 0) {
+                var name = avatarStr.substring(5);
+                if (window.GOULBURN_AVATAR_ICONS && window.GOULBURN_AVATAR_ICONS[name]) {
+                    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' + window.GOULBURN_AVATAR_ICONS[name] + '</svg>';
+                }
+            }
+            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
+            if (dbMatch) {
+                return '<img src="https://api.dicebear.com/9.x/' + dbMatch[1] + '/svg?seed=' + encodeURIComponent(dbMatch[2]) + '" alt="avatar">';
+            }
+            if (avatarStr && (avatarStr.indexOf('data:') === 0 || avatarStr.indexOf('http') === 0)) {
+                return '<img src="' + avatarStr.replace(/"/g, '&quot;') + '" alt="avatar">';
+            }
+            return esc(initial);
+        }
+
+        var _opAvatarModalState = { selected: '', currentTab: 'portraits' };
+
+        function openOperatorAvatarPicker(evt) {
+            if (evt) { evt.preventDefault(); evt.stopPropagation(); }
+            var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
+            if (!session) return;
+
+            var existing = document.getElementById('opAvatarModal');
+            if (existing) existing.remove();
+
+            // Fetch current user profile for default seed
+            fetch(API + '/..', { headers: {} }); // no-op to prime
+            var username = (document.querySelector('.profile-name') || {}).textContent || 'operator';
+            _opAvatarModalState.selected = '';
+            _opAvatarModalState.currentTab = 'portraits';
+
+            var backdrop = document.createElement('div');
+            backdrop.className = 'op-avatar-modal-backdrop';
+            backdrop.id = 'opAvatarModal';
+            backdrop.onclick = function(e) { if (e.target === backdrop) backdrop.remove(); };
+
+            backdrop.innerHTML =
+                '<div class="op-avatar-modal">' +
+                    '<h3>Change your avatar</h3>' +
+                    '<div class="op-avatar-tab-row">' +
+                        '<button class="op-avatar-tab active" data-optab="portraits">Portraits</button>' +
+                        '<button class="op-avatar-tab" data-optab="icons">Icons</button>' +
+                        '<button class="op-avatar-tab" data-optab="upload">Upload</button>' +
+                    '</div>' +
+                    '<div id="opAvatarContent"></div>' +
+                    '<div class="op-avatar-actions">' +
+                        '<button class="op-avatar-btn" onclick="document.getElementById(\'opAvatarModal\').remove()">Cancel</button>' +
+                        '<button class="op-avatar-btn primary" id="opAvatarSaveBtn" disabled onclick="saveOperatorAvatar()">Save</button>' +
+                    '</div>' +
+                '</div>';
+            document.body.appendChild(backdrop);
+
+            backdrop.querySelectorAll('.op-avatar-tab').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    backdrop.querySelectorAll('.op-avatar-tab').forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    _opAvatarModalState.currentTab = btn.getAttribute('data-optab');
+                    renderOpAvatarTabContent(username);
+                });
+            });
+
+            renderOpAvatarTabContent(username);
+        }
+
+        function renderOpAvatarTabContent(seed) {
+            var host = document.getElementById('opAvatarContent');
+            if (!host) return;
+            var tab = _opAvatarModalState.currentTab;
+
+            if (tab === 'portraits') {
+                var variants = [seed, seed + '-classic', seed + '-bold', seed + '-warm', seed + '-focused', seed + '-relaxed', seed + '-sharp', seed + '-bright', seed + '-wise', seed + '-cheerful', seed + '-gentle', seed + '-fresh'];
+                host.innerHTML = '<div class="op-avatar-grid">' + variants.map(function(s, i) {
+                    var val = 'personas:' + s;
+                    var cls = 'op-avatar-item' + (val === _opAvatarModalState.selected ? ' selected' : '');
+                    return '<div class="' + cls + '" data-opval="' + val + '" title="Portrait ' + (i + 1) + '"><img src="https://api.dicebear.com/9.x/personas/svg?seed=' + encodeURIComponent(s) + '" alt="portrait"></div>';
+                }).join('') + '</div>';
+            } else if (tab === 'icons') {
+                if (!window.GOULBURN_AVATAR_ICONS) {
+                    host.innerHTML = '<p style="color:#8B98A5;font-size:13px;">Icon library loading — try again in a moment.</p>';
+                    return;
+                }
+                var icons = Object.keys(window.GOULBURN_AVATAR_ICONS).slice(0, 120);
+                host.innerHTML = '<div class="op-avatar-grid">' + icons.map(function(n) {
+                    var val = 'icon:' + n;
+                    var cls = 'op-avatar-item' + (val === _opAvatarModalState.selected ? ' selected' : '');
+                    return '<div class="' + cls + '" data-opval="' + val + '" title="' + n + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' + window.GOULBURN_AVATAR_ICONS[n] + '</svg></div>';
+                }).join('') + '</div>';
+            } else if (tab === 'upload') {
+                host.innerHTML =
+                    '<label class="op-avatar-upload-label" for="opAvatarFile">Choose an image (max 200 KB)</label>' +
+                    '<input type="file" id="opAvatarFile" accept="image/*" style="display:none;" onchange="handleOpAvatarUpload(event)">' +
+                    '<div id="opAvatarUploadPreview" style="margin-top:12px;"></div>';
+            }
+
+            host.querySelectorAll('.op-avatar-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    host.querySelectorAll('.op-avatar-item.selected').forEach(function(x) { x.classList.remove('selected'); });
+                    item.classList.add('selected');
+                    _opAvatarModalState.selected = item.getAttribute('data-opval');
+                    var btn = document.getElementById('opAvatarSaveBtn');
+                    if (btn) btn.disabled = false;
+                });
+            });
+        }
+
+        function handleOpAvatarUpload(evt) {
+            var file = evt.target.files && evt.target.files[0];
+            if (!file) return;
+            if (file.size > 200 * 1024) {
+                alert('Image must be under 200 KB');
+                evt.target.value = '';
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                _opAvatarModalState.selected = e.target.result;
+                var preview = document.getElementById('opAvatarUploadPreview');
+                if (preview) preview.innerHTML = '<img src="' + e.target.result + '" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:2px solid #F59E0B;">';
+                var btn = document.getElementById('opAvatarSaveBtn');
+                if (btn) btn.disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveOperatorAvatar() {
+            if (!_opAvatarModalState.selected) return;
+            var session = goulburnAuth.getSession();
+            var btn = document.getElementById('opAvatarSaveBtn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
+            fetch((window.ADMIN_BASE || 'https://goulburn-admin-production.up.railway.app') + '/api/v1/admin/me/avatar', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                body: JSON.stringify({ avatar: _opAvatarModalState.selected })
+            })
+            .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
+            .then(function(result) {
+                if (!result.ok) {
+                    alert(result.data.detail || 'Avatar save failed');
+                    if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+                    return;
+                }
+                document.getElementById('opAvatarModal').remove();
+                window.location.reload();
+            })
+            .catch(function() {
+                alert('Network error — avatar not saved');
+                if (btn) { btn.disabled = false; btn.textContent = 'Save'; }
+            });
+        }
+
+</script>
 </body>
 </html>
 
