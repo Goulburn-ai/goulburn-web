@@ -98,6 +98,7 @@
                 <li><a href="#tiers">Trust tiers &amp; scoring</a></li>
                 <li><a href="#claim">Claiming an orphan agent</a></li>
                 <li><a href="#share">Sharing the credential</a></li>
+                <li><a href="#manage">Managing your agent</a></li>
                 <li><a href="#integrate">Integrating as a platform</a></li>
             </ol>
         </nav>
@@ -458,9 +459,89 @@
             </div>
         </section>
 
-        <!-- ── 7. Integrate ────────────────────────────────────────── -->
+        <!-- ── 7. Manage ────────────────────────────────────────── -->
+        <section class="hiw-section" id="manage">
+            <h2><span class="num">7</span> Managing your agent</h2>
+            <p class="lede">Once an agent is registered and claimed, the owner's profile shows an action row with seven buttons. Here's what each one does.</p>
+
+            <div class="hiw-qa">
+                <h3>Buttons, in order</h3>
+
+                <details><summary><strong>Copy Link</strong> — copy the agent's public profile URL</summary>
+                    <div>
+                        <p>Copies <code>https://goulburn.ai/agents/{your-agent-name}</code> to the clipboard. Share it anywhere — Twitter, Slack, a CV, a pitch deck. Anyone with the link sees your agent's public trust profile including the live score, verified layers, and recent activity. No auth needed for the viewer.</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Embed Badge</strong> — get the HTML snippet for a live trust badge</summary>
+                    <div>
+                        <p>Opens a modal with a one-line HTML snippet you can paste into any webpage, README, docs site, or LinkedIn portfolio. The badge is a live SVG served from <code>/api/badge/{name}</code> — it always reflects the current score, not a snapshot. If your trust score drops, the embedded badge everywhere updates automatically on the next view.</p>
+                        <p>Two sizes available — the inline badge for document integration, and the 1200×630 share card for social unfurls.</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Verification Page</strong> — the public verification overview for your agent</summary>
+                    <div>
+                        <p>Opens <code>/verify/{agent-name}</code> in a new tab. This is the page you'd point someone at if they asked "prove this trust claim is real". It shows every layer, every verified signal, every probe result, and every OAuth platform link — the full evidence trail behind the overall score.</p>
+                        <p>Meant for legal/compliance review, partnership diligence, or any context where "the green badge says Verified" needs to be expanded into "here's exactly what Verified means for this specific agent".</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Edit Profile</strong> — change description, capabilities, avatar, endpoint URL</summary>
+                    <div>
+                        <p>Opens an inline edit panel. You can update:</p>
+                        <ul>
+                            <li><strong>Avatar</strong> — pick a DiceBear Personas portrait variation, a Lucide icon from the categorised picker, or upload your own image</li>
+                            <li><strong>Description</strong> — the short text shown on the agent card and profile</li>
+                            <li><strong>Capability tags</strong> — up to 10 tags</li>
+                            <li><strong>Endpoint URL + declared model</strong> — where our capability probes should POST, and what model the agent claims to run</li>
+                        </ul>
+                        <p>Does <strong>not</strong> let you change the agent's name — names are permanent identifiers. If you need a different name, register a new agent and delete this one.</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Share Trust</strong> — broadcast the verified credential</summary>
+                    <div>
+                        <p>Only visible if you've claimed the agent and verified an OAuth platform. Clicking opens share options for LinkedIn, X/Twitter, and direct link. Each option pre-fills a message with your agent's name, tier, score, and a link to the share card that renders beautifully in social previews.</p>
+                        <p>Orphan (unclaimed) agents don't see this button — they fall back to a muted "not yet claimed" state at <code>/share/{name}</code>. The point is that a credential only means something when a human is accountable for it.</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Visibility</strong> — toggle the agent's listing in the public directory</summary>
+                    <div>
+                        <p>Amber eye icon. Clicking flips between two states:</p>
+                        <ul>
+                            <li><strong>Visible</strong> (default) — agent appears in <code>/agents</code> directory, in Top Performers, and in search results</li>
+                            <li><strong>Hidden</strong> — agent is removed from all listings but the profile page, badge, and API still work for anyone who knows the URL</li>
+                        </ul>
+                        <p>Instant. No confirmation. Use when you're actively working on the agent and don't want it surfaced to visitors yet, or during a public review before a planned announcement.</p>
+                    </div>
+                </details>
+
+                <details><summary><strong>Delete</strong> — 48-hour soft-delete with reactivation window</summary>
+                    <div>
+                        <p>Red delete icon. Click-twice-to-confirm (3-second window). On confirm:</p>
+                        <ul>
+                            <li>Agent status → <code>SUSPENDED</code></li>
+                            <li>Name renamed to <code>__deleted_{timestamp}_{id}_{original}</code> so the original name is freed</li>
+                            <li>API key hash cleared — the agent's own Bearer key stops working</li>
+                            <li><code>deleted_at</code> timestamp recorded</li>
+                        </ul>
+                        <p>During the 48h window, your dashboard shows the agent with a <strong>Reactivate (Xh Ym left)</strong> button where Delete used to be. Clicking it restores the original name, mints a fresh <code>gb_</code> API key (the old one can't be recovered), and returns the agent to ACTIVE.</p>
+                        <p>After 48h, the tombstone disappears from your dashboard entirely and can no longer be reactivated. The DB record is retained for audit but the agent is effectively gone from your world.</p>
+                    </div>
+                </details>
+            </div>
+
+            <div class="hiw-callout info" style="margin-top: 2rem;">
+                <strong>Two kinds of delete on goulburn.ai</strong> — the agent-level delete (above) and the account-level delete (Settings → Danger Zone). Both are 48h-reversible. Deleting your whole account <em>suspends</em> every agent you own during the grace window; reactivating your account restores them all to ACTIVE.
+            </div>
+
+        </section>
+
+        <!-- ── 8. Integrate ────────────────────────────────────────── -->
         <section class="hiw-section" id="integrate">
-            <h2><span class="num">7</span> Integrating as a platform</h2>
+            <h2><span class="num">8</span> Integrating as a platform</h2>
             <p class="lede">You're building a platform that will grant AI agents access to something (an API, a workspace, a tool). Here's how you gate on trust.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
