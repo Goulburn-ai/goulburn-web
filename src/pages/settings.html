@@ -778,21 +778,30 @@
         </div>
     </main>
 
-    <!-- Password Confirmation Modal -->
+    <!-- Delete Account Modal — 48h grace window -->
     <div class="modal" id="deleteConfirmModal">
         <div class="modal-content">
             <h3 class="modal-header">Delete Account?</h3>
             <div class="modal-body">
-                <p>This action will:</p>
+                <p>Your account and all agents will be <strong>scheduled for deletion</strong>. You have <strong>48 hours</strong> to sign back in and reactivate before everything is permanently removed.</p>
                 <ul style="color: var(--dark-600); font-size: 0.875rem; margin: 0.5rem 0 0 1.5rem; padding: 0;">
-                    <li>Permanently delete your account</li>
-                    <li>Remove all your agents from goulburn.ai</li>
-                    <li>Delete all associated data</li>
-                    <li>This cannot be undone</li>
+                    <li>Your agents will be suspended (hidden from the public directory)</li>
+                    <li>Your data is preserved during the 48h window</li>
+                    <li>Signing in during this time shows a Reactivate option</li>
+                    <li>After 48 hours, all data is permanently deleted</li>
                 </ul>
-                <p style="margin-top: 1rem; color: var(--red-600); font-weight: 500;">
-                    Are you absolutely sure?
-                </p>
+                <div style="margin-top: 1rem;">
+                    <label class="form-label" for="deletePassword" style="display:block; margin-bottom:0.25rem;">Confirm with your password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="deletePassword" class="form-input" placeholder="Current password" autocomplete="current-password">
+                        <button type="button" class="eye-toggle" onclick="togglePwVis('deletePassword', this)" title="Show password">&#128065;</button>
+                    </div>
+                </div>
+                <div style="margin-top: 0.75rem;">
+                    <label class="form-label" for="deleteConfirmText" style="display:block; margin-bottom:0.25rem;">Type <code>DELETE</code> to confirm</label>
+                    <input type="text" id="deleteConfirmText" class="form-input" placeholder="DELETE" autocomplete="off">
+                </div>
+                <p id="deleteErrorMsg" style="display:none; margin-top: 0.75rem; color: var(--red-600); font-size: 0.875rem;"></p>
             </div>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
@@ -1305,28 +1314,61 @@
 
     function confirmDeleteAccount() {
         var session = goulburnAuth.getSession();
+        var pw = document.getElementById('deletePassword').value || '';
+        var conf = (document.getElementById('deleteConfirmText').value || '').trim();
+        var errEl = document.getElementById('deleteErrorMsg');
+        errEl.style.display = 'none';
+        errEl.textContent = '';
+        if (conf !== 'DELETE') {
+            errEl.textContent = 'Please type DELETE exactly to confirm.';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (!pw) {
+            errEl.textContent = 'Password required.';
+            errEl.style.display = 'block';
+            return;
+        }
+
+        // Step 1: soft-delete the admin account (sets deleted_at, keeps session)
         fetch(ADMIN_BASE + '/api/v1/admin/me', {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + session
-            }
+            },
+            body: JSON.stringify({ password: pw, confirmation: 'DELETE' })
         })
         .then(function(r) {
-            if (r.ok) {
-                goulburnAuth.clearSession();
-                window.location.href = '/?deleted=true';
-            } else {
-                return r.json().then(function(d) {
-                    showToast(d.error || 'Account deletion failed', 'error');
-                    closeDeleteModal();
-                });
+            return r.json().then(function(d) { return { ok: r.ok, status: r.status, data: d }; });
+        })
+        .then(function(result) {
+            if (!result.ok) {
+                errEl.textContent = result.data.detail || result.data.error || ('Deletion failed — HTTP ' + result.status);
+                errEl.style.display = 'block';
+                return;
             }
+            // Step 2: cascade on goulburn-api — suspend all owned agents
+            return fetch(API_BASE + '/api/v1/owners/me/delete-account', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + session
+                }
+            })
+            .catch(function() { /* best-effort; admin side is the source of truth */ })
+            .then(function() {
+                // Keep session; route to dashboard which will show the
+                // Reactivate banner via /me.deleted_at.
+                closeDeleteModal();
+                showToast('Account scheduled for deletion. 48 hours to reactivate.');
+                setTimeout(function() { window.location.href = '/dashboard?pending_deletion=1'; }, 1500);
+            });
         })
         .catch(function(err) {
             console.error('Delete error:', err);
-            showToast('Unable to delete account. Please contact support.', 'error');
-            closeDeleteModal();
+            errEl.textContent = 'Unable to delete account. Please try again.';
+            errEl.style.display = 'block';
         });
     }
 
