@@ -666,8 +666,19 @@
                     var svg = HOME_ICON_SVGS[av.substring(5)];
                     if (svg) return '<div style="width:40px;height:40px;border-radius:50%;background:#1a1a2e;display:flex;align-items:center;justify-content:center;padding:7px;color:#818cf8;flex-shrink:0;">' + svg + '</div>';
                 }
+                // DiceBear portrait avatars (personas / bottts / etc.)
+                var dbM = av && av.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
+                if (dbM) {
+                    var _seed = encodeURIComponent(dbM[2]);
+                    return '<img src="https://api.dicebear.com/9.x/' + dbM[1] + '/svg?seed=' + _seed + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;background:#1a1a2e;flex-shrink:0;" alt="">';
+                }
                 if (av && (av.indexOf('data:') === 0 || av.indexOf('http') === 0)) {
                     return '<img src="' + av + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0;" alt="">';
+                }
+                // Default: Personas portrait seeded by agent name
+                if (name) {
+                    var _fSeed = encodeURIComponent(name);
+                    return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + _fSeed + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;background:#1a1a2e;flex-shrink:0;" alt="">';
                 }
                 var PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
                 var h = 0; for (var i = 0; i < (name||'').length; i++) h = ((h << 5) - h) + name.charCodeAt(i);

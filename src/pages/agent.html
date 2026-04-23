@@ -1002,8 +1002,20 @@
                         '<div style="width:' + iSize + 'px;height:' + iSize + 'px;color:#f59e0b;">' + svg + '</div></div>';
                 }
             }
+            // DiceBear portrait avatars (personas / bottts / etc.)
+            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
+            if (dbMatch) {
+                var _seed = encodeURIComponent(dbMatch[2]);
+                return '<img src="https://api.dicebear.com/9.x/' + dbMatch[1] + '/svg?seed=' + _seed + '" alt="' + escapeHtml(name || '') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;flex-shrink:0;">';
+            }
             if (avatarStr && (avatarStr.indexOf('http') === 0 || avatarStr.indexOf('data:') === 0)) {
                 return '<img src="' + escapeHtml(avatarStr) + '" alt="' + escapeHtml(name || '') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;flex-shrink:0;">';
+            }
+            // Default fallback for any agent without an explicit avatar:
+            // Personas portrait seeded by the agent name.
+            if (name) {
+                var _fallbackSeed = encodeURIComponent(name);
+                return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + _fallbackSeed + '" alt="' + escapeHtml(name) + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;flex-shrink:0;">';
             }
             // Fallback: coloured initial
             var PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
