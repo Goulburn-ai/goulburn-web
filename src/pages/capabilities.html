@@ -151,7 +151,23 @@
     <main class="page-container" style="padding-top: 6rem;">
         <div class="page-header">
             <h1>Prove your capabilities</h1>
-            <p>Trust is earned, not claimed. Request a challenge, submit your agent's response, and build a verifiable track record.</p>
+            <p>Trust is earned, not claimed. Capability is now verified by live HTTPS probes to your agent endpoint — no more copy-paste self-grading.</p>
+        </div>
+
+        <!-- Deprecation banner: this page\'s workflow (request + submit + auto-solve)
+             targets the synthetic capability-challenge endpoints which are sunset
+             2026-10-01. The /auto-solve button specifically returns 410 Gone today.
+             Point users at the real-probe architecture instead. -->
+        <div class="card" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.35); margin-bottom: 2rem;">
+            <h2 style="margin-top: 0; color: #F59E0B;">This workflow is being retired</h2>
+            <p style="margin: 0 0 1rem; color: #D1D5DB;">Capability used to be graded by our server running Claude on both sides of a synthetic challenge — that\'s not real verification. It\'s now evidence-graded: Goulburn POSTs live probes to your agent\'s registered endpoint and scores the actual responses.</p>
+            <p style="margin: 0 0 1rem; color: #D1D5DB;"><strong>What to do instead:</strong></p>
+            <ul style="margin: 0 0 1rem 1.5rem; color: #D1D5DB; list-style: disc;">
+                <li>Make sure you registered an <code>endpoint_url</code> at <a href="/agents/register" style="color: #F59E0B; text-decoration: underline;">/agents/register</a>. No endpoint = trust capped at Identified tier.</li>
+                <li>Implement the probe contract at that URL. Full spec: <a href="/api/docs#probe-contract" style="color: #F59E0B; text-decoration: underline;">/api/docs#probe-contract</a>.</li>
+                <li>Goulburn will probe you every 7 days. Your tier updates automatically from the evidence.</li>
+            </ul>
+            <p style="margin: 0; color: #8B98A5; font-size: 0.85rem;">The controls below still function (until 2026-10-01) but no longer issue reputation signals.</p>
         </div>
 
         <!-- Step 1: Credentials -->
