@@ -269,6 +269,23 @@
                             <p class="text-xs text-dark-500 mt-1">List your key competencies</p>
                         </div>
 
+                        <!-- Agent endpoint + declared model. These are how we
+                             make the trust score real: the capability probe
+                             POSTs a challenge to this URL and grades the agent's
+                             actual response. Without an endpoint, the agent
+                             can only reach the Identified tier — higher tiers
+                             require live probing. -->
+                        <div class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
+                            <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
+                            <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                            <p class="text-xs text-dark-500 mt-2 leading-relaxed">An HTTPS URL where your agent accepts POSTs of <code class="text-emerald-400">{"goulburn_probe": true, "prompt": "..."}</code> and returns <code class="text-emerald-400">{"response": "..."}</code> (JSON or plain text). Goulburn probes this periodically to verify live behaviour. Without it, trust capped at Identified tier.</p>
+
+                            <label for="agentDeclaredModel" class="block text-sm font-semibold text-dark-900 mt-4 mb-2">Declared Model <span class="text-xs font-normal text-dark-500">&middot; Optional</span></label>
+                            <input type="text" id="agentDeclaredModel" name="declared_model" placeholder="e.g., claude-sonnet-4-6, gpt-4o, kimi-k2, self-hosted-llama-3" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                            <p class="text-xs text-dark-500 mt-2">What model runs behind the endpoint. Cross-referenced against the provider's signatures during the model-provenance probe.</p>
+                        </div>
+
+
                         <div>
                             <label class="block text-sm font-semibold text-dark-900 mb-2">Agent Avatar</label>
                             <p class="text-xs text-dark-500 mb-3">Choose a pre-made icon or upload your own image</p>
@@ -549,6 +566,14 @@
                     var el = document.getElementById('agentCapabilities');
                     if (el) el.value = formData.step1.caps;
                 }
+                if (formData.step1.endpoint_url) {
+                    var el = document.getElementById('agentEndpointUrl');
+                    if (el) el.value = formData.step1.endpoint_url;
+                }
+                if (formData.step1.declared_model) {
+                    var el = document.getElementById('agentDeclaredModel');
+                    if (el) el.value = formData.step1.declared_model;
+                }
 if (state.avatar) {
                     formData.step1.avatar = state.avatar;
                     var avEl = document.getElementById('avatarValue');
@@ -774,6 +799,10 @@ if (state.avatar) {
                     var name = document.getElementById('agentName').value.trim();
                     var desc = document.getElementById('agentDescription').value.trim();
                     var caps = document.getElementById('agentCapabilities').value.trim();
+                    var endpointUrlEl = document.getElementById('agentEndpointUrl');
+                    var declaredModelEl = document.getElementById('agentDeclaredModel');
+                    var endpointUrl = endpointUrlEl ? endpointUrlEl.value.trim() : '';
+                    var declaredModel = declaredModelEl ? declaredModelEl.value.trim() : '';
 
                     if (!name || !desc || !caps) {
                         alert('Please fill in all required fields');
@@ -783,8 +812,16 @@ if (state.avatar) {
                         alert('Description must be at least 10 characters.');
                         return false;
                     }
+                    // endpoint_url is strongly recommended but not required — if
+                    // provided it must look like a URL so the backend's SSRF guard
+                    // has something to work with. No hard gate here since base
+                    // registration must stay frictionless.
+                    if (endpointUrl && !/^https?:\/\//i.test(endpointUrl)) {
+                        alert('Agent endpoint URL must start with https:// (or http:// in dev).');
+                        return false;
+                    }
 
-                    formData.step1 = { name: name, desc: desc, caps: caps };
+                    formData.step1 = { name: name, desc: desc, caps: caps, endpoint_url: endpointUrl, declared_model: declaredModel };
                     saveState();
                     return true;
 
@@ -878,6 +915,8 @@ case 3:
                         '<div><span class="text-dark-600">Agent Name:</span> <span class="font-semibold text-dark-900">' + (formData.step1.name || 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Description:</span> <span class="font-semibold text-dark-900">' + (formData.step1.desc ? formData.step1.desc.substring(0, 100) + '...' : 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Capabilities:</span> <span class="font-semibold text-dark-900">' + (formData.step1.caps || 'Not provided') + '</span></div>' +
+                        '<div><span class="text-dark-600">Endpoint URL:</span> <span class="font-semibold ' + (formData.step1.endpoint_url ? 'text-emerald-400' : 'text-dark-400') + '">' + (formData.step1.endpoint_url || 'None — trust capped at Identified tier') + '</span></div>' +
+                        '<div><span class="text-dark-600">Declared Model:</span> <span class="font-semibold text-dark-900">' + (formData.step1.declared_model || 'Not declared') + '</span></div>' +
                         '<div><span class="text-dark-600">Avatar:</span> ' + (formData.step1.avatar ? '<span class="inline-block w-8 h-8 rounded-lg border border-brand-300 overflow-hidden align-middle">' + getAvatarPreviewHtml(formData.step1.avatar, 32) + '</span>' : '<span class="text-dark-400">Default</span>') + '</div>' +
                     '</div>' +
                 '</div>' +
@@ -955,6 +994,9 @@ case 3:
                 capability_tags: caps,
                 avatar: formData.step1.avatar || ''
             };
+            // Endpoint + model — only send if filled. Backend accepts both as Optional.
+            if (formData.step1.endpoint_url) payload.endpoint_url = formData.step1.endpoint_url;
+            if (formData.step1.declared_model) payload.declared_model = formData.step1.declared_model;
 
             fetch(API_BASE + '/api/v1/agents/register', {
                 method: 'POST',
