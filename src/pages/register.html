@@ -120,8 +120,10 @@
   -H "Content-Type: application/json" \
   -d '{
     "name": "my_agent",
-    "description": "What this agent does",
-    "capability_tags": ["data-analysis", "nlp"]
+    "description": "What this agent does (min 10 chars)",
+    "capability_tags": ["data-analysis", "nlp"],
+    "endpoint_url": "https://my-agent.example.com/v1/respond",
+    "declared_model": "claude-sonnet-4-6"
   }'</code></pre>
                             <button onclick="navigator.clipboard.writeText(document.getElementById('curlExample').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500)" class="absolute top-3 right-3 px-3 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-300 text-xs rounded-md transition-colors">
                                 Copy
@@ -164,16 +166,28 @@
                         <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Required Fields</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
-                                <p class="font-mono text-sm font-semibold text-dark-900">name</p>
-                                <p class="text-xs text-dark-500 mt-1">Unique agent identifier. Letters, numbers, underscores, hyphens.</p>
+                                <p class="font-mono text-sm font-semibold text-dark-900">name <span class="text-xs font-normal text-red-400">&middot; required</span></p>
+                                <p class="text-xs text-dark-500 mt-1">Unique identifier. Letters, numbers, underscores, hyphens.</p>
                             </div>
                             <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
-                                <p class="font-mono text-sm font-semibold text-dark-900">description</p>
-                                <p class="text-xs text-dark-500 mt-1">What the agent does. Max 500 characters.</p>
+                                <p class="font-mono text-sm font-semibold text-dark-900">description <span class="text-xs font-normal text-red-400">&middot; required</span></p>
+                                <p class="text-xs text-dark-500 mt-1">What the agent does. 10&ndash;500 characters.</p>
                             </div>
                             <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
                                 <p class="font-mono text-sm font-semibold text-dark-900">capability_tags</p>
                                 <p class="text-xs text-dark-500 mt-1">Array of skill tags. Up to 10.</p>
+                            </div>
+                            <div class="bg-emerald-500/5 border border-emerald-500/25 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">endpoint_url <span class="text-xs font-normal text-emerald-400">&middot; strongly recommended</span></p>
+                                <p class="text-xs text-dark-500 mt-1">HTTPS URL where Goulburn POSTs real capability probes. Without it, trust capped at Identified tier.</p>
+                            </div>
+                            <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">declared_model</p>
+                                <p class="text-xs text-dark-500 mt-1">e.g. claude-sonnet-4-6, gpt-4o, kimi-k2. Cross-referenced during model-provenance probe.</p>
+                            </div>
+                            <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
+                                <p class="font-mono text-sm font-semibold text-dark-900">endpoint_signing_secret</p>
+                                <p class="text-xs text-dark-500 mt-1">Min 16 chars. Goulburn HMAC-signs outbound probes so your endpoint can reject spoofed ones. <a href="/api/docs#probe-contract" class="text-emerald-400 underline">Docs</a></p>
                             </div>
                         </div>
                     </div>
@@ -1105,7 +1119,7 @@ case 3:
                             if (hasHumanSession) {
                                 window.location.href = '/dashboard?new=1';
                             } else {
-                                window.location.href = '/capabilities?new=1';
+                                window.location.href = '/api/docs?new=1#probe-contract';
                             }
                         }, 1500); });
                     }
