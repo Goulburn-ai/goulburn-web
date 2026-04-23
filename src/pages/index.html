@@ -17,6 +17,40 @@
 <meta name="twitter:image" content="https://goulburn.ai/og-image.png">
     <!-- @include partials/head.html -->
 <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+<style>
+    @media (hover: hover) and (pointer: fine) {
+        .landing-tile {
+            transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.18s ease,
+                        box-shadow 0.18s ease,
+                        background-color 0.18s ease;
+            will-change: transform;
+        }
+        .landing-tile:hover {
+            transform: translateY(-3px);
+            border-color: rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 10px 30px -10px rgba(245, 158, 11, 0.25),
+                        0 4px 16px -4px rgba(0, 0, 0, 0.4);
+            background: #1a1d22 !important;
+        }
+        .landing-tier {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+        .landing-tier > div:first-child {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.2s ease;
+        }
+        .landing-tier:hover {
+            transform: translateY(-2px);
+        }
+        .landing-tier:hover > div:first-child {
+            transform: scale(1.06);
+            box-shadow: 0 0 0 8px rgba(245, 158, 11, 0.05),
+                        0 12px 28px -8px rgba(0, 0, 0, 0.5);
+        }
+    }
+</style>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
@@ -201,7 +235,7 @@
 
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
                 <!-- Layer 1: Identity -->
-                <div class="p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
+                <div class="landing-tile p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:rgba(99,102,241,0.15);">
                         <svg class="w-6 h-6" style="color:#818cf8;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -212,7 +246,7 @@
                 </div>
 
                 <!-- Layer 2: Capability -->
-                <div class="p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
+                <div class="landing-tile p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:rgba(245,158,11,0.15);">
                         <svg class="w-6 h-6" style="color:#f59e0b;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
@@ -223,7 +257,7 @@
                 </div>
 
                 <!-- Layer 3: Track Record -->
-                <div class="p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
+                <div class="landing-tile p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:rgba(34,197,94,0.15);">
                         <svg class="w-6 h-6" style="color:#22c55e;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -234,7 +268,7 @@
                 </div>
 
                 <!-- Layer 4: Social Proof -->
-                <div class="p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
+                <div class="landing-tile p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:rgba(59,130,246,0.15);">
                         <svg class="w-6 h-6" style="color:#3b82f6;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -245,7 +279,7 @@
                 </div>
 
                 <!-- Layer 5: Compliance -->
-                <div class="col-span-2 md:col-span-1 mx-auto w-full max-w-[280px] md:max-w-none p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
+                <div class="landing-tile col-span-2 md:col-span-1 mx-auto w-full max-w-[280px] md:max-w-none p-5 md:p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
                     <div class="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center" style="background:rgba(239,68,68,0.15);">
                         <svg class="w-6 h-6" style="color:#ef4444;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
@@ -279,7 +313,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
 
                     <!-- Registered -->
-                    <div class="text-center">
+                    <div class="landing-tier text-center">
                         <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(156,163,175,0.15);border:3px solid #9ca3af;">
                             <svg width="28" height="28" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4-4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
@@ -289,7 +323,7 @@
                     </div>
 
                     <!-- Identified -->
-                    <div class="text-center">
+                    <div class="landing-tier text-center">
                         <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(129,140,248,0.12);border:3px solid #818cf8;">
                             <svg width="28" height="28" fill="none" stroke="#818cf8" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 5v4l3 3"/></svg>
                         </div>
@@ -299,7 +333,7 @@
                     </div>
 
                     <!-- Verified -->
-                    <div class="text-center">
+                    <div class="landing-tier text-center">
                         <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(245,158,11,0.12);border:3px solid #f59e0b;">
                             <svg width="28" height="28" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
@@ -309,7 +343,7 @@
                     </div>
 
                     <!-- Established -->
-                    <div class="text-center">
+                    <div class="landing-tier text-center">
                         <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center relative z-10" style="background:rgba(74,222,128,0.12);border:3px solid #4ade80;">
                             <svg width="28" height="28" fill="none" stroke="#4ade80" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
