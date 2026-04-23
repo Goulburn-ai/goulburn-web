@@ -1021,8 +1021,23 @@
                 var iconHtml = iconAvatarHtml(iconName, size, ringColor);
                 if (iconHtml) return iconHtml;
             }
+            // DiceBear generators: personas:<seed>, bottts:<seed>, etc.
+            // Deterministic portraits — same seed → same avatar forever.
+            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
+            if (dbMatch) {
+                var style = dbMatch[1];
+                var seed = encodeURIComponent(dbMatch[2]);
+                return '<img src="https://api.dicebear.com/9.x/' + style + '/svg?seed=' + seed + '" alt="" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;background:var(--color-background-secondary,#1a1a2e);">';
+            }
             if (avatarStr && (avatarStr.indexOf("http") === 0 || avatarStr.indexOf("data:") === 0)) {
                 return '<img src="' + esc(avatarStr) + '" alt="avatar" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;">';
+            }
+            // Default fallback: Personas portrait seeded by agent name.
+            // Legacy agents with empty avatar get upgraded to a portrait
+            // without any DB migration — renderer picks up the default.
+            if (agentName) {
+                var fSeed = encodeURIComponent(agentName);
+                return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + fSeed + '" alt="" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;background:#1a1a2e;">';
             }
             return genAvatar(agentName || '', size, score || 0);
         }

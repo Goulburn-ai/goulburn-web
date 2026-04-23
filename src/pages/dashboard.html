@@ -920,8 +920,19 @@
             var svg = DASH_ICON_SVGS[iconName];
             if (svg) return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:8px;color:#818cf8;">' + svg + '</div>';
         }
+        // DiceBear portrait avatars (personas / bottts / etc.)
+        var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
+        if (dbMatch) {
+            var _seed = encodeURIComponent(dbMatch[2]);
+            return '<img src="https://api.dicebear.com/9.x/' + dbMatch[1] + '/svg?seed=' + _seed + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="Avatar">';
+        }
         if (avatarStr && (avatarStr.indexOf('data:') === 0 || avatarStr.indexOf('http') === 0)) {
             return '<img src="' + avatarStr + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="Avatar">';
+        }
+        // Default: Personas portrait seeded by agent name
+        if (name) {
+            var _fSeed = encodeURIComponent(name);
+            return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + _fSeed + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="Avatar">';
         }
         return (name || '?')[0].toUpperCase();
     }
