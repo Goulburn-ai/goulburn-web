@@ -843,6 +843,12 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(profile) {
+                // Pending-deletion banner: if profile.deleted_at is set
+                // within 48h, show a prominent amber banner with a live
+                // countdown + Reactivate button. Overrides other content.
+                if (profile && profile.deleted_at) {
+                    renderPendingDeletionBanner(profile);
+                }
                 // Update header with user's name
                 if (profile && (profile.email || profile.name)) {
                     var headerP = document.querySelector('.page-header p');
@@ -1433,6 +1439,87 @@
     document.getElementById('badgeModal').addEventListener('click', function(e) {
         if (e.target === this) this.classList.remove('active');
     });
-    </script>
+    
+    // ── Pending-deletion banner (48h reactivation window) ──
+    var _pendingDeletionInterval = null;
+    function renderPendingDeletionBanner(profile) {
+        var deletedAt = profile.deleted_at;  // unix seconds
+        if (!deletedAt) return;
+        var deadlineMs = (deletedAt + 48 * 3600) * 1000;
+        var host = document.querySelector('.page-header') || document.body;
+
+        // Insert banner once, at the top of the main content area
+        var banner = document.getElementById('pendingDeletionBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'pendingDeletionBanner';
+            banner.style.cssText = 'background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.4); border-radius: 12px; padding: 16px 20px; margin: 0 0 20px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 12px;';
+            banner.innerHTML =
+                '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" style="flex-shrink:0;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+                '<div style="flex: 1 1 auto; min-width: 0;">' +
+                    '<div style="color:#fbbf24; font-weight:600; font-size:15px;">Account scheduled for deletion</div>' +
+                    '<div id="pendingDeletionCountdown" style="color:#fbbf24; opacity:0.85; font-size:13px; margin-top:2px;"></div>' +
+                '</div>' +
+                '<button id="pendingDeletionReactivateBtn" onclick="reactivateAccount()" style="flex-shrink:0; background:#22C55E; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:600; cursor:pointer;">Reactivate Account</button>';
+            host.parentNode.insertBefore(banner, host);
+        }
+
+        function tick() {
+            var remainingMs = deadlineMs - Date.now();
+            var el = document.getElementById('pendingDeletionCountdown');
+            if (!el) return;
+            if (remainingMs <= 0) {
+                el.textContent = 'Window expired — account is being purged.';
+                var btn = document.getElementById('pendingDeletionReactivateBtn');
+                if (btn) { btn.disabled = true; btn.style.opacity = '0.5'; }
+                if (_pendingDeletionInterval) { clearInterval(_pendingDeletionInterval); _pendingDeletionInterval = null; }
+                return;
+            }
+            var hrs = Math.floor(remainingMs / 3600000);
+            var mins = Math.floor((remainingMs % 3600000) / 60000);
+            el.textContent = hrs + 'h ' + mins + 'm remaining. Sign-in stays active during this window. Your agents are suspended.';
+        }
+        tick();
+        if (_pendingDeletionInterval) clearInterval(_pendingDeletionInterval);
+        _pendingDeletionInterval = setInterval(tick, 60000);
+    }
+
+    function reactivateAccount() {
+        var session = goulburnAuth.getSession();
+        var btn = document.getElementById('pendingDeletionReactivateBtn');
+        if (btn) { btn.disabled = true; btn.textContent = 'Reactivating...'; }
+
+        // Step 1: clear deleted_at on the admin side
+        fetch(ADMIN_BASE + '/api/v1/admin/reactivate', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + session }
+        })
+        .then(function(r) {
+            return r.json().then(function(d) { return { ok: r.ok, data: d }; });
+        })
+        .then(function(result) {
+            if (!result.ok) {
+                if (btn) { btn.disabled = false; btn.textContent = 'Reactivate Account'; }
+                showToast(result.data.detail || 'Reactivation failed', 'error');
+                return;
+            }
+            // Step 2: cascade on goulburn-api — restore agents to ACTIVE
+            return fetch(API_BASE + '/api/v1/owners/me/reactivate-account', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + session }
+            })
+            .catch(function() {})
+            .then(function() {
+                showToast('Account reactivated. Agents restored.');
+                setTimeout(function() { window.location.reload(); }, 1000);
+            });
+        })
+        .catch(function() {
+            if (btn) { btn.disabled = false; btn.textContent = 'Reactivate Account'; }
+            showToast('Network error. Please try again.', 'error');
+        });
+    }
+
+</script>
 </body>
 </html>
