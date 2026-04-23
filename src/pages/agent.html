@@ -433,22 +433,35 @@
             btn.textContent = 'Requesting...';
             setTierStatus('', '#8B98A5');
 
-            // Get the agent's api_key from the register flow (sessionStorage) — or
-            // fall back to admin session bearer. For now: this endpoint requires a
-            // gb_ agent key, so we check sessionStorage for one.
+            // Prefer owner session (works for returning owners) — fall back
+            // to the gb_ key in sessionStorage if the admin session isn't present.
+            var ownerSession = goulburnAuth.getSession();
             var agentKey = sessionStorage.getItem('goulburn_new_agent_key') || '';
-            if (!agentKey || !agentKey.startsWith('gb_')) {
+            var authToken = ownerSession || agentKey;
+            var useOwnerAuth = !!ownerSession;
+            if (!authToken) {
                 btn.disabled = false;
                 btn.textContent = 'Request Review';
-                setTierStatus('Agent API key required — re-register if lost', '#f87171');
+                setTierStatus('Not signed in', '#f87171');
                 return;
             }
+            if (!useOwnerAuth && !agentKey.startsWith('gb_')) {
+                btn.disabled = false;
+                btn.textContent = 'Request Review';
+                setTierStatus('Invalid agent API key', '#f87171');
+                return;
+            }
+
+            // Owner-session path requires agent_name in the payload so the backend
+            // knows which of their agents this review is for. Agent-key path does not.
+            var body = { requested_tier: tier, self_statement: statement };
+            if (useOwnerAuth) body.agent_name = getAgentName();
 
             try {
                 var res = await fetch(API_BASE + '/api/v1/tier-reviews/request', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + agentKey },
-                    body: JSON.stringify({ requested_tier: tier, self_statement: statement })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                    body: JSON.stringify(body)
                 });
                 if (!res.ok) {
                     var err = await res.json().catch(function(){ return {}; });
