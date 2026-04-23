@@ -1205,11 +1205,23 @@
             var grid = document.getElementById('editIconGrid');
             if (!grid) return;
             var currentIcon = (_editAvatar && _editAvatar.indexOf('icon:') === 0) ? _editAvatar.substring(5) : '';
+            var currentPortrait = (_editAvatar && _editAvatar.indexOf('personas:') === 0) ? _editAvatar : '';
+            // agent.name comes from the outer page-state object created when
+            // the profile loads. Fallback to the URL slug just in case.
+            var agentName = (typeof agent !== 'undefined' && agent && agent.name) ||
+                            (location.pathname.split('/').pop() || 'agent');
             if (typeof window.GOULBURN_AVATAR_RENDER_PICKER === 'function') {
                 window.GOULBURN_AVATAR_RENDER_PICKER(grid, {
-                    selected: currentIcon,
-                    initialCategory: 'all',
-                    onSelect: function(iconName) { selectEditIcon(iconName); }
+                    selected: currentPortrait || currentIcon,
+                    agentName: agentName,
+                    initialCategory: currentPortrait ? 'portraits' : 'all',
+                    onSelect: function(val) {
+                        if (val && val.indexOf('personas:') === 0) {
+                            selectEditPortrait(val);
+                        } else {
+                            selectEditIcon(val);
+                        }
+                    }
                 });
                 return;
             }
@@ -1224,6 +1236,13 @@
                 btn.onclick = function() { selectEditIcon(name); };
                 grid.appendChild(btn);
             });
+        }
+
+        function selectEditPortrait(val) {
+            // val is already 'personas:<seed>' — store as-is
+            _editAvatar = val;
+            updateEditAvatarPreview();
+            renderEditIconGrid();
         }
 
         function selectEditIcon(name) {

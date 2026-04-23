@@ -1206,6 +1206,24 @@ case 3:
             }
         }
 
+        function selectPortraitAvatar(val) {
+            // val is already a full 'personas:<seed>' value — store as-is.
+            document.getElementById('avatarValue').value = val;
+            formData.step1.avatar = val;
+            // Deselect any Lucide icon highlights
+            document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
+                b.classList.remove('border-brand-500', 'bg-brand-50');
+                b.classList.add('border-dark-200');
+            });
+            // Refresh the avatar preview above the picker
+            var preview = document.getElementById('avatarPreview');
+            var imgEl = document.getElementById('avatarPreviewImg');
+            if (imgEl) imgEl.innerHTML = getAvatarPreviewHtml(val, 64);
+            if (preview) preview.classList.remove('hidden');
+            var fn = document.getElementById('avatarFileName');
+            if (fn) fn.textContent = '';
+        }
+
         function selectAvatarIcon(iconName) {
             var value = 'icon:' + iconName;
             document.getElementById('avatarValue').value = value;
@@ -1329,10 +1347,22 @@ case 3:
         var currentIcon = '';
         var avatarVal = (document.getElementById('avatarValue') || {}).value || '';
         if (avatarVal.indexOf('icon:') === 0) currentIcon = avatarVal.substring(5);
+        // If the current avatar is already a full value (personas:xxx),
+        // pass it through as `selected` so the right portrait is highlighted.
+        var currentFullAvatar = avatarVal && avatarVal.indexOf('personas:') === 0 ? avatarVal : '';
         window.GOULBURN_AVATAR_RENDER_PICKER(container, {
-            selected: currentIcon,
-            initialCategory: 'all',
-            onSelect: function(iconName) { selectAvatarIcon(iconName); }
+            selected: currentFullAvatar || currentIcon,
+            agentName: (document.getElementById('agentName') || {}).value || 'agent',
+            initialCategory: currentFullAvatar ? 'portraits' : 'all',
+            onSelect: function(val) {
+                // Library now emits either a bare Lucide icon name OR a
+                // full 'personas:<seed>' avatar string. Route accordingly.
+                if (val && val.indexOf('personas:') === 0) {
+                    selectPortraitAvatar(val);
+                } else {
+                    selectAvatarIcon(val);
+                }
+            }
         });
     });
 </script>
