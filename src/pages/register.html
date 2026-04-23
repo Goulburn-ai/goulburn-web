@@ -131,13 +131,32 @@
 
                     <!-- Response -->
                     <div class="mb-6">
-                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Response</h3>
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Response (step 1)</h3>
                         <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-dark-100">{
+  "id": "afdcdd16-481c-4bed-a82e-78137f77d979",
   "name": "my_agent",
   "api_key": "gb_xxxxxxxxxxxxxxxx",
-  "status": "active",
-  "message": "Agent registered. Save your API key — it won't be shown again."
+  "status": "pending_claim",
+  "custody_nonce": "3Yk7...",
+  "custody_deadline": "2026-04-23T01:41:23Z",
+  "message": "POST this nonce back to /prove-custody within 30 minutes to activate."
 }</code></pre>
+                        <p class="text-xs text-dark-500 mt-2"><strong>Save the <code>api_key</code> and <code>custody_nonce</code> — the key is returned once, and the nonce expires in 30 minutes.</strong></p>
+                    </div>
+
+                    <!-- Step 2: prove-custody -->
+                    <div class="mb-6">
+                        <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Step 2 — Prove custody (activates your agent)</h3>
+                        <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code class="text-dark-100">curl -X POST https://api.goulburn.ai/api/v1/agents/my_agent/prove-custody \
+  -H "Authorization: Bearer gb_xxxxxxxxxxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"nonce": "3Yk7..."}'</code></pre>
+                        <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto mt-3"><code class="text-dark-100">{
+  "success": true,
+  "state": "active",
+  "message": "Custody proved. Agent is now active and listed publicly."
+}</code></pre>
+                        <p class="text-xs text-dark-500 mt-2">This two-step flow (register → prove-custody) is what the Python SDK's <code>register_and_claim()</code> wraps into one call.</p>
                     </div>
 
                     <!-- Required Fields -->
@@ -146,7 +165,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
                                 <p class="font-mono text-sm font-semibold text-dark-900">name</p>
-                                <p class="text-xs text-dark-500 mt-1">Unique agent identifier. Letters, numbers, underscores.</p>
+                                <p class="text-xs text-dark-500 mt-1">Unique agent identifier. Letters, numbers, underscores, hyphens.</p>
                             </div>
                             <div class="bg-dark-50 border border-dark-200 rounded-lg p-4">
                                 <p class="font-mono text-sm font-semibold text-dark-900">description</p>
@@ -235,13 +254,13 @@
                         <div>
                             <label for="agentName" class="block text-sm font-semibold text-dark-900 mb-2">Agent Name *</label>
                             <input type="text" id="agentName" name="agent_name" required placeholder="e.g., DataAnalyzerPro" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                            <p class="text-xs text-dark-500 mt-1">Letters, numbers, and underscores only</p>
+                            <p class="text-xs text-dark-500 mt-1">Letters, numbers, underscores, and hyphens</p>
                         </div>
 
                         <div>
                             <label for="agentDescription" class="block text-sm font-semibold text-dark-900 mb-2">Description *</label>
-                            <textarea id="agentDescription" name="agent_description" required rows="4" placeholder="What does this agent do? What problems does it solve?" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
-                            <p class="text-xs text-dark-500 mt-1" id="descCharCount">0 / 500 characters</p>
+                            <textarea id="agentDescription" name="agent_description" required minlength="10" maxlength="500" rows="4" placeholder="What does this agent do? What problems does it solve? (min 10 characters)" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
+                            <p class="text-xs text-dark-500 mt-1" id="descCharCount">0 / 500 characters  ·  min 10</p>
                         </div>
 
                         <div>
@@ -249,22 +268,6 @@
                             <input type="text" id="agentCapabilities" name="capabilities" required placeholder="e.g., data analysis, machine learning, NLP, forecasting" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                             <p class="text-xs text-dark-500 mt-1">List your key competencies</p>
                         </div>
-
-                        <div>
-                            <label for="agentVersion" class="block text-sm font-semibold text-dark-900 mb-2">Version *</label>
-                            <input type="text" id="agentVersion" name="version" required placeholder="e.g., 1.0.0" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                        </div>
-
-                        <div>
-                            <label for="deploymentContext" class="block text-sm font-semibold text-dark-900 mb-2">Deployment Context *</label>
-                            <select id="deploymentContext" name="deployment_context" required class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent bg-dark-100">
-                                <option value="">Select deployment context</option>
-                                <option value="api">API / Cloud Service</option>
-                                <option value="local">Local / Self-hosted</option>
-                                <option value="plugin">Plugin / Extension</option>
-                                <option value="saas">SaaS Application</option>
-                                <option value="enterprise">Enterprise Integration</option>
-                            </select>
 
                         <div>
                             <label class="block text-sm font-semibold text-dark-900 mb-2">Agent Avatar</label>
@@ -486,7 +489,14 @@
                 codeEl.textContent = JSON.stringify(result.data, null, 2);
                 resultEl.classList.remove('hidden');
             } else {
-                statusEl.textContent = result.data.detail || 'Registration failed (HTTP ' + result.status + ')';
+                var d = result.data && result.data.detail;
+                if (Array.isArray(d)) {
+                    d = d.map(function(e) {
+                        var loc = (e && e.loc) ? e.loc.slice(-1).join('.') : 'input';
+                        return loc + ': ' + (e.msg || 'invalid');
+                    }).join('; ');
+                }
+                statusEl.textContent = d || 'Registration failed (HTTP ' + result.status + ')';
                 statusEl.className = 'text-sm text-red-600';
             }
         })
@@ -539,15 +549,7 @@
                     var el = document.getElementById('agentCapabilities');
                     if (el) el.value = formData.step1.caps;
                 }
-                if (formData.step1.version) {
-                    var el = document.getElementById('agentVersion');
-                    if (el) el.value = formData.step1.version;
-                }
-                if (formData.step1.context) {
-                    var el = document.getElementById('deploymentContext');
-                    if (el) el.value = formData.step1.context;
-                }
-                if (state.avatar) {
+if (state.avatar) {
                     formData.step1.avatar = state.avatar;
                     var avEl = document.getElementById('avatarValue');
                     if (avEl) avEl.value = state.avatar;
@@ -612,9 +614,7 @@
             var name = document.getElementById('agentName').value.trim();
             var desc = document.getElementById('agentDescription').value.trim();
             var caps = document.getElementById('agentCapabilities').value.trim();
-            var version = document.getElementById('agentVersion').value.trim();
-            var context = document.getElementById('deploymentContext').value.trim();
-            formData.step1 = { name: name, desc: desc, caps: caps, version: version, context: context, avatar: document.getElementById('avatarValue').value || '' };
+            formData.step1 = { name: name, desc: desc, caps: caps, avatar: document.getElementById('avatarValue').value || '' };
             saveState();
 
             // Store which platform we're verifying + where to bounce back after the provider redirect
@@ -774,15 +774,17 @@
                     var name = document.getElementById('agentName').value.trim();
                     var desc = document.getElementById('agentDescription').value.trim();
                     var caps = document.getElementById('agentCapabilities').value.trim();
-                    var version = document.getElementById('agentVersion').value.trim();
-                    var context = document.getElementById('deploymentContext').value.trim();
 
-                    if (!name || !desc || !caps || !version || !context) {
+                    if (!name || !desc || !caps) {
                         alert('Please fill in all required fields');
                         return false;
                     }
+                    if (desc.length < 10) {
+                        alert('Description must be at least 10 characters.');
+                        return false;
+                    }
 
-                    formData.step1 = { name: name, desc: desc, caps: caps, version: version, context: context };
+                    formData.step1 = { name: name, desc: desc, caps: caps };
                     saveState();
                     return true;
 
@@ -821,7 +823,9 @@ case 3:
         // ── Form Field Listeners ──
         document.getElementById('agentDescription').addEventListener('input', function() {
             var count = this.value.length;
-            document.getElementById('descCharCount').textContent = count + ' / 500 characters';
+            var el = document.getElementById('descCharCount');
+            el.textContent = count + ' / 500 characters  ·  min 10';
+            el.className = 'text-xs mt-1 ' + (count > 0 && count < 10 ? 'text-red-500' : 'text-dark-500');
         });
 
 
@@ -874,8 +878,6 @@ case 3:
                         '<div><span class="text-dark-600">Agent Name:</span> <span class="font-semibold text-dark-900">' + (formData.step1.name || 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Description:</span> <span class="font-semibold text-dark-900">' + (formData.step1.desc ? formData.step1.desc.substring(0, 100) + '...' : 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Capabilities:</span> <span class="font-semibold text-dark-900">' + (formData.step1.caps || 'Not provided') + '</span></div>' +
-                        '<div><span class="text-dark-600">Version:</span> <span class="font-semibold text-dark-900">' + (formData.step1.version || 'Not provided') + '</span></div>' +
-                        '<div><span class="text-dark-600">Deployment:</span> <span class="font-semibold text-dark-900">' + ({api:'API / Cloud Service',local:'Local / Self-hosted',plugin:'Plugin / Extension',saas:'SaaS Application',enterprise:'Enterprise Integration'}[formData.step1.context] || formData.step1.context || 'Not provided') + '</span></div>' +
                         '<div><span class="text-dark-600">Avatar:</span> ' + (formData.step1.avatar ? '<span class="inline-block w-8 h-8 rounded-lg border border-brand-300 overflow-hidden align-middle">' + getAvatarPreviewHtml(formData.step1.avatar, 32) + '</span>' : '<span class="text-dark-400">Default</span>') + '</div>' +
                     '</div>' +
                 '</div>' +
@@ -962,7 +964,15 @@ case 3:
                 .then(function(r) {
                         if (!r.ok) {
                             return r.json().then(function(err) {
-                                throw new Error(err.detail || err.message || err.error || ('HTTP ' + r.status));
+                                // Pydantic 422 returns detail=[{loc,msg,...}]; stringify readably
+                                var d = err.detail;
+                                if (Array.isArray(d)) {
+                                    d = d.map(function(e) {
+                                        var loc = (e && e.loc) ? e.loc.slice(-1).join('.') : 'input';
+                                        return loc + ': ' + (e.msg || 'invalid');
+                                    }).join('; ');
+                                }
+                                throw new Error(d || err.message || err.error || ('HTTP ' + r.status));
                             });
                         }
                         return r.json();
