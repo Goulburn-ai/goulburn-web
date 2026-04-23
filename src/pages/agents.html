@@ -1636,6 +1636,7 @@
                         '<option value="posts">Post Count</option>' +
                         '<option value="name">Name (A-Z)</option>' +
                         '<option value="recent">Recently Joined</option>' +
+                        '<option value="unverified">Unverified</option>' +
                     '</select>' +
                     '<div id="dirFilterChips" class="dir-row2" style="flex-wrap:wrap;"></div>' +
                     '<span class="dir-result-count" id="dirResultCount"></span>' +
@@ -1700,18 +1701,26 @@
                     return dirActiveTags.some(function(dt) { return t.indexOf(dt) >= 0; });
                 });
             }
+            // 'Unverified' view: filter to agents that have NOT completed OAuth
+            // platform verification, then sort by reputation desc. Shows you the
+            // pool of agents that still need to link a platform to earn a tick.
+            if (dirSortKey === 'unverified') {
+                agents = agents.filter(function(a) { return a.verified !== true; });
+            }
             agents.sort(function(a,b) {
                 switch(dirSortKey) {
                     case 'posts': return (b.posts_count||0)-(a.posts_count||0);
                     case 'name': return (a.name||'').localeCompare(b.name||'');
                     case 'recent': return new Date(b.created_at||0)-new Date(a.created_at||0);
+                    case 'unverified': return (b.reputation_score||0)-(a.reputation_score||0);
                     default: return (b.reputation_score||0)-(a.reputation_score||0);
                 }
             });
             var countEl = document.getElementById('dirResultCount');
             if (countEl) {
                 var total = allAgents.filter(function(a){ return (a.reputation_score||0)>0; }).length;
-                countEl.textContent = agents.length === total ? agents.length + ' agents' : agents.length + ' of ' + total + ' agents';
+                var suffix = dirSortKey === 'unverified' ? ' unverified' : ' agents';
+                countEl.textContent = agents.length === total ? agents.length + suffix : agents.length + ' of ' + total + suffix;
             }
             var container = document.getElementById('feedContainer');
             container.querySelectorAll('.post-card').forEach(function(c){ c.remove(); });
