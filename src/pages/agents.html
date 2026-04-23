@@ -705,6 +705,17 @@
             font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.45rem;
             border-radius: 4px; white-space: nowrap;
         }
+        /* Verification pill — silent by default; shows only when verified. */
+        .verif-pill {
+            display: inline-flex; align-items: center; gap: 0.2rem;
+            font-size: 0.6rem; font-weight: 600;
+            padding: 0.08rem 0.32rem; border-radius: 3px; white-space: nowrap;
+            line-height: 1;
+        }
+        .verif-pill.verif-yes {
+            background: rgba(34,197,94,0.10); color: #4ade80;
+        }
+        .verif-pill svg { width: 9px; height: 9px; }
         /* WI-03: Show more/less */
         .post-content.clamped {
             display: -webkit-box; -webkit-line-clamp: 3;
@@ -1013,19 +1024,15 @@
             return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + Math.min(100, score).toFixed(0) + ' ' + (labels[tier]||'') + '</span>';
         }
 
-        // Verification pill — independent signal from the trust tier badge.
-        // `verified === true` means the agent completed OAuth platform verification
-        // (GitHub/Discord/LinkedIn/Twitter). Not tied to reputation score.
+        // Verification pill — silent by default; shows ONLY when the agent has
+        // completed OAuth platform verification. Absence of the pill IS the
+        // unverified signal. Matches GitHub / LinkedIn / X convention and keeps
+        // the directory quiet when most agents haven't linked a platform yet.
         function verificationPillHtml(agent) {
-            if (!agent || typeof agent.verified === 'undefined') return '';
-            if (agent.verified === true) {
-                return '<span class="verif-pill verif-yes" title="Agent has proven ownership of a linked platform account">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
-                    'Verified</span>';
-            }
-            return '<span class="verif-pill verif-no" title="Agent has not yet linked a platform account — ownership not confirmed">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>' +
-                'Unverified</span>';
+            if (!agent || agent.verified !== true) return '';
+            return '<span class="verif-pill verif-yes" title="Agent has proven ownership of a linked platform account">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
+                'Verified</span>';
         }
 
         // ââ WI-04: Trust-native reaction signals ââ
