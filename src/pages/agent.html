@@ -1060,6 +1060,9 @@
                         document.getElementById('deleteAgentBtn').style.display = 'inline-flex';
                         document.getElementById('shareTrustBtn').style.display = 'inline-flex';
                         renderSuspendState((list[i].status || '').toLowerCase() === 'suspended');
+                        // If this agent is in the 48h reactivation window, flip the
+                        // Delete button to Reactivate (with remaining-time countdown).
+                        renderDeleteOrReactivateState(list[i]);
                         // Auto-open if ?edit=true
                         if (new URLSearchParams(window.location.search).get('edit') === 'true') {
                             toggleEditPanel();
@@ -1126,6 +1129,84 @@
                 showToastLite('Network error', true);
             }
         }
+
+        // ── Reactivation window rendering ───────────────────────────
+        // When the agent row has a non-null deleted_at within the last 48h,
+        // the red Delete button becomes a green Reactivate button. After 48h
+        // the agent is hidden from /mine entirely (backend filter), so this
+        // path only fires for fresh tombstones.
+        var _reactivateCountdownTimer = null;
+        function renderDeleteOrReactivateState(agent) {
+            var btn = document.getElementById('deleteAgentBtn');
+            var label = document.getElementById('deleteLabel');
+            var icon = document.getElementById('deleteIcon');
+            if (!btn || !label || !agent) return;
+
+            var deletedAt = agent.deleted_at ? new Date(agent.deleted_at) : null;
+            var hoursLeft = null;
+            if (deletedAt) {
+                var elapsedMs = Date.now() - deletedAt.getTime();
+                hoursLeft = 48 - (elapsedMs / 3600000);
+            }
+
+            if (deletedAt && hoursLeft > 0) {
+                // Switch to Reactivate mode
+                btn.onclick = function() { confirmReactivate(); };
+                btn.title = 'Reactivate this agent (within the 48h window)';
+                btn.classList.remove('text-red-400', 'border-red-500/30', 'hover:bg-red-500/10');
+                btn.classList.add('text-green-400', 'border-green-500/30', 'hover:bg-green-500/10');
+                if (icon) icon.innerHTML = '<path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>';
+                var updateCountdown = function() {
+                    var remainingMs = deletedAt.getTime() + 48 * 3600000 - Date.now();
+                    if (remainingMs <= 0) {
+                        label.textContent = 'Window expired';
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        if (_reactivateCountdownTimer) { clearInterval(_reactivateCountdownTimer); _reactivateCountdownTimer = null; }
+                        return;
+                    }
+                    var h = Math.floor(remainingMs / 3600000);
+                    var m = Math.floor((remainingMs % 3600000) / 60000);
+                    label.textContent = 'Reactivate (' + h + 'h ' + m + 'm left)';
+                };
+                updateCountdown();
+                if (_reactivateCountdownTimer) clearInterval(_reactivateCountdownTimer);
+                _reactivateCountdownTimer = setInterval(updateCountdown, 60000);
+            }
+            // Otherwise the existing Delete behaviour is left in place.
+        }
+
+        function confirmReactivate() {
+            if (!confirm('Reactivate this agent? A new API key will be issued; the old one is gone forever.')) return;
+            reactivateAgent();
+        }
+
+        async function reactivateAgent() {
+            if (!_ownedAgent) return;
+            var session = goulburnAuth.getSession();
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/reactivate', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + session }
+                });
+                var body = await res.json().catch(function(){ return {}; });
+                if (!res.ok) {
+                    showToastLite(body.detail || body.message || 'Reactivate failed', true);
+                    return;
+                }
+                // Successful — redirect to the restored agent's profile.
+                // api_key must be shown once; a toast is inadequate, so we
+                // hand off to a simple modal-style alert with copy prompt.
+                var k = body.api_key || '';
+                var msg = 'Agent reactivated as \'' + (body.name || '') + '\'. Save the new API key now — it will not be shown again:\n\n' + k;
+                alert(msg);
+                window.location.href = '/agents/' + encodeURIComponent(body.name || '');
+            } catch (e) {
+                showToastLite('Network error', true);
+            }
+        }
+
+        // ── End reactivation helpers ─────────────────────────────────
 
         function confirmDeleteAgent() {
             var btn = document.getElementById('deleteAgentBtn');
