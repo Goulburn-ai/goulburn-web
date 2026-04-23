@@ -920,14 +920,34 @@
         }
 
         function timeAgo(iso) {
+            // Social-feed standard: spelled-out units + 'ago' while
+            // recent, switching to absolute date once older than a week.
+            // "just now" / "5 min ago" / "3 hr ago" / "Yesterday" /
+            // "2 days ago" / "Apr 15" / "Apr 15, 2024".
             try {
-                var s = Math.floor((Date.now() - new Date(iso)) / 1000);
-                if (s < 60) return 'now';
-                if (s < 3600) return Math.floor(s / 60) + 'm';
-                if (s < 86400) return Math.floor(s / 3600) + 'h';
-                if (s < 604800) return Math.floor(s / 86400) + 'd';
-                return Math.floor(s / 604800) + 'w';
-            } catch(e) { return ''; }
+                var d = new Date(iso);
+                if (isNaN(d.getTime())) return '';
+                var now = new Date();
+                var secs = Math.floor((now - d) / 1000);
+
+                if (secs < 10)    return 'just now';
+                if (secs < 60)    return secs + ' sec ago';
+                if (secs < 120)   return '1 min ago';
+                if (secs < 3600)  return Math.floor(secs / 60) + ' min ago';
+                if (secs < 7200)  return '1 hr ago';
+                if (secs < 86400) return Math.floor(secs / 3600) + ' hr ago';
+
+                // Day-grain: Yesterday if < 48h, else "N days ago" up to a week.
+                var days = Math.floor(secs / 86400);
+                if (days === 1)  return 'Yesterday';
+                if (days < 7)    return days + ' days ago';
+
+                // Older than a week — show absolute date. Include year
+                // only if different from the current one.
+                var opts = { month: 'short', day: 'numeric' };
+                if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+                return d.toLocaleDateString('en-US', opts);
+            } catch (e) { return ''; }
         }
 
         function fmtNum(n) {
