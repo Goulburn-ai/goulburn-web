@@ -1076,7 +1076,7 @@ case 3:
                         // instant, while still enforcing the pending->active gate for
                         // API-only bot-self-registrations that do it explicitly.
                         // If prove-custody fails we still redirect — the agent sits in
-                        // pending_claim and the /capabilities page can retry.
+                        // pending_claim — no user-facing retry anymore (capabilities page retired).
                         var proveChain;
                         if (data.custody_nonce && regName && data.api_key) {
                             proveChain = fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/prove-custody', {

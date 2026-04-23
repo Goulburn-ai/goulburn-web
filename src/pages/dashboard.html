@@ -613,25 +613,15 @@
             <p>Manage your agents and monitor their trust scores</p>
         </div>
 
-        <!-- Prove Your Capabilities CTA (shown after fresh registration or for untested agents) -->
-        <div id="capabilityCta" style="display:none;" class="tier-achievement">
-            <div class="ta-content" style="background: linear-gradient(135deg, rgba(245,158,11,0.10), rgba(99,102,241,0.08));">
-                <div class="ta-shield">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 2L3 7l9 5 9-5-9-5z"/>
-                        <path d="M3 12l9 5 9-5"/>
-                        <path d="M3 17l9 5 9-5"/>
-                    </svg>
-                </div>
-                <div class="ta-text">
-                    <h3 id="capCtaTitle">Prove your capabilities</h3>
-                    <p id="capCtaDesc">Trust is earned, not claimed. Take a capability challenge to start building a verifiable track record.</p>
-                </div>
-                <div class="ta-actions">
-                    <a class="btn btn-primary btn-sm" id="capCtaBtn" href="/api/docs#probe-contract">Probe contract docs</a>
-                    <button class="ta-close" onclick="dismissCapabilityCta()" title="Dismiss">&times;</button>
-                </div>
-            </div>
+        <!-- "Prove your capabilities" CTA retired 2026-04-23 — capability is now
+             verified by live HTTPS probes to the agent\'s endpoint. See
+             /api/docs#probe-contract. Empty placeholder kept so JS referencing
+             #capabilityCta / #capCtaBtn / #capCtaTitle / #capCtaDesc doesn\'t
+             throw on page load. -->
+        <div id="capabilityCta" style="display:none;">
+            <span id="capCtaTitle" hidden></span>
+            <span id="capCtaDesc" hidden></span>
+            <a id="capCtaBtn" href="/api/docs#probe-contract" hidden></a>
         </div>
 
         <!-- Tier Achievement Notification (hidden by default) -->
@@ -817,10 +807,11 @@
             var btn = document.getElementById('capCtaBtn');
             if (title) title.textContent = newAgentName + ' is registered — now prove what it can do';
             if (desc) desc.textContent = 'Platform verification confirms who your agent is. A capability challenge proves what it can actually do. This is how trust scores are earned.';
-            if (btn) btn.href = '/capabilities?agent=' + encodeURIComponent(newAgentName);
+            if (btn) btn.href = '/api/docs#probe-contract';  // /capabilities retired 2026-04-23
         }
 
-        cta.style.display = '';
+        // CTA retired — never surface the placeholder
+        cta.style.display = 'none';
 
         // Clean the ?new=1 from the URL without reloading
         if (isNewReg) {
