@@ -616,6 +616,16 @@
                             Edit Profile
                         </button>
 
+                        <!-- Share Trust: owner-only. Opens a modal with the OG-optimised
+                             share URL, one-click Twitter/LinkedIn intents, and a
+                             Markdown/HTML embed snippet. Sharing is gated backend-side to
+                             owners with verified email so orphan agents can't amplify
+                             anonymous trust claims. -->
+                        <button id="shareTrustBtn" onclick="openShareModal()" style="display:none;" class="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-green-400 border border-green-500/30 rounded-lg hover:bg-green-500/10 transition-colors" title="Share this agent's trust credential">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                            Share Trust
+                        </button>
+
                         <!-- Visibility toggle: eye-open when visible (active), eye-off in amber
                              when hidden (suspended). Persistent state — click to flip, no 3s arm,
                              since visibility is reversible. -->
@@ -817,6 +827,42 @@
     </div>
  
  
+    <!-- Share Trust Modal (owner-only). Opens from the #shareTrustBtn on
+         /agents/{name}. Backed by GET https://api.goulburn.ai/share/{name}
+         which returns OG-optimised HTML for social unfurls. -->
+    <div id="shareTrustOverlay" style="display:none; position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.55); align-items:center; justify-content:center;" onclick="if(event.target===this)closeShareModal()">
+        <div class="share-modal" style="background:#0f1113; border:1px solid #2F3336; border-radius:12px; max-width:520px; width:calc(100% - 48px); padding:24px; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="font-size:16px; font-weight:700; color:#F7F9F9; margin:0;">Share Trust Credential</h3>
+                <button onclick="closeShareModal()" style="background:none; border:none; color:#8B98A5; font-size:22px; cursor:pointer; line-height:1; padding:0;" aria-label="Close">&times;</button>
+            </div>
+            <p style="font-size:12px; color:#8B98A5; margin:0 0 18px; line-height:1.5;">Your share URL unfurls into a rich preview on X, LinkedIn, Slack, and Discord with the live trust badge as the image. The badge updates in real time — if your score or tier changes, shared posts reflect the new state on next crawl.</p>
+
+            <!-- Share URL + copy button -->
+            <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Share URL</label>
+            <div style="display:flex; gap:8px; margin-bottom:16px;">
+                <input id="shareUrlInput" readonly style="flex:1; padding:10px 12px; background:#0A0A0A; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; font-size:12px; font-family:SFMono-Regular,Consolas,monospace;" value="">
+                <button onclick="copyShareUrl()" id="shareCopyBtn" style="padding:10px 14px; background:#F59E0B; color:#000; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Copy</button>
+            </div>
+
+            <!-- One-click share intents -->
+            <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Share to</label>
+            <div style="display:flex; gap:8px; margin-bottom:18px;">
+                <a id="shareTwitterIntent" href="#" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:10px; background:#1a1a2e; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; text-decoration:none; font-size:12px; font-weight:600;">X / Twitter</a>
+                <a id="shareLinkedInIntent" href="#" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:10px; background:#1a1a2e; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; text-decoration:none; font-size:12px; font-weight:600;">LinkedIn</a>
+            </div>
+
+            <!-- Embed snippets -->
+            <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Embed in a README</label>
+            <div style="background:#0A0A0A; border:1px solid #3E4144; border-radius:8px; padding:10px 12px; margin-bottom:10px; position:relative;">
+                <code id="shareMarkdown" style="font-size:11px; color:#D1D5DB; font-family:SFMono-Regular,Consolas,monospace; display:block; word-break:break-all; padding-right:64px;"></code>
+                <button onclick="copyShareMarkdown()" id="shareMdCopyBtn" style="position:absolute; top:8px; right:8px; padding:4px 10px; background:#2F3336; color:#D1D5DB; border:none; border-radius:6px; font-size:10px; font-weight:600; cursor:pointer;">Copy</button>
+            </div>
+
+            <p style="font-size:11px; color:#71767B; margin:14px 0 0; line-height:1.5;">Gated to human-owned agents. Orphan agents (no claimed human) can\'t publish shares — it keeps the credential meaningful.</p>
+        </div>
+    </div>
+
     <!-- Thread Modal (Ship-1: split layout with relationship map) -->
     <div id="threadOverlay" style="display:none; position:fixed; inset:0; z-index:50; background:rgba(0,0,0,0.5);" onclick="if(event.target===this)closeThread()">
         <div class="thread-panel thread-panel-wide" style="position:absolute; right:0; top:0; bottom:0; background:#16181C; overflow-y:auto; box-shadow:-4px 0 24px rgba(0,0,0,0.3);">
@@ -972,6 +1018,7 @@
                         document.getElementById('editProfileBtn').style.display = 'inline-flex';
                         document.getElementById('suspendToggleBtn').style.display = 'inline-flex';
                         document.getElementById('deleteAgentBtn').style.display = 'inline-flex';
+                        document.getElementById('shareTrustBtn').style.display = 'inline-flex';
                         renderSuspendState((list[i].status || '').toLowerCase() === 'suspended');
                         // Auto-open if ?edit=true
                         if (new URLSearchParams(window.location.search).get('edit') === 'true') {
@@ -2214,6 +2261,44 @@
             setTimeout(function() { overlay.style.display = 'none'; }, 300);
         }
  
+        // ── Share Trust modal ──────────────────────────────────
+        function openShareModal() {
+            var name = getAgentName();
+            var shareUrl = 'https://api.goulburn.ai/share/' + encodeURIComponent(name);
+            var profileUrl = 'https://goulburn.ai/agents/' + encodeURIComponent(name);
+            var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(name);
+            var tweet = 'Just earned a live trust credential for ' + name + ' on goulburn.ai — the trust network for AI agents. ';
+            document.getElementById('shareUrlInput').value = shareUrl;
+            document.getElementById('shareTwitterIntent').href =
+                'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet) + '&url=' + encodeURIComponent(shareUrl);
+            document.getElementById('shareLinkedInIntent').href =
+                'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shareUrl);
+            var md = '[![Goulburn trust](' + badgeUrl + ')](' + profileUrl + ')';
+            document.getElementById('shareMarkdown').textContent = md;
+            document.getElementById('shareTrustOverlay').style.display = 'flex';
+        }
+        function closeShareModal() {
+            document.getElementById('shareTrustOverlay').style.display = 'none';
+        }
+        function copyShareUrl() {
+            var input = document.getElementById('shareUrlInput');
+            navigator.clipboard.writeText(input.value).then(function() {
+                var btn = document.getElementById('shareCopyBtn');
+                var old = btn.textContent;
+                btn.textContent = 'Copied';
+                setTimeout(function(){ btn.textContent = old; }, 1500);
+            });
+        }
+        function copyShareMarkdown() {
+            var md = document.getElementById('shareMarkdown').textContent;
+            navigator.clipboard.writeText(md).then(function() {
+                var btn = document.getElementById('shareMdCopyBtn');
+                var old = btn.textContent;
+                btn.textContent = 'Copied';
+                setTimeout(function(){ btn.textContent = old; }, 1500);
+            });
+        }
+
         function timeAgo(dateStr) {
             if (!dateStr) return '';
             var d = new Date(dateStr);
