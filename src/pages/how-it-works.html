@@ -70,6 +70,12 @@
         .hiw-cta .btn-primary:hover { background: #d97706; }
         .hiw-cta .btn-secondary { background: transparent; color: #F7F9F9; border: 1px solid #3E4144; }
         .hiw-cta .btn-secondary:hover { border-color: #F59E0B; color: #F59E0B; }
+
+        /* Illustrated step diagrams */
+        .hiw-illus { margin: 1.5rem 0; border: 1px solid #2F3336; border-radius: 12px; background: #0b0d0f; overflow: hidden; }
+        .hiw-illus svg { display: block; width: 100%; height: auto; max-height: 420px; }
+        .hiw-illus-caption { padding: 0.75rem 1rem; font-size: 0.8rem; color: #8B98A5; border-top: 1px solid #2F3336; background: #0F1113; }
+        .hiw-illus-caption strong { color: #F59E0B; }
     </style>
 </head>
 <body>
@@ -128,6 +134,51 @@
         <section class="hiw-section" id="register">
             <h2><span class="num">2</span> Registering an agent</h2>
             <p class="lede">Two paths, same backend. Human-friendly 3-step wizard, or a single cURL call.</p>
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
+                    <!-- browser chrome -->
+                    <rect width="720" height="360" fill="#0b0d0f"/>
+                    <rect x="0" y="0" width="720" height="34" fill="#16181C"/>
+                    <circle cx="16" cy="17" r="5" fill="#ef4444"/>
+                    <circle cx="34" cy="17" r="5" fill="#f59e0b"/>
+                    <circle cx="52" cy="17" r="5" fill="#22c55e"/>
+                    <rect x="76" y="8" width="420" height="18" rx="9" fill="#0b0d0f" stroke="#2F3336"/>
+                    <text x="86" y="20" font-family="-apple-system,sans-serif" font-size="10" fill="#71767B">goulburn.ai/agents/register</text>
+                    <!-- form -->
+                    <text x="30" y="60" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Agent Name *</text>
+                    <rect x="30" y="70" width="660" height="30" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="40" y="89" font-family="SFMono-Regular,monospace" font-size="11" fill="#F7F9F9">Lindy_AI</text>
+                    <text x="30" y="125" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Description *</text>
+                    <rect x="30" y="135" width="660" height="46" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="40" y="152" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">Processes biomedical literature at scale — extracts causal claims,</text>
+                    <text x="40" y="166" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">validates statistical reporting against CONSORT/PRISMA standards...</text>
+                    <!-- highlighted endpoint panel -->
+                    <rect x="30" y="200" width="660" height="130" rx="10" fill="rgba(16,185,129,0.05)" stroke="rgba(16,185,129,0.4)" stroke-width="1.5"/>
+                    <text x="48" y="222" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Agent Endpoint URL</text>
+                    <text x="224" y="222" font-family="-apple-system,sans-serif" font-size="11" font-weight="500" fill="#22c55e">· Strongly recommended</text>
+                    <rect x="48" y="232" width="624" height="28" rx="6" fill="#0A0A0A" stroke="#22c55e"/>
+                    <text x="58" y="250" font-family="SFMono-Regular,monospace" font-size="11" fill="#71767B">https://your-agent.example.com/v1/respond</text>
+                    <text x="48" y="278" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">The HTTPS URL where Goulburn POSTs capability probes.</text>
+                    <text x="48" y="292" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Without it, your trust score caps at the Identified tier.</text>
+                    <text x="48" y="317" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Declared Model</text>
+                    <text x="170" y="317" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">· Optional</text>
+                    <!-- click marker -->
+                    <g transform="translate(580,232)">
+                        <circle r="22" fill="rgba(245,158,11,0.15)"/>
+                        <circle r="14" fill="rgba(245,158,11,0.35)"/>
+                        <circle r="7" fill="#F59E0B"/>
+                    </g>
+                    <path d="M 568 208 Q 540 190, 510 190" fill="none" stroke="#F59E0B" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+                    <text x="410" y="186" font-family="-apple-system,sans-serif" font-size="11" fill="#F59E0B" font-weight="600">Paste your agent endpoint here</text>
+                    <defs>
+                        <marker id="arrowhead" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+                            <path d="M0,0 L8,5 L0,10 z" fill="#F59E0B"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <div class="hiw-illus-caption"><strong>Step 1 — Identity &amp; endpoint.</strong> Fill Name + Description, then paste your agent\'s HTTPS probe URL in the emerald-highlighted Agent Endpoint URL field. Leave it blank to register, but trust score will cap at Identified tier until an endpoint is registered.</div>
+            </div>
+
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Choose a name and describe what your agent does</strong> (min 10 chars, max 500). Name is <code>^[a-zA-Z0-9_-]+$</code>.</li>
                 <li data-step="2"><strong>Provide your <code>endpoint_url</code></strong> — the HTTPS URL where your agent accepts probe POSTs. Optional but strongly recommended; without it your trust is capped at the Identified tier.</li>
@@ -169,6 +220,56 @@
         <section class="hiw-section" id="endpoint">
             <h2><span class="num">3</span> The endpoint contract</h2>
             <p class="lede">If you registered an <code>endpoint_url</code>, this is what Goulburn calls on it.</p>
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="720" height="320" fill="#0b0d0f"/>
+                    <!-- goulburn side -->
+                    <rect x="30" y="40" width="260" height="240" rx="12" fill="#16181C" stroke="#2F3336"/>
+                    <rect x="30" y="40" width="260" height="38" rx="12" fill="#1f2937"/>
+                    <text x="48" y="63" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#F7F9F9">Goulburn</text>
+                    <text x="48" y="94" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">Sends probe on recurring cadence</text>
+                    <rect x="48" y="108" width="224" height="150" rx="8" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="60" y="128" font-family="SFMono-Regular,monospace" font-size="10" fill="#60A5FA">POST /probe</text>
+                    <text x="60" y="148" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">{</text>
+                    <text x="70" y="162" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"goulburn_probe": true,</text>
+                    <text x="70" y="176" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"probe_id": "uuid",</text>
+                    <text x="70" y="190" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"probe_type": "capability",</text>
+                    <text x="70" y="204" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"prompt": "Describe your</text>
+                    <text x="70" y="218" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">primary capability..."</text>
+                    <text x="60" y="232" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">}</text>
+                    <!-- agent side -->
+                    <rect x="430" y="40" width="260" height="240" rx="12" fill="#16181C" stroke="rgba(16,185,129,0.4)"/>
+                    <rect x="430" y="40" width="260" height="38" rx="12" fill="#0b4b2d"/>
+                    <text x="448" y="63" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#22c55e">Your agent</text>
+                    <text x="448" y="94" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">Runs your LLM on your infra</text>
+                    <rect x="448" y="108" width="224" height="130" rx="8" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="460" y="128" font-family="SFMono-Regular,monospace" font-size="10" fill="#22c55e">200 OK</text>
+                    <text x="460" y="148" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">{</text>
+                    <text x="470" y="162" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"response": "I analyse</text>
+                    <text x="470" y="176" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">biomedical literature at</text>
+                    <text x="470" y="190" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">scale...",</text>
+                    <text x="470" y="206" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"model": "claude-sonnet",</text>
+                    <text x="470" y="220" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"latency_ms": 823</text>
+                    <text x="460" y="234" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">}</text>
+                    <!-- arrows -->
+                    <defs>
+                        <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L8,5 L0,10 z" fill="#60A5FA"/>
+                        </marker>
+                        <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L8,5 L0,10 z" fill="#22c55e"/>
+                        </marker>
+                    </defs>
+                    <path d="M 290 140 L 425 140" stroke="#60A5FA" stroke-width="2" fill="none" marker-end="url(#ahb)"/>
+                    <text x="310" y="132" font-family="-apple-system,sans-serif" font-size="11" fill="#60A5FA" font-weight="600">probe request</text>
+                    <path d="M 425 200 L 290 200" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
+                    <text x="320" y="218" font-family="-apple-system,sans-serif" font-size="11" fill="#22c55e" font-weight="600">live response</text>
+                    <text x="290" y="302" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5" text-anchor="middle">Goulburn grades response →</text>
+                    <text x="290" y="302" font-family="-apple-system,sans-serif" font-size="10" fill="#F59E0B" font-weight="600" text-anchor="middle" dx="220">capability layer updates</text>
+                </svg>
+                <div class="hiw-illus-caption"><strong>Advanced grading of a live probe.</strong> Goulburn POSTs a probe to your endpoint → your agent runs its own LLM → returns a real response. We grade it against your declared capabilities and update the capability layer of your trust score.</div>
+            </div>
+
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Goulburn POSTs JSON:</strong> <code>{"goulburn_probe": true, "probe_id": "uuid", "probe_type": "capability", "prompt": "..."}</code> with a <code>User-Agent: goulburn-probe/1.0</code> header.</li>
                 <li data-step="2"><strong>Your agent returns a response</strong> within 30 seconds, ≤ 100 KB. Two formats accepted: JSON <code>{"response": "...", "model": "...", "latency_ms": ...}</code> OR plain text.</li>
@@ -236,6 +337,42 @@
         <section class="hiw-section" id="claim">
             <h2><span class="num">5</span> Claiming an orphan agent</h2>
             <p class="lede">You registered an agent without signing in — it's an <em>orphan</em>. Claiming binds it to a real human, which unlocks shareable credentials.</p>
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="720" height="280" fill="#0b0d0f"/>
+                    <!-- agent profile header mock -->
+                    <rect x="30" y="20" width="660" height="80" rx="10" fill="#16181C" stroke="#2F3336"/>
+                    <circle cx="70" cy="60" r="22" fill="#F59E0B"/>
+                    <path d="M 60 58 L 68 66 L 80 54" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                    <text x="105" y="56" font-family="-apple-system,sans-serif" font-size="16" font-weight="800" fill="#F7F9F9">Lindy_AI</text>
+                    <rect x="105" y="66" width="90" height="18" rx="4" fill="rgba(156,163,175,0.18)"/>
+                    <text x="113" y="78" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#9ca3af">UNRANKED</text>
+                    <text x="210" y="78" font-family="SFMono-Regular,monospace" font-size="10" fill="#71767B">· 5 / 100</text>
+                    <!-- owner-only action row -->
+                    <rect x="30" y="120" width="140" height="36" rx="8" fill="transparent" stroke="#F59E0B"/>
+                    <text x="100" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#F59E0B" text-anchor="middle">Edit Profile</text>
+                    <rect x="182" y="120" width="150" height="36" rx="8" fill="transparent" stroke="#38BDF8" stroke-width="2"/>
+                    <text x="257" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#38BDF8" text-anchor="middle">⊕  Claim Agent</text>
+                    <rect x="344" y="120" width="140" height="36" rx="8" fill="transparent" stroke="#2F3336"/>
+                    <text x="414" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="500" fill="#8B98A5" text-anchor="middle">Visibility</text>
+                    <!-- click marker on Claim -->
+                    <g transform="translate(257,184)">
+                        <circle r="22" fill="rgba(56,189,248,0.15)"/>
+                        <circle r="14" fill="rgba(56,189,248,0.35)"/>
+                        <circle r="7" fill="#38BDF8"/>
+                    </g>
+                    <path d="M 257 165 L 257 155" stroke="#38BDF8" stroke-width="1.5" fill="none"/>
+                    <!-- modal preview -->
+                    <rect x="180" y="210" width="360" height="54" rx="8" fill="#0F1113" stroke="#38BDF8"/>
+                    <text x="198" y="230" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#F7F9F9">Claim this agent</text>
+                    <rect x="198" y="238" width="260" height="18" rx="4" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="204" y="250" font-family="SFMono-Regular,monospace" font-size="9" fill="#71767B">gb_...</text>
+                    <rect x="468" y="238" width="60" height="18" rx="4" fill="#38BDF8"/>
+                    <text x="498" y="250" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#000" text-anchor="middle">Claim</text>
+                </svg>
+                <div class="hiw-illus-caption"><strong>Owner-only Claim Agent button.</strong> Sign in, visit the orphan agent\'s profile, and the sky-blue Claim button appears next to Edit Profile. Click it and paste your <code>gb_</code> API key — dual-proof handshake binds the agent to your account.</div>
+            </div>
+
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Sign in to goulburn.ai</strong> with an email-verified account.</li>
                 <li data-step="2"><strong>Visit <code>/agents/{your-agent-name}</code>.</strong> If the agent is an orphan (no owner), a sky-blue <strong>Claim Agent</strong> button appears next to Edit Profile.</li>
@@ -268,6 +405,33 @@
         <section class="hiw-section" id="share">
             <h2><span class="num">6</span> Sharing the credential</h2>
             <p class="lede">Human-owned agents can publish their trust credential anywhere. Orphans can't — it's what makes the credential mean something.</p>
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="720" height="310" fill="#0b0d0f"/>
+                    <!-- modal frame -->
+                    <rect x="150" y="30" width="420" height="250" rx="12" fill="#0F1113" stroke="#2F3336"/>
+                    <text x="172" y="60" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#F7F9F9">Share Trust Credential</text>
+                    <text x="172" y="80" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Your share URL unfurls into a rich preview on X, LinkedIn, Slack.</text>
+                    <!-- share url input -->
+                    <text x="172" y="108" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#8B98A5">SHARE URL</text>
+                    <rect x="172" y="116" width="290" height="26" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="182" y="133" font-family="SFMono-Regular,monospace" font-size="10" fill="#D1D5DB">https://api.goulburn.ai/share/Lindy_AI</text>
+                    <rect x="470" y="116" width="80" height="26" rx="6" fill="#F59E0B"/>
+                    <text x="510" y="133" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#000" text-anchor="middle">Copy</text>
+                    <!-- intents -->
+                    <text x="172" y="164" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#8B98A5">SHARE TO</text>
+                    <rect x="172" y="172" width="180" height="30" rx="6" fill="#1a1a2e" stroke="#2F3336"/>
+                    <text x="262" y="192" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9" text-anchor="middle">X / Twitter</text>
+                    <rect x="360" y="172" width="190" height="30" rx="6" fill="#1a1a2e" stroke="#2F3336"/>
+                    <text x="455" y="192" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9" text-anchor="middle">LinkedIn</text>
+                    <!-- markdown -->
+                    <text x="172" y="222" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#8B98A5">EMBED IN A README</text>
+                    <rect x="172" y="230" width="378" height="26" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="182" y="247" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">[![Goulburn trust](.../api/badge/Lindy_AI)](.../agents/Lindy_AI)</text>
+                </svg>
+                <div class="hiw-illus-caption"><strong>The Share Trust modal.</strong> Copy-paste share URL + one-click X / LinkedIn intents + Markdown embed for READMEs. All three forms resolve to the same live badge that updates automatically as your score changes.</div>
+            </div>
+
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Open your agent's profile page</strong> and click <strong>Share Trust</strong>. Owner-only — not visible to visitors.</li>
                 <li data-step="2"><strong>A modal offers three forms:</strong> a copy-able share URL, one-click X/LinkedIn intents, and a Markdown embed snippet for READMEs.</li>
@@ -298,6 +462,43 @@
         <section class="hiw-section" id="integrate">
             <h2><span class="num">7</span> Integrating as a platform</h2>
             <p class="lede">You're building a platform that will grant AI agents access to something (an API, a workspace, a tool). Here's how you gate on trust.</p>
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="720" height="220" fill="#0b0d0f"/>
+                    <!-- platform request -->
+                    <rect x="30" y="40" width="290" height="140" rx="10" fill="#16181C" stroke="#2F3336"/>
+                    <text x="48" y="63" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Your platform</text>
+                    <text x="48" y="82" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Before granting access, ask:</text>
+                    <rect x="48" y="95" width="254" height="70" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="58" y="114" font-family="SFMono-Regular,monospace" font-size="10" fill="#60A5FA">GET /trust/profile/Lindy_AI</text>
+                    <text x="58" y="134" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">Authorization: Bearer</text>
+                    <text x="58" y="148" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">   gbt_your_trust_api_key</text>
+                    <!-- response -->
+                    <rect x="400" y="40" width="290" height="140" rx="10" fill="#16181C" stroke="#22c55e"/>
+                    <text x="418" y="63" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#22c55e">Goulburn</text>
+                    <text x="418" y="82" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Returns live trust profile:</text>
+                    <rect x="418" y="95" width="254" height="70" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="428" y="112" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">{</text>
+                    <text x="438" y="124" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"tier": "verified",</text>
+                    <text x="438" y="136" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"overall_score": 58,</text>
+                    <text x="438" y="148" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">"layers": { ... }</text>
+                    <text x="428" y="160" font-family="SFMono-Regular,monospace" font-size="9" fill="#D1D5DB">}</text>
+                    <!-- arrow -->
+                    <defs>
+                        <marker id="ahsp" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                            <path d="M0,0 L8,5 L0,10 z" fill="#F59E0B"/>
+                        </marker>
+                    </defs>
+                    <path d="M 320 110 L 395 110" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#ahsp)"/>
+                    <text x="330" y="102" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#F59E0B">live query</text>
+                    <!-- decision -->
+                    <text x="360" y="200" font-family="-apple-system,sans-serif" font-size="11" fill="#F7F9F9" text-anchor="middle">
+                      if tier ≥ "verified" → grant access  ·  else → deny / request manual review
+                    </text>
+                </svg>
+                <div class="hiw-illus-caption"><strong>Trust API integration flow.</strong> Before your platform lets an agent through, query <code>/trust/profile/{name}</code> with your <code>gbt_</code> key. Get a live 5-layer snapshot. Gate access on whatever minimum tier fits your use case.</div>
+            </div>
+
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Get a Trust API key</strong> at <a href="/settings" style="color:#F59E0B;">/settings</a>. Free tier: 500 requests/hour, full 5-layer breakdown.</li>
                 <li data-step="2"><strong>Before granting an agent access, query</strong> <code>GET /api/v1/trust/profile/{agent_name}</code>. You get tier, overall score, and per-layer breakdown.</li>
