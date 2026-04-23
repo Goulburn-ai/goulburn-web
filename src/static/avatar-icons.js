@@ -14,6 +14,42 @@
 (function () {
     "use strict";
 
+    // Self-inject the picker CSS once per page load. Hosting pages used
+    // to have to duplicate 80 lines of .gb-avatar-* CSS or the picker's
+    // search-icon SVG would inflate to fill its container (rendering as
+    // a giant magnifying glass — Issue #80 follow-up).
+    if (typeof document !== "undefined" &&
+        !document.getElementById("gb-avatar-picker-css")) {
+        var _gbStyle = document.createElement("style");
+        _gbStyle.id = "gb-avatar-picker-css";
+        _gbStyle.textContent =
+            ".gb-avatar-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}" +
+            ".gb-cat-tab{padding:5px 14px;border-radius:999px;border:1px solid #e5e7eb;background:#fff;color:#6b7280;font-size:12px;font-weight:500;cursor:pointer;transition:all 150ms;white-space:nowrap}" +
+            ".gb-cat-tab:hover{border-color:#f97316;color:#ea580c}" +
+            ".gb-cat-tab.gb-cat-active{background:#fff7ed;border-color:#f97316;color:#ea580c}" +
+            ".gb-avatar-search-wrap{position:relative;margin-bottom:10px}" +
+            ".gb-avatar-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#9ca3af;pointer-events:none;flex-shrink:0}" +
+            ".gb-avatar-search{width:100%;padding:10px 12px 10px 38px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;font-size:13px;color:#111827;outline:none;transition:border-color 120ms,box-shadow 120ms;box-sizing:border-box}" +
+            ".gb-avatar-search::-webkit-search-cancel-button{cursor:pointer}" +
+            ".gb-avatar-search:focus{border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,0.15)}" +
+            ".gb-avatar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));grid-auto-rows:72px;gap:10px;max-height:calc(3 * 72px + 2 * 10px + 2 * 12px);overflow-y:auto;overscroll-behavior:contain;padding:12px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;width:100%;box-sizing:border-box;scrollbar-width:thin;scrollbar-color:#d1d5db transparent}" +
+            ".gb-avatar-grid::-webkit-scrollbar{width:8px}" +
+            ".gb-avatar-grid::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}" +
+            ".gb-avatar-grid::-webkit-scrollbar-thumb:hover{background:#9ca3af}" +
+            ".gb-avatar-btn{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:10px;border:2px solid #e5e7eb;background:#fff;color:#4b5563;cursor:pointer;transition:all 120ms}" +
+            ".gb-avatar-btn svg{width:32px;height:32px}" +
+            ".gb-avatar-btn:hover{border-color:#f97316;color:#ea580c;background:#fff7ed;transform:translateY(-1px)}" +
+            ".gb-avatar-btn.gb-avatar-selected{border-color:#f97316;background:#ffedd5;color:#c2410c;box-shadow:0 0 0 2px rgba(249,115,22,0.25)}" +
+            ".gb-avatar-empty{padding:18px 14px;text-align:center;color:#6b7280;font-size:13px;background:#fafafa;border:1px dashed #e5e7eb;border-radius:10px;margin-top:10px}" +
+            ".gb-avatar-empty span{color:#f97316;font-weight:600}" +
+            "@media (max-width:640px){" +
+                ".gb-avatar-grid{grid-template-columns:repeat(auto-fill,minmax(56px,1fr));grid-auto-rows:56px;max-height:calc(3 * 56px + 2 * 10px + 2 * 12px)}" +
+                ".gb-avatar-btn svg{width:26px;height:26px}" +
+            "}";
+        (document.head || document.documentElement).appendChild(_gbStyle);
+    }
+
+
     var ICONS = {
         // ── Tech / Developer ───────────────────────────────────────
         robot:    '<rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/>',
