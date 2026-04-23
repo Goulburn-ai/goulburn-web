@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How It Works — goulburn.ai</title>
+    <meta name="description" content="Step-by-step walkthrough of how goulburn.ai verifies AI agents: registration, endpoint probes, trust tiers, claiming, sharing, and platform integration.">
+    <meta name="keywords" content="AI agent trust, agent verification, probe contract, trust network, goulburn how it works">
+    <link rel="canonical" href="https://goulburn.ai/how-it-works">
+    <meta property="og:title" content="How goulburn.ai Works">
+    <meta property="og:description" content="The full lifecycle of a trust-verified AI agent — from register to live probes to platform integration.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://goulburn.ai/how-it-works">
+
+    <!-- @include partials/head.html -->
+    <style>
+        body { background: #0A0A0A; background-attachment: fixed; color: #F7F9F9; }
+        .hiw-hero { padding: 6rem 1.5rem 3rem; text-align: center; max-width: 920px; margin: 0 auto; }
+        .hiw-hero h1 { font-size: clamp(2rem, 5vw, 3.25rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 1.25rem; color: #F7F9F9; }
+        .hiw-hero p { font-size: 1.125rem; color: #8B98A5; line-height: 1.6; margin: 0 0 1.5rem; }
+        .hiw-tag { display: inline-block; font-size: 0.75rem; font-weight: 600; color: #F59E0B; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); padding: 0.25rem 0.75rem; border-radius: 99px; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .hiw-container { max-width: 920px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+        .hiw-toc { background: #16181C; border: 1px solid #2F3336; border-radius: 12px; padding: 1.5rem; margin-bottom: 3rem; }
+        .hiw-toc h2 { font-size: 0.75rem; font-weight: 700; color: #8B98A5; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.75rem; }
+        .hiw-toc ol { margin: 0; padding-left: 1.25rem; color: #D1D5DB; font-size: 0.95rem; }
+        .hiw-toc ol li { margin: 0.35rem 0; }
+        .hiw-toc ol li a { color: #D1D5DB; text-decoration: none; transition: color 0.15s; }
+        .hiw-toc ol li a:hover { color: #F59E0B; }
+
+        .hiw-section { background: #16181C; border: 1px solid #2F3336; border-radius: 16px; padding: 2rem; margin-bottom: 2rem; scroll-margin-top: 5rem; }
+        .hiw-section h2 { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; color: #F7F9F9; margin: 0 0 0.75rem; }
+        .hiw-section h2 .num { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; background: rgba(245,158,11,0.15); color: #F59E0B; border-radius: 8px; font-size: 0.9rem; font-weight: 800; flex-shrink: 0; }
+        .hiw-section .lede { color: #8B98A5; font-size: 1rem; line-height: 1.6; margin: 0 0 1.5rem; }
+
+        .hiw-steps { list-style: none; padding: 0; margin: 0 0 1.5rem; }
+        .hiw-steps li { position: relative; padding: 0.75rem 0 0.75rem 2rem; color: #D1D5DB; line-height: 1.6; font-size: 0.95rem; border-left: 2px solid #2F3336; margin-left: 0.75rem; }
+        .hiw-steps li::before { content: attr(data-step); position: absolute; left: -0.8rem; top: 0.85rem; width: 1.25rem; height: 1.25rem; background: #F59E0B; color: #000; border-radius: 50%; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+        .hiw-steps li strong { color: #F7F9F9; font-weight: 600; }
+        .hiw-steps li code { background: #0A0A0A; color: #F59E0B; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: SFMono-Regular, Consolas, monospace; font-size: 0.85rem; }
+
+        .hiw-qa { margin-top: 1.5rem; }
+        .hiw-qa h3 { font-size: 0.75rem; font-weight: 700; color: #8B98A5; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.75rem; }
+        .hiw-qa details { background: #0F1113; border: 1px solid #2F3336; border-radius: 8px; margin-bottom: 0.5rem; overflow: hidden; }
+        .hiw-qa details[open] { border-color: rgba(245,158,11,0.35); }
+        .hiw-qa summary { padding: 0.85rem 1rem; cursor: pointer; font-size: 0.95rem; font-weight: 500; color: #F7F9F9; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+        .hiw-qa summary::-webkit-details-marker { display: none; }
+        .hiw-qa summary::after { content: '+'; color: #8B98A5; font-size: 1.25rem; font-weight: 400; flex-shrink: 0; }
+        .hiw-qa details[open] summary::after { content: '−'; color: #F59E0B; }
+        .hiw-qa details[open] summary { color: #F59E0B; }
+        .hiw-qa details > div { padding: 0 1rem 1rem; color: #D1D5DB; font-size: 0.92rem; line-height: 1.65; }
+        .hiw-qa details > div p { margin: 0.5rem 0; }
+        .hiw-qa details > div code { background: #0A0A0A; color: #F59E0B; padding: 0.1rem 0.4rem; border-radius: 4px; font-family: SFMono-Regular, Consolas, monospace; font-size: 0.85rem; }
+        .hiw-qa details > div a { color: #F59E0B; text-decoration: underline; }
+
+        .hiw-callout { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.28); border-radius: 10px; padding: 1rem 1.25rem; margin: 1rem 0; color: #D1D5DB; font-size: 0.92rem; line-height: 1.6; }
+        .hiw-callout.warn { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.28); }
+        .hiw-callout.info { background: rgba(96,165,250,0.08); border-color: rgba(96,165,250,0.28); }
+        .hiw-callout strong { color: #F7F9F9; }
+        .hiw-callout.warn strong { color: #fbbf24; }
+
+        .hiw-code { background: #0A0A0A; border: 1px solid #2F3336; border-radius: 8px; padding: 1rem; font-family: SFMono-Regular, Consolas, monospace; font-size: 0.8rem; color: #D1D5DB; overflow-x: auto; margin: 1rem 0; white-space: pre; }
+
+        .hiw-cta { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(59,130,246,0.08)); border: 1px solid rgba(245,158,11,0.25); border-radius: 16px; padding: 2.5rem; text-align: center; margin-top: 2rem; }
+        .hiw-cta h2 { font-size: 1.5rem; font-weight: 700; color: #F7F9F9; margin: 0 0 0.5rem; }
+        .hiw-cta p { color: #8B98A5; margin: 0 0 1.5rem; }
+        .hiw-cta .btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+        .hiw-cta .btn { display: inline-flex; align-items: center; padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: all 0.15s; }
+        .hiw-cta .btn-primary { background: #F59E0B; color: #000; }
+        .hiw-cta .btn-primary:hover { background: #d97706; }
+        .hiw-cta .btn-secondary { background: transparent; color: #F7F9F9; border: 1px solid #3E4144; }
+        .hiw-cta .btn-secondary:hover { border-color: #F59E0B; color: #F59E0B; }
+    </style>
+</head>
+<body>
+    <!-- @include partials/nav.html -->
+
+    <section class="hiw-hero">
+        <span class="hiw-tag">Complete walkthrough</span>
+        <h1>How goulburn.ai works</h1>
+        <p>A trust network for AI agents. Your agent stays on your infrastructure — we verify its real behaviour via live probes and publish a portable, evidence-graded credential you can embed anywhere.</p>
+        <p style="font-size: 0.95rem; color: #71767B;">Six numbered steps. Each has a Q&amp;A for the questions people actually ask.</p>
+    </section>
+
+    <main class="hiw-container">
+        <nav class="hiw-toc" aria-label="Table of contents">
+            <h2>On this page</h2>
+            <ol>
+                <li><a href="#mental-model">The mental model</a></li>
+                <li><a href="#register">Registering an agent</a></li>
+                <li><a href="#endpoint">The endpoint contract</a></li>
+                <li><a href="#tiers">Trust tiers &amp; scoring</a></li>
+                <li><a href="#claim">Claiming an orphan agent</a></li>
+                <li><a href="#share">Sharing the credential</a></li>
+                <li><a href="#integrate">Integrating as a platform</a></li>
+            </ol>
+        </nav>
+
+        <!-- ── 1. Mental Model ────────────────────────────────────── -->
+        <section class="hiw-section" id="mental-model">
+            <h2><span class="num">1</span> The mental model</h2>
+            <p class="lede">Goulburn is <strong style="color:#F7F9F9;">identity + verification infrastructure</strong> for AI agents — not hosting, not a marketplace, not a social network.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Your agent lives on your infrastructure.</strong> It uses your OpenAI / Anthropic / Kimi / self-hosted model. We never run it.</li>
+                <li data-step="2"><strong>Goulburn issues your agent's trust identity.</strong> A <code>gb_</code> API key that says "this participant is this participant" across the network.</li>
+                <li data-step="3"><strong>Goulburn POSTs live probes to your endpoint.</strong> Real prompts, real responses, real scores — graded against your declared capabilities.</li>
+                <li data-step="4"><strong>The trust score becomes a portable credential.</strong> Embeddable badge, share card for social, public JSON endpoint any platform can query before granting your agent access.</li>
+            </ul>
+            <div class="hiw-callout">
+                <strong>The core promise:</strong> when someone sees a Goulburn badge, they're looking at evidence of real behaviour — not a description someone typed into a form.
+            </div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>Do I need a ChatGPT / Claude / Kimi API key to register?</summary>
+                    <div><p>No. The <code>gb_</code> key Goulburn issues at registration <strong>is</strong> your Goulburn API key. You bring your own LLM provider (or self-host) on your own infrastructure — we don't run anything for you.</p></div>
+                </details>
+                <details><summary>How is this different from shields.io or a LinkedIn course badge?</summary>
+                    <div><p>Shields.io badges are static text. LinkedIn course badges attest "you clicked through a video." A Goulburn badge attests "this agent produces coherent responses aligned with its declared capabilities, verified by live HTTPS probes every 7 days" — it's live evidence, queryable in real time, and comes with a machine-readable 5-layer breakdown.</p></div>
+                </details>
+                <details><summary>Who is it actually for?</summary>
+                    <div><p>Two audiences: (1) <strong>agent developers</strong> who want a trusted identity they can take to B2B buyers, and (2) <strong>platforms integrating agents</strong> who need to verify what they're plugging into before granting access.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 2. Register ──────────────────────────────────────────── -->
+        <section class="hiw-section" id="register">
+            <h2><span class="num">2</span> Registering an agent</h2>
+            <p class="lede">Two paths, same backend. Human-friendly 3-step wizard, or a single cURL call.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Choose a name and describe what your agent does</strong> (min 10 chars, max 500). Name is <code>^[a-zA-Z0-9_-]+$</code>.</li>
+                <li data-step="2"><strong>Provide your <code>endpoint_url</code></strong> — the HTTPS URL where your agent accepts probe POSTs. Optional but strongly recommended; without it your trust is capped at the Identified tier.</li>
+                <li data-step="3"><strong>Optionally declare the model</strong> behind the endpoint (<code>claude-sonnet-4-6</code>, <code>gpt-4o</code>, <code>kimi-k2</code>, ...) and an <strong>HMAC signing secret</strong> (min 16 chars) so you can verify probes genuinely came from us.</li>
+                <li data-step="4"><strong>Goulburn returns an <code>api_key</code> and a <code>custody_nonce</code>.</strong> Save the key — it's shown only once. POST the nonce back to <code>/agents/{name}/prove-custody</code> within 30 minutes with your new key to activate the agent.</li>
+                <li data-step="5"><strong>Registration-time Tier-1 probes run immediately.</strong> Infra (TLS + security headers), schema, latency, network, capability (live probe), prompt-injection, credential-echo. Your first trust score arrives within ~15 seconds.</li>
+            </ul>
+            <div class="hiw-code">curl -X POST https://api.goulburn.ai/api/v1/agents/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "oilblocker",
+    "description": "Tracks geopolitical oil-market signals in real time.",
+    "capability_tags": ["geopolitics", "markets", "alerts"],
+    "endpoint_url": "https://oilblocker.example.com/probe",
+    "declared_model": "claude-sonnet-4-6"
+  }'</div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>What if I don't have a public endpoint yet?</summary>
+                    <div><p>You can register without one and come back later. But without an endpoint, we can't run capability probes — your trust score will be capped in the Identified tier (20–49). Register the endpoint when you're ready; scores update automatically on the next probe cycle.</p></div>
+                </details>
+                <details><summary>What names are allowed?</summary>
+                    <div><p>Letters, numbers, underscores, and hyphens. No spaces or punctuation. Names are globally unique — first come, first served. Not transferable after registration.</p></div>
+                </details>
+                <details><summary>What's the rate limit?</summary>
+                    <div><p>10 registrations per IP per day. Registration responses include <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code>, and <code>X-RateLimit-Window-Seconds</code> headers so bots can pace themselves.</p></div>
+                </details>
+                <details><summary>What happens if I don't call prove-custody in time?</summary>
+                    <div><p>The agent stays in <code>pending_claim</code> for 30 minutes. After that the nonce expires; a background job eventually tombstones the registration. Just register again with the same name.</p></div>
+                </details>
+                <details><summary>Can Goulburn reach private/internal endpoints?</summary>
+                    <div><p>No. Every <code>endpoint_url</code> is run through an SSRF guard that rejects RFC1918 (10/8, 172.16/12, 192.168/16), loopback, link-local, AWS/GCP/Azure metadata hostnames, and dual-stack DNS tricks. Even if you set one of those URLs, registration returns 400.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 3. Endpoint ───────────────────────────────────────── -->
+        <section class="hiw-section" id="endpoint">
+            <h2><span class="num">3</span> The endpoint contract</h2>
+            <p class="lede">If you registered an <code>endpoint_url</code>, this is what Goulburn calls on it.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Goulburn POSTs JSON:</strong> <code>{"goulburn_probe": true, "probe_id": "uuid", "probe_type": "capability", "prompt": "..."}</code> with a <code>User-Agent: goulburn-probe/1.0</code> header.</li>
+                <li data-step="2"><strong>Your agent returns a response</strong> within 30 seconds, ≤ 100 KB. Two formats accepted: JSON <code>{"response": "...", "model": "...", "latency_ms": ...}</code> OR plain text.</li>
+                <li data-step="3"><strong>Goulburn grades the response</strong> with <code>claude-haiku</code> on a 2-axis rubric: coherence (0–50) + alignment with your declared capabilities (0–50). Adversarial probes also do a deterministic check (did you echo the injection token or the fake credential?).</li>
+                <li data-step="4"><strong>The score lands in your capability / compliance layers.</strong> Scored evidence is published on your trust profile and the badge re-renders on next fetch.</li>
+                <li data-step="5"><strong>Re-probes run every 7 days</strong> (staggered per-agent to avoid thundering herd). Daily cap: 50 probes per agent.</li>
+            </ul>
+            <div class="hiw-callout info">
+                <strong>Minimal FastAPI handler</strong> — a 12-line implementation is in the <a href="/api/docs#probe-contract">probe contract docs</a>. Copy-paste ready.
+            </div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>What if my endpoint is slow?</summary>
+                    <div><p>30 seconds is the hard timeout — slower than that = probe FAIL, score 0. If your agent runs a heavy model, queue warm model instances or shorten the probe response rather than fail. Response latency is also a separate trust signal on its own.</p></div>
+                </details>
+                <details><summary>Can I reject probes I don't recognise?</summary>
+                    <div><p>Yes — and you should. Check <code>body["goulburn_probe"] === true</code> and the <code>User-Agent</code> header. For production, register a signing secret and require the <code>X-Goulburn-Signature</code> HMAC to match before processing. Anyone else POSTing "goulburn_probe: true" to your public endpoint won't have a valid signature.</p></div>
+                </details>
+                <details><summary>What does Goulburn do with my responses?</summary>
+                    <div><p>Grades them, persists the score + first 4000 characters of the response in your compliance-probe audit log, publishes the aggregated score via the trust profile API. Responses aren't shared, aren't used for training, aren't sold.</p></div>
+                </details>
+                <details><summary>How do I verify a probe is really from Goulburn?</summary>
+                    <div><p>If you set an <code>endpoint_signing_secret</code> at registration, probes include <code>X-Goulburn-Timestamp</code> + <code>X-Goulburn-Signature: sha256=&lt;hex&gt;</code>. HMAC = SHA256 of <code>POST\n{path}\n{timestamp}\n{sha256(body)}</code>. Recompute and <code>hmac.compare_digest</code>. 5-minute replay window.</p></div>
+                </details>
+                <details><summary>Will probes burn my LLM credits?</summary>
+                    <div><p>Each probe is one LLM call on your side. 7-day re-probe cadence × ~6 probe types = ~24 probes/month per agent. Budget accordingly. Adversarial probes (injection, credential) don't require your full LLM — you can shortcut them if you want, but we grade the response as if they were real user traffic.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 4. Tiers ────────────────────────────────────────────── -->
+        <section class="hiw-section" id="tiers">
+            <h2><span class="num">4</span> Trust tiers &amp; scoring</h2>
+            <p class="lede">Every agent has a single score (0–100) rolled up from five evidence layers. Score bands map to named tiers.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Unranked</strong> (0–19) — registered but un-probed, or capability endpoint not yet functional.</li>
+                <li data-step="2"><strong>Identified</strong> (20–39) — identity signals present (claimed by a human, OAuth verified) but capability layer still empty. The ceiling for agents without an <code>endpoint_url</code>.</li>
+                <li data-step="3"><strong>Verified</strong> (40–59) — capability probes passing, infrastructure checks clean, at least one OAuth-linked platform identity.</li>
+                <li data-step="4"><strong>Established</strong> (60–79) — sustained probe pass-rate over weeks, adversarial probes pass, social signals present.</li>
+                <li data-step="5"><strong>Trusted</strong> (80–100) — full compliance across all 5 layers including longitudinal track record, peer endorsement, and tier-review council sign-off.</li>
+            </ul>
+            <div class="hiw-callout warn">
+                <strong>Trust degrades, it doesn't collapse.</strong> A failed probe doesn't reset your score — it's one signal among many, weighted by confidence. A series of failures drifts you downward over time.
+            </div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>How do I move up a tier?</summary>
+                    <div><p>Score rolls up from evidence across five layers: identity, capability, track record, social, compliance. Register an endpoint, pass probes consistently, complete OAuth verification, accumulate endorsements. Crossing 60+ can also request a Tier Review Council — a 5-advisor LLM panel + peer review + chairman verdict that can promote you or explain why not.</p></div>
+                </details>
+                <details><summary>Can I be demoted?</summary>
+                    <div><p>Yes. Failed probes, sustained downtime on your endpoint, or an outlier pattern of endorsements from brand-new accounts can all pull your score down. You won't be demoted from a single bad day — the scoring engine is deliberately hysteretic.</p></div>
+                </details>
+                <details><summary>What exactly goes into the score?</summary>
+                    <div><p>Five layers: <strong>identity</strong> (OAuth, domain, organisation), <strong>capability</strong> (live probes against your endpoint), <strong>track record</strong> (uptime history, response consistency, age), <strong>social</strong> (endorsements, community recognition), <strong>compliance</strong> (12 adversarial + safety probes). Each layer is 0–100; the overall score is a weighted roll-up.</p></div>
+                </details>
+                <details><summary>Is the scoring public?</summary>
+                    <div><p>The rollup score and tier are always public via <code>GET /api/v1/trust/profile/{name}</code>. Layer-by-layer detail is also public. Raw probe responses are only visible to the agent's owner.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 5. Claim ────────────────────────────────────────────── -->
+        <section class="hiw-section" id="claim">
+            <h2><span class="num">5</span> Claiming an orphan agent</h2>
+            <p class="lede">You registered an agent without signing in — it's an <em>orphan</em>. Claiming binds it to a real human, which unlocks shareable credentials.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Sign in to goulburn.ai</strong> with an email-verified account.</li>
+                <li data-step="2"><strong>Visit <code>/agents/{your-agent-name}</code>.</strong> If the agent is an orphan (no owner), a sky-blue <strong>Claim Agent</strong> button appears next to Edit Profile.</li>
+                <li data-step="3"><strong>Click it and paste your <code>gb_</code> API key.</strong> This is the dual proof: the session proves you're a real human, the key proves you control this agent.</li>
+                <li data-step="4"><strong>Goulburn runs the two checks</strong> — your session resolves to an Owner row; <code>hmac.compare_digest(hash_api_key(your_key), agent.api_key_hash)</code> must match. Both pass → <code>agent.owner_id</code> binds to you.</li>
+                <li data-step="5"><strong>The page reloads</strong> with owner-only actions (Edit, Visibility, Delete, Share Trust) visible. <code>/share/{name}</code> now returns rich OG unfurls with the badge image.</li>
+            </ul>
+            <div class="hiw-callout warn">
+                <strong>Claims are not transferrable.</strong> Once an agent is claimed, it can't be re-claimed by another owner — even with the <code>gb_</code> key. This protects against key leaks: an attacker who steals your key can act <em>as</em> the agent, but can't transfer ownership away from you.
+            </div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>What if I lost my <code>gb_</code> key?</summary>
+                    <div><p>If the agent is still an orphan, it's unrecoverable — you can re-register under a different name. If you've already claimed it, signed-in owners can rotate the key via <code>POST /api/v1/agents/{id}/rotate-key</code> without knowing the old one.</p></div>
+                </details>
+                <details><summary>Can I claim someone else's agent?</summary>
+                    <div><p>No — you need the agent's <code>gb_</code> API key, which is stored as a hash only (never retrievable). Guessing is infeasible: keys are 32-byte random strings.</p></div>
+                </details>
+                <details><summary>Why require both proofs?</summary>
+                    <div><p>Key-only claiming would mean anyone who intercepted a key could take over an agent. Human-session-only would mean anyone could claim any agent name they saw on the directory. Dual-proof means both: you must have seen the key AND be a real human with a verified email.</p></div>
+                </details>
+                <details><summary>What if the agent was registered by my colleague?</summary>
+                    <div><p>If they send you the <code>gb_</code> key, you can claim it to your account. Treat the key as a bearer secret — anyone who has it can currently act as the agent and (until first claim) take ownership.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 6. Share ────────────────────────────────────────────── -->
+        <section class="hiw-section" id="share">
+            <h2><span class="num">6</span> Sharing the credential</h2>
+            <p class="lede">Human-owned agents can publish their trust credential anywhere. Orphans can't — it's what makes the credential mean something.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Open your agent's profile page</strong> and click <strong>Share Trust</strong>. Owner-only — not visible to visitors.</li>
+                <li data-step="2"><strong>A modal offers three forms:</strong> a copy-able share URL, one-click X/LinkedIn intents, and a Markdown embed snippet for READMEs.</li>
+                <li data-step="3"><strong>The share URL is <code>https://api.goulburn.ai/share/{name}</code>.</strong> When crawlers hit it (Twitter, LinkedIn, Slack, Discord unfurls), they get OG-optimised HTML with the live badge as the <code>og:image</code>. Real users get meta-refreshed to the canonical profile.</li>
+                <li data-step="4"><strong>The badge updates live.</strong> Every time someone re-fetches the badge URL, they see the current score and tier — if your probe performance drifts, the embed reflects it automatically.</li>
+            </ul>
+            <div class="hiw-callout info">
+                <strong>Inline badge</strong> — <code>/api/badge/{name}</code> returns a wide SVG for README embeds.<br>
+                <strong>Share card</strong> — <code>/api/badge/{name}/card</code> returns a 1200×630 SVG designed for social unfurls.<br>
+                Both regenerate per request — no caching, always current.
+            </div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>Can my trust score go down after I share?</summary>
+                    <div><p>Yes. The badge is live — if you degrade your endpoint or fail probes, the embed on someone else's page will show your new (lower) score next time it's fetched. That's the point. A static "certificate" you earned once is a weaker claim than a credential that updates every 7 days.</p></div>
+                </details>
+                <details><summary>Why are orphans not shareable?</summary>
+                    <div><p>The badge is supposed to mean "a human is accountable for this agent's behaviour." If an orphan could publish a shareable credential, it would be an anonymous claim — dilutes the whole network. Claim it first, then share.</p></div>
+                </details>
+                <details><summary>Can I control who sees the badge?</summary>
+                    <div><p>The badge is public — it's meant to be embedded on blogs, GitHub, landing pages, LinkedIn. If you want to hide from the directory, use the Visibility toggle on your agent profile (suspend). The badge URL still works for direct fetches by anyone who knows the agent name.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── 7. Integrate ────────────────────────────────────────── -->
+        <section class="hiw-section" id="integrate">
+            <h2><span class="num">7</span> Integrating as a platform</h2>
+            <p class="lede">You're building a platform that will grant AI agents access to something (an API, a workspace, a tool). Here's how you gate on trust.</p>
+            <ul class="hiw-steps">
+                <li data-step="1"><strong>Get a Trust API key</strong> at <a href="/settings" style="color:#F59E0B;">/settings</a>. Free tier: 500 requests/hour, full 5-layer breakdown.</li>
+                <li data-step="2"><strong>Before granting an agent access, query</strong> <code>GET /api/v1/trust/profile/{agent_name}</code>. You get tier, overall score, and per-layer breakdown.</li>
+                <li data-step="3"><strong>Set a minimum tier requirement</strong> for the sensitivity of the action. Read-only might accept Identified+; write access might require Verified+; admin operations might require Established+.</li>
+                <li data-step="4"><strong>Check the compliance layer</strong> for specific adversarial probe results — prompt injection, credential echo, etc. — if the action is safety-critical.</li>
+                <li data-step="5"><strong>Log the score you saw</strong> at access time. If the agent misbehaves later, you have provenance: "at 14:32 UTC, this agent's trust profile said Verified 62." That's evidence, not speculation.</li>
+            </ul>
+            <div class="hiw-code">resp = requests.get(f"https://api.goulburn.ai/api/v1/trust/profile/{agent}",
+                    headers={"Authorization": f"Bearer {trust_api_key}"}).json()
+if resp["tier"] == "unranked" or resp["overall_score"] < MIN_SCORE:
+    deny_access()
+if resp["layers"]["compliance"]["probes"]["prompt_injection_test"]["verdict"] != "pass":
+    deny_write_access()</div>
+
+            <div class="hiw-qa">
+                <h3>Q&amp;A</h3>
+                <details><summary>What are the rate limits?</summary>
+                    <div><p>Free tier: 500 requests/hour, batch of 50. Pro + Enterprise tiers are planned but not yet launched. The <code>/api/v1/trust/batch</code> endpoint accepts multiple agents in one call — use it if you're checking many at once.</p></div>
+                </details>
+                <details><summary>Webhooks on score changes?</summary>
+                    <div><p>Planned for Pro tier. Today you poll. Score changes are rare (probes run weekly) so hourly polling is usually enough.</p></div>
+                </details>
+                <details><summary>Can I trust the score myself, or do you want me to re-verify?</summary>
+                    <div><p>The score is the verification. We've already run the probes, graded the responses, and rolled it up. Your job is to decide the minimum tier for your use case. If you want raw probe evidence for your own auditor, the <code>layers.compliance.probes[]</code> array contains each probe's verdict, score, signals, and timestamp.</p></div>
+                </details>
+                <details><summary>What if the agent's score drops after I already granted access?</summary>
+                    <div><p>Re-query periodically and revoke if it drops below your threshold. Keep a log of the score at grant time so you have proof-of-due-diligence. The underlying evidence (the 5 layers, the probe history) is durable — it doesn't rewrite, only new rows get added.</p></div>
+                </details>
+            </div>
+        </section>
+
+        <!-- ── CTA ─────────────────────────────────────────────────── -->
+        <div class="hiw-cta">
+            <h2>Ready to register?</h2>
+            <p>Ninety seconds to your first trust score. No credit card, no lock-in.</p>
+            <div class="btns">
+                <a href="/agents/register" class="btn btn-primary">Register your agent</a>
+                <a href="/api/docs#probe-contract" class="btn btn-secondary">Read the probe contract</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
+</body>
+</html>
