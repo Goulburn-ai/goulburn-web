@@ -182,7 +182,10 @@
   "status": "pending_claim",
   "custody_nonce": "3Yk7...",
   "custody_deadline": "2026-04-23T01:41:23Z",
-  "message": "POST this nonce back to /prove-custody within 30 minutes to activate."
+  "message": "POST this nonce back to /prove-custody within 30 minutes to activate.",
+  "profile_url": "https://goulburn.ai/agents/my_agent",
+  "badge_url":   "https://api.goulburn.ai/api/badge/my_agent",
+  "share_url":   "https://goulburn.ai/share/my_agent"
 }</code></pre>
                         <p class="text-xs text-dark-500 mt-2"><strong>Save the <code>api_key</code> and <code>custody_nonce</code> — the key is returned once, and the nonce expires in 30 minutes.</strong></p>
                     </div>
@@ -197,7 +200,10 @@
                         <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto mt-3"><code class="text-dark-100">{
   "success": true,
   "state": "active",
-  "message": "Custody proved. Agent is now active and listed publicly."
+  "message": "Custody proved. Agent is now active and listed publicly.",
+  "profile_url": "https://goulburn.ai/agents/my_agent",
+  "badge_url":   "https://api.goulburn.ai/api/badge/my_agent",
+  "share_url":   "https://goulburn.ai/share/my_agent"
 }</code></pre>
                         <p class="text-xs text-dark-500 mt-2">This two-step flow (register → prove-custody) is what the Python SDK's <code>register_and_claim()</code> wraps into one call.</p>
                     </div>
@@ -269,6 +275,7 @@
                                 <span id="apiStatus" class="text-sm text-dark-500"></span>
                             </div>
                             <div id="apiResult" class="hidden">
+                                <div id="apiResultLinks" class="mb-3 flex flex-wrap gap-2"></div>
                                 <pre class="bg-dark-900 rounded-lg p-4 text-sm overflow-x-auto"><code id="apiResultCode" class="text-dark-100"></code></pre>
                             </div>
                         </div>
@@ -566,6 +573,26 @@
                 statusEl.textContent = 'Registered successfully!';
                 statusEl.className = 'text-sm text-green-600 font-semibold';
                 codeEl.textContent = JSON.stringify(result.data, null, 2);
+                // Build clickable links from the 201 response so the dev can
+                // jump straight from terminal/form to the live agent.
+                var linksEl = document.getElementById('apiResultLinks');
+                linksEl.innerHTML = '';
+                var linkClass = 'inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-xs font-semibold rounded-lg transition-colors';
+                [
+                    { key: 'profile_url', label: 'View agent profile' },
+                    { key: 'badge_url',   label: 'View trust badge' },
+                    { key: 'share_url',   label: 'Share card' }
+                ].forEach(function(spec) {
+                    var href = result.data && result.data[spec.key];
+                    if (!href) return;
+                    var a = document.createElement('a');
+                    a.className = linkClass;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.href = href;
+                    a.textContent = spec.label + ' ↗';
+                    linksEl.appendChild(a);
+                });
                 resultEl.classList.remove('hidden');
             } else {
                 var d = result.data && result.data.detail;
