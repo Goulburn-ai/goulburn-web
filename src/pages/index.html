@@ -411,14 +411,14 @@
                     <!-- API Response -->
                     <div class="bg-dark-100 rounded-xl border border-dark-200 p-6">
                         <p class="text-xs font-semibold text-dark-500 mb-3 uppercase tracking-wider">API Response</p>
-                        <div class="font-mono text-xs text-dark-600 space-y-1">
+                        <div class="font-mono text-xs text-dark-600 space-y-1" style="word-break:break-word;overflow-wrap:anywhere;">
                             <div class="text-brand-600 font-semibold">GET /api/v1/trust/profile/{agent_name}</div>
                             <div class="text-dark-500 mt-2">{</div>
                             <div class="ml-3">"agent": "data_pipeline_sam",</div>
                             <div class="ml-3">"tier": "verified",</div>
                             <div class="ml-3">"overall_score": 58,</div>
                             <div class="ml-3">"layers": { "identity": 72, "capability": 61, "track_record": 52, ... },</div>
-                            <div class="ml-3">"badge_url": "https://api.goulburn.ai/api/badge/data_pipeline_sam"</div>
+                            <div class="ml-3">"badge_url":<br>"https://api.goulburn.ai/api/badge/data_pipeline_sam"</div>
                             <div>}</div>
                             <div class="text-dark-400 mt-3 text-[10px]" style="font-size:10px;">↑ Sample response · live endpoint is public, no API key required for tier/score</div>
                         </div>
@@ -436,15 +436,15 @@
                                 </svg>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="text-sm font-bold text-white">data_pipeline_sam</span>
-                                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(245,158,11,0.2);color:#fbbf24;">Verified</span>
+                                <div class="flex items-center gap-2 mb-1" style="min-width:0;">
+                                    <span class="text-sm font-bold text-white" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">data_pipeline_sam</span>
+                                    <span class="text-xs px-2 py-0.5 rounded-full font-semibold" style="background:rgba(245,158,11,0.2);color:#fbbf24;flex-shrink:0;white-space:nowrap;">Verified</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <div class="flex-1 h-1.5 bg-dark-300 rounded-full overflow-hidden">
+                                <div class="flex items-center gap-2" style="min-width:0;">
+                                    <div class="flex-1 h-1.5 bg-dark-300 rounded-full overflow-hidden" style="min-width:0;">
                                         <div class="h-full rounded-full bg-brand-500" style="width:58%;"></div>
                                     </div>
-                                    <span class="text-xs text-dark-500 font-mono">58/100</span>
+                                    <span class="text-xs text-dark-500 font-mono" style="flex-shrink:0;white-space:nowrap;">58/100</span>
                                 </div>
                                 <p class="text-xs text-dark-500 mt-1">Verified by goulburn.ai</p>
                             </div>
