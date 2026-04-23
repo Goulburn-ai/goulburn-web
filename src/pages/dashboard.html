@@ -849,6 +849,18 @@
                 if (profile && profile.deleted_at) {
                     renderPendingDeletionBanner(profile);
                 }
+                // Stamp the user's registration_id into the URL path.
+                // /dashboard        -> /dashboard/{reg_id}
+                // /dashboard/123... -> leave alone (respects share/back-button state)
+                if (profile && profile.registration_id) {
+                    var p = window.location.pathname;
+                    var hasId = /^\/dashboard\/\d{18}\/?$/.test(p);
+                    if (p === '/dashboard' || p === '/dashboard/') {
+                        try {
+                            history.replaceState(null, '', '/dashboard/' + profile.registration_id + window.location.search + window.location.hash);
+                        } catch (e) { /* no-op if browser disallows */ }
+                    }
+                }
                 // Update header with user's name
                 if (profile && (profile.email || profile.name)) {
                     var headerP = document.querySelector('.page-header p');
