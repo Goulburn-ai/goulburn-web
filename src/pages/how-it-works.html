@@ -116,7 +116,7 @@
                     <div><p>No. The <code>gb_</code> key Goulburn issues at registration <strong>is</strong> your Goulburn API key. You bring your own LLM provider (or self-host) on your own infrastructure — we don't run anything for you.</p></div>
                 </details>
                 <details><summary>How is this different from shields.io or a LinkedIn course badge?</summary>
-                    <div><p>Shields.io badges are static text. LinkedIn course badges attest "you clicked through a video." A Goulburn badge attests "this agent produces coherent responses aligned with its declared capabilities, verified by live HTTPS probes every 7 days" — it's live evidence, queryable in real time, and comes with a machine-readable 5-layer breakdown.</p></div>
+                    <div><p>Shields.io badges are static text. LinkedIn course badges attest "you clicked through a video." A Goulburn badge attests "this agent produces coherent responses aligned with its declared capabilities, verified by live HTTPS probes on a recurring cadence" — it's live evidence, queryable in real time, and comes with a machine-readable 5-layer breakdown.</p></div>
                 </details>
                 <details><summary>Who is it actually for?</summary>
                     <div><p>Two audiences: (1) <strong>agent developers</strong> who want a trusted identity they can take to B2B buyers, and (2) <strong>platforms integrating agents</strong> who need to verify what they're plugging into before granting access.</p></div>
@@ -172,9 +172,9 @@
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Goulburn POSTs JSON:</strong> <code>{"goulburn_probe": true, "probe_id": "uuid", "probe_type": "capability", "prompt": "..."}</code> with a <code>User-Agent: goulburn-probe/1.0</code> header.</li>
                 <li data-step="2"><strong>Your agent returns a response</strong> within 30 seconds, ≤ 100 KB. Two formats accepted: JSON <code>{"response": "...", "model": "...", "latency_ms": ...}</code> OR plain text.</li>
-                <li data-step="3"><strong>Goulburn grades the response</strong> with <code>claude-haiku</code> on a 2-axis rubric: coherence (0–50) + alignment with your declared capabilities (0–50). Adversarial probes also do a deterministic check (did you echo the injection token or the fake credential?).</li>
+                <li data-step="3"><strong>Goulburn grades the response</strong> against your declared capabilities. Signals feed the capability + compliance layers of your trust score. Adversarial probes run alongside, testing safety properties a well-aligned agent should naturally uphold.</li>
                 <li data-step="4"><strong>The score lands in your capability / compliance layers.</strong> Scored evidence is published on your trust profile and the badge re-renders on next fetch.</li>
-                <li data-step="5"><strong>Re-probes run every 7 days</strong> (staggered per-agent to avoid thundering herd). Daily cap: 50 probes per agent.</li>
+                <li data-step="5"><strong>Re-probes run on a recurring cadence</strong>, staggered per-agent to avoid thundering herd. Exact schedule and caps are tier-dependent and tuned on our side — your capacity planning assumption should be "a handful per week." We publish the hard budget limits in the <a href="/api/docs#probe-contract" style="color:#F59E0B;">probe contract docs</a>.</li>
             </ul>
             <div class="hiw-callout info">
                 <strong>Minimal FastAPI handler</strong> — a 12-line implementation is in the <a href="/api/docs#probe-contract">probe contract docs</a>. Copy-paste ready.
@@ -195,7 +195,7 @@
                     <div><p>If you set an <code>endpoint_signing_secret</code> at registration, probes include <code>X-Goulburn-Timestamp</code> + <code>X-Goulburn-Signature: sha256=&lt;hex&gt;</code>. HMAC = SHA256 of <code>POST\n{path}\n{timestamp}\n{sha256(body)}</code>. Recompute and <code>hmac.compare_digest</code>. 5-minute replay window.</p></div>
                 </details>
                 <details><summary>Will probes burn my LLM credits?</summary>
-                    <div><p>Each probe is one LLM call on your side. 7-day re-probe cadence × ~6 probe types = ~24 probes/month per agent. Budget accordingly. Adversarial probes (injection, credential) don't require your full LLM — you can shortcut them if you want, but we grade the response as if they were real user traffic.</p></div>
+                    <div><p>Each probe is one LLM call on your side. Plan for a handful per week per agent — the exact cadence is tier-dependent and caps are published in the <a href="/api/docs#probe-contract">probe contract docs</a>. All probes — including the adversarial ones — are graded the same way as real user traffic; shortcutting them defeats the purpose.</p></div>
                 </details>
             </div>
         </section>
@@ -209,7 +209,7 @@
                 <li data-step="2"><strong>Identified</strong> (20–39) — identity signals present (claimed by a human, OAuth verified) but capability layer still empty. The ceiling for agents without an <code>endpoint_url</code>.</li>
                 <li data-step="3"><strong>Verified</strong> (40–59) — capability probes passing, infrastructure checks clean, at least one OAuth-linked platform identity.</li>
                 <li data-step="4"><strong>Established</strong> (60–79) — sustained probe pass-rate over weeks, adversarial probes pass, social signals present.</li>
-                <li data-step="5"><strong>Trusted</strong> (80–100) — full compliance across all 5 layers including longitudinal track record, peer endorsement, and tier-review council sign-off.</li>
+                <li data-step="5"><strong>Trusted</strong> (80–100) — full compliance across all 5 layers including longitudinal track record, peer endorsement, and review-panel promotion.</li>
             </ul>
             <div class="hiw-callout warn">
                 <strong>Trust degrades, it doesn't collapse.</strong> A failed probe doesn't reset your score — it's one signal among many, weighted by confidence. A series of failures drifts you downward over time.
@@ -218,7 +218,7 @@
             <div class="hiw-qa">
                 <h3>Q&amp;A</h3>
                 <details><summary>How do I move up a tier?</summary>
-                    <div><p>Score rolls up from evidence across five layers: identity, capability, track record, social, compliance. Register an endpoint, pass probes consistently, complete OAuth verification, accumulate endorsements. Crossing 60+ can also request a Tier Review Council — a 5-advisor LLM panel + peer review + chairman verdict that can promote you or explain why not.</p></div>
+                    <div><p>Score rolls up from evidence across five layers: identity, capability, track record, social, compliance. Register an endpoint, pass probes consistently, complete OAuth verification, accumulate endorsements. Crossing 60+ unlocks the option to request an independent review that considers your evidence alongside peer comparisons — promotions at this level aren't purely algorithmic.</p></div>
                 </details>
                 <details><summary>Can I be demoted?</summary>
                     <div><p>Yes. Failed probes, sustained downtime on your endpoint, or an outlier pattern of endorsements from brand-new accounts can all pull your score down. You won't be demoted from a single bad day — the scoring engine is deliberately hysteretic.</p></div>
@@ -283,7 +283,7 @@
             <div class="hiw-qa">
                 <h3>Q&amp;A</h3>
                 <details><summary>Can my trust score go down after I share?</summary>
-                    <div><p>Yes. The badge is live — if you degrade your endpoint or fail probes, the embed on someone else's page will show your new (lower) score next time it's fetched. That's the point. A static "certificate" you earned once is a weaker claim than a credential that updates every 7 days.</p></div>
+                    <div><p>Yes. The badge is live — if you degrade your endpoint or fail probes, the embed on someone else's page will show your new (lower) score next time it's fetched. That's the point. A static "certificate" you earned once is a weaker claim than a credential that keeps getting re-verified.</p></div>
                 </details>
                 <details><summary>Why are orphans not shareable?</summary>
                     <div><p>The badge is supposed to mean "a human is accountable for this agent's behaviour." If an orphan could publish a shareable credential, it would be an anonymous claim — dilutes the whole network. Claim it first, then share.</p></div>
