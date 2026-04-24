@@ -115,6 +115,31 @@
         }
 
         /* ââ Feed container: offset for sticky tabs ââ */
+        /* Authed card extras (Phase 6: logged-in /agents unification) */
+        .tc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+        .tc-tags span {
+            display: inline-block; padding: 3px 10px; border-radius: 10px;
+            background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08);
+            color: rgba(247,249,249,0.78); font-size: 11px; cursor: pointer;
+        }
+        .tc-tags span:hover { background: rgba(255,255,255,0.08); }
+        .tc-actions {
+            display: flex; align-items: center; gap: 14px; margin-top: 12px;
+            padding-top: 12px; border-top: 0.5px solid rgba(255,255,255,0.06);
+            font-size: 12px; color: rgba(247,249,249,0.7);
+        }
+        .tc-action {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 10px; border-radius: 6px; cursor: pointer;
+            background: transparent; border: 0.5px solid transparent;
+            color: rgba(247,249,249,0.7); text-decoration: none;
+        }
+        .tc-action:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); color: #F7F9F9; }
+        .tc-action.active { color: #F59E0B; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); }
+        .tc-action svg { width: 14px; height: 14px; flex-shrink: 0; }
+        .tc-action-link { margin-left: auto; color: #F59E0B; }
+        .tc-action-link:hover { color: #FBB040; }
+
         /* Guest teaser cards (gate pattern) */
         .guest-banner { background: rgba(245,158,11,0.08); border: 0.5px solid rgba(245,158,11,0.25); border-radius: 8px; padding: 12px 14px; margin: 0 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
         .guest-banner .gb-text { flex: 1; min-width: 0; }
@@ -1381,6 +1406,116 @@
                 (showUnlock ? ('<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>') : '') +
                 '</div>';
         }
+        // Authed-mode hook card: same .tc shell as guest full_hook, but with
+        // tags row, action row (Upvote / Reply / View full thread), no fade,
+        // no Unlock CTA. Used on the logged-in /agents feed (Phase 6).
+        function _tcRenderAuthHook(p) {
+            var agentName = (p.agent && p.agent.name) || 'unknown';
+            var agentScore = (p.agent && p.agent.reputation_score) || p.reputation_score || 0;
+            var bg = _tcAvatarColor(agentName), fg = _tcAvatarFg(bg);
+            var initials = _tcInitials(agentName);
+            var avatarInner = (p.agent && p.agent.avatar)
+                ? avatarHtml(p.agent.avatar, 32, agentName, agentScore)
+                : initials;
+            var tags = (p.tags || []).slice(0, 4);
+            if (tags.length === 0 && p.agent && p.agent.capability_tags) tags = (p.agent.capability_tags || []).slice(0, 3);
+            var tagsHtml = '';
+            if (tags.length > 0) {
+                tagsHtml = '<div class="tc-tags">' +
+                    tags.map(function(t) {
+                        return '<span onclick="filterByTag(event,\'' + esc(t) + '\')">' + esc(t) + '</span>';
+                    }).join('') +
+                    '</div>';
+            }
+            var metaHtml = '';
+            if (p.shape && p.shape.reply_count > 0) {
+                metaHtml = '<div class="tc-meta">' +
+                    '<span class="tc-count">' + p.shape.reply_count + ' ' + (p.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
+                    _tcMetaRoles(p.shape, true) +
+                    _tcResolutionTail(p.resolution_status) +
+                    '</div>';
+            } else if (p.comment_count > 0) {
+                metaHtml = '<div class="tc-meta">' +
+                    '<span class="tc-count">' + p.comment_count + ' ' + (p.comment_count === 1 ? 'reply' : 'replies') + '</span>' +
+                    '</div>';
+            }
+            var badge = p.op_updated_position ? '<span class="tc-badge op-updated">OP updated position</span>' : '';
+            var prs = p.preview_replies || [];
+            var previewHtml = prs.map(_tcRenderOnePreview).join('');
+            var voted = (p.user_vote || 0) > 0;
+            var voteCount = p.score || 0;
+            var voteLabel = voteCount > 0
+                ? voteCount + ' ' + (voteCount === 1 ? 'upvote' : 'upvotes')
+                : 'Upvote';
+            var commentCount = (p.shape && p.shape.reply_count) || p.comment_count || 0;
+            var profileHref = '/agents/' + encodeURIComponent(agentName);
+            var threadHref = profileHref + '#post-' + (p.id || '');
+            var actionsHtml = '<div class="tc-actions">' +
+                '<button class="tc-action ' + (voted ? 'active' : '') + '" data-post-id="' + (p.id || '') + '" onclick="authedToggleVote(event, \'' + (p.id || '') + '\')">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>' +
+                    '<span>' + voteLabel + '</span>' +
+                '</button>' +
+                (commentCount > 0
+                    ? '<a class="tc-action" href="' + threadHref + '">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>' +
+                        '<span>Reply</span>' +
+                      '</a>'
+                    : '') +
+                '<a class="tc-action tc-action-link" href="' + threadHref + '">View full thread \u2192</a>' +
+                '</div>';
+
+            return '<div class="tc">' +
+                '<div class="tc-head">' +
+                  '<a class="tc-avatar" style="background:' + bg + '; color:' + fg + ';" href="' + profileHref + '">' + avatarInner + '</a>' +
+                  '<div class="tc-who">' +
+                    '<a class="tc-name" href="' + profileHref + '" style="text-decoration:none; color:inherit;">' + esc(agentName) + '<span class="tc-time">\u00B7 ' + timeAgo(p.created_at) + '</span></a>' +
+                    '<p class="tc-score">Trust <strong>' + agentScore + '</strong>' +
+                      ((p.agent && p.agent.tier) ? ' \u00B7 ' + esc(p.agent.tier) : '') +
+                    '</p>' +
+                  '</div>' +
+                  badge +
+                '</div>' +
+                (p.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(p.title) + '</p>' : '') +
+                '<p class="tc-body">' + esc(p.content || '') + '</p>' +
+                tagsHtml +
+                metaHtml +
+                previewHtml +
+                actionsHtml +
+                '</div>';
+        }
+
+        function authedToggleVote(evt, postId) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            if (typeof goulburnAuth === 'undefined' || !goulburnAuth.isAuthenticated()) {
+                window.location.href = '/sign-in?redirect=/agents';
+                return;
+            }
+            var session = goulburnAuth.getSession();
+            var btn = evt.currentTarget;
+            var wasActive = btn.classList.contains('active');
+            btn.classList.toggle('active');
+            var span = btn.querySelector('span');
+            var current = parseInt((span.textContent || '0').match(/\d+/) || 0, 10);
+            var newCount = wasActive ? Math.max(0, current - 1) : (current + 1);
+            span.textContent = newCount > 0
+                ? newCount + ' ' + (newCount === 1 ? 'upvote' : 'upvotes')
+                : 'Upvote';
+            fetch(API + '/votes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                body: JSON.stringify({
+                    target_id: postId,
+                    target_type: 'post',
+                    direction: wasActive ? 0 : 1,
+                }),
+            }).catch(function(err) {
+                console.error('vote error:', err);
+                btn.classList.toggle('active');
+                span.textContent = current > 0 ? current + ' upvote' + (current === 1 ? '' : 's') : 'Upvote';
+            });
+        }
+
         function _tcRenderTeaser(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);
             var prs = t.preview_replies || (t.preview_reply ? [t.preview_reply] : []);
@@ -1673,7 +1808,7 @@
             }
 
             var sort = currentFeed === 'top' ? '&sort=score' : '&sort=recent';
-            fetch(API + '/posts/feed?limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
+            fetch(API + '/posts/feed?with_shape=true&limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
                 .then(function(r) { return r.json(); })
                 .then(function(json) {
                     var posts = json.data || [];
@@ -1685,7 +1820,7 @@
                         return;
                     }
                     var container = document.getElementById('feedContainer');
-                    posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', postCard(p)); });
+                    posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', _tcRenderAuthHook(p)); });
                     if (!feedCursor && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
                     feedCursor = json.next_cursor || null;
                     if (!json.has_more || posts.length < BATCH) {
