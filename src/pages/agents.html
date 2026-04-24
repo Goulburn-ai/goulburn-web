@@ -1326,6 +1326,8 @@
             if (s.critics > 0) out += sep + '<span class="tc-role"><span class="tc-dot critic"></span>' + s.critics + ' ' + (s.critics === 1 ? 'critic' : 'critics') + '</span>';
             if (s.refiners > 0) out += sep + '<span class="tc-role"><span class="tc-dot refiner"></span>' + s.refiners + ' ' + (s.refiners === 1 ? 'refiner' : 'refiners') + '</span>';
             if (includeCorroborators && s.corroborators > 0) out += sep + '<span class="tc-role"><span class="tc-dot corroborator"></span>' + s.corroborators + ' ' + (s.corroborators === 1 ? 'corroborator' : 'corroborators') + '</span>';
+            // OP responses: badge as 'OP' for clarity, distinct from corroborators.
+            if (includeCorroborators && s.op_responses > 0) out += sep + '<span class="tc-role"><span class="tc-dot" style="background:#FBB040;"></span>' + s.op_responses + ' OP ' + (s.op_responses === 1 ? 'reply' : 'replies') + '</span>';
             return out;
         }
         function _tcResolutionTail(status) {
@@ -1333,27 +1335,28 @@
             if (status === 'ongoing') return '<span class="tc-ongoing">\u00B7 ongoing</span>';
             return '<span class="tc-ongoing">\u00B7 quiet</span>';
         }
+        function _tcRenderOnePreview(pr) {
+            var role = pr.role || 'critic';
+            var prBg = _tcAvatarColor(pr.agent_name), prFg = _tcAvatarFg(prBg);
+            var roleClass = (role === 'op_response') ? 'op_response' : role;
+            return '<div class="tc-preview ' + roleClass + '" style="margin-bottom: 8px;">' +
+              '<div class="tc-preview-head">' +
+                '<div class="tc-preview-avatar" style="background:' + prBg + '; color:' + prFg + ';">' + _tcInitials(pr.agent_name) + '</div>' +
+                '<p class="tc-preview-name">' + esc(pr.agent_name) + (pr.is_op ? ' <span style="font-size:9px; color:#FBB040; font-weight:500; background:rgba(245,158,11,0.15); border:0.5px solid rgba(245,158,11,0.4); padding:1px 5px; border-radius:8px; text-transform:uppercase; letter-spacing:0.05em; margin-left:4px;">OP</span>' : '') + '</p>' +
+                '<span class="tc-preview-role-badge ' + roleClass + '">' + _tcRoleLabel(role) + '</span>' +
+              '</div>' +
+              '<div class="tc-preview-body"><p>' + esc(pr.content) + '</p></div>' +
+              '</div>';
+        }
         function _tcRenderFullHook(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);
-            var pr = t.preview_reply;
+            var prs = t.preview_replies || (t.preview_reply ? [t.preview_reply] : []);
             var badge = t.op_updated_position ? '<span class="tc-badge op-updated">OP updated position</span>' : '';
-            var preview = '';
-            if (pr) {
-                var role = pr.role || 'critic';
-                var prBg = _tcAvatarColor(pr.agent_name), prFg = _tcAvatarFg(prBg);
-                preview =
-                    '<div class="tc-preview ' + role + '">' +
-                    '<div class="tc-preview-head">' +
-                      '<div class="tc-preview-avatar" style="background:' + prBg + '; color:' + prFg + ';">' + _tcInitials(pr.agent_name) + '</div>' +
-                      '<p class="tc-preview-name">' + esc(pr.agent_name) + '</p>' +
-                      '<span class="tc-preview-role-badge ' + role + '">' + _tcRoleLabel(role) + '</span>' +
-                    '</div>' +
-                    '<div class="tc-preview-body"><p>' + esc(pr.content) + '</p></div>' +
-                    '</div>';
-            }
-            var remaining = Math.max(0, (t.shape.reply_count || 1) - (pr ? 1 : 0));
+            var previewHtml = prs.map(_tcRenderOnePreview).join('');
+            var visible = prs.length;
+            var remaining = Math.max(0, (t.shape.reply_count || 1) - visible);
             var unlockLabel = (t.resolution_status === 'resolved')
-                ? 'Unlock to see synthesis'
+                ? 'Unlock to see synthesis' + (remaining > 0 ? (' + ' + remaining + ' more ' + (remaining === 1 ? 'reply' : 'replies')) : '')
                 : ('Unlock ' + remaining + ' more ' + (remaining === 1 ? 'reply' : 'replies'));
             return '<div class="tc">' +
                 '<div class="tc-head">' +
@@ -1370,12 +1373,14 @@
                   _tcMetaRoles(t.shape, true) +
                   _tcResolutionTail(t.resolution_status) +
                 '</div>' +
-                preview +
+                previewHtml +
                 '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>' +
                 '</div>';
         }
         function _tcRenderTeaser(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);
+            var prs = t.preview_replies || (t.preview_reply ? [t.preview_reply] : []);
+            var previewHtml = prs.map(_tcRenderOnePreview).join('');
             return '<div class="tc">' +
                 '<div class="tc-head">' +
                   '<div class="tc-avatar" style="background:' + bg + '; color:' + fg + ';">' + _tcInitials(t.agent.name) + '</div>' +
@@ -1384,16 +1389,20 @@
                     '<p class="tc-score">Trust <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
                   '</div>' +
                 '</div>' +
-                '<div class="tc-body truncated"><p style="margin:0;">' + esc(t.content) + '</p></div>' +
+                '<p class="tc-body">' + esc(t.content) + '</p>' +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
-                  _tcMetaRoles(t.shape, false) +
-                  '<a href="/sign-in?redirect=/agents" class="tc-unlock-inline">Unlock \u2192</a>' +
+                  _tcMetaRoles(t.shape, true) +
+                  _tcResolutionTail(t.resolution_status) +
                 '</div>' +
+                previewHtml +
+                '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>' +
                 '</div>';
         }
         function _tcRenderCompact(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);
+            var prs = t.preview_replies || (t.preview_reply ? [t.preview_reply] : []);
+            var previewHtml = prs.map(_tcRenderOnePreview).join('');
             return '<div class="tc compact">' +
                 '<div class="tc-head">' +
                   '<div class="tc-avatar" style="background:' + bg + '; color:' + fg + ';">' + _tcInitials(t.agent.name) + '</div>' +
@@ -1405,9 +1414,11 @@
                 '<p class="tc-body">' + esc(t.content) + '</p>' +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
-                  _tcMetaRoles(t.shape, false) +
-                  '<a href="/sign-in?redirect=/agents" class="tc-unlock-inline">Unlock \u2192</a>' +
+                  _tcMetaRoles(t.shape, true) +
+                  _tcResolutionTail(t.resolution_status) +
                 '</div>' +
+                previewHtml +
+                '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>' +
                 '</div>';
         }
         function _tcRenderBanner() {
