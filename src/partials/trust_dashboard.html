@@ -15,7 +15,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-tab {
         flex: 0 0 auto; display: flex; align-items: center; gap: 0.55rem;
         padding: 0.55rem 0.85rem;
-        background: var(--dark-800); border: 1px solid var(--dark-700);
+        background: #16181C; border: 1px solid #2A2E34;
         border-radius: 0.5rem; cursor: pointer;
         transition: background 0.15s, border-color 0.15s;
         font-size: 0.875rem; min-width: 150px;
@@ -63,9 +63,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-score-big {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
         font-size: 4.5rem; font-weight: 300; line-height: 1;
-        color: var(--dark-100); letter-spacing: -0.02em;
+        color: #F7F9F9; letter-spacing: -0.02em;
     }
-    .td-score-of { font-size: 1.25rem; color: var(--dark-500); font-weight: 300; }
+    .td-score-of { font-size: 1.25rem; color: #9AA5B0; font-weight: 300; }
     .td-score-movement {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
         font-size: 0.8125rem; display: inline-flex;
@@ -91,12 +91,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-snapshot-right h3 {
         font-size: 0.75rem; font-weight: 600;
         letter-spacing: 0.08em; text-transform: uppercase;
-        color: var(--dark-500); margin: 0 0 0.75rem 0;
+        color: #9AA5B0; margin: 0 0 0.75rem 0;
     }
     .td-drivers { display: flex; flex-direction: column; gap: 0.5rem; }
     .td-driver {
         display: flex; align-items: flex-start; gap: 0.6rem;
-        font-size: 0.875rem; line-height: 1.5; color: var(--dark-100);
+        font-size: 0.875rem; line-height: 1.5; color: #F7F9F9;
     }
     .td-driver-sym {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
@@ -110,7 +110,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         gap: 1rem; padding: 1.5rem 0;
     }
     .td-layer {
-        background: var(--dark-800); border: 1px solid var(--dark-700);
+        background: #16181C; border: 1px solid #2A2E34;
         border-radius: 0.5rem; padding: 1.25rem;
         display: flex; flex-direction: column; gap: 0.75rem;
     }
@@ -121,14 +121,14 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-layer-name {
         font-size: 0.8125rem; font-weight: 700;
         letter-spacing: 0.05em; text-transform: uppercase;
-        color: var(--dark-100);
+        color: #F7F9F9;
     }
     .td-layer-score {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 1.5rem; font-weight: 400; color: var(--dark-100);
+        font-size: 1.5rem; font-weight: 400; color: #F7F9F9;
     }
     .td-layer-bar {
-        width: 100%; height: 4px; background: var(--dark-700);
+        width: 100%; height: 4px; background: #2A2E34;
         border-radius: 2px; overflow: hidden;
     }
     .td-layer-bar-fill { height: 100%; background: #F59E0B; transition: width 0.3s ease; }
@@ -137,7 +137,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     .td-evidence, .td-gaps {
         display: flex; flex-direction: column; gap: 0.35rem;
-        font-size: 0.8125rem; color: var(--dark-300);
+        font-size: 0.8125rem; color: #D1D5DB;
     }
     .td-evidence-item, .td-gap-item {
         display: flex; align-items: flex-start; gap: 0.5rem; line-height: 1.45;
@@ -177,7 +177,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-timeline-title {
         font-size: 0.75rem; font-weight: 700;
         letter-spacing: 0.08em; text-transform: uppercase;
-        color: var(--dark-500); margin: 0;
+        color: #9AA5B0; margin: 0;
     }
     .td-timeline-filters {
         display: flex; gap: 0.35rem; flex-wrap: wrap;
@@ -228,17 +228,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         padding: 0.1rem 0.45rem;
         letter-spacing: 0.04em; text-transform: uppercase;
         border-radius: 0.25rem;
-        background: var(--dark-800);
-        color: var(--dark-400);
+        background: #2A2E34;
+        color: #B1B7BD;
     }
     .td-event-ts {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
         font-size: 0.7rem;
-        color: var(--dark-500);
+        color: #9AA5B0;
         margin-left: auto;
     }
     .td-event-text {
-        color: var(--dark-100); line-height: 1.45;
+        color: #F7F9F9; line-height: 1.45;
         overflow: hidden; text-overflow: ellipsis;
     }
     /* Event text: anchor inherits the neutral event text colour;
@@ -257,14 +257,14 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-actions-title {
         font-size: 0.75rem; font-weight: 700;
         letter-spacing: 0.08em; text-transform: uppercase;
-        color: var(--dark-500); margin: 0 0 0.75rem 0;
+        color: #9AA5B0; margin: 0 0 0.75rem 0;
     }
     .td-actions-grid {
         display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
         gap: 0.75rem;
     }
     .td-action {
-        background: var(--dark-800); border: 1px solid var(--dark-700);
+        background: #16181C; border: 1px solid #2A2E34;
         border-radius: 0.5rem; padding: 1rem 1.15rem;
         display: flex; flex-direction: column; gap: 0.5rem;
     }
@@ -273,7 +273,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         gap: 0.5rem;
     }
     .td-action-title {
-        font-size: 0.9rem; font-weight: 600; color: var(--dark-100);
+        font-size: 0.9rem; font-weight: 600; color: #F7F9F9;
         line-height: 1.3;
     }
     .td-action-impact {
@@ -282,7 +282,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         white-space: nowrap;
     }
     .td-action-desc {
-        font-size: 0.8125rem; color: var(--dark-400);
+        font-size: 0.8125rem; color: #D1D5DB;
         line-height: 1.45; margin: 0;
     }
     .td-action-meta {
@@ -294,7 +294,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         padding: 0.15rem 0.55rem;
         letter-spacing: 0.04em; text-transform: uppercase;
         border-radius: 0.25rem;
-        background: var(--dark-700); color: var(--dark-400);
+        background: #2A2E34; color: #B1B7BD;
         font-weight: 600;
     }
     .td-action-effort { color: var(--dark-500); }
@@ -319,16 +319,16 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-access-stat {
         padding: 0.65rem 0.85rem;
-        background: var(--dark-800); border: 1px solid var(--dark-700);
+        background: #16181C; border: 1px solid #2A2E34;
         border-radius: 0.4rem;
     }
     .td-access-stat-num {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 1.35rem; font-weight: 400; color: var(--dark-100);
+        font-size: 1.35rem; font-weight: 400; color: #F7F9F9;
         line-height: 1;
     }
     .td-access-stat-lbl {
-        font-size: 0.7rem; color: var(--dark-500);
+        font-size: 0.7rem; color: #9AA5B0;
         letter-spacing: 0.04em; text-transform: uppercase;
         margin-top: 0.3rem;
     }
@@ -355,15 +355,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-access-verdict.td-v-restricted { background: rgba(245,158,11,0.12); color: #F59E0B; }
     .td-access-verdict.td-v-denied { background: rgba(239,68,68,0.12); color: #EF4444; }
     .td-access-body {
-        flex: 1; color: var(--dark-300);
+        flex: 1; color: #D1D5DB;
     }
     .td-access-caller {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 0.7rem; color: var(--dark-500);
+        font-size: 0.7rem; color: #9AA5B0;
     }
     .td-access-ts {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 0.7rem; color: var(--dark-500);
+        font-size: 0.7rem; color: #9AA5B0;
         margin-left: auto;
     }
 
