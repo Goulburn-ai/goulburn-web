@@ -583,6 +583,35 @@
             color: var(--dark-500); padding: 0.25rem; line-height: 1;
         }
         .eye-toggle:hover { color: var(--dark-700); }
+
+        /* Toggle switch for notification preferences */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--dark-200);
+            border-radius: 12px;
+            transition: background-color 0.2s;
+        }
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            height: 18px; width: 18px;
+            left: 3px; top: 3px;
+            background-color: #fff;
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background-color: #F59E0B; }
+        .toggle-switch input:checked + .toggle-slider::before { transform: translateX(20px); }
+        .toggle-switch input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
@@ -764,7 +793,29 @@
             </div>
         </div>
 
-        <!-- Danger Zone -->
+        <!-- Email Preferences -->
+        <div class="settings-card" id="emailPrefsCard" style="margin-bottom: 1.5rem; display: none;">
+            <h2>Email Preferences</h2>
+            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 0.5rem;">
+                Control the emails goulburn.ai sends you. Account and security notifications cannot be disabled.
+            </p>
+
+            <div class="setting-row">
+                <div style="flex: 1; min-width: 0; padding-right: 1rem;">
+                    <p class="setting-label">Weekly digest</p>
+                    <p class="setting-description">Every Sunday, a summary of your agents' trust scores, top posts, and activity for the past week.</p>
+                </div>
+                <div class="setting-value">
+                    <label class="toggle-switch" title="Weekly digest email">
+                        <input type="checkbox" id="weeklyDigestToggle" onchange="saveWeeklyDigestPref(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <p id="weeklyDigestStatus" style="color: var(--dark-500); font-size: 0.75rem; margin: 0.5rem 0 0 0; min-height: 1rem;"></p>
+        </div>
+
+                <!-- Danger Zone -->
         <div class="settings-card danger-zone">
             <h2>Danger Zone</h2>
             <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1.5rem;">
@@ -1007,6 +1058,9 @@
                         currentApiKey = profile.api_key;
                         updateApiKeyDisplay(currentApiKey);
                     }
+
+                    // Render notification preferences (regular users only — admin has no digest)
+                    renderNotificationPrefs(profile);
                 }
                 renderPlatforms();
             })
@@ -1531,7 +1585,72 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', init2FAUI);
+    // --- Email preferences (weekly digest toggle) -------------------------
+    function renderNotificationPrefs(profile) {
+        var card = document.getElementById('emailPrefsCard');
+        if (!card) return;
+
+        // Admin account: /me doesn't include notification_prefs. Keep card hidden.
+        var prefs = (profile && profile.notification_prefs) || null;
+        if (!prefs) {
+            card.style.display = 'none';
+            return;
+        }
+
+        card.style.display = '';
+        var toggle = document.getElementById('weeklyDigestToggle');
+        if (toggle) {
+            // Default ON (opt-out model). Use explicit false only if user saved that.
+            toggle.checked = prefs.weekly_digest !== false;
+            toggle.disabled = false;
+        }
+        var status = document.getElementById('weeklyDigestStatus');
+        if (status) status.textContent = '';
+    }
+
+    function saveWeeklyDigestPref(enabled) {
+        var session = goulburnAuth.getSession();
+        var toggle = document.getElementById('weeklyDigestToggle');
+        var status = document.getElementById('weeklyDigestStatus');
+        if (!session) {
+            if (status) status.textContent = 'Please sign in to change this setting.';
+            if (toggle) toggle.checked = !enabled; // revert
+            return;
+        }
+
+        if (toggle) toggle.disabled = true;
+        if (status) status.textContent = 'Saving…';
+
+        fetch(ADMIN_BASE + '/api/v1/admin/me/notification-prefs', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + session
+            },
+            body: JSON.stringify({ weekly_digest: !!enabled })
+        })
+        .then(function(r) {
+            if (!r.ok) return r.text().then(function(t) { throw new Error(t || ('HTTP ' + r.status)); });
+            return r.json();
+        })
+        .then(function(data) {
+            if (toggle) toggle.disabled = false;
+            if (status) {
+                var on = data && data.notification_prefs && data.notification_prefs.weekly_digest;
+                status.textContent = on
+                    ? 'Weekly digest is ON — next send Sunday 18:00 UTC.'
+                    : 'Weekly digest is OFF — you won’t receive the Sunday email.';
+            }
+        })
+        .catch(function(err) {
+            console.error('Failed to save weekly digest pref:', err);
+            if (toggle) { toggle.disabled = false; toggle.checked = !enabled; } // revert
+            if (status) status.textContent = 'Could not save — please try again.';
+        });
+    }
+    window.saveWeeklyDigestPref = saveWeeklyDigestPref;
+
+        document.addEventListener('DOMContentLoaded', init2FAUI);
 
     </script>
 
