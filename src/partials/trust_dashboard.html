@@ -164,12 +164,109 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         padding: 3rem 1rem; text-align: center;
         color: var(--dark-500); font-size: 0.875rem;
     }
+
+    /* Evidence timeline (Week 2) */
+    .td-timeline-wrap {
+        padding: 1.5rem 0 0.5rem 0;
+        border-top: 1px solid var(--dark-700);
+    }
+    .td-timeline-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap;
+    }
+    .td-timeline-title {
+        font-size: 0.75rem; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--dark-500); margin: 0;
+    }
+    .td-timeline-filters {
+        display: flex; gap: 0.35rem; flex-wrap: wrap;
+    }
+    .td-filter {
+        padding: 0.3rem 0.65rem; font-size: 0.75rem;
+        background: transparent; border: 1px solid var(--dark-700);
+        color: var(--dark-400); border-radius: 0.3rem;
+        cursor: pointer; font-weight: 500;
+        transition: all 0.15s;
+    }
+    .td-filter:hover { border-color: var(--dark-500); color: var(--dark-100); }
+    .td-filter.td-filter-active {
+        background: rgba(245,158,11,0.12); border-color: #F59E0B; color: #F59E0B;
+    }
+    .td-timeline {
+        display: flex; flex-direction: column;
+        border-left: 1px solid var(--dark-700);
+        padding-left: 1.25rem;
+        margin-top: 0.5rem;
+    }
+    .td-event {
+        display: flex; gap: 0.85rem; padding: 0.75rem 0;
+        border-bottom: 1px solid var(--dark-800);
+        font-size: 0.85rem;
+    }
+    .td-event:last-child { border-bottom: none; }
+    .td-event-sym {
+        font-family: 'SF Mono','Menlo','Consolas',monospace;
+        font-weight: 700; font-size: 0.9rem;
+        width: 14px; flex-shrink: 0;
+        margin-left: -1.25rem; margin-right: 0.5rem;
+        background: var(--dark-900);
+        text-align: center; line-height: 1.2;
+    }
+    .td-event-pos .td-event-sym { color: #22C55E; }
+    .td-event-neg .td-event-sym { color: #EF4444; }
+    .td-event-neutral .td-event-sym { color: var(--dark-500); }
+    .td-event-body {
+        flex: 1; display: flex; flex-direction: column; gap: 0.15rem;
+        min-width: 0;
+    }
+    .td-event-row1 {
+        display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;
+    }
+    .td-event-layer {
+        font-size: 0.7rem; font-weight: 600;
+        padding: 0.1rem 0.45rem;
+        letter-spacing: 0.04em; text-transform: uppercase;
+        border-radius: 0.25rem;
+        background: var(--dark-800);
+        color: var(--dark-400);
+    }
+    .td-event-ts {
+        font-family: 'SF Mono','Menlo','Consolas',monospace;
+        font-size: 0.7rem;
+        color: var(--dark-500);
+        margin-left: auto;
+    }
+    .td-event-text {
+        color: var(--dark-100); line-height: 1.45;
+        overflow: hidden; text-overflow: ellipsis;
+    }
+    .td-event-text a { color: #F59E0B; text-decoration: none; }
+    .td-event-text a:hover { text-decoration: underline; }
+    .td-timeline-empty {
+        padding: 1.5rem 0; font-size: 0.85rem; color: var(--dark-500);
+    }
 </style>
 
 <section class="td-root" id="trustDashboard">
     <div class="td-strip" id="tdStrip"></div>
     <div class="td-strip-meta" id="tdStripMeta"></div>
     <div id="tdPanel" class="td-loading">Loading trust state&hellip;</div>
+
+    <div class="td-timeline-wrap" id="tdTimelineWrap" style="display:none;">
+        <div class="td-timeline-head">
+            <h3 class="td-timeline-title">Evidence timeline</h3>
+            <div class="td-timeline-filters" id="tdFilters">
+                <button class="td-filter td-filter-active" data-layer="all">All</button>
+                <button class="td-filter" data-layer="compliance">Compliance</button>
+                <button class="td-filter" data-layer="identity">Identity</button>
+                <button class="td-filter" data-layer="capability">Capability</button>
+                <button class="td-filter" data-layer="operational">Operational</button>
+                <button class="td-filter" data-layer="reputation">Reputation</button>
+            </div>
+        </div>
+        <div class="td-timeline" id="tdTimeline"></div>
+    </div>
 </section>
 
 <script>
@@ -331,8 +428,93 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     function selectAgent(id){
         state.selectedId=id;
         renderStrip(state.agents,id);
-        renderPanel((state.agents||[]).find(function(a){return a.id===id;}));
+        var agent = (state.agents||[]).find(function(a){return a.id===id;});
+        renderPanel(agent);
+        if (agent && agent.name) loadTimeline(agent.name, state.layerFilter || 'all');
     }
+    // Evidence timeline (Week 2)
+    function renderTimeline(events, activeLayer) {
+        var wrap = document.getElementById('tdTimelineWrap');
+        var timeline = document.getElementById('tdTimeline');
+        if (!wrap || !timeline) return;
+
+        // Update filter pill active state
+        var filters = document.querySelectorAll('#tdFilters .td-filter');
+        filters.forEach(function(f) {
+            f.classList.toggle('td-filter-active', f.dataset.layer === (activeLayer || 'all'));
+        });
+
+        if (!events || !events.length) {
+            wrap.style.display = '';
+            timeline.innerHTML = '<div class="td-timeline-empty">No events in this view yet. As your agent accumulates activity, evidence will appear here.</div>';
+            return;
+        }
+
+        wrap.style.display = '';
+        var html = events.map(function(e) {
+            var sym = e.impact === 'pos' ? '+' : (e.impact === 'neg' ? '\u2212' : '\u00B7');
+            var symCls = e.impact === 'pos' ? 'td-event-pos' : (e.impact === 'neg' ? 'td-event-neg' : 'td-event-neutral');
+            var ts = fmtShort(e.timestamp);
+            var linked = e.evidence_url ? ('<a href="' + e.evidence_url + '" target="_blank">' + esc(e.text) + '</a>') : esc(e.text);
+            return '<div class="td-event ' + symCls + '">' +
+                '<div class="td-event-sym">' + sym + '</div>' +
+                '<div class="td-event-body">' +
+                    '<div class="td-event-row1">' +
+                        '<span class="td-event-layer">' + esc(e.layer || '') + '</span>' +
+                        '<span class="td-event-ts">' + ts + '</span>' +
+                    '</div>' +
+                    '<div class="td-event-text">' + linked + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+        timeline.innerHTML = html;
+    }
+
+    function fmtShort(iso) {
+        if (!iso) return '';
+        try {
+            var dt = new Date(iso);
+            var diff = (Date.now() - dt.getTime()) / 1000;
+            if (diff < 60) return Math.floor(diff) + 's ago';
+            if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+            if (diff < 604800) return Math.floor(diff/86400) + 'd ago';
+            return dt.toISOString().slice(0, 10);
+        } catch (e) { return ''; }
+    }
+
+    function loadTimeline(agentName, layer) {
+        var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
+        var qs = 'limit=30';
+        if (layer && layer !== 'all') qs += '&layer=' + encodeURIComponent(layer);
+        state.layerFilter = layer;
+        var wrap = document.getElementById('tdTimelineWrap');
+        if (wrap) wrap.style.display = '';
+        var timeline = document.getElementById('tdTimeline');
+        if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Loading timeline\u2026</div>';
+
+        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/trust-events?' + qs)
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; })
+            .then(function(d) {
+                if (!d || !d.events) {
+                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn\u2019t load timeline.</div>';
+                    return;
+                }
+                renderTimeline(d.events, layer);
+            });
+    }
+
+    // Wire up filter clicks
+    document.addEventListener('click', function(ev) {
+        var target = ev.target;
+        if (target && target.classList && target.classList.contains('td-filter')) {
+            var layer = target.dataset.layer;
+            var agent = (state.agents||[]).find(function(a){return a.id===state.selectedId;});
+            if (agent && agent.name) loadTimeline(agent.name, layer);
+        }
+    });
+
     window.__tdSelect=selectAgent;
     window.__tdAction=function(key){
         var routes={ compliance:'/how-it-works#compliance', identity:'/settings',
