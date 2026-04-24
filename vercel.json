@@ -142,6 +142,10 @@
     {
       "source": "/oauth/2fa",
       "destination": "/oauth-2fa.html"
+    },
+    {
+      "source": "/unsubscribe/:token",
+      "destination": "https://goulburn-admin-production.up.railway.app/api/v1/admin/unsubscribe/:token"
     }
   ]
 }
