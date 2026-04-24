@@ -209,4 +209,65 @@
             init();
         }
     })();
+
+    // ──────────────────────────────────────────────────────────────
+    // Universal registration-ID URL stamp. Runs on every page once
+    // the user is signed in. Appends ?u={reg_id} to the address bar
+    // via history.replaceState. Works on all pages including public
+    // ones (feed, agent profiles, landing) because it uses a query
+    // parameter rather than a path segment — zero collision with
+    // existing routes.
+    //
+    // Pages that already path-stamp (/dashboard/:id, /settings/:id)
+    // are left alone — their own page-level logic handles URL state.
+    //
+    // Privacy note: the reg_id appears in the address bar. On public
+    // pages, if you copy-paste the URL to share externally, your
+    // reg_id goes with it. The ID alone doesn't grant access (auth
+    // is by session) but treat as semi-private. Referrer-Policy is
+    // tightened to same-origin on /dashboard/* and /settings/* to
+    // prevent leakage via Referer header on outbound clicks.
+    // ──────────────────────────────────────────────────────────────
+    (function stampRegIdUniverse() {
+        try {
+            if (!goulburnAuth.isAuthenticated()) return;
+
+            function stampIfMissing(regId) {
+                if (!regId) return;
+                var path = window.location.pathname;
+                // Skip pages that handle their own path-level stamping
+                if (/^\/dashboard(?:\/\d+)?\/?$/.test(path)) return;
+                if (/^\/settings(?:\/\d+)?\/?$/.test(path)) return;
+                if (/^\/dashboard\/settings(?:\/\d+)?\/?$/.test(path)) return;
+
+                // Already stamped?
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('u') === regId) return;
+
+                params.set('u', regId);
+                var newUrl = path + '?' + params.toString() + window.location.hash;
+                try { history.replaceState(null, '', newUrl); } catch (e) { /* no-op */ }
+            }
+
+            // Use cached reg_id if present — avoids an extra /me fetch
+            // on every page load once the user is signed in.
+            var cached = goulburnAuth.getRegId && goulburnAuth.getRegId();
+            if (cached) {
+                stampIfMissing(cached);
+                return;
+            }
+            // Cold: fetch /me once and cache.
+            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
+                headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+            })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; })
+            .then(function(profile) {
+                if (profile && profile.registration_id) {
+                    if (goulburnAuth.setRegId) goulburnAuth.setRegId(profile.registration_id);
+                    stampIfMissing(profile.registration_id);
+                }
+            });
+        } catch (e) { /* silent — never block page render */ }
+    })();
     </script>
