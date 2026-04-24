@@ -241,8 +241,10 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         color: var(--dark-100); line-height: 1.45;
         overflow: hidden; text-overflow: ellipsis;
     }
-    .td-event-text a { color: #F59E0B; text-decoration: none; }
-    .td-event-text a:hover { text-decoration: underline; }
+    /* Event text: anchor inherits the neutral event text colour;
+       amber accent only on hover so substantive content reads cleanly. */
+    .td-event-text a { color: inherit; text-decoration: none; }
+    .td-event-text a:hover { color: #F59E0B; text-decoration: underline; }
     .td-timeline-empty {
         padding: 1.5rem 0; font-size: 0.85rem; color: var(--dark-500);
     }
