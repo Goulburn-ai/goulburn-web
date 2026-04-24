@@ -3,15 +3,15 @@ Trust Dashboard component — Week 1 of the dashboard redesign.
 Portfolio strip + selected-agent trust panel with 5 layer scores.
 -->
 <style>
-    .td-root { margin: 1.5rem 0 2rem 0; color: var(--dark-100); }
+    .td-root { margin: 1.5rem 0 2rem 0; color: #F7F9F9; }
     .td-strip {
         display: flex; gap: 0.5rem; overflow-x: auto;
         padding: 0.75rem 0.25rem;
-        border-bottom: 1px solid var(--dark-700);
+        border-bottom: 1px solid #2A2E34;
         scrollbar-width: thin;
     }
     .td-strip::-webkit-scrollbar { height: 6px; }
-    .td-strip::-webkit-scrollbar-thumb { background: var(--dark-700); border-radius: 3px; }
+    .td-strip::-webkit-scrollbar-thumb { background: #2A2E34; border-radius: 3px; }
     .td-tab {
         flex: 0 0 auto; display: flex; align-items: center; gap: 0.55rem;
         padding: 0.55rem 0.85rem;
@@ -20,11 +20,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         transition: background 0.15s, border-color 0.15s;
         font-size: 0.875rem; min-width: 150px;
     }
-    .td-tab:hover { background: var(--dark-700); border-color: var(--dark-500); }
-    .td-tab.td-active { background: var(--dark-700); border-color: #F59E0B; }
+    .td-tab:hover { background: #1F2328; border-color: #3A3F45; }
+    .td-tab.td-active { background: #1F2328; border-color: #F59E0B; }
     .td-tab-avatar {
         width: 28px; height: 28px; border-radius: 50%;
-        background: var(--dark-700); display: flex;
+        background: #2A2E34; display: flex;
         align-items: center; justify-content: center;
         font-size: 0.75rem; font-weight: 700;
         overflow: hidden; flex-shrink: 0;
@@ -32,29 +32,29 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-tab-avatar img { width: 100%; height: 100%; object-fit: cover; }
     .td-tab-avatar svg { width: 100%; height: 100%; padding: 4px; box-sizing: border-box; }
     .td-tab-name {
-        font-weight: 600; color: var(--dark-100); max-width: 120px;
+        font-weight: 600; color: #F7F9F9; max-width: 120px;
         overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     }
     .td-tab-score {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 0.8125rem; color: var(--dark-400); margin-left: auto;
+        font-size: 0.8125rem; color: #B1B7BD; margin-left: auto;
     }
     .td-tab.td-active .td-tab-score { color: #F59E0B; }
     .td-strip-meta {
         display: flex; gap: 2rem; padding: 0.75rem 0.25rem;
-        font-size: 0.8125rem; color: var(--dark-400);
-        border-bottom: 1px solid var(--dark-700); flex-wrap: wrap;
+        font-size: 0.8125rem; color: #B1B7BD;
+        border-bottom: 1px solid #2A2E34; flex-wrap: wrap;
     }
     .td-strip-meta strong {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        color: var(--dark-100); font-weight: 600;
+        color: #F7F9F9; font-weight: 600;
     }
     .td-strip-meta .td-meta-risk { color: #EF4444; }
 
     .td-snapshot {
         display: grid; grid-template-columns: minmax(220px,1fr) 2fr;
         gap: 2rem; padding: 2rem 0 1.5rem 0;
-        border-bottom: 1px solid var(--dark-700);
+        border-bottom: 1px solid #2A2E34;
     }
     @media (max-width:640px) {
         .td-snapshot { grid-template-columns: 1fr; gap: 1rem; }
@@ -73,7 +73,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-move-up { color: #22C55E; }
     .td-move-down { color: #EF4444; }
-    .td-move-flat { color: var(--dark-500); }
+    .td-move-flat { color: #9AA5B0; }
 
     .td-access {
         display: inline-flex; align-items: center; gap: 0.5rem;
@@ -151,8 +151,8 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     .td-layer-action {
         margin-top: 0.25rem; padding: 0.5rem 0.85rem;
-        background: transparent; border: 1px solid var(--dark-500);
-        color: var(--dark-100); border-radius: 0.375rem;
+        background: transparent; border: 1px solid #2A2E34;
+        color: #F7F9F9; border-radius: 0.375rem;
         font-size: 0.8125rem; font-weight: 600; cursor: pointer;
         text-align: left; transition: border-color 0.15s, background 0.15s;
     }
@@ -162,13 +162,13 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     .td-empty, .td-loading {
         padding: 3rem 1rem; text-align: center;
-        color: var(--dark-500); font-size: 0.875rem;
+        color: #9AA5B0; font-size: 0.875rem;
     }
 
     /* Evidence timeline (Week 2) */
     .td-timeline-wrap {
         padding: 1.5rem 0 0.5rem 0;
-        border-top: 1px solid var(--dark-700);
+        border-top: 1px solid #2A2E34;
     }
     .td-timeline-head {
         display: flex; align-items: center; justify-content: space-between;
@@ -184,24 +184,24 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-filter {
         padding: 0.3rem 0.65rem; font-size: 0.75rem;
-        background: transparent; border: 1px solid var(--dark-700);
-        color: var(--dark-400); border-radius: 0.3rem;
+        background: transparent; border: 1px solid #2A2E34;
+        color: #B1B7BD; border-radius: 0.3rem;
         cursor: pointer; font-weight: 500;
         transition: all 0.15s;
     }
-    .td-filter:hover { border-color: var(--dark-500); color: var(--dark-100); }
+    .td-filter:hover { border-color: #3A3F45; color: #F7F9F9; }
     .td-filter.td-filter-active {
         background: rgba(245,158,11,0.12); border-color: #F59E0B; color: #F59E0B;
     }
     .td-timeline {
         display: flex; flex-direction: column;
-        border-left: 1px solid var(--dark-700);
+        border-left: 1px solid #2A2E34;
         padding-left: 1.25rem;
         margin-top: 0.5rem;
     }
     .td-event {
         display: flex; gap: 0.85rem; padding: 0.75rem 0;
-        border-bottom: 1px solid var(--dark-800);
+        border-bottom: 1px solid #1F2328;
         font-size: 0.85rem;
     }
     .td-event:last-child { border-bottom: none; }
@@ -210,12 +210,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         font-weight: 700; font-size: 0.9rem;
         width: 14px; flex-shrink: 0;
         margin-left: -1.25rem; margin-right: 0.5rem;
-        background: var(--dark-900);
+        background: #0A0A0A;
         text-align: center; line-height: 1.2;
     }
     .td-event-pos .td-event-sym { color: #22C55E; }
     .td-event-neg .td-event-sym { color: #EF4444; }
-    .td-event-neutral .td-event-sym { color: var(--dark-500); }
+    .td-event-neutral .td-event-sym { color: #9AA5B0; }
     .td-event-body {
         flex: 1; display: flex; flex-direction: column; gap: 0.15rem;
         min-width: 0;
@@ -246,13 +246,13 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-event-text a { color: inherit; text-decoration: none; }
     .td-event-text a:hover { color: #F59E0B; text-decoration: underline; }
     .td-timeline-empty {
-        padding: 1.5rem 0; font-size: 0.85rem; color: var(--dark-500);
+        padding: 1.5rem 0; font-size: 0.85rem; color: #9AA5B0;
     }
 
     /* Actions panel (Week 3) */
     .td-actions-wrap {
         padding: 1.5rem 0;
-        border-top: 1px solid var(--dark-700);
+        border-top: 1px solid #2A2E34;
     }
     .td-actions-title {
         font-size: 0.75rem; font-weight: 700;
@@ -297,7 +297,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         background: #2A2E34; color: #B1B7BD;
         font-weight: 600;
     }
-    .td-action-effort { color: var(--dark-500); }
+    .td-action-effort { color: #9AA5B0; }
     .td-action-effort.td-effort-low { color: #22C55E; }
     .td-action-effort.td-effort-medium { color: #F59E0B; }
     .td-action-effort.td-effort-high { color: #EF4444; }
@@ -311,7 +311,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     /* Access & Permissions panel */
     .td-access-wrap {
         padding: 1.5rem 0;
-        border-top: 1px solid var(--dark-700);
+        border-top: 1px solid #2A2E34;
     }
     .td-access-summary {
         display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr));
@@ -341,7 +341,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-access-entry {
         display: flex; gap: 0.75rem; padding: 0.6rem 0;
-        border-bottom: 1px solid var(--dark-800);
+        border-bottom: 1px solid #1F2328;
     }
     .td-access-entry:last-child { border-bottom: none; }
     .td-access-verdict {
@@ -372,12 +372,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-event.td-event-upvote .td-event-text { font-size: 0.8rem; }
     .td-timeline-more {
         margin-top: 0.65rem; padding: 0.5rem 0.9rem;
-        background: transparent; border: 1px solid var(--dark-700);
-        color: var(--dark-400); border-radius: 0.35rem;
+        background: transparent; border: 1px solid #2A2E34;
+        color: #B1B7BD; border-radius: 0.35rem;
         font-size: 0.8125rem; font-weight: 500; cursor: pointer;
         text-align: center; width: 100%;
     }
-    .td-timeline-more:hover { border-color: var(--dark-500); color: var(--dark-100); }
+    .td-timeline-more:hover { border-color: #3A3F45; color: #F7F9F9; }
 </style>
 
 <section class="td-root" id="trustDashboard">
