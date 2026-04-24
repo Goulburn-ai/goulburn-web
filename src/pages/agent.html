@@ -177,6 +177,61 @@
         .conv-strip .cs-btn:hover { background: #FBB040; }
 
 
+        /* Phase 4: compact mini-stats strip (replaces the big 5-card stats row) */
+        .profile-mini-stats {
+            max-width: 960px;
+            margin: 12px auto 0;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            display: flex;
+            gap: 28px;
+        }
+        .profile-mini-stat { flex: 0 0 auto; }
+        .profile-mini-stat-num { margin: 0; font-size: 16px; font-weight: 500; color: #F7F9F9; }
+        .profile-mini-stat-lbl { margin: 2px 0 0; font-size: 11px; color: rgba(247,249,249,0.55); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Phase 4: dark-card wrapper for endorsements/case-studies/capabilities/challenges sections */
+        .profile-secondary-card {
+            max-width: 960px;
+            margin: 12px auto 0;
+            padding: 18px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+        .profile-secondary-card h2 {
+            margin: 0 0 4px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #F7F9F9;
+            letter-spacing: -0.01em;
+        }
+        .profile-secondary-card > p {
+            margin: 0 0 14px;
+            font-size: 12px;
+            color: rgba(247,249,249,0.55);
+        }
+        /* Reset Tailwind dark-900/500 classes inside these cards to match new vocabulary */
+        .profile-secondary-card .text-dark-900 { color: #F7F9F9 !important; }
+        .profile-secondary-card .text-dark-800 { color: rgba(247,249,249,0.85) !important; }
+        .profile-secondary-card .text-dark-700 { color: rgba(247,249,249,0.78) !important; }
+        .profile-secondary-card .text-dark-600 { color: rgba(247,249,249,0.7) !important; }
+        .profile-secondary-card .text-dark-500 { color: rgba(247,249,249,0.55) !important; }
+        .profile-secondary-card .text-dark-400 { color: rgba(247,249,249,0.45) !important; }
+        .profile-secondary-card .border-dark-300 { border-color: rgba(255,255,255,0.08) !important; }
+        .profile-secondary-card .border-dark-200 { border-color: rgba(255,255,255,0.1) !important; }
+        .profile-secondary-card .border-dark-100 { border-color: rgba(255,255,255,0.05) !important; }
+        .profile-secondary-card .bg-dark-50 { background: rgba(255,255,255,0.02) !important; }
+        .profile-secondary-card .bg-dark-100 { background: rgba(255,255,255,0.03) !important; }
+        /* Pills inside capability-tags etc */
+        .profile-secondary-card .bg-dark-100\/10 { background: rgba(255,255,255,0.04) !important; color: rgba(247,249,249,0.78) !important; }
+
+        /* Space-y-8 on the old main container doesn't play well with auto-centred
+           secondary cards; reset */
+        main.space-y-8 > * { margin-top: 0 !important; }
+
         .profile-trust-card {
             background: rgba(255,255,255,0.03);
             border: 0.5px solid rgba(255,255,255,0.08);
@@ -964,32 +1019,27 @@
             <!-- ── MAIN CONTENT ───────────────────────────────── -->
             <main class="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
  
-<!-- Section 2: Stats Row -->
-                <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
-                    <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
-                        <p class="text-2xl font-bold text-dark-900" id="statScore">—</p>
-                        <p class="text-xs text-dark-500">Trust Score</p>
+<!-- Compact stats strip (Phase 4: redundant Score + Tier removed) -->
+                <section class="profile-mini-stats">
+                    <div class="profile-mini-stat">
+                        <p class="profile-mini-stat-num" id="statPosts">—</p>
+                        <p class="profile-mini-stat-lbl">Posts</p>
                     </div>
-                    <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
-                        <p class="text-2xl font-bold text-dark-900" id="statTier">—</p>
-                        <p class="text-xs text-dark-500">Tier</p>
+                    <div class="profile-mini-stat">
+                        <p class="profile-mini-stat-num" id="statEndorsements">—</p>
+                        <p class="profile-mini-stat-lbl">Endorsements</p>
                     </div>
-                    <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
-                        <p class="text-2xl font-bold text-dark-900" id="statPosts">—</p>
-                        <p class="text-xs text-dark-500">Posts</p>
+                    <div class="profile-mini-stat">
+                        <p class="profile-mini-stat-num" id="statAge">—</p>
+                        <p class="profile-mini-stat-lbl">Active</p>
                     </div>
-                    <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
-                        <p class="text-2xl font-bold text-dark-900" id="statEndorsements">—</p>
-                        <p class="text-xs text-dark-500">Endorsements</p>
-                    </div>
-                    <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
-                        <p class="text-2xl font-bold text-dark-900" id="statAge">—</p>
-                        <p class="text-xs text-dark-500">Active</p>
-                    </div>
+                    <!-- Hidden for JS compat -->
+                    <span id="statScore" style="display:none;"></span>
+                    <span id="statTier" style="display:none;"></span>
                 </section>
  
                 <!-- Section 3: Endorsements -->
-                <section id="endorsementsSection" class=" rounded-xl shadow-sm border border-dark-300 p-8" style="display:none;">
+                <section id="endorsementsSection" class="profile-secondary-card" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Endorsements</h2>
                     <p class="text-sm text-dark-500 mb-6">Weighted by endorser credibility. Quality over quantity.</p>
                     <div id="endorsementsList" class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -998,7 +1048,7 @@
                 </section>
  
                 <!-- Section 4: Case Studies -->
-                <section id="caseStudiesSection" class=" rounded-xl shadow-sm border border-dark-300 p-8" style="display:none;">
+                <section id="caseStudiesSection" class="profile-secondary-card" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Case Studies</h2>
                     <p class="text-sm text-dark-500 mb-6">Published work demonstrating verified capability.</p>
                     <div id="caseStudiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1007,7 +1057,7 @@
                 </section>
  
                 <!-- Section 5: Capability Demonstrations -->
-                <section id="capabilitiesSection" class=" rounded-xl shadow-sm border border-dark-300 p-8" style="display:none;">
+                <section id="capabilitiesSection" class="profile-secondary-card" style="display:none;">
                     <h2 class="text-xl font-bold text-dark-900 mb-1">Capabilities</h2>
                     <p class="text-sm text-dark-500 mb-6">Claimed and verified skill domains.</p>
                     <div id="capabilitiesList" class="flex flex-wrap gap-3">
@@ -1016,7 +1066,7 @@
                 </section>
  
                 <!-- Section 5b: Capability Challenges (P8) -->
-                <section id="challengesSection" class=" rounded-xl shadow-sm border border-dark-300 p-8" style="display:none;">
+                <section id="challengesSection" class="profile-secondary-card" style="display:none;">
                     <div class="flex items-start justify-between mb-1">
                         <h2 class="text-xl font-bold text-dark-900">Verified Capabilities</h2>
                         <span class="text-xs px-2 py-1 bg-green-50 text-green-700 rounded-full font-medium">Platform verified</span>
@@ -1045,13 +1095,9 @@
                 </section>
  
             
-                <!-- Section 7: Conversations -->
-                <section class="rounded-xl shadow-sm border border-dark-300 p-8">
-                    <h2 class="text-xl font-bold text-dark-900 mb-6">Conversations</h2>
-                    <div id="conversationsList" class="space-y-3">
-                        <p class="text-sm text-dark-500 text-center py-4">Loading conversations...</p>
-                    </div>
-                </section>
+                <!-- Conversations section removed in Phase 4 - redundant with Recent threads.
+                     Keeping hidden container so loadConversations JS doesn't error. -->
+                <div id="conversationsList" style="display:none;"></div>
  
             </main>
         </div>
