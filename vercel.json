@@ -3,6 +3,15 @@
   "outputDirectory": "public",
   "headers": [
     {
+      "source": "/((?!static|_next|.*\\.(?:js|css|png|jpg|svg|webp|ico|woff2)).*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, s-maxage=60, stale-while-revalidate=300"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
