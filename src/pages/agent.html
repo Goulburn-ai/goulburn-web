@@ -421,6 +421,7 @@
 
         // ── Tier Review (council) ─────────────────────────────
         async function requestTierReview() {
+            if (gateOnPendingDeletion("Expert Review")) return;
             var btn = document.getElementById('tierReviewBtn');
             var statusEl = document.getElementById('tierReviewStatus');
             var tier = document.getElementById('tierReviewTarget').value;
@@ -1121,6 +1122,7 @@
         }
 
         async function toggleSuspend() {
+            if (gateOnPendingDeletion("Visibility toggle")) return;
             if (!_ownedAgent) return;
             var isSuspended = (_ownedAgent.status || '').toLowerCase() === 'suspended';
             var path = isSuspended ? '/resume' : '/suspend';
@@ -1148,6 +1150,20 @@
         // the red Delete button becomes a green Reactivate button. After 48h
         // the agent is hidden from /mine entirely (backend filter), so this
         // path only fires for fresh tombstones.
+        // Shared pending-deletion gate. When the agent is in the 48h
+        // deletion grace, every owner action except Reactivate must be a
+        // no-op. The ghost CSS on buttons is visual; this helper is the
+        // functional gate. Returns true if the action should block.
+        var _agentPendingDeletion = false;
+        function gateOnPendingDeletion(actionName) {
+            if (!_agentPendingDeletion) return false;
+            showToastLite(
+                (actionName || "This action") + " is unavailable. Reactivate the agent first.",
+                true
+            );
+            return true;
+        }
+
         var _reactivateCountdownTimer = null;
         function renderDeleteOrReactivateState(agent) {
             var btn = document.getElementById('deleteAgentBtn');
@@ -1172,6 +1188,11 @@
             }
 
             if (deletedAt && hoursLeft > 0) {
+                // Pending-deletion state is active — block all owner actions
+                _agentPendingDeletion = true;
+                // Also auto-close the edit panel if currently open
+                var _ep = document.getElementById("editPanel");
+                if (_ep && _ep.style.display !== "none") _ep.style.display = "none";
                 // Switch to Reactivate mode
                 btn.onclick = function() { confirmReactivate(); };
                 btn.title = 'Reactivate this agent (within the 48h window)';
@@ -1298,6 +1319,7 @@
         }
 
         function toggleEditPanel() {
+            if (gateOnPendingDeletion("Edit Profile")) return;
             var panel = document.getElementById('editPanel');
             var isVisible = panel.style.display !== 'none';
             if (isVisible) {
@@ -1419,6 +1441,7 @@
         });
 
         async function saveAgentEdits() {
+            if (gateOnPendingDeletion("Save Changes")) return;
             var btn = document.getElementById('editSaveBtn');
             var status = document.getElementById('editStatus');
             btn.disabled = true;
@@ -1570,10 +1593,12 @@
         }
  
         function copyProfileLink() {
+            if (gateOnPendingDeletion("Copy Link")) return;
             navigator.clipboard.writeText(window.location.href).then(function() { flashConfirm('copyConfirm'); });
         }
  
         function copyEmbedCode() {
+            if (gateOnPendingDeletion("Embed Badge")) return;
             var n = getAgentName();
             var code = '<a href="https://goulburn.ai/verify/' + encodeURIComponent(n) + '"><img src="https://api.goulburn.ai/api/badge/' + encodeURIComponent(n) + '" alt="' + n + ' — Verified by goulburn.ai" /></a>';
             navigator.clipboard.writeText(code).then(function() { flashConfirm('copyConfirm'); });
@@ -2515,6 +2540,7 @@
 
         // ── Share Trust modal ──────────────────────────────────
         function openShareModal() {
+            if (gateOnPendingDeletion("Share Trust")) return;
             var name = getAgentName();
             var shareUrl = 'https://api.goulburn.ai/share/' + encodeURIComponent(name);
             var profileUrl = 'https://goulburn.ai/agents/' + encodeURIComponent(name);
