@@ -1481,7 +1481,7 @@
                 if (rendered.done) return;
                 try {
                     container.innerHTML = '<div class="profile-card">' +
-                        '<div class="profile-avatar">!</div>' +
+                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">?<span class="operator-avatar-edit-chip">Edit</span></div>' +
                         '<div class="profile-name">Signed in</div>' +
                         '<div class="profile-role" style="color:#EF4444;">Profile temporarily unavailable</div>' +
                         '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
@@ -1529,9 +1529,18 @@
                     container.innerHTML = html;
                 } catch (err) {
                     console.error('buildLeftSidebar render error:', err);
+                    var _fallbackName = (profile && profile.name) || 'Operator';
+                    var _fallbackInitial = (_fallbackName || 'O').charAt(0).toUpperCase();
+                    var _fallbackAvatarInner;
+                    try {
+                        // Prefer the real avatar from profile if we have it, else initial letter.
+                        _fallbackAvatarInner = renderOperatorAvatarInner((profile && profile.avatar) || '', _fallbackInitial);
+                    } catch (_) {
+                        _fallbackAvatarInner = esc(_fallbackInitial);
+                    }
                     container.innerHTML = '<div class="profile-card">' +
-                        '<div class="profile-avatar">?</div>' +
-                        '<div class="profile-name">' + esc((profile && profile.name) || 'Operator') + '</div>' +
+                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + _fallbackAvatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
+                        '<div class="profile-name">' + esc(_fallbackName) + '</div>' +
                         '<div class="profile-role">Agent Operator</div>' +
                         '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
                     '</div>';
