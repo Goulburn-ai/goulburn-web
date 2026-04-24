@@ -364,6 +364,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         font-size: 0.7rem; color: var(--dark-500);
         margin-left: auto;
     }
+
+    /* Compact upvote rows (Week 4 polish) */
+    .td-event.td-event-upvote .td-event-body { opacity: 0.65; }
+    .td-event.td-event-upvote .td-event-text { font-size: 0.8rem; }
+    .td-timeline-more {
+        margin-top: 0.65rem; padding: 0.5rem 0.9rem;
+        background: transparent; border: 1px solid var(--dark-700);
+        color: var(--dark-400); border-radius: 0.35rem;
+        font-size: 0.8125rem; font-weight: 500; cursor: pointer;
+        text-align: center; width: 100%;
+    }
+    .td-timeline-more:hover { border-color: var(--dark-500); color: var(--dark-100); }
 </style>
 
 <section class="td-root" id="trustDashboard">
@@ -566,12 +578,31 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
     }
     // Evidence timeline (Week 2)
+    var DEFAULT_TIMELINE_CAP = 8;
+    function _renderEventHtml(e) {
+        var sym = e.impact === 'pos' ? '+' : (e.impact === 'neg' ? '\u2212' : '\u00B7');
+        var symCls = e.impact === 'pos' ? 'td-event-pos' : (e.impact === 'neg' ? 'td-event-neg' : 'td-event-neutral');
+        var isVote = e.kind === 'upvote_received' || e.kind === 'downvote_received';
+        if (isVote) symCls += ' td-event-upvote';
+        var ts = fmtShort(e.timestamp);
+        var linked = e.evidence_url ? ('<a href="' + e.evidence_url + '" target="_blank">' + esc(e.text) + '</a>') : esc(e.text);
+        return '<div class="td-event ' + symCls + '">' +
+            '<div class="td-event-sym">' + sym + '</div>' +
+            '<div class="td-event-body">' +
+                '<div class="td-event-row1">' +
+                    '<span class="td-event-layer">' + esc(e.layer || '') + '</span>' +
+                    '<span class="td-event-ts">' + ts + '</span>' +
+                '</div>' +
+                '<div class="td-event-text">' + linked + '</div>' +
+            '</div>' +
+        '</div>';
+    }
+
     function renderTimeline(events, activeLayer) {
         var wrap = document.getElementById('tdTimelineWrap');
         var timeline = document.getElementById('tdTimeline');
         if (!wrap || !timeline) return;
 
-        // Update filter pill active state
         var filters = document.querySelectorAll('#tdFilters .td-filter');
         filters.forEach(function(f) {
             f.classList.toggle('td-filter-active', f.dataset.layer === (activeLayer || 'all'));
@@ -584,23 +615,23 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         wrap.style.display = '';
-        var html = events.map(function(e) {
-            var sym = e.impact === 'pos' ? '+' : (e.impact === 'neg' ? '\u2212' : '\u00B7');
-            var symCls = e.impact === 'pos' ? 'td-event-pos' : (e.impact === 'neg' ? 'td-event-neg' : 'td-event-neutral');
-            var ts = fmtShort(e.timestamp);
-            var linked = e.evidence_url ? ('<a href="' + e.evidence_url + '" target="_blank">' + esc(e.text) + '</a>') : esc(e.text);
-            return '<div class="td-event ' + symCls + '">' +
-                '<div class="td-event-sym">' + sym + '</div>' +
-                '<div class="td-event-body">' +
-                    '<div class="td-event-row1">' +
-                        '<span class="td-event-layer">' + esc(e.layer || '') + '</span>' +
-                        '<span class="td-event-ts">' + ts + '</span>' +
-                    '</div>' +
-                    '<div class="td-event-text">' + linked + '</div>' +
-                '</div>' +
-            '</div>';
-        }).join('');
+        var cap = DEFAULT_TIMELINE_CAP;
+        var initial = events.slice(0, cap);
+        var rest = events.slice(cap);
+        var html = initial.map(_renderEventHtml).join('');
+        if (rest.length > 0) {
+            html += '<button class="td-timeline-more" id="tdTimelineMore">Show ' + rest.length + ' more</button>';
+        }
         timeline.innerHTML = html;
+
+        var moreBtn = document.getElementById('tdTimelineMore');
+        if (moreBtn) {
+            moreBtn.addEventListener('click', function() {
+                // Append the rest, remove the button
+                moreBtn.remove();
+                timeline.insertAdjacentHTML('beforeend', rest.map(_renderEventHtml).join(''));
+            });
+        }
     }
 
     function fmtShort(iso) {
