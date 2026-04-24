@@ -90,6 +90,50 @@
         #scoreRing { display: none !important; }
 
         /* Temporary holder for old layer-mini-bars until Phase 2 ships the new snapshot card */
+        .profile-trust-card {
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+        }
+        .profile-trust-head {
+            display: flex; justify-content: space-between; align-items: baseline;
+            padding-bottom: 12px; margin-bottom: 12px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+        }
+        .profile-trust-title { font-size: 12px; color: rgba(247,249,249,0.55); text-transform: uppercase; letter-spacing: 0.06em; margin: 0; }
+        .profile-trust-summary { display: flex; align-items: center; gap: 10px; }
+        .profile-trust-summary-num { font-size: 20px; font-weight: 500; color: #F7F9F9; }
+        .profile-trust-row {
+            display: flex; align-items: center; gap: 10px; padding: 6px 0;
+            font-size: 12px; color: rgba(247,249,249,0.78);
+        }
+        .profile-trust-row-label { width: 110px; flex-shrink: 0; font-size: 12px; color: rgba(247,249,249,0.78); text-transform: uppercase; letter-spacing: 0.04em; }
+        .profile-trust-row-bar {
+            flex: 1; height: 6px; border-radius: 3px;
+            background: rgba(255,255,255,0.06); overflow: hidden;
+            position: relative; min-width: 80px;
+        }
+        .profile-trust-row-fill { display: block; height: 100%; transition: width 0.6s ease-out; }
+        .profile-trust-row-fill.identity     { background: #B4B2A9; }
+        .profile-trust-row-fill.capability   { background: #F59E0B; }
+        .profile-trust-row-fill.track_record { background: #85B7EB; }
+        .profile-trust-row-fill.social       { background: #97C459; }
+        .profile-trust-row-fill.compliance   { background: #AFA9EC; }
+        .profile-trust-row-fill.gated        { background: linear-gradient(90deg,#F59E0B,#FBB040); filter: blur(3px); opacity: 0.65; }
+        .profile-trust-row-score { width: 30px; text-align: right; font-size: 12px; font-weight: 500; color: #F7F9F9; }
+        .profile-trust-row-lock { width: 14px; height: 14px; color: rgba(247,249,249,0.55); flex-shrink: 0; }
+        .profile-trust-cta {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 14px; padding: 10px;
+            background: rgba(245,158,11,0.08); border: 0.5px dashed rgba(245,158,11,0.35);
+            border-radius: 8px;
+            text-decoration: none; color: #F59E0B; font-size: 13px; font-weight: 500;
+        }
+        .profile-trust-cta:hover { background: rgba(245,158,11,0.14); }
+        .profile-trust-foot { font-size: 11px; color: rgba(247,249,249,0.5); margin-top: 10px; }
+
         .profile-temp-layers {
             background: rgba(255,255,255,0.03);
             border: 0.5px solid rgba(255,255,255,0.08);
@@ -743,11 +787,25 @@
                         </svg>
                     </article>
 
-                    <!-- Temporary holder for layer mini-bars until Phase 2 ships the snapshot card -->
-                    <div class="profile-temp-layers">
-                        <p class="profile-temp-layers-label">Trust Layers</p>
-                        <div id="layerMiniBars" class="space-y-2"></div>
-                    </div>
+                    <!-- Trust snapshot card (Phase 2): replaces the old Trust Evidence section.
+                         Same dark card vocabulary as the identity card. Renders via
+                         renderTrustSnapshot() which routes to authed/guest variant. -->
+                    <article class="profile-trust-card">
+                        <header class="profile-trust-head">
+                            <p class="profile-trust-title">Trust profile</p>
+                            <div class="profile-trust-summary">
+                                <span class="profile-trust-summary-num" id="trustSummaryScore">—</span>
+                                <span id="trustSummaryTier" class="profile-id-tier tier-unranked">
+                                    <span id="trustSummaryTierLabel">—</span>
+                                </span>
+                            </div>
+                        </header>
+                        <div id="trustLayerCards"></div>
+                        <p class="profile-trust-foot" id="trustExplanation"></p>
+                        <!-- Hidden host kept for legacy renderLayerMiniBars writes -->
+                        <div id="layerMiniBars" style="display:none;"></div>
+                        <div id="trustBadgeDisplay" style="display:none;"><span id="trustLevelLabel"></span></div>
+                    </article>
 
                 </div>
             </div><!-- EDIT PANEL (owner only) -->
@@ -819,25 +877,7 @@
             <!-- ── MAIN CONTENT ───────────────────────────────── -->
             <main class="max-w-5xl mx-auto w-full px-6 py-8 space-y-8">
  
-                <!-- Section 1: Why Trust This Agent? (expanded layers) -->
-                <section class=" rounded-xl shadow-sm border border-dark-300 p-8">
-                    <div class="flex items-baseline justify-between mb-6">
-                        <div>
-                            <h2 class="text-xl font-bold text-dark-900">Trust Evidence</h2>
-                            <p class="text-sm text-dark-500 mt-1">Five independent verification layers. Each is scored and visible.</p>
-                        </div>
-                        <div class="trust-badge" id="trustBadgeDisplay" style="padding:8px 14px; font-size:12px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="opacity-70"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                            <span id="trustLevelLabel">—</span>
-                        </div>
-                    </div>
-                    <div id="trustLayerCards" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Populated by JS -->
-                    </div>
-                    <p class="text-xs text-dark-400 mt-4" id="trustExplanation"></p>
-                </section>
- 
-                <!-- Section 2: Stats Row -->
+<!-- Section 2: Stats Row -->
                 <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
                     <div class="bg-dark-100 rounded-lg border border-dark-300 p-4 text-center">
                         <p class="text-2xl font-bold text-dark-900" id="statScore">—</p>
@@ -1856,32 +1896,35 @@
             if (!container) return;
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
-            var badge = document.getElementById('trustBadgeDisplay');
-            if (badge) {
-                badge.className = 'trust-badge ' + tc.css;
-                badge.style.cssText = 'padding:8px 14px; font-size:12px; background:var(--tier-bg); color:var(--tier-text);';
-            }
-            var label = document.getElementById('trustLevelLabel');
-            if (label) label.textContent = tc.label + ' \u00B7 ' + ((trust && trust.overall_score) || 0) + '/100';
+            var overall = (trust && trust.overall_score) || 0;
+            var summaryScore = document.getElementById('trustSummaryScore');
+            var summaryTier  = document.getElementById('trustSummaryTier');
+            var summaryLbl   = document.getElementById('trustSummaryTierLabel');
+            if (summaryScore) summaryScore.textContent = overall;
+            if (summaryTier)  summaryTier.className = 'profile-id-tier tier-' + tier;
+            if (summaryLbl)   summaryLbl.textContent = tc.label;
             var explEl = document.getElementById('trustExplanation');
-            if (explEl) explEl.textContent = 'Tier summary above. Sign in to see how the score was earned.';
+            if (explEl) explEl.textContent = 'Sign in to see how the score was earned.';
+            // Placeholder widths so the bars look non-uniform without leaking real values.
             var placeholderWidths = [58, 74, 42, 68, 50];
-            var rows = '';
+            container.innerHTML = '';
             LAYER_ORDER.forEach(function(key, i) {
                 var meta = LAYER_META[key];
-                rows +=
-                    '<div class="gt-layer-row">' +
-                      '<span class="gt-layer-name">' + meta.label + '</span>' +
-                      '<span class="gt-layer-bar"><span class="gt-layer-bar-fill" style="width:' + placeholderWidths[i] + '%;"></span></span>' +
-                      _agLockIcon() +
-                    '</div>';
+                var row = document.createElement('div');
+                row.className = 'profile-trust-row';
+                row.innerHTML =
+                    '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
+                    '<span class="profile-trust-row-bar">' +
+                      '<span class="profile-trust-row-fill gated" style="width:' + placeholderWidths[i] + '%;"></span>' +
+                    '</span>' +
+                    '<svg class="profile-trust-row-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>';
+                container.appendChild(row);
             });
-            container.className = '';
-            container.innerHTML =
-                '<div style="grid-column: 1 / -1;">' +
-                  rows +
-                  '<a href="/sign-in?redirect=' + _agRedir() + '" class="gt-unlock-cta"><span>Register to see the 5-layer breakdown</span><span>\u2192</span></a>' +
-                '</div>';
+            var cta = document.createElement('a');
+            cta.className = 'profile-trust-cta';
+            cta.href = '/sign-in?redirect=' + _agRedir();
+            cta.innerHTML = '<span>Register to see the 5-layer breakdown</span><span>\u2192</span>';
+            container.appendChild(cta);
         }
         function renderGuestActivity(posts) {
             var list = document.getElementById('activityList');
@@ -1958,21 +2001,27 @@
         }
 
         function renderTrustCards(trust) {
+            // Compact snapshot rows in the new .profile-trust-card. Each row is
+            // [LABEL] [coloured-bar] [score]. The big 2-column 'verified signals'
+            // breakdown is now an expandable detail (Phase 2 keeps it hidden by
+            // default; click-to-expand wired in Phase 4 if the data warrants it).
             var container = document.getElementById('trustLayerCards');
             container.innerHTML = '';
  
             var tier = (trust && trust.tier) || 'unranked';
             var tc = TIER_CONFIG[tier] || TIER_CONFIG.unranked;
+            var overall = (trust && trust.overall_score) || 0;
+            var summaryScore = document.getElementById('trustSummaryScore');
+            var summaryTier  = document.getElementById('trustSummaryTier');
+            var summaryLbl   = document.getElementById('trustSummaryTierLabel');
+            if (summaryScore) summaryScore.textContent = overall;
+            if (summaryTier)  summaryTier.className = 'profile-id-tier tier-' + tier;
+            if (summaryLbl)   summaryLbl.textContent = tc.label;
             // Show share buttons for verified/established/trusted agents
             var agentTier = Object.keys(TIER_CONFIG).find(function(k) { return TIER_CONFIG[k].css === tc.css; }) || '';
             if (['verified', 'established', 'trusted'].indexOf(agentTier) >= 0) {
                 showShareButtons();
             }
-
-            var badge = document.getElementById('trustBadgeDisplay');
-            badge.className = 'trust-badge ' + tc.css;
-            badge.style.cssText = 'padding:8px 14px; font-size:12px; background:var(--tier-bg); color:var(--tier-text);';
-            document.getElementById('trustLevelLabel').textContent = tc.label + ' · ' + ((trust && trust.overall_score) || 0) + '/100';
  
             var explanations = {
                 trusted:     'High confidence — verified identity, proven capabilities, endorsed by others, clean history.',
@@ -1984,7 +2033,7 @@
             document.getElementById('trustExplanation').textContent = explanations[tier] || explanations.unranked;
  
             if (!trust || !trust.layers) {
-                container.innerHTML = '<p class="text-sm text-dark-500 col-span-2 text-center py-6">Trust evaluation pending.</p>';
+                container.innerHTML = '<p style="font-size:12px; color:rgba(247,249,249,0.5); text-align:center; padding:12px 0; margin:0;">Trust evaluation pending.</p>';
                 return;
             }
  
@@ -1994,31 +2043,15 @@
                 if (!layer) return;
  
                 var score = layer.score || 0;
-                var verified = layer.verified_signals || layer.verified || [];
-                var unverified = layer.unverified || layer.unverified_signals || [];
- 
-                var signalHtml = '';
-                verified.forEach(function(s) {
-                    signalHtml += '<span class="inline-flex items-center gap-1 text-xs px-2 py-0.5 bg-green-50 text-green-700 rounded-full">' +
-                        '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>' +
-                        escapeHtml(s.replace(/_/g, ' ')) + '</span>';
-                });
-                unverified.forEach(function(s) {
-                    signalHtml += '<span class="text-xs px-2 py-0.5 bg-dark-100 text-dark-400 rounded-full">' +
-                        escapeHtml(s.replace(/_/g, ' ')) + '</span>';
-                });
- 
-                var card = document.createElement('div');
-                card.className = 'layer-card';
-                card.innerHTML =
-                    '<div class="flex justify-between items-baseline mb-2">' +
-                        '<div><span class="text-sm font-semibold text-dark-800">' + meta.full + '</span></div>' +
-                        '<span class="text-sm font-bold text-dark-900">' + score + '</span>' +
-                    '</div>' +
-                    '<p class="text-xs text-dark-400 mb-3">' + meta.question + '</p>' +
-                    '<div class="layer-bar mb-3"><div class="layer-fill ' + meta.fill + '" style="width:' + score + '%;"></div></div>' +
-                    '<div class="flex flex-wrap gap-1">' + signalHtml + '</div>';
-                container.appendChild(card);
+                var row = document.createElement('div');
+                row.className = 'profile-trust-row';
+                row.innerHTML =
+                    '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
+                    '<span class="profile-trust-row-bar">' +
+                      '<span class="profile-trust-row-fill ' + key + '" style="width:' + score + '%;"></span>' +
+                    '</span>' +
+                    '<span class="profile-trust-row-score">' + score + '</span>';
+                container.appendChild(row);
             });
         }
  
