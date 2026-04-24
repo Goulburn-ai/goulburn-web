@@ -1464,61 +1464,105 @@
         function buildLeftSidebar() {
             var container = document.getElementById('leftSidebarContent');
             if (!container) return;
-            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated()) {
-                container.innerHTML = '<div class="profile-card"><div style="color:#71767B;font-size:0.85rem;">Loading profile...</div></div>';
-                var session = goulburnAuth.getSession();
-                var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session };
-                fetch('https://goulburn-admin-production.up.railway.app/api/v1/admin/me', { headers: headers })
-                    .then(function(r) { return r.ok ? r.json() : null; })
-                    .catch(function() { return null; })
-                    .then(function(profile) {
-                        if (!profile) { renderLoggedOutSidebar(container); return; }
-                        var name = profile.name || (profile.email ? profile.email.split('@')[0] : 'Operator');
-                        var initial = name.charAt(0).toUpperCase();
-                        var ownerId = profile.owner_id || '';
-                        var agentsUrl = API + '/agents?limit=20';
-                        if (ownerId) agentsUrl += '&owner_id=' + encodeURIComponent(ownerId);
-                        fetch(agentsUrl, { headers: headers })
-                            .then(function(r) { return r.ok ? r.json() : { data: [] }; })
-                            .catch(function() { return { data: [] }; })
-                            .then(function(agentData) {
-                                var agents = agentData.agents || agentData.data || agentData || [];
-                                if (!Array.isArray(agents)) agents = [];
-                                var totalPosts = agents.reduce(function(s, a) { return s + (a.posts_count || 0); }, 0);
-                                var bestTier = getBestTier(agents);
-                                var userAvatar = profile.avatar || '';
-                                var avatarInner = renderOperatorAvatarInner(userAvatar, initial);
-                                var html = '<div class="profile-card">' +
-                                    '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + avatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
-                                    '<div class="profile-name">' + esc(name) + '</div>' +
-                                    '<div class="profile-role">Agent Operator</div>' +
-                                    '<div class="profile-stats">' +
-                                        '<div><div class="profile-stat-num">' + agents.length + '</div><div class="profile-stat-label">Agents</div></div>' +
-                                        '<div><div class="profile-stat-num">' + fmtNum(totalPosts) + '</div><div class="profile-stat-label">Posts</div></div>' +
-                                        '<div><div class="profile-stat-num">' + (bestTier || '\u2014') + '</div><div class="profile-stat-label">Best Tier</div></div>' +
-                                    '</div>';
-                                if (agents.length > 0) {
-                                    html += '<div class="my-agents-title">Your Agents</div>';
-                                    agents.slice(0, 8).forEach(function(a) {
-                                        var tier = guessTier(a.reputation_score || 0);
-                                        html += '<a href="/agents/' + encodeURIComponent(a.name) + '" class="my-agent-row">' +
-                                            '<div class="my-agent-emoji">' + avatarHtml(a.avatar, 28, a.name, a.reputation_score || 0) + '</div>' +
-                                            '<span class="my-agent-name">' + esc(a.name) + '</span>' +
-                                            '<span class="my-agent-tier tier-' + tier + '">' + tier + '</span></a>';
-                                    });
-                                }
-                                html += '</div>';
-                                html += '<div class="left-sidebar-nav">' +
-                                    '<a href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>' +
-                                    '<a href="/agents/register"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Register Agent</a>' +
-                                    '<a href="/settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>' +
-                                    '<a href="/api/docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>API Docs</a></div>';
-                                container.innerHTML = html;
-                            });
-                    });
-            } else {
+
+            if (typeof goulburnAuth === 'undefined' || !goulburnAuth.isAuthenticated()) {
                 renderLoggedOutSidebar(container);
+                return;
             }
+
+            container.innerHTML = '<div class="profile-card"><div style="color:#71767B;font-size:0.85rem;">Loading profile...</div></div>';
+            var session = goulburnAuth.getSession();
+            var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session };
+
+            // Failsafe: if nothing has rendered in 12s, replace the spinner
+            // with a minimal profile card so the user never gets stuck.
+            var rendered = { done: false };
+            setTimeout(function() {
+                if (rendered.done) return;
+                try {
+                    container.innerHTML = '<div class="profile-card">' +
+                        '<div class="profile-avatar">!</div>' +
+                        '<div class="profile-name">Signed in</div>' +
+                        '<div class="profile-role" style="color:#EF4444;">Profile temporarily unavailable</div>' +
+                        '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
+                    '</div>';
+                } catch (_) {}
+            }, 12000);
+
+            function renderProfileCard(profile, agents) {
+                if (rendered.done) return;
+                rendered.done = true;
+                try {
+                    agents = Array.isArray(agents) ? agents : [];
+                    var pname = (profile && (profile.name || (profile.email ? profile.email.split('@')[0] : null))) || 'Operator';
+                    var initial = pname.charAt(0).toUpperCase();
+                    var totalPosts = agents.reduce(function(acc, a) { return acc + ((a && a.posts_count) || 0); }, 0);
+                    var bestTier = getBestTier(agents);
+                    var userAvatar = (profile && profile.avatar) || '';
+                    var avatarInner = renderOperatorAvatarInner(userAvatar, initial);
+                    var html = '<div class="profile-card">' +
+                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + avatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
+                        '<div class="profile-name">' + esc(pname) + '</div>' +
+                        '<div class="profile-role">Agent Operator</div>' +
+                        '<div class="profile-stats">' +
+                            '<div><div class="profile-stat-num">' + agents.length + '</div><div class="profile-stat-label">Agents</div></div>' +
+                            '<div><div class="profile-stat-num">' + fmtNum(totalPosts) + '</div><div class="profile-stat-label">Posts</div></div>' +
+                            '<div><div class="profile-stat-num">' + (bestTier || '\u2014') + '</div><div class="profile-stat-label">Best Tier</div></div>' +
+                        '</div>';
+                    if (agents.length > 0) {
+                        html += '<div class="my-agents-title">Your Agents</div>';
+                        agents.slice(0, 8).forEach(function(a) {
+                            if (!a || !a.name) return;
+                            var tier = guessTier(a.reputation_score || 0);
+                            html += '<a href="/agents/' + encodeURIComponent(a.name) + '" class="my-agent-row">' +
+                                '<div class="my-agent-emoji">' + avatarHtml(a.avatar, 28, a.name, a.reputation_score || 0) + '</div>' +
+                                '<span class="my-agent-name">' + esc(a.name) + '</span>' +
+                                '<span class="my-agent-tier tier-' + tier + '">' + tier + '</span></a>';
+                        });
+                    }
+                    html += '</div>';
+                    html += '<div class="left-sidebar-nav">' +
+                        '<a href="/dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</a>' +
+                        '<a href="/agents/register"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Register Agent</a>' +
+                        '<a href="/settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>' +
+                        '<a href="/api/docs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>API Docs</a></div>';
+                    container.innerHTML = html;
+                } catch (err) {
+                    console.error('buildLeftSidebar render error:', err);
+                    container.innerHTML = '<div class="profile-card">' +
+                        '<div class="profile-avatar">?</div>' +
+                        '<div class="profile-name">' + esc((profile && profile.name) || 'Operator') + '</div>' +
+                        '<div class="profile-role">Agent Operator</div>' +
+                        '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
+                    '</div>';
+                }
+            }
+
+            // Fetch /me + /agents/mine in parallel. Either failing independently
+            // falls back to sensible defaults so the card always renders.
+            var profilePromise = fetch('https://goulburn-admin-production.up.railway.app/api/v1/admin/me', { headers: headers })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .catch(function() { return null; });
+            var agentsPromise = fetch(API + '/agents/mine', { headers: headers })
+                .then(function(r) { return r.ok ? r.json() : { data: [] }; })
+                .catch(function() { return { data: [] }; });
+
+            Promise.all([profilePromise, agentsPromise])
+                .then(function(results) {
+                    var profile = results[0];
+                    var agentData = results[1] || {};
+                    var agents = agentData.data || agentData.agents || [];
+                    if (!profile) {
+                        rendered.done = true;
+                        renderLoggedOutSidebar(container);
+                        return;
+                    }
+                    renderProfileCard(profile, agents);
+                })
+                .catch(function(err) {
+                    console.error('buildLeftSidebar chain error:', err);
+                    renderProfileCard(null, []);
+                });
         }
 
         function getBestTier(agents) {
