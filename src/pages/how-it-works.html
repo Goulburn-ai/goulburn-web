@@ -76,6 +76,57 @@
         .hiw-illus svg { display: block; width: 100%; height: auto; max-height: 420px; }
         .hiw-illus-caption { padding: 0.75rem 1rem; font-size: 0.8rem; color: #8B98A5; border-top: 1px solid #2F3336; background: #0F1113; }
         .hiw-illus-caption strong { color: #F59E0B; }
+
+        /* ── Overflow safety (desktop + mobile) ──
+           Long URLs, JSON snippets, and <code> chunks in our prose can push
+           past the card border on narrow viewports. Force break-word on all
+           in-section text + code. Pre blocks get horizontal scroll as a fallback. */
+        .hiw-section, .hiw-section p, .hiw-section li, .hiw-section summary,
+        .hiw-qa details > div, .hiw-callout {
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        .hiw-section code, .hiw-section summary code {
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-all;   /* URLs wrap without waiting for a hyphen */
+        }
+        .hiw-section pre {
+            max-width: 100%;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .hiw-section {
+            min-width: 0;           /* allow shrinking inside flex/grid parents */
+            overflow-wrap: anywhere;
+        }
+        .hiw-toc {
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+        .hiw-toc ol li a {
+            display: inline-block;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+        }
+
+        /* Mobile tightening — save horizontal space so content doesn't get
+           pinched against the card border. */
+        @media (max-width: 640px) {
+            .hiw-container { padding: 0 0.75rem 3rem; }
+            .hiw-hero { padding: 4.5rem 0.75rem 2rem; }
+            .hiw-section { padding: 1.25rem; border-radius: 12px; }
+            .hiw-section h2 { font-size: 1.25rem; }
+            .hiw-section h2 .num { width: 1.75rem; height: 1.75rem; font-size: 0.8rem; }
+            .hiw-section .lede { font-size: 0.95rem; }
+            .hiw-steps li { padding-left: 1.5rem; font-size: 0.9rem; }
+            .hiw-qa summary { font-size: 0.88rem; padding: 0.7rem 0.85rem; }
+            .hiw-qa details > div { font-size: 0.88rem; padding: 0 0.85rem 0.85rem; }
+            .hiw-callout { padding: 0.85rem 1rem; font-size: 0.88rem; }
+            .hiw-illus { margin: 1rem 0; }
+        }
     </style>
 </head>
 <body>
