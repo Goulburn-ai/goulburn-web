@@ -339,7 +339,10 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         display: flex; flex-direction: column;
         font-size: 0.8125rem;
     }
-    .td-access-entry {
+    .td-access-count { display: inline-block; margin-left: 8px; padding: 1px 6px; font-size: 10px; font-weight: 600; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.15); border-radius: 8px; color: rgba(247,249,249,0.85); vertical-align: middle; }
+.td-timeline-refresh { margin-left: 8px; padding: 4px 10px; background: rgba(245,158,11,0.12); border: 0.5px solid rgba(245,158,11,0.3); border-radius: 6px; color: #F59E0B; font-size: 11px; font-weight: 500; cursor: pointer; }
+.td-timeline-refresh:hover { background: rgba(245,158,11,0.18); }
+.td-access-entry {
         display: flex; gap: 0.75rem; padding: 0.6rem 0;
         border-bottom: 1px solid #1F2328;
     }
@@ -765,7 +768,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         } catch (e) { return ''; }
     }
 
+    var _tdRefreshTimer = null;
     function loadTimeline(agentName) {
+        // Track the current agent so the auto-refresh tick stays in sync.
+        window.__tdLoadTimeline = function() { loadTimeline(agentName); };
+        if (_tdRefreshTimer) { clearTimeout(_tdRefreshTimer); }
+        _tdRefreshTimer = setTimeout(function() {
+            // Only refresh if this agent is still the selected one.
+            var sel = state.selectedId;
+            var match = (state.agents||[]).find(function(a){return a.id===sel && a.name===agentName;});
+            if (match) loadTimeline(agentName);
+        }, 60000);
         var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
         var wrap = document.getElementById('tdTimelineWrap');
         if (wrap) wrap.style.display = '';
@@ -774,23 +787,34 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
         // Fetch enough events for 30d pulse range + timeline list. 200 is enough
         // for active agents; light agents just see fewer bars.
-        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/trust-events?limit=200')
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .catch(function() { return null; })
+        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/trust-events?limit=200', {cache: 'no-store'})
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(function(d) {
                 if (!d || !d.events) {
-                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn\u2019t load timeline.</div>';
+                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">No events yet — evidence will appear as your agent earns it.</div>';
                     return;
                 }
                 state.events = d.events;
                 state.eventsByLayer = buildEventsByLayer(d.events);
                 state.pulseRange = state.pulseRange || '24h';
                 state.pulseFilter = null;
-                // Re-render layer panels now that sparkline data is available
                 var agent = (state.agents||[]).find(function(a){return a.id===state.selectedId;});
-                if (agent) renderPanel(agent);
-                rebuildPulse();
-                renderTimeline(getFilteredEvents(), null);
+                if (agent) {
+                    try { renderPanel(agent); } catch (e) { console.error('renderPanel error:', e); }
+                }
+                try { rebuildPulse(); } catch (e) { console.error('rebuildPulse error:', e); }
+                try { renderTimeline(getFilteredEvents(), null); }
+                catch (e) {
+                    console.error('renderTimeline error:', e);
+                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Timeline rendered with errors. <button class="td-timeline-refresh" onclick="window.__tdLoadTimeline && window.__tdLoadTimeline()">Retry</button></div>';
+                }
+            })
+            .catch(function(err) {
+                console.error('trust-events fetch error:', err);
+                if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn’t load timeline (' + (err && err.message ? err.message : 'network error') + '). <button class="td-timeline-refresh" onclick="window.__tdLoadTimeline && window.__tdLoadTimeline()">Retry</button></div>';
             });
     }
 
@@ -1049,13 +1073,21 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
                 entries.innerHTML = es.map(function(e) {
                     var vCls = 'td-v-' + (e.verdict || 'denied');
+                    var countN = e.count || 1;
+                    var countBadge = countN > 1
+                        ? '<span class="td-access-count">×' + countN + '</span>'
+                        : '';
+                    var tsLabel = countN > 1
+                        ? ('first ' + fmtShort(e.ts))
+                        : fmtShort(e.ts);
                     return '<div class="td-access-entry">' +
                         '<span class="td-access-verdict ' + vCls + '">' + esc(e.verdict || 'denied') + '</span>' +
                         '<div class="td-access-body">' +
                             'Tier <strong>' + esc(e.tier_returned || 'unknown') + '</strong> returned' +
                             ' &middot; <span class="td-access-caller">' + esc(e.api_key_prefix || 'anon') + '</span>' +
+                            countBadge +
                         '</div>' +
-                        '<span class="td-access-ts">' + fmtShort(e.ts) + '</span>' +
+                        '<span class="td-access-ts">' + tsLabel + '</span>' +
                     '</div>';
                 }).join('');
             });
