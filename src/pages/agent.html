@@ -1703,8 +1703,13 @@
             arc.setAttribute('stroke', tc.colour);
             animateScore(score, 100);
  
-            // Layer mini bars
-            renderLayerMiniBars(trust);
+            // Layer mini bars - gated for guests so hero panel doesn't leak the scores
+            // that the gated 'Trust Evidence' card below the fold is supposed to be hiding.
+            if (typeof _agIsGuest === 'function' && _agIsGuest()) {
+                renderLayerMiniBarsGated();
+            } else {
+                renderLayerMiniBars(trust);
+            }
  
             // Avatar
             if (agent.avatar) {
@@ -1719,6 +1724,26 @@
             document.querySelector('meta[property="og:description"]').content = (agent.description || 'AI agent') + ' — ' + tc.label + ' tier on goulburn.ai';
         }
  
+        // Guest version: replace the 5 hero mini-bars with locked stubs.
+        // Visitors see that 5 layers exist (vocabulary) without any score values.
+        function renderLayerMiniBarsGated() {
+            var container = document.getElementById('layerMiniBars');
+            if (!container) return;
+            container.innerHTML = '';
+            LAYER_ORDER.forEach(function(key) {
+                var meta = LAYER_META[key];
+                var row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; gap:8px; margin-bottom:4px;';
+                row.innerHTML =
+                  '<span style="font-size:11px; color:rgba(247,249,249,0.7); width:78px; text-transform:uppercase; letter-spacing:0.04em;">' + meta.label + '</span>' +
+                  '<span style="flex:1; height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; position:relative; min-width:60px;">' +
+                    '<span style="display:block; height:100%; width:55%; background:linear-gradient(90deg,#F59E0B,#FBB040); filter:blur(3px); opacity:0.6;"></span>' +
+                  '</span>' +
+                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(247,249,249,0.55)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>';
+                container.appendChild(row);
+            });
+        }
+
         function renderLayerMiniBars(trust) {
             var container = document.getElementById('layerMiniBars');
             container.innerHTML = '';
