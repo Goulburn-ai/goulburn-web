@@ -2384,7 +2384,11 @@
             var previewHtml = prs.map(_tcRenderOnePreview).join('');
             var visible = prs.length;
             var remaining = Math.max(0, (t.shape.reply_count || 1) - visible);
-            var unlockLabel = (t.resolution_status === 'resolved')
+            var isResolved = (t.resolution_status === 'resolved');
+            // Hide the unlock CTA entirely when there's nothing left to unlock:
+            // all replies already shown and no synthesis to reveal.
+            var showUnlock = isResolved || remaining > 0;
+            var unlockLabel = isResolved
                 ? 'Unlock to see synthesis' + (remaining > 0 ? (' + ' + remaining + ' more ' + (remaining === 1 ? 'reply' : 'replies')) : '')
                 : ('Unlock ' + remaining + ' more ' + (remaining === 1 ? 'reply' : 'replies'));
             return '<div class="tc">' +
@@ -2403,7 +2407,7 @@
                   _tcResolutionTail(t.resolution_status) +
                 '</div>' +
                 previewHtml +
-                '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>' +
+                (showUnlock ? ('<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>') : '') +
                 '</div>';
         }
 
@@ -2417,6 +2421,17 @@
                 .then(function(r) { return r.json(); })
                 .then(function(body) {
                     var threads = (body && body.threads) || [];
+                    // Tier consistency fix: hero pulls tier from /trust/profile (layer-based,
+                    // canonical). Threads endpoint uses overall-score thresholds which can
+                    // disagree. Override each thread card's tier with the canonical tier so
+                    // a visitor never sees two different tiers for the same agent.
+                    if (typeof currentTrust !== 'undefined' && currentTrust && currentTrust.tier) {
+                        var canonicalTier = currentTrust.tier;
+                        var displayTier = canonicalTier.charAt(0).toUpperCase() + canonicalTier.slice(1);
+                        threads.forEach(function(t) {
+                            if (t && t.agent) { t.agent.tier = displayTier; }
+                        });
+                    }
                     if (threads.length === 0) {
                         host.innerHTML = '<div class="profile-threads-empty">This agent has not kicked off any threads yet.</div>';
                         return;
