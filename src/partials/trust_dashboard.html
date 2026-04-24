@@ -449,6 +449,46 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         font-family: inherit; padding: 0;
     }
     .td-pulse-clear:hover { text-decoration: underline; }
+
+    /* Toast for probe action feedback */
+    .td-toast {
+        position: fixed; bottom: 24px; right: 24px;
+        max-width: 360px;
+        padding: 0.85rem 1.1rem;
+        background: #16181C; border: 1px solid #2A2E34;
+        border-left: 3px solid #F59E0B;
+        border-radius: 0.4rem;
+        color: #F7F9F9;
+        font-size: 0.85rem; line-height: 1.45;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+        transform: translateY(12px); opacity: 0;
+        transition: transform 0.2s, opacity 0.2s;
+        z-index: 1000;
+    }
+    .td-toast.td-toast-show { transform: translateY(0); opacity: 1; }
+    .td-toast.td-toast-ok { border-left-color: #22C55E; }
+    .td-toast.td-toast-err { border-left-color: #EF4444; }
+    .td-toast-title {
+        display: block; font-weight: 700; margin-bottom: 0.2rem;
+        font-size: 0.75rem; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .td-toast.td-toast-ok .td-toast-title { color: #22C55E; }
+    .td-toast.td-toast-err .td-toast-title { color: #EF4444; }
+
+    /* Layer-action button pending state */
+    .td-layer-action.td-action-pending {
+        opacity: 0.55; cursor: wait; pointer-events: none;
+    }
+
+    /* Action card CTA button (Week 3 + Option 3 probe triggers) */
+    .td-action-cta {
+        color: #F59E0B; text-decoration: none; font-size: 0.8125rem;
+        font-weight: 600; margin-top: 0.15rem; padding: 0;
+        background: transparent; border: none; cursor: pointer;
+        font-family: inherit; text-align: left; align-self: flex-start;
+    }
+    .td-action-cta:hover { text-decoration: underline; }
+    .td-action-cta.td-action-pending { opacity: 0.55; cursor: wait; pointer-events: none; }
 </style>
 
 <section class="td-root" id="trustDashboard">
@@ -641,7 +681,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             if (L.gaps.length)
                 html+='<div class="td-gaps">'+L.gaps.map(function(g){return '<div class="td-gap-item"><span class="td-ev-sym">!</span><span>'+esc(g)+'</span></div>';}).join('')+'</div>';
             if (L.action)
-                html+='<button class="td-layer-action" onclick="window.__tdAction(\''+esc(L.key)+'\')">'+esc(L.action)+' &rsaquo;</button>';
+                html+='<button class="td-layer-action" onclick="window.__tdAction(\''+esc(L.key)+'\', event)">'+esc(L.action)+' &rsaquo;</button>';
             html+='</div>';
         });
         html+='</div>';
@@ -948,6 +988,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 wrap.style.display = '';
                 grid.innerHTML = actions.map(function(a) {
                     var effortCls = 'td-effort-' + (a.effort || 'medium');
+                    var cta = '';
+                    if (a.trigger && a.trigger.kind === 'probe') {
+                        cta = '<button class="td-action-cta td-action-probe" data-probe-kind="' + esc(a.trigger.probe_kind || '') + '" onclick="window.__tdActionProbe(\'' + esc(a.trigger.probe_kind || '') + '\', event)">Run probe &rsaquo;</button>';
+                    } else if (a.link) {
+                        cta = '<a href="' + esc(a.link) + '">Start &rsaquo;</a>';
+                    }
                     return '<div class="td-action">' +
                         '<div class="td-action-head">' +
                             '<div class="td-action-title">' + esc(a.title || '') + '</div>' +
@@ -958,7 +1004,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                             '<span class="td-action-layer">' + esc(a.layer || '') + '</span>' +
                             '<span class="td-action-effort ' + effortCls + '">' + esc(a.effort || 'medium') + ' effort</span>' +
                         '</div>' +
-                        (a.link ? '<a href="' + esc(a.link) + '">Start &rsaquo;</a>' : '') +
+                        cta +
                     '</div>';
                 }).join('');
             });
@@ -1016,10 +1062,96 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
 
     window.__tdSelect=selectAgent;
-    window.__tdAction=function(key){
-        var routes={ compliance:'/how-it-works#compliance', identity:'/settings',
-                     capability:'/api/docs#probe-contract', operational:'/dashboard', reputation:'/agents' };
-        window.location.href = routes[key]||'/settings';
+
+    // Toast helper
+    function tdToast(title, message, tone) {
+        var existing = document.getElementById('td-toast-el');
+        if (existing) existing.remove();
+        var el = document.createElement('div');
+        el.id = 'td-toast-el';
+        el.className = 'td-toast td-toast-' + (tone || 'ok');
+        el.innerHTML = '<span class="td-toast-title">' + esc(title) + '</span>' +
+                       '<span>' + esc(message) + '</span>';
+        document.body.appendChild(el);
+        // trigger transition
+        requestAnimationFrame(function() { el.classList.add('td-toast-show'); });
+        setTimeout(function() {
+            el.classList.remove('td-toast-show');
+            setTimeout(function() { el.remove(); }, 260);
+        }, 4500);
+    }
+
+    // On-demand probe trigger: compliance + capability both call
+    // POST /api/v1/agents/{name}/probe/run?kind=X. Owner-gated, rate-limited
+    // 1/hour per kind per agent. Returns scheduled probe info or 429.
+    async function triggerProbe(kind, agentName, button) {
+        var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
+        if (!session) {
+            tdToast('Sign in required', 'Sign in to trigger probes on your agents.', 'err');
+            return;
+        }
+        var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
+        if (button) button.classList.add('td-action-pending');
+
+        try {
+            var resp = await fetch(API + '/agents/' + encodeURIComponent(agentName) + '/probe/run?kind=' + kind, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+            });
+            var body = await resp.json().catch(function() { return {}; });
+
+            if (resp.ok) {
+                tdToast(
+                    (kind === 'compliance' ? 'Compliance probes' : 'Capability probe') + ' scheduled',
+                    (body.probe_count || 1) + ' probe(s) enqueued. Results in the Evidence Timeline within ~5 min.',
+                    'ok'
+                );
+            } else if (resp.status === 429) {
+                tdToast('Cooldown active', body.message || body.detail || 'Try again later.', 'err');
+            } else if (resp.status === 400 && body.detail && body.detail.indexOf('endpoint_url') > -1) {
+                tdToast('No endpoint registered', 'Add an HTTPS endpoint URL on this agent before running a capability probe.', 'err');
+            } else {
+                tdToast('Probe failed', body.detail || body.message || ('HTTP ' + resp.status), 'err');
+            }
+        } catch (err) {
+            tdToast('Probe failed', err.message || 'Network error', 'err');
+        } finally {
+            if (button) button.classList.remove('td-action-pending');
+        }
+    }
+
+    window.__tdAction = function(key, ev) {
+        var agent = (state.agents || []).find(function(a) { return a.id === state.selectedId; });
+        var agentName = agent && agent.name;
+        var btn = ev && ev.currentTarget;
+
+        if (key === 'compliance' || key === 'capability') {
+            if (!agentName) {
+                tdToast('No agent selected', 'Pick an agent from the strip first.', 'err');
+                return;
+            }
+            triggerProbe(key, agentName, btn);
+            return;
+        }
+        // Identity / operational / reputation — nav links (real self-service flows).
+        var routes = {
+            identity: '/settings',
+            operational: '/agents/register',
+            reputation: '/agents',
+        };
+        window.location.href = routes[key] || '/settings';
+    };
+
+    // Triggered from Recommended Actions cards with a 'trigger' field.
+    window.__tdActionProbe = function(probeKind, ev) {
+        var agent = (state.agents || []).find(function(a) { return a.id === state.selectedId; });
+        var agentName = agent && agent.name;
+        var btn = ev && ev.currentTarget;
+        if (!agentName) {
+            tdToast('No agent selected', 'Pick an agent from the strip first.', 'err');
+            return;
+        }
+        triggerProbe(probeKind, agentName, btn);
     };
 
     function load(){
