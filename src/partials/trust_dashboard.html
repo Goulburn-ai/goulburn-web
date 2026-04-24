@@ -378,6 +378,77 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         text-align: center; width: 100%;
     }
     .td-timeline-more:hover { border-color: #3A3F45; color: #F7F9F9; }
+
+    /* ====== Option A — Sparklines inside layer panels ====== */
+    .td-layer-title {
+        display: flex; align-items: baseline; gap: 0.8rem; flex-wrap: wrap;
+    }
+    .td-spark { display: block; flex-shrink: 0; }
+
+    /* ====== Option C — 24h activity pulse bar ====== */
+    .td-pulse-head {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 0.75rem; gap: 1rem;
+    }
+    .td-pulse-controls { display: flex; gap: 0.35rem; }
+    .td-pulse-range {
+        padding: 0.3rem 0.65rem; font-size: 0.75rem; font-weight: 500;
+        background: transparent; border: 1px solid #2A2E34;
+        color: #B1B7BD; border-radius: 0.3rem; cursor: pointer;
+        font-family: inherit;
+    }
+    .td-pulse-range:hover { border-color: #3A3F45; color: #F7F9F9; }
+    .td-pulse-range.td-pulse-range-active {
+        background: rgba(245,158,11,0.12);
+        border-color: #F59E0B; color: #F59E0B;
+    }
+    .td-pulse-chart {
+        position: relative; height: 48px;
+        background: #16181C; border: 1px solid #2A2E34;
+        border-radius: 0.35rem; padding: 0.5rem;
+        display: flex; align-items: flex-end; gap: 2px;
+    }
+    .td-pulse-bar {
+        flex: 1; min-width: 2px; display: flex;
+        flex-direction: column-reverse;
+        cursor: pointer; border-radius: 1px;
+        position: relative;
+        transition: filter 0.15s;
+    }
+    .td-pulse-bar:hover { filter: brightness(1.35); }
+    .td-pulse-bar.td-pulse-bar-active {
+        outline: 1.5px solid #F59E0B; outline-offset: 1px;
+    }
+    .td-pulse-bar-empty {
+        height: 2px !important; background: #1F2328;
+        border-radius: 1px;
+    }
+    .td-pulse-seg { width: 100%; }
+    .td-pulse-seg.td-seg-compliance { background: #F59E0B; }
+    .td-pulse-seg.td-seg-identity { background: #EF4444; }
+    .td-pulse-seg.td-seg-capability { background: #8B5CF6; }
+    .td-pulse-seg.td-seg-operational { background: #22C55E; }
+    .td-pulse-seg.td-seg-reputation { background: #06B6D4; }
+    .td-pulse-labels {
+        display: flex; justify-content: space-between;
+        margin-top: 0.35rem;
+        font-family: 'SF Mono','Menlo','Consolas',monospace;
+        font-size: 0.65rem; color: #9AA5B0;
+    }
+    .td-pulse-legend {
+        display: flex; gap: 1rem; flex-wrap: wrap;
+        margin-top: 0.75rem; font-size: 0.7rem; color: #B1B7BD;
+    }
+    .td-pulse-legend-item { display: flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+    .td-pulse-legend-item:hover { color: #F7F9F9; }
+    .td-pulse-legend-item.td-pulse-legend-dim { opacity: 0.35; }
+    .td-pulse-legend-sw { width: 10px; height: 10px; border-radius: 2px; }
+    .td-pulse-clear {
+        margin-top: 0.5rem; font-size: 0.75rem; color: #F59E0B;
+        background: transparent; border: none; cursor: pointer;
+        font-family: inherit; padding: 0;
+    }
+    .td-pulse-clear:hover { text-decoration: underline; }
 </style>
 
 <section class="td-root" id="trustDashboard">
@@ -397,18 +468,25 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     </div>
 
     <div class="td-timeline-wrap" id="tdTimelineWrap" style="display:none;">
-        <div class="td-timeline-head">
+        <div class="td-pulse-head">
             <h3 class="td-timeline-title">Evidence timeline</h3>
-            <div class="td-timeline-filters" id="tdFilters">
-                <button class="td-filter td-filter-active" data-layer="all">All</button>
-                <button class="td-filter" data-layer="compliance">Compliance</button>
-                <button class="td-filter" data-layer="identity">Identity</button>
-                <button class="td-filter" data-layer="capability">Capability</button>
-                <button class="td-filter" data-layer="operational">Operational</button>
-                <button class="td-filter" data-layer="reputation">Reputation</button>
+            <div class="td-pulse-controls">
+                <button class="td-pulse-range td-pulse-range-active" data-range="24h">24h</button>
+                <button class="td-pulse-range" data-range="7d">7d</button>
+                <button class="td-pulse-range" data-range="30d">30d</button>
             </div>
         </div>
-        <div class="td-timeline" id="tdTimeline"></div>
+        <div class="td-pulse-chart" id="tdPulseChart"></div>
+        <div class="td-pulse-labels" id="tdPulseLabels"></div>
+        <div class="td-pulse-legend" id="tdPulseLegend">
+            <div class="td-pulse-legend-item" data-layer="compliance"><span class="td-pulse-legend-sw" style="background:#F59E0B;"></span>Compliance</div>
+            <div class="td-pulse-legend-item" data-layer="identity"><span class="td-pulse-legend-sw" style="background:#EF4444;"></span>Identity</div>
+            <div class="td-pulse-legend-item" data-layer="capability"><span class="td-pulse-legend-sw" style="background:#8B5CF6;"></span>Capability</div>
+            <div class="td-pulse-legend-item" data-layer="operational"><span class="td-pulse-legend-sw" style="background:#22C55E;"></span>Operational</div>
+            <div class="td-pulse-legend-item" data-layer="reputation"><span class="td-pulse-legend-sw" style="background:#06B6D4;"></span>Reputation</div>
+        </div>
+        <button class="td-pulse-clear" id="tdPulseClear" style="display:none;">Clear filter \u2715</button>
+        <div class="td-timeline" id="tdTimeline" style="margin-top:0.85rem;"></div>
     </div>
 </section>
 
@@ -551,7 +629,10 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             else if (L.score>=70) layerCls += ' td-layer-strong';
             html+='<div class="td-layer '+layerCls+'">'+
                 '<div class="td-layer-head">'+
-                    '<span class="td-layer-name">'+esc(L.name)+'</span>'+
+                    '<div class="td-layer-title">'+
+                        '<span class="td-layer-name">'+esc(L.name)+'</span>'+
+                        (state.eventsByLayer ? renderSparkline(L.key) : '')+
+                    '</div>'+
                     '<span class="td-layer-score">'+L.score+'</span>'+
                 '</div>'+
                 '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>';
@@ -580,7 +661,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
     }
     // Evidence timeline (Week 2)
-    var DEFAULT_TIMELINE_CAP = 8;
+    var DEFAULT_TIMELINE_CAP = 5;
     function _renderEventHtml(e) {
         var sym = e.impact === 'pos' ? '+' : (e.impact === 'neg' ? '\u2212' : '\u00B7');
         var symCls = e.impact === 'pos' ? 'td-event-pos' : (e.impact === 'neg' ? 'td-event-neg' : 'td-event-neutral');
@@ -604,11 +685,6 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var wrap = document.getElementById('tdTimelineWrap');
         var timeline = document.getElementById('tdTimeline');
         if (!wrap || !timeline) return;
-
-        var filters = document.querySelectorAll('#tdFilters .td-filter');
-        filters.forEach(function(f) {
-            f.classList.toggle('td-filter-active', f.dataset.layer === (activeLayer || 'all'));
-        });
 
         if (!events || !events.length) {
             wrap.style.display = '';
@@ -649,17 +725,16 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         } catch (e) { return ''; }
     }
 
-    function loadTimeline(agentName, layer) {
+    function loadTimeline(agentName) {
         var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
-        var qs = 'limit=30';
-        if (layer && layer !== 'all') qs += '&layer=' + encodeURIComponent(layer);
-        state.layerFilter = layer;
         var wrap = document.getElementById('tdTimelineWrap');
         if (wrap) wrap.style.display = '';
         var timeline = document.getElementById('tdTimeline');
         if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Loading timeline\u2026</div>';
 
-        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/trust-events?' + qs)
+        // Fetch enough events for 30d pulse range + timeline list. 200 is enough
+        // for active agents; light agents just see fewer bars.
+        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/trust-events?limit=200')
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(d) {
@@ -667,17 +742,191 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn\u2019t load timeline.</div>';
                     return;
                 }
-                renderTimeline(d.events, layer);
+                state.events = d.events;
+                state.eventsByLayer = buildEventsByLayer(d.events);
+                state.pulseRange = state.pulseRange || '24h';
+                state.pulseFilter = null;
+                // Re-render layer panels now that sparkline data is available
+                var agent = (state.agents||[]).find(function(a){return a.id===state.selectedId;});
+                if (agent) renderPanel(agent);
+                rebuildPulse();
+                renderTimeline(getFilteredEvents(), null);
             });
     }
 
-    // Wire up filter clicks
+    // Group events into per-layer + per-bucket aggregates used by both
+    // sparklines (daily, 7d) and pulse (hourly 24h / daily 7d + 30d).
+    function buildEventsByLayer(events) {
+        var byLayer = { compliance: [], identity: [], capability: [], operational: [], reputation: [] };
+        events.forEach(function(e) {
+            if (e.layer && byLayer[e.layer]) byLayer[e.layer].push(e);
+        });
+        return byLayer;
+    }
+
+    function getFilteredEvents() {
+        var evs = state.events || [];
+        var f = state.pulseFilter;
+        if (!f) return evs;
+        return evs.filter(function(e) {
+            if (f.layer && e.layer !== f.layer) return false;
+            if (f.bucket) {
+                var bucketStart = new Date(f.bucket).getTime();
+                var bucketEnd = bucketStart + (state.pulseRange === '24h' ? 3600000 : state.pulseRange === '7d' ? 86400000 : 86400000);
+                var t = new Date(e.timestamp).getTime();
+                if (t < bucketStart || t >= bucketEnd) return false;
+            }
+            return true;
+        });
+    }
+
+    function applyPulseFilter(f) {
+        state.pulseFilter = f;
+        // Toggle: same filter clicked twice clears it
+        var clearBtn = document.getElementById('tdPulseClear');
+        if (clearBtn) clearBtn.style.display = f ? '' : 'none';
+
+        // Highlight active bucket
+        document.querySelectorAll('.td-pulse-bar').forEach(function(b) {
+            b.classList.toggle('td-pulse-bar-active',
+                !!(f && f.bucket && b.dataset.bucketStart === f.bucket));
+        });
+        // Dim non-matching legend entries
+        document.querySelectorAll('.td-pulse-legend-item').forEach(function(l) {
+            l.classList.toggle('td-pulse-legend-dim',
+                !!(f && f.layer && l.dataset.layer !== f.layer));
+        });
+        renderTimeline(getFilteredEvents(), null);
+    }
+
+    // Sparkline: 7-day event density for one layer. 80\u00d718 viewBox, 7 points.
+    var LAYER_COLOURS = {
+        compliance: '#F59E0B', identity: '#EF4444',
+        capability: '#8B5CF6', operational: '#22C55E', reputation: '#06B6D4',
+    };
+
+    function renderSparkline(layerKey) {
+        if (!state.eventsByLayer) return '';
+        var evs = state.eventsByLayer[layerKey] || [];
+        var now = Date.now();
+        var buckets = new Array(7).fill(0);
+        evs.forEach(function(e) {
+            var t = new Date(e.timestamp).getTime();
+            var daysAgo = Math.floor((now - t) / 86400000);
+            if (daysAgo >= 0 && daysAgo < 7) buckets[6 - daysAgo]++;
+        });
+        var maxV = Math.max.apply(null, buckets.concat([1]));
+        var colour = LAYER_COLOURS[layerKey] || '#F59E0B';
+        var points = buckets.map(function(v, i) {
+            var x = i * (80 / 6);
+            var y = 16 - (v / maxV) * 14;
+            return x.toFixed(1) + ',' + y.toFixed(1);
+        }).join(' ');
+        var lastX = 80, lastY = 16 - (buckets[6] / maxV) * 14;
+        var dot = buckets[6] > 0
+            ? '<circle cx="' + lastX + '" cy="' + lastY.toFixed(1) + '" r="1.8" fill="' + colour + '"/>'
+            : '';
+        var totalEvents = buckets.reduce(function(a, b) { return a + b; }, 0);
+        var title = totalEvents + ' event' + (totalEvents === 1 ? '' : 's') + ' in last 7 days';
+        return '<svg class="td-spark" width="80" height="18" viewBox="0 0 80 18" xmlns="http://www.w3.org/2000/svg">' +
+            '<title>' + esc(title) + '</title>' +
+            '<polyline points="' + points + '" fill="none" stroke="' + colour + '" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+            dot +
+        '</svg>';
+    }
+
+    // Pulse bar: 24 hourly / 7 daily / 30 daily buckets of the evidence timeline.
+    function rebuildPulse() {
+        var chart = document.getElementById('tdPulseChart');
+        var labels = document.getElementById('tdPulseLabels');
+        if (!chart || !labels) return;
+
+        var range = state.pulseRange || '24h';
+        var now = Date.now();
+        var bucketCount, bucketMs, rangeMs;
+        if (range === '24h') { bucketCount = 24; bucketMs = 3600 * 1000; rangeMs = 24 * 3600 * 1000; }
+        else if (range === '7d') { bucketCount = 7; bucketMs = 86400 * 1000; rangeMs = 7 * 86400 * 1000; }
+        else { bucketCount = 30; bucketMs = 86400 * 1000; rangeMs = 30 * 86400 * 1000; }
+
+        var rangeStart = now - rangeMs;
+        var LAYERS = ['compliance', 'identity', 'capability', 'operational', 'reputation'];
+        // 2D: bucketIdx -> {layer: count}
+        var buckets = [];
+        for (var i = 0; i < bucketCount; i++) {
+            buckets.push({ compliance: 0, identity: 0, capability: 0, operational: 0, reputation: 0 });
+        }
+        (state.events || []).forEach(function(e) {
+            var t = new Date(e.timestamp).getTime();
+            if (t < rangeStart || t > now) return;
+            var idx = Math.floor((t - rangeStart) / bucketMs);
+            if (idx < 0 || idx >= bucketCount) return;
+            var layer = e.layer;
+            if (!LAYERS.indexOf(layer) === -1) return;
+            // Weight by count field if present (upvote aggregations)
+            var weight = e.count && e.count > 1 ? Math.min(e.count, 10) : 1;
+            if (buckets[idx][layer] !== undefined) buckets[idx][layer] += weight;
+        });
+
+        // Max total per bucket for normalisation
+        var maxTotal = 0;
+        buckets.forEach(function(b) {
+            var total = LAYERS.reduce(function(s, l) { return s + b[l]; }, 0);
+            if (total > maxTotal) maxTotal = total;
+        });
+        if (maxTotal === 0) maxTotal = 1;
+
+        var barsHtml = '';
+        buckets.forEach(function(b, i) {
+            var total = LAYERS.reduce(function(s, l) { return s + b[l]; }, 0);
+            var heightPct = total === 0 ? 0 : Math.max(10, (total / maxTotal) * 100);
+            var bucketStart = new Date(rangeStart + i * bucketMs).toISOString();
+            var titleTs = range === '24h'
+                ? (bucketCount - i - 1) + 'h ago'
+                : (bucketCount - i - 1) + 'd ago';
+            var title = titleTs + ' — ' + total + ' event' + (total === 1 ? '' : 's');
+            if (total === 0) {
+                barsHtml += '<div class="td-pulse-bar td-pulse-bar-empty" data-bucket-start="' + bucketStart + '" title="' + title + '"></div>';
+                return;
+            }
+            // Build stacked segments
+            var segs = '';
+            LAYERS.forEach(function(l) {
+                if (b[l] === 0) return;
+                var segPct = (b[l] / total) * 100;
+                segs += '<div class="td-pulse-seg td-seg-' + l + '" style="height:' + segPct + '%;"></div>';
+            });
+            barsHtml += '<div class="td-pulse-bar" data-bucket-start="' + bucketStart + '" style="height:' + heightPct + '%;" title="' + title + '">' + segs + '</div>';
+        });
+        chart.innerHTML = barsHtml;
+
+        // X-axis labels
+        var lblA, lblB, lblC, lblD;
+        if (range === '24h') { lblA = '24h ago'; lblB = '12h'; lblC = '6h'; lblD = 'now'; }
+        else if (range === '7d') { lblA = '7d ago'; lblB = '4d'; lblC = '2d'; lblD = 'now'; }
+        else { lblA = '30d ago'; lblB = '15d'; lblC = '7d'; lblD = 'now'; }
+        labels.innerHTML = '<span>' + lblA + '</span><span>' + lblB + '</span><span>' + lblC + '</span><span>' + lblD + '</span>';
+    }
+
+    // Pulse bar click / legend click / range toggle
     document.addEventListener('click', function(ev) {
-        var target = ev.target;
-        if (target && target.classList && target.classList.contains('td-filter')) {
-            var layer = target.dataset.layer;
-            var agent = (state.agents||[]).find(function(a){return a.id===state.selectedId;});
-            if (agent && agent.name) loadTimeline(agent.name, layer);
+        var t = ev.target;
+        while (t && t !== document.body && !t.dataset) t = t.parentElement;
+        if (!t || !t.dataset) return;
+
+        if (t.classList.contains('td-pulse-bar')) {
+            var ts = t.dataset.bucketStart;
+            applyPulseFilter({bucket: ts});
+        } else if (t.classList.contains('td-pulse-range')) {
+            state.pulseRange = t.dataset.range;
+            document.querySelectorAll('.td-pulse-range').forEach(function(r) {
+                r.classList.toggle('td-pulse-range-active', r.dataset.range === state.pulseRange);
+            });
+            rebuildPulse();
+        } else if (t.classList.contains('td-pulse-legend-item')) {
+            applyPulseFilter({layer: t.dataset.layer});
+        } else if (t.id === 'tdPulseClear') {
+            state.pulseFilter = null;
+            applyPulseFilter(null);
         }
     });
 
