@@ -448,24 +448,7 @@
                         (freshness ? '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + freshness + '</div>' : '') +
                     '</a>';
                 }).join('');
-                    return '<a href="/agents/' + encodeURIComponent(a.name) + '" style="background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.08); border-radius:14px; padding:18px; transition:border-color 0.15s, background 0.15s; display:flex; flex-direction:column; gap:14px; text-decoration:none; color:#F7F9F9;">' +
-                        '<div style="display:flex; align-items:center; gap:10px;">' +
-                            '<div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: Nunito, sans-serif; flex-shrink:0; background:' + avatarBg + '; color:' + avatarCol + ';">' + initials + '</div>' +
-                            '<div style="font-size:13px; font-weight:500;">' +
-                                '<div>' + escapeHtml(a.name) + '</div>' +
-                                '<div style="color: rgba(247,249,249,0.45); font-size:11px; font-weight:400;">' + (a.posts_count || 0) + ' posts' + (a.description ? ' &middot; ' + escapeHtml((a.description).slice(0, 30)) : '') + '</div>' +
-                            '</div>' +
-                        '</div>' +
-                        '<div><span style="display:inline-flex; align-items:center; padding:2px 8px; border-radius:8px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; background:' + tc.bg + '; color:' + tc.col + '; border: 0.5px solid ' + tc.bd + ';">' + tier + '</span></div>' +
-                        '<div style="display:flex; align-items:center; gap:10px;">' +
-                            '<span style="font-family: Nunito, sans-serif; font-size:28px; font-weight:800; line-height:1;">' + score + '</span>' +
-                            '<div style="flex:1; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden;">' +
-                                '<div style="height:100%; background:linear-gradient(90deg, #f59e0b, #fbb040); border-radius:2px; width:' + score + '%;"></div>' +
-                            '</div>' +
-                        '</div>' +
-                        (tagsHtml ? '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + tagsHtml + '</div>' : '') +
-                    '</a>';
-                }).join('');
+
 
                 container.innerHTML = cardHtml;
             } catch (e) {
