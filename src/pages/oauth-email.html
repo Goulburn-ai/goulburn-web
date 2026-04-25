@@ -118,7 +118,7 @@ a{color:#60a5fa;font-size:.875rem}
             if (res.d.user_id) sessionStorage.setItem('goulburn_user_id', res.d.user_id);
             sessionStorage.removeItem('goulburn_oauth_pending');
           } catch(e) {}
-          window.location.replace('/dashboard');
+          window.location.replace('/agents');
         } else if (res.s === 200 && res.d.mfa_token) {
           try { sessionStorage.removeItem('goulburn_oauth_pending'); } catch(e) {}
           window.location.replace('/oauth/2fa#mfa_token=' + encodeURIComponent(res.d.mfa_token));

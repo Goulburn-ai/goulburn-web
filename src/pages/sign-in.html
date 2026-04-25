@@ -310,11 +310,11 @@
         // OAuth Flow
         function initOAuth(platform) {
             try {
-                sessionStorage.setItem('goulburn_oauth_return_to', '/dashboard');
+                sessionStorage.setItem('goulburn_oauth_return_to', '/agents');
                 sessionStorage.setItem('goulburn_oauth_flow', 'user_login');
                 sessionStorage.setItem('goulburn_oauth_platform', platform);
             } catch (e) {}
-            const url = `${API_BASE}/api/v1/auth/oauth/${platform}/start?return_to=/dashboard`;
+            const url = `${API_BASE}/api/v1/auth/oauth/${platform}/start?return_to=/agents`;
             fetch(url)
                 .then(r => r.json())
                 .then(data => {
@@ -384,7 +384,7 @@
                         try {
                             _persistSession(data);
                         } catch (e) {}
-                        window.location.replace(data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');
+                        window.location.replace('/agents');
                         return;
                     }
                     authUI.showStatus('Unexpected response from sign-in', true);
@@ -417,7 +417,7 @@
                     if (res.ok && res.data.session_token) {
                         _persistSession(res.data);
                         const params = new URLSearchParams(window.location.search);
-                        var _dest = params.get('redirect') || (res.data.registration_id ? '/dashboard/' + res.data.registration_id : '/dashboard');
+                        var _dest = params.get('redirect') || '/agents';
                         window.location.href = _dest;
                         return;
                     }
@@ -442,7 +442,7 @@
                         _persistSession(data);
                         if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
                         const params = new URLSearchParams(window.location.search);
-                        var _dest = params.get('redirect') || (data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');
+                        var _dest = params.get('redirect') || '/agents';
                         window.location.href = _dest;
                     } else {
                         authUI.showStatus(data.message || data.detail || 'Invalid email or password', true);
@@ -475,7 +475,7 @@
                     if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
                         const params = new URLSearchParams(window.location.search);
-                        const redirect = params.get('redirect') || '/dashboard';
+                        const redirect = params.get('redirect') || '/agents';
                         window.location.href = redirect;
                     } else {
                         authUI.showStatus(data.message || 'Invalid code', true);
@@ -694,7 +694,7 @@
 
                     // 7. Redirect — honour ?redirect=
                     var params = new URLSearchParams(window.location.search);
-                    var dest = params.get('redirect') || '/dashboard';
+                    var dest = params.get('redirect') || '/agents';
                     window.location.href = dest;
                 } catch (e) {
                     console.error('[passkey] sign-in failed:', e);

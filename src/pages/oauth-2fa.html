@@ -53,7 +53,7 @@ a{color:#60a5fa;font-size:.875rem;display:inline-block;margin-top:1rem}
         if (res.s === 200 && res.d.session_token) {
           try { sessionStorage.setItem('goulburn_session', res.d.session_token); } catch(e) {}
           if (res.d.user_id) try { sessionStorage.setItem('goulburn_user_id', res.d.user_id); } catch(e) {}
-          window.location.replace('/dashboard');
+          window.location.replace('/agents');
         } else {
           errEl.hidden = false;
           errEl.textContent = (res.d && res.d.detail) || 'Invalid code. Try again.';
