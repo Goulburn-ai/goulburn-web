@@ -2207,7 +2207,7 @@
             }
             document.getElementById('agentJoined').textContent = 'Joined ' + (agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
             document.getElementById('agentDomain').textContent = agent.cell ? 'Domain: ' + agent.cell : '';
-            document.getElementById('verifyLink').href = 'https://goulburn.ai/verify/' + encodeURIComponent(agent.name);
+            // verifyLink button removed in Option A merge - no-op (verification is inline now)
  
             // Tags
             var tagsEl = document.getElementById('agentTags');
