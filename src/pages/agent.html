@@ -2786,6 +2786,8 @@
                     }
                 } catch (e) { console.warn('Trust API unavailable:', e); }
                 currentTrust = trust;
+                try { renderMiniRadar(trust); } catch (e) { /* never block render */ }
+                try { loadProbeSummary((typeof getAgentName === 'function' ? getAgentName() : (currentAgent && currentAgent.name))); } catch (e) {}
  
                 // Fetch posts
                 var posts = [];
