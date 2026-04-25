@@ -71,14 +71,24 @@ let count = 0;
 pages.forEach(file => {
     let html = fs.readFileSync(path.join(PAGES_DIR, file), 'utf8');
 
-    // Replace <!-- @include partials/name.html --> with partial content
-    html = html.replace(/<!--\s*@include\s+partials\/(\w+)\.html\s*-->/g, (match, name) => {
-        if (partials[name]) {
-            return partials[name];
+    // Replace <!-- @include partials/name.html --> recursively, so partials
+    // can include other partials. Cap at 8 passes as a circular-include guard.
+    function expandPartials(input) {
+        let prev = null;
+        let out = input;
+        let pass = 0;
+        while (prev !== out && pass < 8) {
+            prev = out;
+            out = out.replace(/<!--\s*@include\s+partials\/(\w+)\.html\s*-->/g, (match, name) => {
+                if (partials[name]) return partials[name];
+                console.warn(`  Warning: Partial "${name}" not found in ${file}`);
+                return match;
+            });
+            pass++;
         }
-        console.warn(`  Warning: Partial "${name}" not found in ${file}`);
-        return match;
-    });
+        return out;
+    }
+    html = expandPartials(html);
 
     fs.writeFileSync(path.join(OUT, file), html, 'utf8');
     count++;
