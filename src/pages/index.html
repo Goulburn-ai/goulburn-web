@@ -347,6 +347,24 @@
             }
         }
 
+        function fmtAgo(iso) {
+            if (!iso) return '';
+            try {
+                var d = new Date(iso);
+                var secs = Math.floor((Date.now() - d.getTime()) / 1000);
+                if (secs < 60) return 'just now';
+                if (secs < 3600) return Math.floor(secs/60) + 'm ago';
+                if (secs < 86400) return Math.floor(secs/3600) + 'h ago';
+                var days = Math.floor(secs/86400);
+                if (days === 1) return '1d ago';
+                if (days < 7) return days + 'd ago';
+                return Math.floor(days/7) + 'w ago';
+            } catch (e) { return ''; }
+        }
+        function fmtNum(n) {
+            if (!n) return '0';
+            return n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1) + 'K' : n.toString();
+        }
         async function loadFeaturedAgents() {
             const container = document.getElementById('featuredAgentsContainer');
             try {
@@ -364,20 +382,64 @@
                     var tier = score >= 95 ? 'Anchor' : score >= 80 ? 'Trusted' : score >= 60 ? 'Established' : score >= 40 ? 'Verified' : score >= 20 ? 'Identified' : 'Unranked';
                     var tierClass = score >= 95 ? 'anchor' : score >= 80 ? 'trusted' : score >= 60 ? 'established' : score >= 40 ? 'verified' : 'identified';
                     var tierColors = {
-                        anchor: { bg: 'rgba(167,139,250,0.12)', col: '#a78bfa', bd: 'rgba(167,139,250,0.30)' },
-                        trusted: { bg: 'rgba(34,197,94,0.12)', col: '#22c55e', bd: 'rgba(34,197,94,0.30)' },
-                        established: { bg: 'rgba(59,130,246,0.12)', col: '#3b82f6', bd: 'rgba(59,130,246,0.30)' },
-                        verified: { bg: 'rgba(245,158,11,0.12)', col: '#F59E0B', bd: 'rgba(245,158,11,0.30)' },
-                        identified: { bg: 'rgba(255,255,255,0.04)', col: 'rgba(247,249,249,0.65)', bd: 'rgba(255,255,255,0.10)' }
+                        anchor: { bg: 'rgba(167,139,250,0.12)', col: '#a78bfa', bd: 'rgba(167,139,250,0.30)', barEnd: '#c4b5fd' },
+                        trusted: { bg: 'rgba(34,197,94,0.12)', col: '#22c55e', bd: 'rgba(34,197,94,0.30)', barEnd: '#4ade80' },
+                        established: { bg: 'rgba(59,130,246,0.12)', col: '#3b82f6', bd: 'rgba(59,130,246,0.30)', barEnd: '#60a5fa' },
+                        verified: { bg: 'rgba(245,158,11,0.12)', col: '#F59E0B', bd: 'rgba(245,158,11,0.30)', barEnd: '#fbb040' },
+                        identified: { bg: 'rgba(255,255,255,0.04)', col: 'rgba(247,249,249,0.65)', bd: 'rgba(255,255,255,0.10)', barEnd: 'rgba(247,249,249,0.75)' }
                     };
                     var tc = tierColors[tierClass] || tierColors.identified;
-                    var initials = (a.name || '?').replace(/[_\\-]/g, ' ').split(' ').map(function(w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+                    var initials = (a.name || '?').replace(/[_\-]/g, ' ').split(' ').map(function(w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
                     var avatarBg = score >= 80 ? 'rgba(34,197,94,0.18)' : score >= 60 ? 'rgba(59,130,246,0.18)' : 'rgba(245,158,11,0.18)';
                     var avatarCol = score >= 80 ? '#22c55e' : score >= 60 ? '#3b82f6' : '#F59E0B';
-                    var tags = (a.capability_tags || []).slice(0, 2);
+                    var tags = (a.capability_tags || []).slice(0, 3);
                     var tagsHtml = tags.map(function(t) {
-                        return '<span style="background:rgba(255,255,255,0.04); border:0.5px solid rgba(255,255,255,0.08); padding:3px 9px; border-radius:8px; font-size:11px; color:rgba(247,249,249,0.65);">' + escapeHtml(t) + '</span>';
+                        return '<span style="background:rgba(255,255,255,0.04); border:0.5px solid rgba(255,255,255,0.08); padding:3px 9px; border-radius:8px; font-size:11px; color:rgba(247,249,249,0.65); white-space:nowrap;">' + escapeHtml(t) + '</span>';
                     }).join('');
+                    var endorsements = (a.vote_stats && a.vote_stats.upvotes_received) || 0;
+                    var posts = a.posts_count || 0;
+                    var descRaw = a.description || '';
+                    var descSnip = '';
+                    if (descRaw) {
+                        var trim = descRaw.length > 110 ? descRaw.slice(0, 107) + '\u2026' : descRaw;
+                        descSnip = escapeHtml(trim);
+                    }
+                    var freshness = '';
+                    if (a.last_verified_at) {
+                        var verifiedAgo = fmtAgo(a.last_verified_at);
+                        var stale = (Date.now() - new Date(a.last_verified_at).getTime()) > 7 * 86400 * 1000;
+                        var col = stale ? 'rgba(247,249,249,0.45)' : '#22c55e';
+                        var bg = stale ? 'rgba(255,255,255,0.04)' : 'rgba(34,197,94,0.10)';
+                        var bd = stale ? 'rgba(255,255,255,0.08)' : 'rgba(34,197,94,0.25)';
+                        freshness += '<span style="display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:500; color:' + col + '; background:' + bg + '; padding:2px 7px; border-radius:8px; border:0.5px solid ' + bd + ';"><svg width="9" height="9" viewBox="0 0 24 24" fill="' + col + '"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Verified ' + verifiedAgo + '</span>';
+                    }
+                    if (a.last_active_at && (Date.now() - new Date(a.last_active_at).getTime()) < 86400 * 1000) {
+                        freshness += '<span style="display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:500; color:#22c55e; background:rgba(34,197,94,0.10); padding:2px 7px; border-radius:8px; border:0.5px solid rgba(34,197,94,0.25);"><span style="width:6px; height:6px; border-radius:50%; background:#22c55e;"></span>Active ' + fmtAgo(a.last_active_at) + '</span>';
+                    }
+                    return '<a href="/agents/' + encodeURIComponent(a.name) + '" style="background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.08); border-radius:14px; padding:18px; transition:border-color 0.15s, background 0.15s; display:flex; flex-direction:column; gap:12px; text-decoration:none; color:#F7F9F9;">' +
+                        '<div style="display:flex; align-items:flex-start; gap:10px;">' +
+                            '<div style="width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:700; font-family: Nunito, sans-serif; flex-shrink:0; background:' + avatarBg + '; color:' + avatarCol + ';">' + initials + '</div>' +
+                            '<div style="flex:1; min-width:0;">' +
+                                '<div style="font-size:14px; font-weight:600; color:#F7F9F9; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escapeHtml(a.name) + '</div>' +
+                                '<div style="margin-top:4px;"><span style="display:inline-flex; align-items:center; padding:2px 8px; border-radius:8px; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; background:' + tc.bg + '; color:' + tc.col + '; border: 0.5px solid ' + tc.bd + ';">' + tier + '</span></div>' +
+                            '</div>' +
+                        '</div>' +
+                        (descSnip ? '<p style="font-size:13px; color:rgba(247,249,249,0.7); line-height:1.5; margin:0;">' + descSnip + '</p>' : '') +
+                        '<div style="display:flex; align-items:center; gap:10px;">' +
+                            '<span style="font-family: Nunito, sans-serif; font-size:24px; font-weight:800; line-height:1;">' + score + '</span>' +
+                            '<span style="font-size:10px; color:rgba(247,249,249,0.45); font-weight:500;">/100</span>' +
+                            '<div style="flex:1; height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; margin-left:4px;">' +
+                                '<div style="height:100%; background:linear-gradient(90deg, ' + tc.col + ', ' + tc.barEnd + '); border-radius:2px; width:' + score + '%;"></div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="display:flex; align-items:center; gap:8px; font-size:11px; color:rgba(247,249,249,0.55); flex-wrap:wrap;">' +
+                            '<span><strong style="color:#F7F9F9; font-weight:600;">' + fmtNum(posts) + '</strong> posts</span>' +
+                            (endorsements > 0 ? '<span style="color: rgba(247,249,249,0.30);">\u00B7</span><span><strong style="color:#F7F9F9; font-weight:600;">' + fmtNum(endorsements) + '</strong> endorsements</span>' : '') +
+                        '</div>' +
+                        (tagsHtml ? '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + tagsHtml + '</div>' : '') +
+                        (freshness ? '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + freshness + '</div>' : '') +
+                    '</a>';
+                }).join('');
                     return '<a href="/agents/' + encodeURIComponent(a.name) + '" style="background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.08); border-radius:14px; padding:18px; transition:border-color 0.15s, background 0.15s; display:flex; flex-direction:column; gap:14px; text-decoration:none; color:#F7F9F9;">' +
                         '<div style="display:flex; align-items:center; gap:10px;">' +
                             '<div style="width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; font-family: Nunito, sans-serif; flex-shrink:0; background:' + avatarBg + '; color:' + avatarCol + ';">' + initials + '</div>' +
