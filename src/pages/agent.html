@@ -250,6 +250,30 @@
            secondary cards; reset */
         main.space-y-8 > * { margin-top: 0 !important; }
 
+        /* Mini radar chart embedded in trust snapshot card */
+        .profile-mini-radar {
+            display: flex; justify-content: center; align-items: center;
+            margin: 8px 0 12px; padding: 8px 0;
+        }
+        .profile-mini-radar svg { width: 100%; max-width: 240px; height: auto; }
+        @media (max-width: 640px) {
+            .profile-mini-radar svg { max-width: 200px; }
+        }
+        /* Probe summary chip (passed/failed) + verify CTA */
+        .profile-probe-chip {
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            margin-top: 10px; padding: 10px 12px;
+            background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 10px; font-size: 12px;
+        }
+        .profile-probe-chip .ppc-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .profile-probe-chip .ppc-pass { color: #22c55e; font-weight: 500; }
+        .profile-probe-chip .ppc-fail { color: #ef4444; font-weight: 500; }
+        .profile-probe-chip .ppc-pending { color: rgba(247,249,249,0.55); }
+        .profile-probe-chip .ppc-cta {
+            color: #F59E0B; text-decoration: none; font-weight: 500; white-space: nowrap;
+        }
+        .profile-probe-chip .ppc-cta:hover { color: #FBB040; }
         .profile-trust-card {
             background: rgba(255,255,255,0.03);
             border: 0.5px solid rgba(255,255,255,0.08);
@@ -927,7 +951,7 @@
                             </button>
                             <a id="verifyLink" href="#" target="_blank" class="profile-id-btn primary">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                                Verification page
+                                View verification
                             </a>
                             <button id="editProfileBtn" onclick="toggleEditPanel()" style="display:none;" class="profile-id-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -970,7 +994,14 @@
                                 </span>
                             </div>
                         </header>
+                        <!-- Mini radar chart (Option B verify-merge) -->
+                        <div class="profile-mini-radar" id="profileMiniRadar"></div>
                         <div id="trustLayerCards"></div>
+                        <!-- Probe summary chip + 'View full verification report' CTA -->
+                        <div class="profile-probe-chip" id="profileProbeChip" style="display:none;">
+                            <div class="ppc-stats" id="profileProbeStats"></div>
+                            <a class="ppc-cta" id="profileProbeCta" href="#" target="_blank" rel="noopener">View full report →</a>
+                        </div>
                         <p class="profile-trust-foot" id="trustExplanation"></p>
                         <!-- Hidden host kept for legacy renderLayerMiniBars writes -->
                         <div id="layerMiniBars" style="display:none;"></div>
@@ -1858,6 +1889,108 @@
             not_found:   { label: 'Not Found',   css: 'tier-unranked',    colour: '#94a3b8' }
         };
  
+        // ── Mini radar chart for the trust snapshot card (Option B) ──
+        function renderMiniRadar(trust) {
+            var host = document.getElementById('profileMiniRadar');
+            if (!host) return;
+            if (!trust || !trust.layers) {
+                host.innerHTML = '';
+                return;
+            }
+            var keys = ['identity','capability','track_record','social','compliance'];
+            var labels = ['Identity','Capability','Track Record','Social','Compliance'];
+            var scores = keys.map(function(k) { return (trust.layers[k] && trust.layers[k].score) || 0; });
+            var size = 200, cx = size/2, cy = size/2, r = 70;
+            var n = keys.length;
+            // -PI/2 puts vertex 0 at the top
+            function pt(i, score) {
+                var angle = -Math.PI/2 + (2 * Math.PI * i / n);
+                var rr = r * (Math.max(0, Math.min(100, score)) / 100);
+                return { x: cx + rr * Math.cos(angle), y: cy + rr * Math.sin(angle), angle: angle };
+            }
+            function colorFor(s) {
+                if (s >= 75) return '#22c55e';
+                if (s >= 50) return '#F59E0B';
+                if (s >= 25) return '#fbbf24';
+                return '#ef4444';
+            }
+            var svg = '<svg viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="Trust radar across 5 evidence layers">';
+            // grid rings 25/50/75/100
+            [25,50,75,100].forEach(function(ring) {
+                var pts = [];
+                for (var i=0;i<n;i++) {
+                    var angle = -Math.PI/2 + (2 * Math.PI * i / n);
+                    var rr = r * (ring/100);
+                    pts.push((cx + rr * Math.cos(angle)) + ',' + (cy + rr * Math.sin(angle)));
+                }
+                var op = ring === 100 ? 0.18 : 0.06;
+                svg += '<polygon points="' + pts.join(' ') + '" fill="none" stroke="rgba(255,255,255,'+op+')" stroke-width="1"/>';
+            });
+            // axis lines
+            for (var i=0;i<n;i++) {
+                var angle = -Math.PI/2 + (2 * Math.PI * i / n);
+                var ex = cx + r * Math.cos(angle), ey = cy + r * Math.sin(angle);
+                svg += '<line x1="'+cx+'" y1="'+cy+'" x2="'+ex+'" y2="'+ey+'" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>';
+            }
+            // data polygon
+            var dataPts = [];
+            for (var i=0;i<n;i++) { var p = pt(i, scores[i]); dataPts.push(p.x + ',' + p.y); }
+            svg += '<polygon points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.18)" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round"/>';
+            // vertex dots
+            for (var i=0;i<n;i++) {
+                var p = pt(i, scores[i]);
+                svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="3.5" fill="' + colorFor(scores[i]) + '" stroke="rgba(0,0,0,0.4)" stroke-width="1"/>';
+            }
+            // labels around the outside
+            for (var i=0;i<n;i++) {
+                var angle = -Math.PI/2 + (2 * Math.PI * i / n);
+                var lr = r + 18;
+                var lx = cx + lr * Math.cos(angle), ly = cy + lr * Math.sin(angle);
+                var anchor = 'middle';
+                if (Math.cos(angle) < -0.3) anchor = 'end';
+                else if (Math.cos(angle) > 0.3) anchor = 'start';
+                svg += '<text x="'+lx+'" y="'+ly+'" text-anchor="'+anchor+'" dominant-baseline="middle" fill="rgba(247,249,249,0.65)" font-size="9" font-family="Plus Jakarta Sans, sans-serif">' + labels[i] + '</text>';
+            }
+            svg += '</svg>';
+            host.innerHTML = svg;
+        }
+
+        // ── Probe summary chip: count passed/failed/pending and link to /verify ──
+        function loadProbeSummary(name) {
+            var chip = document.getElementById('profileProbeChip');
+            var stats = document.getElementById('profileProbeStats');
+            var cta = document.getElementById('profileProbeCta');
+            if (!chip || !stats || !cta) return;
+            cta.href = '/verify/' + encodeURIComponent(name);
+            fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name))
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) {
+                    if (!d) { chip.style.display = 'flex'; stats.innerHTML = '<span class="ppc-pending">No probes run yet</span>'; cta.textContent = 'View full verification report →'; return; }
+                    var probes = d.probes || [];
+                    var total = d.probe_count != null ? d.probe_count : probes.length;
+                    var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
+                    var failed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'failed'; }).length;
+                    var pending = Math.max(0, total - passed - failed);
+                    var html = '';
+                    if (total === 0) {
+                        html = '<span class="ppc-pending">No probes run yet</span>';
+                    } else {
+                        html = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
+                        if (passed > 0) html += '<span class="ppc-pass">✓ ' + passed + ' passed</span>';
+                        if (failed > 0) html += '<span class="ppc-fail">✗ ' + failed + ' failed</span>';
+                        if (pending > 0) html += '<span class="ppc-pending">' + pending + ' pending</span>';
+                    }
+                    stats.innerHTML = html;
+                    cta.textContent = 'View full verification report →';
+                    chip.style.display = 'flex';
+                })
+                .catch(function() {
+                    chip.style.display = 'flex';
+                    stats.innerHTML = '<span class="ppc-pending">Probe data unavailable</span>';
+                    cta.textContent = 'View full verification report →';
+                });
+        }
+
         var LAYER_META = {
             identity:     { label: 'Identity',     full: 'Identity Verification',    question: 'Who is accountable?',       fill: 'fill-identity' },
             capability:   { label: 'Capability',   full: 'Capability Verification',  question: 'Can it do what it claims?', fill: 'fill-capability' },
