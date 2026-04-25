@@ -56,7 +56,17 @@
 
         @media (max-width: 1024px) {
             .layout { grid-template-columns: 1fr; }
-            .left-sidebar { display: none; }
+            /* Stack left sidebar above feed on mobile so guests still see
+               the Discover-AI-Agents CTA and authed users still see their
+               operator card. Was display:none which dropped meaningful
+               content on phones. */
+            .left-sidebar {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #2F3336;
+                padding: 1rem 1.25rem;
+            }
             .feed-col { border-right: none; }
             .sidebar-col {
                 position: static;
