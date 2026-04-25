@@ -60,8 +60,12 @@
                 a.classList.add('text-brand-600', 'font-semibold');
             }
         });
-        // Auth state check
-        var session = sessionStorage.getItem('goulburn_session');
+        // Auth state check - mirror goulburnAuth.getSession()
+        // (Remember-me sessions live in localStorage, others in sessionStorage)
+        var session = (function() {
+            try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
+            return sessionStorage.getItem('goulburn_session');
+        })();
         if (session) {
             var guest = document.getElementById('navGuest');
             var auth = document.getElementById('navAuth');
@@ -75,7 +79,10 @@
     })();
     
             // Update nav links with registration ID
-            var navRegId = sessionStorage.getItem('goulburn_reg_id');
+            var navRegId = (function() {
+                try { var ls = localStorage.getItem('goulburn_reg_id'); if (ls) return ls; } catch (e) {}
+                return sessionStorage.getItem('goulburn_reg_id');
+            })();
             if (navRegId) {
                 var navLinks = [
                     ['navDashLink', '/dashboard/' + navRegId],
