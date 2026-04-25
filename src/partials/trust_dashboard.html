@@ -494,6 +494,30 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-action-cta:hover { text-decoration: underline; }
     .td-action-cta.td-action-pending { opacity: 0.55; cursor: wait; pointer-events: none; }
+
+    /* Filled amber CTA: makes 'Run probe' read as a clear button, not text. */
+    .td-action-probe-btn {
+        display: inline-flex; align-items: center; gap: 6px;
+        margin-top: 0.7rem; align-self: flex-start;
+        padding: 9px 14px;
+        background: #F59E0B; color: #1A0F00; border: 0.5px solid #F59E0B;
+        border-radius: 8px;
+        font-size: 0.8125rem; font-weight: 600;
+        font-family: inherit;
+        cursor: pointer; text-decoration: none;
+        transition: background 0.15s ease, transform 0.05s ease;
+    }
+    .td-action-probe-btn:hover { background: #FBB040; }
+    .td-action-probe-btn:active { transform: translateY(1px); }
+    .td-action-probe-btn.td-action-pending { opacity: 0.6; cursor: wait; pointer-events: none; }
+    .td-action-probe-btn:disabled,
+    .td-action-probe-btn.td-action-cooldown {
+        background: transparent; color: rgba(247,249,249,0.55);
+        border: 0.5px dashed rgba(245,158,11,0.35);
+        cursor: not-allowed;
+    }
+    .td-action-probe-btn.td-action-cooldown:hover { background: transparent; }
+    .td-action-probe-btn .td-cooldown-num { color: #F59E0B; font-variant-numeric: tabular-nums; }
 </style>
 
 <section class="td-root" id="trustDashboard">
@@ -1042,13 +1066,30 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     return;
                 }
                 wrap.style.display = '';
-                grid.innerHTML = actions.map(function(a) {
+                grid.innerHTML = actions.map(function(a, idx) {
                     var effortCls = 'td-effort-' + (a.effort || 'medium');
                     var cta = '';
                     if (a.trigger && a.trigger.kind === 'probe') {
-                        cta = '<button class="td-action-cta td-action-probe" data-probe-kind="' + esc(a.trigger.probe_kind || '') + '" onclick="window.__tdActionProbe(\'' + esc(a.trigger.probe_kind || '') + '\', event)">Run probe &rsaquo;</button>';
+                        var pk = esc(a.trigger.probe_kind || '');
+                        var cooldown = parseInt(a.trigger.cooldown_remaining_seconds || 0, 10) || 0;
+                        var btnId = 'tdProbeBtn-' + pk + '-' + idx;
+                        if (cooldown > 0) {
+                            // In cooldown: render disabled button with countdown,
+                            // ticking down via setInterval. Endpoint for the
+                            // countdown id is set so the ticker can find it.
+                            cta = '<button id="' + btnId + '" class="td-action-cta td-action-probe-btn td-action-cooldown" disabled data-probe-kind="' + pk + '" data-cooldown-end="' + (Date.now() + cooldown * 1000) + '">' +
+                                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' +
+                                '<span>Available in <span class="td-cooldown-num">--:--</span></span>' +
+                                '</button>';
+                        } else {
+                            // Available: filled amber CTA
+                            cta = '<button id="' + btnId + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '" onclick="window.__tdActionProbe(\'' + pk + '\', event)">' +
+                                '<span>Run probe</span>' +
+                                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
+                                '</button>';
+                        }
                     } else if (a.link) {
-                        cta = '<a href="' + esc(a.link) + '">Start &rsaquo;</a>';
+                        cta = '<a class="td-action-cta" href="' + esc(a.link) + '">Start &rsaquo;</a>';
                     }
                     return '<div class="td-action">' +
                         '<div class="td-action-head">' +
@@ -1063,6 +1104,35 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                         cta +
                     '</div>';
                 }).join('');
+
+                // Start the cooldown ticker. One global interval handles all cards.
+                if (window.__tdCooldownTimer) { clearInterval(window.__tdCooldownTimer); }
+                window.__tdCooldownTimer = setInterval(function() {
+                    var anyActive = false;
+                    document.querySelectorAll('.td-action-probe-btn.td-action-cooldown').forEach(function(btn) {
+                        var endTs = parseInt(btn.dataset.cooldownEnd || 0, 10);
+                        var remaining = Math.max(0, Math.floor((endTs - Date.now()) / 1000));
+                        if (remaining <= 0) {
+                            // Cooldown done - swap to available state
+                            var pk = btn.dataset.probeKind || '';
+                            btn.outerHTML = '<button id="' + btn.id + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '" onclick="window.__tdActionProbe(\'' + pk + '\', event)">' +
+                                '<span>Run probe</span>' +
+                                '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
+                                '</button>';
+                            return;
+                        }
+                        anyActive = true;
+                        var mins = Math.floor(remaining / 60);
+                        var secs = remaining % 60;
+                        var label = (mins > 0 ? mins + 'm ' : '') + secs + 's';
+                        var numEl = btn.querySelector('.td-cooldown-num');
+                        if (numEl) numEl.textContent = label;
+                    });
+                    if (!anyActive) {
+                        clearInterval(window.__tdCooldownTimer);
+                        window.__tdCooldownTimer = null;
+                    }
+                }, 1000);
             });
     }
 
