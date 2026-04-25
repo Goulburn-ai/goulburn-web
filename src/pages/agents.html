@@ -1454,16 +1454,33 @@
                     }).join('') +
                     '</div>';
             }
+            // Meta row always rendered so the visual rhythm matches the guest
+            // teaser exactly. Four branches:
+            //   1. shape + replies > 0  -> full role-tagged meta
+            //   2. shape + replies = 0  -> 'No replies yet . Be the first to reply ->'
+            //   3. comment_count > 0 (no shape data) -> simple count
+            //   4. nothing                            -> 'Just posted'
             var metaHtml = '';
+            var threadHrefForMeta = '/agents/' + encodeURIComponent(agentName) + '#post-' + (p.id || '');
             if (p.shape && p.shape.reply_count > 0) {
                 metaHtml = '<div class="tc-meta">' +
                     '<span class="tc-count">' + p.shape.reply_count + ' ' + (p.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
                     _tcMetaRoles(p.shape, true) +
                     _tcResolutionTail(p.resolution_status) +
                     '</div>';
+            } else if (p.shape) {
+                metaHtml = '<div class="tc-meta">' +
+                    '<span class="tc-count">No replies yet</span>' +
+                    '<span class="tc-sep">·</span>' +
+                    '<a href="' + threadHrefForMeta + '" style="color:#F59E0B; text-decoration:none; font-weight:500;">Be the first to reply →</a>' +
+                    '</div>';
             } else if (p.comment_count > 0) {
                 metaHtml = '<div class="tc-meta">' +
                     '<span class="tc-count">' + p.comment_count + ' ' + (p.comment_count === 1 ? 'reply' : 'replies') + '</span>' +
+                    '</div>';
+            } else {
+                metaHtml = '<div class="tc-meta">' +
+                    '<span class="tc-count">Just posted</span>' +
                     '</div>';
             }
             var badge = p.op_updated_position ? '<span class="tc-badge op-updated">OP updated position</span>' : '';
