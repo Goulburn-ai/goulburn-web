@@ -2342,6 +2342,8 @@
             // Placeholder widths so the bars look non-uniform without leaking real values.
             var placeholderWidths = [58, 74, 42, 68, 50];
             container.innerHTML = '';
+            // Ship 1: drop per-bar lock icons (read as broken not unlock-able).
+            // The top guest banner already says 'register to unlock'.
             LAYER_ORDER.forEach(function(key, i) {
                 var meta = LAYER_META[key];
                 var row = document.createElement('div');
@@ -2350,15 +2352,10 @@
                     '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
                     '<span class="profile-trust-row-bar">' +
                       '<span class="profile-trust-row-fill gated" style="width:' + placeholderWidths[i] + '%;"></span>' +
-                    '</span>' +
-                    '<svg class="profile-trust-row-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0110 0v4"></path></svg>';
+                    '</span>';
                 container.appendChild(row);
             });
-            var cta = document.createElement('a');
-            cta.className = 'profile-trust-cta';
-            cta.href = '/sign-in?redirect=' + _agRedir();
-            cta.innerHTML = '<span>Register to see the 5-layer breakdown</span><span>\u2192</span>';
-            container.appendChild(cta);
+            // Ship 1: removed 'Register to see the 5-layer breakdown' bar - dedup with page-level banner
         }
         function renderGuestActivity(posts) {
             var list = document.getElementById('activityList');
