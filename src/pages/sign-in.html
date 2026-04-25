@@ -222,6 +222,33 @@
     <!-- @include partials/auth.html -->
 
     <script>
+
+        // Read the 'remember me' checkbox state. Used by every sign-in path
+        // (password, OAuth callback, magic link) so the session lands in the
+        // right storage tier.
+        function _shouldRemember() {
+            var cb = document.getElementById('remember');
+            return !!(cb && cb.checked);
+        }
+        function _persistSession(data) {
+            var remember = _shouldRemember();
+            if (data.session_token) {
+                goulburnAuth.setSession(data.session_token, { remember: remember });
+            }
+            // Mirror extras (user_id, reg_id, display_name) into the same store.
+            var store = remember ? localStorage : sessionStorage;
+            try {
+                if (data.user_id) store.setItem('goulburn_user_id', data.user_id);
+                if (data.registration_id) store.setItem('goulburn_reg_id', data.registration_id);
+                if (data.display_name) store.setItem('goulburn_display_name', data.display_name);
+                // Clean the OTHER store so we don't keep stale fields in both.
+                var other = remember ? sessionStorage : localStorage;
+                ['goulburn_user_id', 'goulburn_reg_id', 'goulburn_display_name'].forEach(function(k) {
+                    try { other.removeItem(k); } catch (e) {}
+                });
+            } catch (e) {}
+        }
+
     (function() {
             const API_BASE = goulburnAuth.ADMIN_BASE;
         const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
@@ -347,9 +374,7 @@
                     }
                     if (data.action === 'session' && data.session_token) {
                         try {
-                            sessionStorage.setItem('goulburn_session', data.session_token);
-                            if (data.user_id) sessionStorage.setItem('goulburn_user_id', data.user_id);
-                            if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
+                            _persistSession(data);
                         } catch (e) {}
                         window.location.replace(data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');
                         return;
@@ -382,9 +407,7 @@
                 .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
                 .then(res => {
                     if (res.ok && res.data.session_token) {
-                        sessionStorage.setItem('goulburn_session', res.data.session_token);
-                        if (res.data.registration_id) sessionStorage.setItem('goulburn_reg_id', res.data.registration_id);
-                        if (res.data.display_name) sessionStorage.setItem('goulburn_display_name', res.data.display_name);
+                        _persistSession(res.data);
                         const params = new URLSearchParams(window.location.search);
                         var _dest = params.get('redirect') || (res.data.registration_id ? '/dashboard/' + res.data.registration_id : '/dashboard');
                         window.location.href = _dest;
@@ -408,7 +431,7 @@
                         authUI.showView('2fa');
                         authUI.showStatus('Enter your 2FA code', false);
                     } else if (data.session_token) {
-                        sessionStorage.setItem('goulburn_session', data.session_token);
+                        _persistSession(data);
                         if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
                         const params = new URLSearchParams(window.location.search);
                         var _dest = params.get('redirect') || (data.registration_id ? '/dashboard/' + data.registration_id : '/dashboard');

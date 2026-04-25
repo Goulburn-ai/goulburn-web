@@ -4,25 +4,79 @@
         var API_BASE = 'https://api.goulburn.ai';
         var ADMIN_BASE = 'https://goulburn-admin-production.up.railway.app';
 
+        // Storage strategy:
+        //   - 'remember me' checked at sign-in -> writes to localStorage (persists
+        //     across browser restarts) + sets a goulburn_remember=1 flag
+        //   - unchecked -> writes to sessionStorage (cleared when tab closes)
+        // getSession reads localStorage first, falls back to sessionStorage,
+        // so callers get the right token regardless of how the user signed in.
+        function _getRememberStore() {
+            try {
+                return localStorage.getItem('goulburn_remember') === '1' ? localStorage : sessionStorage;
+            } catch (e) {
+                // localStorage may throw in restricted contexts (e.g. some
+                // private-browsing modes). Fall back to sessionStorage.
+                return sessionStorage;
+            }
+        }
+
         function getSession() {
+            try {
+                var ls = localStorage.getItem('goulburn_session');
+                if (ls) return ls;
+            } catch (e) {}
             return sessionStorage.getItem('goulburn_session');
         }
 
-        function setSession(token) {
-            sessionStorage.setItem('goulburn_session', token);
+        // setSession(token, opts?) - opts.remember=true -> localStorage
+        // Backward compat: setSession(token) without opts keeps the existing
+        // sessionStorage behaviour for any callers that don't pass remember.
+        function setSession(token, opts) {
+            opts = opts || {};
+            try {
+                if (opts.remember) {
+                    localStorage.setItem('goulburn_session', token);
+                    localStorage.setItem('goulburn_remember', '1');
+                    // Clean up any sessionStorage copy from a previous non-remembered sign-in
+                    sessionStorage.removeItem('goulburn_session');
+                    return;
+                }
+                // Not remembering -> use sessionStorage and clear any stale localStorage copy
+                sessionStorage.setItem('goulburn_session', token);
+                localStorage.removeItem('goulburn_session');
+                localStorage.removeItem('goulburn_remember');
+            } catch (e) {
+                // Storage hiccup -> last-resort sessionStorage write
+                try { sessionStorage.setItem('goulburn_session', token); } catch (_) {}
+            }
         }
 
         function clearSession() {
+            try {
+                localStorage.removeItem('goulburn_session');
+                localStorage.removeItem('goulburn_reg_id');
+                localStorage.removeItem('goulburn_user_id');
+                localStorage.removeItem('goulburn_display_name');
+                localStorage.removeItem('goulburn_remember');
+            } catch (e) {}
             sessionStorage.removeItem('goulburn_session');
             sessionStorage.removeItem('goulburn_reg_id');
+            sessionStorage.removeItem('goulburn_user_id');
+            sessionStorage.removeItem('goulburn_display_name');
         }
 
         function getRegId() {
+            try {
+                var ls = localStorage.getItem('goulburn_reg_id');
+                if (ls) return ls;
+            } catch (e) {}
             return sessionStorage.getItem('goulburn_reg_id');
         }
 
         function setRegId(id) {
-            sessionStorage.setItem('goulburn_reg_id', id);
+            // Mirror the session storage choice so both pieces stay together.
+            var store = _getRememberStore();
+            store.setItem('goulburn_reg_id', id);
         }
 
         function isAuthenticated() {
