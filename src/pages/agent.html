@@ -53,6 +53,17 @@
         .profile-id-tier.tier-identified, .profile-id-tier.tier-unranked { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: rgba(247,249,249,0.7); }
         .profile-id-desc { margin: 0; font-size: 14px; line-height: 1.5; color: rgba(247,249,249,0.78); }
         .profile-id-scorebox { text-align: right; flex-shrink: 0; }
+        /* Percentile + trend chips (Option 1 trust polish) */
+        .profile-id-chips { display: flex; flex-direction: column; gap: 4px; align-items: flex-end; margin-top: 4px; font-size: 11px; }
+        .profile-id-chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.10); color: rgba(247,249,249,0.75); font-weight: 500; white-space: nowrap; }
+        .profile-id-chip.up    { color: #22c55e; background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.25); }
+        .profile-id-chip.down  { color: #ef4444; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.25); }
+        .profile-id-chip.flat  { color: rgba(247,249,249,0.55); }
+        .profile-id-chip.pct   { color: #F59E0B; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.30); }
+        @media (max-width: 640px) {
+            .profile-id-chips { align-items: flex-start; margin-top: 6px; }
+        }
+
         .profile-id-scoreval { font-size: 28px; font-weight: 500; color: #F7F9F9; line-height: 1; }
         .profile-id-scorelbl { font-size: 10px; color: rgba(247,249,249,0.55); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; }
         .profile-id-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
@@ -946,7 +957,8 @@
                             </div>
                             <div class="profile-id-scorebox">
                                 <div class="profile-id-scoreval" id="scoreValue">—</div>
-                                <div class="profile-id-scorelbl">Trust score</div>
+                                <div class="profile-id-scorelbl">Trust score / 100</div>
+                                <div class="profile-id-chips" id="profileScoreChips"></div>
                             </div>
                         </header>
                         <div class="profile-id-tags" id="agentTags"></div>
@@ -1849,6 +1861,7 @@
 
                 // Re-render hero with updated data
                 renderHero(currentAgent, currentTrust);
+                try { renderScoreChips(currentAgent); } catch (e) { /* chips are decorative, never block */ }
                 renderCapabilities(currentAgent, currentTrust);
 
                 showEditStatus('Saved', '#22c55e');
@@ -2116,6 +2129,39 @@
                 });
         }
 
+        // Trust Option 1: trend chip + percentile chip on score box.
+        // Trend uses agent.reputation_score - agent.score_last_week.
+        // Percentile fetched from /api/v1/trust/percentile/{name}.
+        function renderScoreChips(agent) {
+            var host = document.getElementById('profileScoreChips');
+            if (!host || !agent) return;
+            var html = '';
+            // Trend chip
+            var cur = agent.reputation_score || 0;
+            var prev = (agent.score_last_week != null) ? agent.score_last_week : null;
+            if (prev != null) {
+                var delta = cur - prev;
+                var cls = delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat');
+                var arrow = delta > 0 ? '↑' : (delta < 0 ? '↓' : '—');
+                var sign = delta > 0 ? '+' : '';
+                html += '<span class="profile-id-chip ' + cls + '">' + arrow + ' ' + sign + delta + ' this week</span>';
+            }
+            host.innerHTML = html;
+            // Percentile chip - lazy fetch
+            try {
+                var name = agent.name;
+                if (!name) return;
+                fetch(API_BASE + '/api/v1/trust/percentile/' + encodeURIComponent(name))
+                    .then(function(r) { return r.ok ? r.json() : null; })
+                    .then(function(d) {
+                        if (!d || d.percentile == null) return;
+                        if (d.total < 5) return;  // too small a sample to be meaningful
+                        var pctChip = '<span class="profile-id-chip pct">top ' + d.top_percent + '%</span>';
+                        host.innerHTML = pctChip + host.innerHTML;
+                    })
+                    .catch(function() {});
+            } catch (e) {}
+        }
         var LAYER_META = {
             identity:     { label: 'Identity',     full: 'Identity Verification',    question: 'Who is accountable?',       fill: 'fill-identity' },
             capability:   { label: 'Capability',   full: 'Capability Verification',  question: 'Can it do what it claims?', fill: 'fill-capability' },
