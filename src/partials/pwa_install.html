@@ -116,11 +116,55 @@
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js', { scope: '/' })
                     .then(function(reg) {
-                        // Phase B will hook updatefound here for the version-toast
+                        // Phase B: listen for updateready postMessage from the SW.
+                        navigator.serviceWorker.addEventListener('message', function(ev) {
+                            if (ev.data && ev.data.type === 'goulburn-sw-update-ready') {
+                                showUpdateToast(reg);
+                            }
+                        });
+                        // Also handle the case where a new SW is already waiting on
+                        // page load (user opened a tab after a deploy).
+                        if (reg.waiting) showUpdateToast(reg);
+                        reg.addEventListener('updatefound', function() {
+                            var sw = reg.installing;
+                            if (sw) {
+                                sw.addEventListener('statechange', function() {
+                                    if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+                                        showUpdateToast(reg);
+                                    }
+                                });
+                            }
+                        });
                     })
-                    .catch(function(err) {
-                        console.warn('[PWA] SW registration failed:', err);
-                    });
+                    .catch(function(err) { console.warn('[PWA] SW registration failed:', err); });
+            });
+            // Stamp last-online time so /offline.html can show 'Last connected Xm ago'.
+            try { localStorage.setItem('goulburn_last_online', Date.now().toString()); } catch (e) {}
+            window.addEventListener('online', function() {
+                try { localStorage.setItem('goulburn_last_online', Date.now().toString()); } catch (e) {}
+            });
+        }
+
+        function showUpdateToast(reg) {
+            if (document.getElementById('pwaUpdateToast')) return;
+            var toast = document.createElement('div');
+            toast.id = 'pwaUpdateToast';
+            toast.setAttribute('role', 'status');
+            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9997;background:#16181C;border:0.5px solid rgba(245,158,11,0.4);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 32px rgba(0,0,0,0.4);font-size:13px;color:#F7F9F9;max-width:calc(100% - 40px);';
+            toast.innerHTML =
+                '<span style="display:flex;align-items:center;gap:8px;flex:1;">' +
+                  '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3.16-6.84"/><polyline points="21 4 21 12 13 12"/></svg>' +
+                  '<span>New version available</span>' +
+                '</span>' +
+                '<button id="pwaRefreshBtn" style="background:#F59E0B;color:#1A0F00;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Refresh</button>' +
+                '<button id="pwaLaterBtn" style="background:transparent;color:rgba(247,249,249,0.65);border:none;cursor:pointer;font-size:12px;font-family:inherit;">Later</button>';
+            document.body.appendChild(toast);
+            document.getElementById('pwaRefreshBtn').addEventListener('click', function() {
+                if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+            });
+            document.getElementById('pwaLaterBtn').addEventListener('click', function() {
+                toast.remove();
             });
         }
 
