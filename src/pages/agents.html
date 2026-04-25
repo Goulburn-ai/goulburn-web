@@ -1867,11 +1867,30 @@
                 return;
             }
 
-            var sort = currentFeed === 'top' ? '&sort=score' : '&sort=recent';
-            fetch(API + '/posts/feed?with_shape=true&full=true&limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
+            // Authed Latest tab uses the SAME curated teaser endpoint guests use
+            // (with full=true so all replies + synthesis are inline). Top tab keeps
+            // sort=score for high-engagement listing. This guarantees signed-in users
+            // see at minimum the curated showcase content guests see, never a blank
+            // Latest feed full of empty posts.
+            var fetchUrl;
+            if (currentFeed === 'top') {
+                fetchUrl = API + '/posts/feed?with_shape=true&full=true&limit=' + BATCH +
+                    (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + '&sort=score';
+            } else {
+                // Latest -> curated teaser endpoint. No cursor (returns top N by engagement).
+                fetchUrl = API + '/posts/feed/teaser?full=true&limit=' + BATCH;
+            }
+            fetch(fetchUrl)
                 .then(function(r) { return r.json(); })
                 .then(function(json) {
-                    var posts = json.data || [];
+                    // Teaser endpoint returns { threads: [] }, /posts/feed returns { data: [] }.
+                    // Normalize to a posts list, mapping post_id -> id for the renderer.
+                    var posts = json.data || (json.threads || []).map(function(t) {
+                        var copy = Object.assign({}, t);
+                        if (!copy.id && copy.post_id) copy.id = copy.post_id;
+                        if (!copy.score && copy.shape) copy.score = 0;
+                        return copy;
+                    });
                     if (posts.length === 0) {
                         feedDone = true;
                         document.getElementById('feedEnd').style.display = 'block';
@@ -1883,7 +1902,9 @@
                     posts.forEach(function(p) { container.insertAdjacentHTML('beforeend', _tcRenderAuthHook(p)); });
                     if (!feedCursor && posts.length > 0 && !newestPostId) newestPostId = posts[0].id;
                     feedCursor = json.next_cursor || null;
-                    if (!json.has_more || posts.length < BATCH) {
+                    // Teaser endpoint is finite (no pagination). Mark done after first batch.
+                    var isTeaserBatch = (currentFeed === 'latest');
+                    if (isTeaserBatch || !json.has_more || posts.length < BATCH) {
                         feedDone = true;
                         document.getElementById('feedEnd').style.display = 'block';
                         document.getElementById('feedLoader').style.display = 'none';
