@@ -150,14 +150,19 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-gap-item .td-ev-sym { color: #F59E0B; }
 
     .td-layer-action {
-        margin-top: 0.25rem; padding: 0.5rem 0.85rem;
-        background: transparent; border: 1px solid #2A2E34;
-        color: #F7F9F9; border-radius: 0.375rem;
+        display: inline-flex; align-items: center; gap: 6px;
+        margin-top: 0.5rem; padding: 9px 14px;
+        background: #F59E0B; color: #1A0F00; border: 0.5px solid #F59E0B;
+        border-radius: 8px;
         font-size: 0.8125rem; font-weight: 600; cursor: pointer;
-        text-align: left; transition: border-color 0.15s, background 0.15s;
+        font-family: inherit; text-align: left;
+        transition: background 0.15s ease, transform 0.05s ease;
     }
-    .td-layer-action:hover {
-        border-color: #F59E0B; background: rgba(245,158,11,0.08);
+    .td-layer-action:hover { background: #FBB040; }
+    .td-layer-action:active { transform: translateY(1px); }
+    .td-layer-action::after {
+        content: "\2192"; margin-left: 2px;
+        font-size: 0.875rem; font-weight: 700;
     }
 
     .td-empty, .td-loading {
