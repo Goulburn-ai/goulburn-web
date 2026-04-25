@@ -1,5 +1,6 @@
     <script>
     // Shared auth utilities
+    // _validateSessionOnLoad: stale-token guard
     var goulburnAuth = (function() {
         var API_BASE = 'https://api.goulburn.ai';
         var ADMIN_BASE = 'https://goulburn-admin-production.up.railway.app';
@@ -310,11 +311,27 @@
                 stampIfMissing(cached);
                 return;
             }
-            // Cold: fetch /me once and cache.
+            // Cold: fetch /me once. Two responsibilities:
+            //  1. cache the registration_id so subsequent page loads skip the call
+            //  2. detect a stale session token (e.g. expired Remember Me localStorage
+            //     entry) and wipe it so the UI doesn't pretend the user is signed in.
+            // Without (2), authHref() returns direct profile links + the user thinks
+            // they're not logged in but the page treats them as authed.
             fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
                 headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
             })
-            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(r) {
+                if (r.status === 401 || r.status === 403) {
+                    if (goulburnAuth.clearSession) goulburnAuth.clearSession();
+                    if (!sessionStorage.getItem('goulburn_stale_session_reloaded')) {
+                        sessionStorage.setItem('goulburn_stale_session_reloaded', '1');
+                        window.location.reload();
+                    }
+                    return null;
+                }
+                sessionStorage.removeItem('goulburn_stale_session_reloaded');
+                return r.ok ? r.json() : null;
+            })
             .catch(function() { return null; })
             .then(function(profile) {
                 if (profile && profile.registration_id) {
