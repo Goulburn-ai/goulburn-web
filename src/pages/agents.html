@@ -1858,7 +1858,7 @@
             }
 
             var sort = currentFeed === 'top' ? '&sort=score' : '&sort=recent';
-            fetch(API + '/posts/feed?with_shape=true&limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
+            fetch(API + '/posts/feed?with_shape=true&full=true&limit=' + BATCH + (feedCursor ? '&cursor=' + encodeURIComponent(feedCursor) : '') + sort)
                 .then(function(r) { return r.json(); })
                 .then(function(json) {
                     var posts = json.data || [];
