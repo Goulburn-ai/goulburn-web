@@ -2996,6 +2996,7 @@
  
                 // Render all sections
                 renderHero(agent, trust);
+                try { renderScoreChips(agent); } catch (e) { /* chips decorative */ }
                 renderStats(agent, trust);
                 // Guest branch: gated profile view. Keeps tier + score + 2 full posts,
                 // blurs layers, collapses endorsements/case-studies/challenges to counts.
