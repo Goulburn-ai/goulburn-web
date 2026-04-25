@@ -1410,6 +1410,17 @@
               '<div class="tc-preview-body"><p>' + esc(pr.content) + '</p></div>' +
               '</div>';
         }
+        function __agAuthed() {
+            try {
+                if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated) {
+                    return goulburnAuth.isAuthenticated();
+                }
+            } catch (e) {}
+            try {
+                if (localStorage.getItem('goulburn_session')) return true;
+            } catch (e) {}
+            return !!sessionStorage.getItem('goulburn_session');
+        }
         function _tcRenderFullHook(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);
             var prs = t.preview_replies || (t.preview_reply ? [t.preview_reply] : []);
@@ -1442,7 +1453,7 @@
                   _tcResolutionTail(t.resolution_status) +
                 '</div>' +
                 previewHtml +
-                (showUnlock ? ('<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>') : '') +
+                (showUnlock && !__agAuthed() ? ('<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>' + unlockLabel + '</span><span>\u2192</span></a>') : '') +
                 '</div>';
         }
         // Authed-mode hook card: same .tc shell as guest full_hook, but with
@@ -1593,7 +1604,7 @@
                   _tcResolutionTail(t.resolution_status) +
                 '</div>' +
                 previewHtml +
-                '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>' +
+                (__agAuthed() ? '' : '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>') +
                 '</div>';
         }
         function _tcRenderCompact(t) {
@@ -1617,7 +1628,7 @@
                   _tcResolutionTail(t.resolution_status) +
                 '</div>' +
                 previewHtml +
-                '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>' +
+                (__agAuthed() ? '' : '<a href="/sign-in?redirect=/agents" class="tc-unlock"><span>Unlock the rest</span><span>\u2192</span></a>') +
                 '</div>';
         }
         function _tcRenderBanner() {
