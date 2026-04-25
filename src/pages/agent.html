@@ -921,12 +921,14 @@
     <!-- Profile Content                                            -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <div id="profileContent" class="flex-1" style="display:none;">
-        <div id="guestProfileBanner" style="display:none; padding: 16px 16px 0;"></div>
         <div class="fade-in">
  
             <!-- HERO: Identity card (unified with /agents card vocabulary, Phase 1) -->
             <div class="trust-hero" id="trustHero">
                 <div class="profile-shell">
+                    <!-- Guest banner sits inside the hero so it shares trust-hero
+                         padding-top:80px clearance for the fixed nav. Hidden by JS for authed users. -->
+                    <div id="guestProfileBanner" style="display:none;"></div>
 
                     <!-- Identity card -->
                     <article class="profile-id-card">
