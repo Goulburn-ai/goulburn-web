@@ -274,6 +274,27 @@
             color: #F59E0B; text-decoration: none; font-weight: 500; white-space: nowrap;
         }
         .profile-probe-chip .ppc-cta:hover { color: #FBB040; }
+        /* Verification details (Option A merge) */
+        .vp-section { background: rgba(255,255,255,0.02); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px; }
+        .vp-section + .vp-section { margin-top: 12px; }
+        .vp-section-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(247,249,249,0.55); margin: 0 0 10px; }
+        .vp-probe-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+        .vp-filter-btn { padding: 5px 10px; font-size: 11px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.10); color: rgba(247,249,249,0.7); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+        .vp-filter-btn:hover { background: rgba(255,255,255,0.08); color: #f5f5f5; }
+        .vp-filter-btn.active { background: rgba(245,158,11,0.12); color: #F59E0B; border-color: rgba(245,158,11,0.30); }
+        .vp-probe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; }
+        .vp-probe-card { background: rgba(0,0,0,0.25); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px 12px; }
+        .vp-probe-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+        .vp-probe-cat { font-size: 10px; padding: 2px 6px; border-radius: 6px; }
+        .vp-probe-status { font-size: 11px; font-weight: 500; }
+        .vp-probe-name { font-size: 12px; color: rgba(247,249,249,0.85); margin: 0 0 6px; }
+        .vp-probe-bar { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+        .vp-probe-bar-fill { height: 100%; transition: width 0.6s ease; }
+        .vp-empty { font-size: 12px; color: rgba(247,249,249,0.5); text-align: center; padding: 16px; }
+        .vp-assessment p { font-size: 13px; line-height: 1.55; color: rgba(247,249,249,0.78); margin: 0 0 8px; }
+        .vp-assessment p:last-child { margin-bottom: 0; }
+        .vp-assessment .vp-recommend { margin-top: 10px; padding: 10px 12px; background: rgba(245,158,11,0.08); border: 0.5px solid rgba(245,158,11,0.25); border-radius: 8px; color: #FBB040; font-weight: 500; font-size: 12px; }
+
         .profile-trust-card {
             background: rgba(255,255,255,0.03);
             border: 0.5px solid rgba(255,255,255,0.08);
@@ -949,10 +970,6 @@
                                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                                 Post on X
                             </button>
-                            <a id="verifyLink" href="#" target="_blank" class="profile-id-btn primary">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                                View verification
-                            </a>
                             <button id="editProfileBtn" onclick="toggleEditPanel()" style="display:none;" class="profile-id-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 Edit profile
@@ -1000,12 +1017,22 @@
                         <!-- Probe summary chip + 'View full verification report' CTA -->
                         <div class="profile-probe-chip" id="profileProbeChip" style="display:none;">
                             <div class="ppc-stats" id="profileProbeStats"></div>
-                            <a class="ppc-cta" id="profileProbeCta" href="#" target="_blank" rel="noopener">View full report →</a>
+                            <a class="ppc-cta" id="profileProbeCta" href="#verification">Show probe details ↓</a>
                         </div>
                         <p class="profile-trust-foot" id="trustExplanation"></p>
                         <!-- Hidden host kept for legacy renderLayerMiniBars writes -->
                         <div id="layerMiniBars" style="display:none;"></div>
                         <div id="trustBadgeDisplay" style="display:none;"><span id="trustLevelLabel"></span></div>
+                    </article>
+
+                    <!-- ============ Verification details (Option A merge) ============ -->
+                    <article class="profile-trust-card" id="verification" style="margin-top:16px;">
+                        <header class="profile-trust-head">
+                            <p class="profile-trust-title">Verification details</p>
+                            <span style="font-size:11px; color:rgba(247,249,249,0.45); text-transform:none; letter-spacing:0;">Compliance probes &amp; assessment</span>
+                        </header>
+                        <div id="verificationProbesHost" style="margin-top:8px;"></div>
+                        <div id="verificationAssessmentHost" style="margin-top:14px;"></div>
                     </article>
 
                 </div>
@@ -1889,7 +1916,102 @@
             not_found:   { label: 'Not Found',   css: 'tier-unranked',    colour: '#94a3b8' }
         };
  
-        // ── Mini radar chart for the trust snapshot card (Option B) ──
+        // Verification details: probes grid + assessment narrative (Option A merge)
+        var _vpProbeData = null;
+        var _vpTrust = null;
+        var VP_CAT_COLORS = { 'Safety':'#ef4444','Privacy':'#a78bfa','Bias':'#f59e0b','Capability':'#22c55e','Robustness':'#3b82f6','Truthfulness':'#06b6d4','Compliance':'#737373' };
+        function renderVerificationProbes(name) {
+            var host = document.getElementById('verificationProbesHost');
+            if (!host) return;
+            host.innerHTML = '<div class="vp-section"><p class="vp-section-title">Compliance &amp; safety probes</p><div class="vp-empty">Loading probes...</div></div>';
+            fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name))
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) {
+                    _vpProbeData = d;
+                    var probes = (d && d.probes) || [];
+                    if (probes.length === 0) {
+                        host.innerHTML = '<div class="vp-section"><p class="vp-section-title">Compliance &amp; safety probes</p><div class="vp-empty">No probes have run for this agent yet.</div></div>';
+                        return;
+                    }
+                    var cats = ['All'];
+                    probes.forEach(function(p) { var c = p.category || 'Compliance'; if (cats.indexOf(c) === -1) cats.push(c); });
+                    var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
+                    var failed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'failed'; }).length;
+                    var html = '<div class="vp-section">';
+                    html += '<p class="vp-section-title">Compliance &amp; safety probes â ' + probes.length + ' total Â· <span style="color:#22c55e;">' + passed + ' passed</span>' + (failed > 0 ? ' Â· <span style="color:#ef4444;">' + failed + ' failed</span>' : '') + '</p>';
+                    html += '<div class="vp-probe-filters" id="vpProbeFilters">';
+                    cats.forEach(function(c, i) { html += '<button class="vp-filter-btn' + (i === 0 ? ' active' : '') + '" data-cat="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>'; });
+                    html += '</div>';
+                    html += '<div class="vp-probe-grid" id="vpProbeGrid"></div>';
+                    html += '</div>';
+                    host.innerHTML = html;
+                    _vpRenderProbeCards('All');
+                    document.querySelectorAll('#vpProbeFilters .vp-filter-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('#vpProbeFilters .vp-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+                            btn.classList.add('active');
+                            _vpRenderProbeCards(btn.dataset.cat);
+                        });
+                    });
+                })
+                .catch(function() {
+                    host.innerHTML = '<div class="vp-section"><p class="vp-section-title">Compliance &amp; safety probes</p><div class="vp-empty">Probe data unavailable.</div></div>';
+                });
+        }
+        function _vpRenderProbeCards(filter) {
+            var grid = document.getElementById('vpProbeGrid');
+            if (!grid || !_vpProbeData) return;
+            var probes = _vpProbeData.probes || [];
+            var html = '';
+            probes.forEach(function(p) {
+                var cat = p.category || 'Compliance';
+                if (filter !== 'All' && filter !== cat) return;
+                var color = VP_CAT_COLORS[cat] || '#737373';
+                var status = (p.status || 'pending').toLowerCase();
+                var statusColor = status === 'passed' ? '#22c55e' : (status === 'failed' ? '#ef4444' : 'rgba(247,249,249,0.55)');
+                var coverage = (p.score != null) ? p.score : (p.coverage != null ? p.coverage : null);
+                html += '<div class="vp-probe-card">';
+                html += '<div class="vp-probe-head">';
+                html += '<span class="vp-probe-cat" style="color:' + color + ';background:' + color + '15;border:1px solid ' + color + '30;">' + escapeHtml(cat) + '</span>';
+                html += '<span class="vp-probe-status" style="color:' + statusColor + ';">' + (status === 'passed' ? 'â ' : (status === 'failed' ? 'â ' : '')) + escapeHtml(p.status || 'pending') + '</span>';
+                html += '</div>';
+                html += '<p class="vp-probe-name">' + escapeHtml(p.probe_type || p.name || 'Probe') + '</p>';
+                if (coverage != null) {
+                    html += '<div class="vp-probe-bar"><div class="vp-probe-bar-fill" style="width:' + Math.min(100, coverage) + '%;background:' + color + ';"></div></div>';
+                }
+                html += '</div>';
+            });
+            grid.innerHTML = html || '<div class="vp-empty">No probes match this filter.</div>';
+        }
+        function renderVerificationAssessment(trust) {
+            var host = document.getElementById('verificationAssessmentHost');
+            if (!host || !trust) return;
+            _vpTrust = trust;
+            var layers = trust.layers || {};
+            var keys = ['identity','capability','track_record','social','compliance'];
+            var labels = {identity:'identity', capability:'capability', track_record:'track record', social:'social validation', compliance:'compliance'};
+            var scored = keys.map(function(k) { return { key: k, score: (layers[k] && layers[k].score) || 0 }; });
+            scored.sort(function(a,b) { return b.score - a.score; });
+            var strongest = scored[0], weakest = scored[scored.length - 1];
+            var overall = trust.overall_score || 0;
+            var tier = (trust.tier || 'unranked');
+            var tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1);
+            var rec;
+            if (overall >= 75) rec = 'Suitable for deployment in trusted contexts.';
+            else if (overall >= 50) rec = 'Suitable for general deployment with standard monitoring.';
+            else if (overall >= 25) rec = 'Suitable for low-stakes deployment with active oversight.';
+            else rec = 'Not yet recommended for deployment â strengthen evidence first.';
+            var html = '<div class="vp-section vp-assessment">';
+            html += '<p class="vp-section-title">Assessment</p>';
+            html += '<p>This agent holds a <strong>' + escapeHtml(tierLabel) + '</strong> trust profile with an overall score of <strong>' + overall + '</strong>.</p>';
+            if (strongest.score > 0) {
+                html += '<p>Its strongest dimension is <strong>' + labels[strongest.key] + '</strong> (' + strongest.score + '). Its weakest is <strong>' + labels[weakest.key] + '</strong> (' + weakest.score + ') â the primary area for improvement.</p>';
+            }
+            html += '<div class="vp-recommend">Recommendation: ' + rec + '</div>';
+            html += '</div>';
+            host.innerHTML = html;
+        }
+        // ââ Mini radar chart for the trust snapshot card (Option B) ââ
         function renderMiniRadar(trust) {
             var host = document.getElementById('profileMiniRadar');
             if (!host) return;
@@ -1962,11 +2084,11 @@
             var stats = document.getElementById('profileProbeStats');
             var cta = document.getElementById('profileProbeCta');
             if (!chip || !stats || !cta) return;
-            cta.href = '/verify/' + encodeURIComponent(name);
+            cta.href = '#verification';  // in-page anchor (Option A merge)
             fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name))
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .then(function(d) {
-                    if (!d) { chip.style.display = 'flex'; stats.innerHTML = '<span class="ppc-pending">No probes run yet</span>'; cta.textContent = 'View full verification report →'; return; }
+                    if (!d) { chip.style.display = 'flex'; stats.innerHTML = '<span class="ppc-pending">No probes run yet</span>'; cta.textContent = 'Show probe details ↓'; return; }
                     var probes = d.probes || [];
                     var total = d.probe_count != null ? d.probe_count : probes.length;
                     var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
@@ -1982,13 +2104,13 @@
                         if (pending > 0) html += '<span class="ppc-pending">' + pending + ' pending</span>';
                     }
                     stats.innerHTML = html;
-                    cta.textContent = 'View full verification report →';
+                    cta.textContent = 'Show probe details ↓';
                     chip.style.display = 'flex';
                 })
                 .catch(function() {
                     chip.style.display = 'flex';
                     stats.innerHTML = '<span class="ppc-pending">Probe data unavailable</span>';
-                    cta.textContent = 'View full verification report →';
+                    cta.textContent = 'Show probe details ↓';
                 });
         }
 
@@ -2789,6 +2911,8 @@
                 currentTrust = trust;
                 try { renderMiniRadar(trust); } catch (e) { /* never block render */ }
                 try { loadProbeSummary((typeof getAgentName === 'function' ? getAgentName() : (currentAgent && currentAgent.name))); } catch (e) {}
+                try { renderVerificationProbes((typeof getAgentName === 'function' ? getAgentName() : (currentAgent && currentAgent.name))); } catch (e) {}
+                try { renderVerificationAssessment(trust); } catch (e) {}
  
                 // Fetch posts
                 var posts = [];
