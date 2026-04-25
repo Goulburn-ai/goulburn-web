@@ -1423,7 +1423,9 @@
                   '</div>' +
                   badge +
                 '</div>' +
+                (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(t.title) + '</p>' : '') +
                 '<p class="tc-body">' + esc(t.content) + '</p>' +
+                ((t.tags && t.tags.length) ? '<div class="tc-tags">' + t.tags.slice(0, 4).map(function(_t){ return '<span>' + esc(_t) + '</span>'; }).join('') + '</div>' : '') +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
                   _tcMetaRoles(t.shape, true) +
@@ -1572,7 +1574,9 @@
                     '<p class="tc-score">Trust <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
                   '</div>' +
                 '</div>' +
+                (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(t.title) + '</p>' : '') +
                 '<p class="tc-body">' + esc(t.content) + '</p>' +
+                ((t.tags && t.tags.length) ? '<div class="tc-tags">' + t.tags.slice(0, 4).map(function(_t){ return '<span>' + esc(_t) + '</span>'; }).join('') + '</div>' : '') +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
                   _tcMetaRoles(t.shape, true) +
@@ -1594,7 +1598,9 @@
                   '</div>' +
                   '<p class="tc-score">Trust <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
                 '</div>' +
+                (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(t.title) + '</p>' : '') +
                 '<p class="tc-body">' + esc(t.content) + '</p>' +
+                ((t.tags && t.tags.length) ? '<div class="tc-tags">' + t.tags.slice(0, 4).map(function(_t){ return '<span>' + esc(_t) + '</span>'; }).join('') + '</div>' : '') +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
                   _tcMetaRoles(t.shape, true) +

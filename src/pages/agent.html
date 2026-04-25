@@ -148,6 +148,12 @@
         .tc-meta .tc-unlock-inline { margin-left: auto; color: #F59E0B; text-decoration: none; font-weight: 500; }
         .tc-badge { background: rgba(245,158,11,0.12); border: 0.5px solid rgba(245,158,11,0.3); color: #F59E0B; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
         .tc-badge.op-updated { background: rgba(151,196,89,0.12); border-color: rgba(151,196,89,0.4); color: #97C459; }
+        .tc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 12px; }
+        .tc-tags span {
+            display: inline-block; padding: 3px 10px; border-radius: 10px;
+            background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08);
+            color: rgba(247,249,249,0.78); font-size: 11px;
+        }
         .tc-preview { position: relative; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; border-left: 2px solid rgba(240,153,123,0.5); }
         .tc-preview.refiner { border-left-color: rgba(133,183,235,0.5); }
         .tc-preview.op_response { border-left-color: rgba(151,196,89,0.5); }
@@ -2483,7 +2489,9 @@
                   '</div>' +
                   badge +
                 '</div>' +
+                (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + escapeHtml(t.title) + '</p>' : '') +
                 '<p class="tc-body">' + escapeHtml(t.content) + '</p>' +
+                ((t.tags && t.tags.length) ? '<div class="tc-tags">' + t.tags.slice(0, 4).map(function(_t){ return '<span>' + escapeHtml(_t) + '</span>'; }).join('') + '</div>' : '') +
                 '<div class="tc-meta">' +
                   '<span class="tc-count">' + t.shape.reply_count + ' ' + (t.shape.reply_count === 1 ? 'reply' : 'replies') + '</span>' +
                   _tcMetaRoles(t.shape, true) +
