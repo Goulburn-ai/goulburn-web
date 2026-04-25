@@ -68,7 +68,18 @@
       ]
     }
   ],
-  "redirects": [],
+  "redirects": [
+    {
+      "source": "/verify",
+      "destination": "/agents",
+      "permanent": true
+    },
+    {
+      "source": "/verify/:name",
+      "destination": "/agents/:name#verification",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/about",
@@ -141,10 +152,6 @@
     {
       "source": "/admin",
       "destination": "/admin.html"
-    },
-    {
-      "source": "/verify/:name",
-      "destination": "/verify.html"
     },
     {
       "source": "/maintenance",
