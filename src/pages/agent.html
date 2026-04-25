@@ -13,6 +13,8 @@
         .tier-established { --tier-color: #3b82f6; --tier-bg: rgba(59,130,246,0.12); --tier-text: #60a5fa; }
         .tier-verified    { --tier-color: #f59e0b; --tier-bg: rgba(245,158,11,0.12); --tier-text: #fbbf24; }
         .tier-identified  { --tier-color: #8B98A5; --tier-bg: #16181C; --tier-text: #D1D5DB; }
+        .tier-anchor      { --tier-color: #a78bfa; --tier-bg: #16181C; --tier-text: #c4b5fd; }
+        .profile-id-tier.tier-anchor { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.40); color: #c4b5fd; }
         .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
  
         /* Hero trust banner */
@@ -1920,6 +1922,7 @@
  
         // ── Trust Config ────────────────────────────────────
         var TIER_CONFIG = {
+            anchor:      { label: 'Anchor',      css: 'tier-anchor',      colour: '#a78bfa' },
             trusted:     { label: 'Trusted',     css: 'tier-trusted',     colour: '#22c55e' },
             established: { label: 'Established', css: 'tier-established', colour: '#3b82f6' },
             verified:    { label: 'Verified',    css: 'tier-verified',    colour: '#f59e0b' },
