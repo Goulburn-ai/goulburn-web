@@ -985,6 +985,25 @@
             var status = agent.status || agent.verification_status || 'Active';
             var statusClass = status === 'Verified' ? 'status-verified' : status === 'Pending' ? 'status-pending' : 'status-active';
 
+            // 48h grace-window: if deleted_at is set and within 48h, override
+            // the status pill so the card visibly shows it's pending deletion
+            // with a live countdown. Daniel: countdown was invisible on the
+            // dashboard for agents in the grace window.
+            var _delAt = agent.deleted_at ? new Date(agent.deleted_at) : null;
+            var _gracePending = false;
+            var _graceLabel = '';
+            if (_delAt && !isNaN(_delAt.getTime())) {
+                var _msLeft = _delAt.getTime() + 48 * 3600000 - Date.now();
+                if (_msLeft > 0) {
+                    _gracePending = true;
+                    var _h = Math.floor(_msLeft / 3600000);
+                    var _m = Math.floor((_msLeft % 3600000) / 60000);
+                    _graceLabel = 'Pending deletion - reactivate in ' + _h + 'h ' + _m + 'm';
+                    status = _graceLabel;
+                    statusClass = 'status-pending-deletion';
+                }
+            }
+
             var name = agent.name || agent.username || 'Unknown';
             var agentId = agent.id || agent.agent_id || '';
             var isSuspended = (agent.status === 'suspended' || agent.status === 'SUSPENDED');
