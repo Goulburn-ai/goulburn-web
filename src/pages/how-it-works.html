@@ -158,6 +158,105 @@
         <section class="hiw-section" id="mental-model">
             <h2><span class="num">1</span> The mental model</h2>
             <p class="lede">Goulburn is <strong style="color:#F7F9F9;">identity + verification infrastructure</strong> for AI agents — not hosting, not a marketplace, not a social network.</p>
+
+            <div class="hiw-illus">
+                <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Goulburn mental model: your infrastructure runs the agent, Goulburn issues identity and runs probes, public platforms query the trust profile">
+                    <!-- bg -->
+                    <rect width="720" height="320" fill="#0b0d0f"/>
+
+                    <!-- col 1: YOUR INFRASTRUCTURE -->
+                    <rect x="20" y="40" width="200" height="240" rx="10" fill="#16181C" stroke="#2F3336"/>
+                    <text x="120" y="65" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#8B98A5" letter-spacing="0.05em">YOUR INFRASTRUCTURE</text>
+
+                    <!-- agent box inside col 1 -->
+                    <rect x="40" y="90" width="160" height="80" rx="8" fill="#0F1113" stroke="#3F4346"/>
+                    <text x="120" y="115" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#F7F9F9">Your AI agent</text>
+                    <text x="120" y="138" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">at https://...</text>
+                    <text x="120" y="155" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">/probe endpoint</text>
+
+                    <!-- LLM provider pill -->
+                    <rect x="50" y="190" width="140" height="34" rx="6" fill="rgba(129,140,248,0.10)" stroke="rgba(129,140,248,0.30)"/>
+                    <text x="120" y="205" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#a5b4fc">YOUR LLM</text>
+                    <text x="120" y="218" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#a5b4fc">Claude / GPT / Kimi / self-hosted</text>
+
+                    <text x="120" y="252" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#71767B">You own the model.</text>
+                    <text x="120" y="266" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#71767B">You pay the LLM bill.</text>
+
+                    <!-- col 2: GOULBURN -->
+                    <rect x="260" y="40" width="200" height="240" rx="10" fill="#16181C" stroke="rgba(245,158,11,0.40)"/>
+                    <text x="360" y="65" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#F59E0B" letter-spacing="0.05em">GOULBURN</text>
+
+                    <!-- 4 stacked roles -->
+                    <rect x="280" y="85" width="160" height="38" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)"/>
+                    <text x="360" y="100" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Issues identity</text>
+                    <text x="360" y="115" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">gb_xxxxx api key</text>
+
+                    <rect x="280" y="130" width="160" height="38" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)"/>
+                    <text x="360" y="145" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Sends probes</text>
+                    <text x="360" y="160" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">live HTTPS POST</text>
+
+                    <rect x="280" y="175" width="160" height="38" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)"/>
+                    <text x="360" y="190" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Grades responses</text>
+                    <text x="360" y="205" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">5 evidence layers</text>
+
+                    <rect x="280" y="220" width="160" height="38" rx="6" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)"/>
+                    <text x="360" y="235" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Publishes profile</text>
+                    <text x="360" y="250" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">score &amp; tier &amp; layers</text>
+
+                    <!-- col 3: PUBLIC -->
+                    <rect x="500" y="40" width="200" height="240" rx="10" fill="#16181C" stroke="#2F3336"/>
+                    <text x="600" y="65" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#8B98A5" letter-spacing="0.05em">CONSUMING PLATFORMS</text>
+
+                    <!-- platform list -->
+                    <rect x="520" y="90" width="160" height="32" rx="6" fill="#0F1113" stroke="#2F3336"/>
+                    <text x="600" y="110" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Slack / Discord / Notion</text>
+
+                    <rect x="520" y="130" width="160" height="32" rx="6" fill="#0F1113" stroke="#2F3336"/>
+                    <text x="600" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Your customer&apos;s platform</text>
+
+                    <rect x="520" y="170" width="160" height="32" rx="6" fill="#0F1113" stroke="#2F3336"/>
+                    <text x="600" y="190" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Embed badge</text>
+
+                    <rect x="520" y="210" width="160" height="32" rx="6" fill="#0F1113" stroke="#2F3336"/>
+                    <text x="600" y="230" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#F7F9F9">Your B2B sales deck</text>
+
+                    <text x="600" y="265" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#71767B">They query before</text>
+                    <text x="600" y="278" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#71767B">granting your agent access.</text>
+
+                    <!-- arrows: col1 <-> col2 (probes go right-to-left, responses left-to-right) -->
+                    <!-- arrow: probes col2 -> col1 (top) -->
+                    <line x1="260" y1="120" x2="220" y2="120" stroke="#F59E0B" stroke-width="1.6" marker-end="url(#arrL)" stroke-dasharray="4,3"/>
+                    <text x="240" y="112" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#F59E0B">probes</text>
+
+                    <!-- arrow: responses col1 -> col2 (mid) -->
+                    <line x1="220" y1="160" x2="260" y2="160" stroke="#22c55e" stroke-width="1.6" marker-end="url(#arrR)"/>
+                    <text x="240" y="152" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#22c55e">responses</text>
+
+                    <!-- arrow: gb_ key col2 -> col1 (bottom) -->
+                    <line x1="260" y1="200" x2="220" y2="200" stroke="#a5b4fc" stroke-width="1.6" marker-end="url(#arrL2)"/>
+                    <text x="240" y="192" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#a5b4fc">gb_ key</text>
+
+                    <!-- arrow: trust profile col2 -> col3 -->
+                    <line x1="460" y1="155" x2="500" y2="155" stroke="#22c55e" stroke-width="1.8" marker-end="url(#arrR2)"/>
+                    <text x="480" y="147" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#22c55e">trust profile</text>
+                    <text x="480" y="170" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#22c55e">queries</text>
+
+                    <!-- arrow markers -->
+                    <defs>
+                        <marker id="arrL" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#F59E0B"/></marker>
+                        <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#22c55e"/></marker>
+                        <marker id="arrL2" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M10,0 L0,5 L10,10 z" fill="#a5b4fc"/></marker>
+                        <marker id="arrR2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#22c55e"/></marker>
+                    </defs>
+
+                    <!-- footer label band -->
+                    <rect x="0" y="295" width="720" height="25" fill="#0F1113"/>
+                    <text x="120" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">You run the agent</text>
+                    <text x="360" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#F59E0B">We verify it</text>
+                    <text x="600" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Anyone can query the score</text>
+                </svg>
+                <div class="hiw-illus-caption"><strong>Three actors, one feedback loop.</strong> Your infrastructure runs the agent and the LLM. Goulburn issues an identity (gb_ key), POSTs probes to your endpoint, grades the responses, and publishes a portable trust profile that consuming platforms query before granting access.</div>
+            </div>
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Your agent lives on your infrastructure.</strong> It uses your OpenAI / Anthropic / Kimi / self-hosted model. We never run it.</li>
                 <li data-step="2"><strong>Goulburn issues your agent's trust identity.</strong> A <code>gb_</code> API key that says "this participant is this participant" across the network.</li>
