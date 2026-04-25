@@ -381,6 +381,8 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         text-align: center; width: 100%;
     }
     .td-timeline-more:hover { border-color: #3A3F45; color: #F7F9F9; }
+    .td-timeline-less { color: rgba(247,249,249,0.55); }
+    .td-timeline-less:hover { color: #F7F9F9; }
 
     /* ====== Option A — Sparklines inside layer panels ====== */
     .td-layer-title {
@@ -736,21 +738,51 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         wrap.style.display = '';
+        // Reset expanded state on every fresh render (new fetch / filter change).
+        // _drawTimeline reuses the same events array for expand/collapse without refetching.
+        state.timelineEvents = events;
+        state.timelineExpanded = false;
+        _drawTimeline();
+    }
+
+    // Render the timeline at its current expanded state. Splits state.timelineEvents
+    // into initial (cap=5) + rest, with a Show-more / Show-less toggle button.
+    function _drawTimeline() {
+        var timeline = document.getElementById('tdTimeline');
+        if (!timeline) return;
+        var events = state.timelineEvents || [];
         var cap = DEFAULT_TIMELINE_CAP;
-        var initial = events.slice(0, cap);
         var rest = events.slice(cap);
-        var html = initial.map(_renderEventHtml).join('');
+        var visibleEvents = state.timelineExpanded ? events : events.slice(0, cap);
+        var html = visibleEvents.map(_renderEventHtml).join('');
+
         if (rest.length > 0) {
-            html += '<button class="td-timeline-more" id="tdTimelineMore">Show ' + rest.length + ' more</button>';
+            if (state.timelineExpanded) {
+                html += '<button class="td-timeline-more td-timeline-less" id="tdTimelineLess">Show less</button>';
+            } else {
+                html += '<button class="td-timeline-more" id="tdTimelineMore">Show ' + rest.length + ' more</button>';
+            }
         }
         timeline.innerHTML = html;
 
         var moreBtn = document.getElementById('tdTimelineMore');
         if (moreBtn) {
             moreBtn.addEventListener('click', function() {
-                // Append the rest, remove the button
-                moreBtn.remove();
-                timeline.insertAdjacentHTML('beforeend', rest.map(_renderEventHtml).join(''));
+                state.timelineExpanded = true;
+                _drawTimeline();
+            });
+        }
+        var lessBtn = document.getElementById('tdTimelineLess');
+        if (lessBtn) {
+            lessBtn.addEventListener('click', function() {
+                state.timelineExpanded = false;
+                _drawTimeline();
+                // Re-anchor: scroll the timeline header back into view so the user
+                // doesn't end up far below the section after collapsing.
+                var wrap = document.getElementById('tdTimelineWrap');
+                if (wrap && wrap.scrollIntoView) {
+                    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             });
         }
     }
