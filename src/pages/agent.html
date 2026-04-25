@@ -1555,22 +1555,30 @@
                 hoursLeft = 48 - (elapsedMs / 3600000);
             }
 
+            // Detect ANY pending-deletion signal. We treat this as
+            // "agent is tombstoned" regardless of how recently -- the
+            // visual must match the 'Pending deletion' badge in renderHero
+            // which uses the same name-match heuristic. Letting the Delete
+            // button stay was the regression Daniel reported.
+            var isPending = !!deletedAt;
             if (deletedAt && hoursLeft > 0) {
                 // Pending-deletion state is active — block all owner actions
                 _agentPendingDeletion = true;
                 // Also auto-close the edit panel if currently open
                 var _ep = document.getElementById("editPanel");
                 if (_ep && _ep.style.display !== "none") _ep.style.display = "none";
+            }
+            if (isPending) {
+                _agentPendingDeletion = true;
                 // Switch to Reactivate mode
                 btn.onclick = function() { confirmReactivate(); };
-                btn.title = 'Reactivate this agent (within the 48h window)';
+                btn.title = 'Reactivate this agent';
                 btn.classList.remove('text-red-400', 'border-red-500/30', 'hover:bg-red-500/10');
                 btn.classList.add('text-green-400', 'border-green-500/30', 'hover:bg-green-500/10');
                 if (icon) icon.innerHTML = '<path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>';
 
                 // Ghost all other action buttons — while pending deletion, only
-                // Reactivate is actionable. Matches the Visibility-muted treatment
-                // so the row reads as "paused, click green to resume."
+                // Reactivate is actionable.
                 ['copyLinkBtn', 'embedBadgeBtn', 'verifyLink', 'editProfileBtn', 'shareTrustBtn', 'suspendToggleBtn'].forEach(function(id) {
                     var el = document.getElementById(id);
                     if (!el) return;
@@ -1583,9 +1591,13 @@
                 var updateCountdown = function() {
                     var remainingMs = deletedAt.getTime() + 48 * 3600000 - Date.now();
                     if (remainingMs <= 0) {
-                        label.textContent = 'Window expired';
-                        btn.disabled = true;
-                        btn.style.opacity = '0.5';
+                        // 48h window expired but the row is still here -- offer
+                        // the reactivate button anyway; the server will reject
+                        // it with a clear error if the cleanup has hard-deleted
+                        // the row, otherwise restoration is still possible.
+                        label.textContent = 'Reactivate (window expired)';
+                        btn.title = 'The 48h grace window has passed; reactivation may fail.';
+                        btn.style.opacity = '0.85';
                         if (_reactivateCountdownTimer) { clearInterval(_reactivateCountdownTimer); _reactivateCountdownTimer = null; }
                         return;
                     }
