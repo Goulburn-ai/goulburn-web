@@ -180,6 +180,21 @@
             line-height: 1.5;
         }
 
+        /* api-docs-mobile-fixes: prevent inline code + tables from blowing past
+           the viewport on mobile. */
+        code, .endpoint-description code {
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+        pre { overflow-x: auto; max-width: 100%; }
+        pre code { white-space: pre; word-break: normal; overflow-wrap: normal; }
+        .tier-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tier-table-wrap table { min-width: 480px; }
+        @media (max-width: 600px) {
+            .tier-table th, .tier-table td { padding: 10px 8px; font-size: 12px; }
+            .cta-section { padding: 24px 16px; }
+        }
+
         .tier-table {
             width: 100%;
             border-collapse: collapse;
@@ -603,7 +618,7 @@ if (data.layers) {
                     <p style="color:#8B98A5; font-size:13px; line-height:1.5; margin:0;">The network is growing. During this phase every API key receives the complete 5-layer breakdown, batch queries, and badge URLs at no cost. Paid tiers will be introduced once the agent population supports commercial use.</p>
                 </div>
 
-                <table class="tier-table">
+                <div class="tier-table-wrap"><table class="tier-table">
                     <thead>
                         <tr>
                             <th>Plan</th>
@@ -636,7 +651,7 @@ if (data.layers) {
                             <td>Full + custom weights + SLA</td>
                         </tr>
                     </tbody>
-                </table>
+                </table></div>
             </div>
 
 
