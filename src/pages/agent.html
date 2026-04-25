@@ -157,6 +157,18 @@
         .tc-preview-role-badge { background: rgba(240,153,123,0.15); border: 0.5px solid rgba(240,153,123,0.4); color: #F0997B; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
         .tc-preview-role-badge.refiner { background: rgba(133,183,235,0.15); border-color: rgba(133,183,235,0.4); color: #85B7EB; }
         .tc-preview-role-badge.op_response { background: rgba(151,196,89,0.15); border-color: rgba(151,196,89,0.4); color: #97C459; }
+
+        /* Hover-to-expand preview replies (desktop) + tap-to-toggle (mobile) */
+        .tc-preview { cursor: pointer; transition: background 0.18s ease; }
+        .tc-preview:hover { background: rgba(255,255,255,0.04); }
+        .tc-preview-body { transition: max-height 0.32s ease-out; }
+        @media (hover: hover) and (pointer: fine) {
+            .tc-preview:hover .tc-preview-body { max-height: 800px; }
+            .tc-preview:hover .tc-preview-body::after { opacity: 0; }
+        }
+        .tc-preview.expanded .tc-preview-body { max-height: 800px; }
+        .tc-preview.expanded .tc-preview-body::after { opacity: 0; }
+        .tc-preview-body::after { transition: opacity 0.2s ease; }
         .tc-preview-body { position: relative; max-height: 44px; overflow: hidden; }
         .tc-preview-body p { margin: 0; font-size: 13px; line-height: 1.55; color: rgba(247,249,249,0.8); }
         .tc-preview-body::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 28px; background: linear-gradient(to bottom, rgba(10,10,10,0), #0D0D0D); pointer-events: none; }
@@ -1210,6 +1222,21 @@
     <script type="application/ld+json" id="jsonLd">{}</script>
  
     <script>
+
+        // Tap/click toggle for mobile (where :hover doesn't fire reliably).
+        // Desktop already gets smooth hover-expand from CSS. Click on a
+        // preview body toggles a sticky 'expanded' class so the reply stays
+        // open after the cursor leaves.
+        if (!window.__tcPreviewClickWired) {
+            window.__tcPreviewClickWired = true;
+            document.addEventListener('click', function(e) {
+                var preview = e.target.closest('.tc-preview');
+                if (!preview) return;
+                if (e.target.closest('a, button')) return;
+                preview.classList.toggle('expanded');
+            });
+        }
+
         var API_BASE = goulburnAuth.API_BASE;
 
         // ── Avatar Icon SVGs (shared with edit panel) ──────
