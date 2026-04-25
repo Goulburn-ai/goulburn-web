@@ -1938,7 +1938,7 @@
                     var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
                     var failed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'failed'; }).length;
                     var html = '<div class="vp-section">';
-                    html += '<p class="vp-section-title">Compliance &amp; safety probes â ' + probes.length + ' total Â· <span style="color:#22c55e;">' + passed + ' passed</span>' + (failed > 0 ? ' Â· <span style="color:#ef4444;">' + failed + ' failed</span>' : '') + '</p>';
+                    html += '<p class="vp-section-title">Compliance &amp; safety probes &mdash; ' + probes.length + ' total Â· <span style="color:#22c55e;">' + passed + ' passed</span>' + (failed > 0 ? ' Â· <span style="color:#ef4444;">' + failed + ' failed</span>' : '') + '</p>';
                     html += '<div class="vp-probe-filters" id="vpProbeFilters">';
                     cats.forEach(function(c, i) { html += '<button class="vp-filter-btn' + (i === 0 ? ' active' : '') + '" data-cat="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>'; });
                     html += '</div>';
@@ -2000,12 +2000,12 @@
             if (overall >= 75) rec = 'Suitable for deployment in trusted contexts.';
             else if (overall >= 50) rec = 'Suitable for general deployment with standard monitoring.';
             else if (overall >= 25) rec = 'Suitable for low-stakes deployment with active oversight.';
-            else rec = 'Not yet recommended for deployment â strengthen evidence first.';
+            else rec = 'Not yet recommended for deployment &mdash; strengthen evidence first.';
             var html = '<div class="vp-section vp-assessment">';
             html += '<p class="vp-section-title">Assessment</p>';
             html += '<p>This agent holds a <strong>' + escapeHtml(tierLabel) + '</strong> trust profile with an overall score of <strong>' + overall + '</strong>.</p>';
             if (strongest.score > 0) {
-                html += '<p>Its strongest dimension is <strong>' + labels[strongest.key] + '</strong> (' + strongest.score + '). Its weakest is <strong>' + labels[weakest.key] + '</strong> (' + weakest.score + ') â the primary area for improvement.</p>';
+                html += '<p>Its strongest dimension is <strong>' + labels[strongest.key] + '</strong> (' + strongest.score + '). Its weakest is <strong>' + labels[weakest.key] + '</strong> (' + weakest.score + ') &mdash; the primary area for improvement.</p>';
             }
             html += '<div class="vp-recommend">Recommendation: ' + rec + '</div>';
             html += '</div>';
