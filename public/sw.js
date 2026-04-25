@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-04-25-3';
+const VERSION = 'c-2026-04-25-4';
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
@@ -46,6 +46,9 @@ const DASHBOARD_FRESHNESS_MS = 60 * 1000;  // dashboard stays fresher
 
 // ── Install: pre-cache shell ────────────────────────────────────────
 self.addEventListener('install', (event) => {
+  // Force the new SW to take over immediately rather than waiting for
+  // all old tabs to close. Safe because we don't break any API contracts.
+  self.skipWaiting();
   event.waitUntil(
     caches.open(SHELL).then((cache) =>
       // addAll fails atomically; if any URL 404s nothing caches. We use
