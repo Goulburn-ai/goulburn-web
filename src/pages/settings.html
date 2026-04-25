@@ -793,6 +793,44 @@
             </div>
         </div>
 
+        <!-- Sign-in security (PWA Phase D — Passkeys) -->
+        <div class="settings-card" id="passkeysCard" style="margin-bottom: 1.5rem;">
+            <h2>Sign-in security</h2>
+            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1rem;">
+                Add a passkey to sign in with Touch ID, Face ID, Windows Hello, or a security key. Hardware-backed, phishing-resistant, syncs across your devices via iCloud Keychain or Google Password Manager.
+            </p>
+            <div id="passkeyList" style="margin-bottom: 1rem;"></div>
+            <button id="addPasskeyBtn" class="btn btn-secondary" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="9" r="4"/><path d="M12 13v8"/><path d="M9 17h6"/></svg>
+                <span id="addPasskeyLabel">Set up Touch ID / Face ID / passkey</span>
+            </button>
+            <p id="passkeyStatus" style="color: var(--dark-500); font-size: 0.75rem; margin: 0.5rem 0 0 0; min-height: 1rem;"></p>
+        </div>
+
+        <!-- Push notifications (PWA Phase C) -->
+        <div class="settings-card" id="pushCard" style="margin-bottom: 1.5rem;">
+            <h2>Push notifications</h2>
+            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1rem;">
+                Get notified about probe results, score changes, and peer endorsements directly on this device. Works best when goulburn.ai is installed as an app.
+            </p>
+            <div class="setting-row">
+                <div style="flex: 1; min-width: 0; padding-right: 1rem;">
+                    <p class="setting-label">Notifications on this device</p>
+                    <p class="setting-description" id="pushDeviceDesc">Toggle on to allow push notifications from goulburn.ai.</p>
+                </div>
+                <div class="setting-value">
+                    <label class="toggle-switch" title="Push notifications">
+                        <input type="checkbox" id="pushToggle" onchange="onPushToggle(this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <button id="pushTestBtn" class="btn btn-secondary" type="button" style="display:none; margin-top:1rem;">
+                Send a test notification
+            </button>
+            <p id="pushStatus" style="color: var(--dark-500); font-size: 0.75rem; margin: 0.5rem 0 0 0; min-height: 1rem;"></p>
+        </div>
+
         <!-- Email Preferences -->
         <div class="settings-card" id="emailPrefsCard" style="margin-bottom: 1.5rem; display: none;">
             <h2>Email Preferences</h2>
@@ -1677,6 +1715,294 @@
             }
         });
     })();
-    </script>
+    
+        // ════════════════════════════════════════════════════════════
+        // PWA Phase D — Passkey credential management
+        // ════════════════════════════════════════════════════════════
+        function _pkB64urlToBytes(s) {
+            var pad = '='.repeat((4 - s.length % 4) % 4);
+            var b64 = (s + pad).replace(/-/g, '+').replace(/_/g, '/');
+            var bin = atob(b64);
+            var arr = new Uint8Array(bin.length);
+            for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            return arr;
+        }
+        function _pkBytesToB64url(bytes) {
+            var bin = '';
+            var arr = new Uint8Array(bytes);
+            for (var i = 0; i < arr.byteLength; i++) bin += String.fromCharCode(arr[i]);
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        function _pkStatus(msg, isError) {
+            var el = document.getElementById('passkeyStatus');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.style.color = isError ? '#EF4444' : 'var(--dark-500)';
+        }
+        function _fmtAgo(iso) {
+            if (!iso) return '';
+            var d = new Date(iso); if (isNaN(d.getTime())) return '';
+            var sec = Math.floor((Date.now() - d.getTime()) / 1000);
+            if (sec < 60) return 'just now';
+            if (sec < 3600) return Math.floor(sec/60) + 'm ago';
+            if (sec < 86400) return Math.floor(sec/3600) + 'h ago';
+            return Math.floor(sec/86400) + 'd ago';
+        }
+        async function loadPasskeys() {
+            var list = document.getElementById('passkeyList');
+            if (!list) return;
+            try {
+                var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials', {
+                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                });
+                if (!res.ok) {
+                    list.innerHTML = '';
+                    return;
+                }
+                var data = await res.json();
+                var creds = data.credentials || [];
+                if (creds.length === 0) {
+                    list.innerHTML = '';
+                    return;
+                }
+                list.innerHTML = creds.map(function(c) {
+                    var label = c.device_label || 'Unnamed device';
+                    var lastUsed = c.last_used_at ? 'Last used ' + _fmtAgo(c.last_used_at) : 'Never used';
+                    var added = c.created_at ? 'Added ' + _fmtAgo(c.created_at) : '';
+                    var sync = c.backup_eligible ? '<span style="color:#22C55E;font-size:11px;">syncs</span>' : '<span style="color:var(--dark-500);font-size:11px;">device-bound</span>';
+                    return '<div class="setting-row" style="border-bottom:0.5px solid var(--dark-300);padding:10px 0;">' +
+                        '<div style="flex:1;min-width:0;padding-right:1rem;">' +
+                            '<p class="setting-label" style="display:flex;gap:8px;align-items:center;">' + _pkEsc(label) + ' ' + sync + '</p>' +
+                            '<p class="setting-description">' + lastUsed + ' · ' + added + '</p>' +
+                        '</div>' +
+                        '<div class="setting-value">' +
+                            '<button class="btn btn-secondary" onclick="revokePasskey(\'' + _pkEsc(c.credential_id) + '\', this)" style="font-size:12px;padding:6px 12px;">Revoke</button>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+            } catch (e) { console.error('[passkey] list error:', e); }
+        }
+        function _pkEsc(s) {
+            var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML.replace(/'/g, "\\'");
+        }
+        async function revokePasskey(credentialId, btn) {
+            if (!confirm('Revoke this passkey? You won\'t be able to sign in with it again — but other passkeys still work.')) return;
+            btn.disabled = true; btn.textContent = 'Revoking…';
+            try {
+                var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials/' + encodeURIComponent(credentialId), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                });
+                if (res.ok) {
+                    _pkStatus('Passkey revoked.');
+                    await loadPasskeys();
+                } else {
+                    _pkStatus('Couldn\'t revoke. Try again.', true);
+                    btn.disabled = false; btn.textContent = 'Revoke';
+                }
+            } catch (e) {
+                _pkStatus('Network error. Try again.', true);
+                btn.disabled = false; btn.textContent = 'Revoke';
+            }
+        }
+        async function setupPasskey() {
+            if (!('credentials' in navigator) || !window.PublicKeyCredential) {
+                _pkStatus('Passkeys are not supported in this browser.', true);
+                return;
+            }
+            var btn = document.getElementById('addPasskeyBtn');
+            var label = document.getElementById('addPasskeyLabel');
+            btn.disabled = true; label.textContent = 'Adding…';
+            _pkStatus('');
+            try {
+                var deviceLabel = navigator.userAgentData && navigator.userAgentData.platform
+                    ? (navigator.userAgentData.platform + ' ' + (navigator.userAgentData.brands?.[0]?.brand || ''))
+                    : (navigator.platform || 'this device');
+                var beginRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/begin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    body: JSON.stringify({ device_label: deviceLabel })
+                });
+                if (!beginRes.ok) throw new Error('begin failed: ' + beginRes.status);
+                var beginData = await beginRes.json();
+                var opts = beginData.options;
+                var challengeId = beginData.challenge_id;
+
+                opts.challenge = _pkB64urlToBytes(opts.challenge);
+                opts.user.id = _pkB64urlToBytes(opts.user.id);
+                if (opts.excludeCredentials) {
+                    opts.excludeCredentials = opts.excludeCredentials.map(function(c) {
+                        return Object.assign({}, c, { id: _pkB64urlToBytes(c.id) });
+                    });
+                }
+
+                var cred = await navigator.credentials.create({ publicKey: opts });
+                if (!cred) throw new Error('no credential');
+
+                var body = {
+                    id: cred.id,
+                    rawId: _pkBytesToB64url(cred.rawId),
+                    type: cred.type,
+                    response: {
+                        clientDataJSON: _pkBytesToB64url(cred.response.clientDataJSON),
+                        attestationObject: _pkBytesToB64url(cred.response.attestationObject),
+                        transports: cred.response.getTransports ? cred.response.getTransports() : []
+                    }
+                };
+
+                var completeRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/complete?challenge_id=' + encodeURIComponent(challengeId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    body: JSON.stringify(body)
+                });
+                if (!completeRes.ok) {
+                    var err = await completeRes.text();
+                    throw new Error('verify failed: ' + err);
+                }
+                _pkStatus('Passkey added. You can now sign in with biometric.');
+                await loadPasskeys();
+            } catch (e) {
+                console.error('[passkey] setup error:', e);
+                _pkStatus('Setup failed. ' + (e && e.message ? e.message : 'Try again.'), true);
+            } finally {
+                btn.disabled = false; label.textContent = 'Set up Touch ID / Face ID / passkey';
+            }
+        }
+
+        // ════════════════════════════════════════════════════════════
+        // PWA Phase C — Push notifications
+        // ════════════════════════════════════════════════════════════
+        function _pushStatus(msg, isError) {
+            var el = document.getElementById('pushStatus');
+            if (!el) return;
+            el.textContent = msg || '';
+            el.style.color = isError ? '#EF4444' : 'var(--dark-500)';
+        }
+        async function loadPushState() {
+            var toggle = document.getElementById('pushToggle');
+            var testBtn = document.getElementById('pushTestBtn');
+            var desc = document.getElementById('pushDeviceDesc');
+            if (!toggle) return;
+            // Browser support check
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                desc.textContent = 'Your browser doesn\'t support push notifications.';
+                toggle.disabled = true;
+                return;
+            }
+            // Permission state
+            if (Notification.permission === 'denied') {
+                desc.textContent = 'Notifications are blocked at the browser level. Open site settings to re-enable.';
+                toggle.disabled = true;
+                return;
+            }
+            // Subscription state
+            try {
+                var reg = await navigator.serviceWorker.ready;
+                var sub = await reg.pushManager.getSubscription();
+                toggle.checked = !!sub;
+                testBtn.style.display = sub ? 'inline-block' : 'none';
+            } catch (e) {
+                toggle.checked = false;
+            }
+        }
+        async function onPushToggle(checked) {
+            _pushStatus('');
+            if (checked) {
+                await subscribePush();
+            } else {
+                await unsubscribePush();
+            }
+        }
+        async function subscribePush() {
+            try {
+                if (Notification.permission !== 'granted') {
+                    var perm = await Notification.requestPermission();
+                    if (perm !== 'granted') {
+                        document.getElementById('pushToggle').checked = false;
+                        _pushStatus('Notifications declined.');
+                        return;
+                    }
+                }
+                var keyRes = await fetch(ADMIN_BASE + '/api/v1/push/vapid-public-key');
+                if (!keyRes.ok) {
+                    document.getElementById('pushToggle').checked = false;
+                    _pushStatus('Push not configured on the server.', true);
+                    return;
+                }
+                var key = (await keyRes.json()).public_key;
+                var reg = await navigator.serviceWorker.ready;
+                var sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: _pkB64urlToBytes(key)
+                });
+                var subJson = sub.toJSON();
+                var body = {
+                    endpoint: sub.endpoint,
+                    keys: subJson.keys,
+                    user_agent: navigator.userAgent
+                };
+                var res = await fetch(ADMIN_BASE + '/api/v1/push/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('server rejected subscription');
+                document.getElementById('pushTestBtn').style.display = 'inline-block';
+                _pushStatus('Notifications enabled on this device.');
+            } catch (e) {
+                console.error('[push] subscribe error:', e);
+                document.getElementById('pushToggle').checked = false;
+                _pushStatus('Couldn\'t enable. ' + (e.message || 'Try again.'), true);
+            }
+        }
+        async function unsubscribePush() {
+            try {
+                var reg = await navigator.serviceWorker.ready;
+                var sub = await reg.pushManager.getSubscription();
+                if (sub) {
+                    await fetch(ADMIN_BASE + '/api/v1/push/unsubscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                        body: JSON.stringify({ endpoint: sub.endpoint })
+                    });
+                    await sub.unsubscribe();
+                }
+                document.getElementById('pushTestBtn').style.display = 'none';
+                _pushStatus('Notifications disabled.');
+            } catch (e) {
+                console.error('[push] unsubscribe error:', e);
+                _pushStatus('Couldn\'t disable cleanly. ' + (e.message || ''), true);
+            }
+        }
+        async function pushTest() {
+            _pushStatus('Sending test...');
+            try {
+                var res = await fetch(ADMIN_BASE + '/api/v1/push/test-send', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                });
+                var data = await res.json();
+                _pushStatus('Test fired. Sent: ' + (data.sent || 0) + ' (dead: ' + (data.dead || 0) + ')');
+            } catch (e) {
+                _pushStatus('Test failed.', true);
+            }
+        }
+
+        // Wire up after the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            var addBtn = document.getElementById('addPasskeyBtn');
+            if (addBtn) addBtn.addEventListener('click', setupPasskey);
+            var testBtn = document.getElementById('pushTestBtn');
+            if (testBtn) testBtn.addEventListener('click', pushTest);
+            // Hide the passkey card if browser doesn't support WebAuthn
+            if (!('credentials' in navigator) || !window.PublicKeyCredential) {
+                var card = document.getElementById('passkeysCard');
+                if (card) card.style.display = 'none';
+            } else {
+                loadPasskeys();
+            }
+            loadPushState();
+        });
+</script>
 </body>
 </html>

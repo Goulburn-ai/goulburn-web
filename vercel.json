@@ -181,6 +181,10 @@
     {
       "source": "/unsubscribe/:token",
       "destination": "https://goulburn-admin-production.up.railway.app/api/v1/admin/unsubscribe/:token"
+    },
+    {
+      "source": "/share",
+      "destination": "/share.html"
     }
   ]
 }
