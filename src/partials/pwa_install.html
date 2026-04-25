@@ -20,6 +20,11 @@
             transition: background 0.15s ease;
         }
         #pwaInstallBtn:hover { background: rgba(245, 158, 11, 0.2); }
+        /* Mobile-only: hide install button on desktop pointer / wide viewport */
+        @media (pointer: fine) and (min-width: 1024px) {
+            #pwaInstallBtn { display: none !important; }
+            #pwaIosModal { display: none !important; }
+        }
         #pwaInstallBtn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
         /* iOS instructions modal */
@@ -143,7 +148,23 @@
         var isIosSafari = isIos
             && /^((?!chrome|crios|fxios|edge).)*safari/i.test(navigator.userAgent || '');
 
+        // Mobile-only PWA install. Skip on desktop where install adds noise
+        // (users bookmark or pin tabs instead). Mobile = touch device OR narrow
+        // viewport. matchMedia('(pointer: coarse)') catches every phone/tablet
+        // touch input; the viewport guard catches small windows on touch laptops.
+        function isMobilePhone() {
+            try {
+                return window.matchMedia('(pointer: coarse)').matches
+                    && window.innerWidth < 1024;
+            } catch (e) {
+                // Fall back to UA sniffing if matchMedia is unavailable.
+                return /iPhone|iPad|iPod|Android|webOS|BlackBerry|Windows Phone|Mobile/i
+                    .test(navigator.userAgent || '');
+            }
+        }
+
         function showInstallButton() {
+            if (!isMobilePhone()) return;  // desktop: never reveal
             var btn = document.getElementById('pwaInstallBtn');
             if (btn) btn.style.display = 'inline-flex';
         }
