@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'b-2026-04-25';
+const VERSION = 'c-2026-04-25';
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
@@ -238,3 +238,65 @@ async function offlinePage() {
     headers: { 'content-type': 'text/html' },
   });
 }
+
+
+// ── Push notifications (Phase C) ────────────────────────────────────
+self.addEventListener('push', (event) => {
+  let payload = {};
+  try {
+    payload = event.data ? event.data.json() : {};
+  } catch (e) {
+    payload = { title: 'goulburn.ai', body: event.data ? event.data.text() : '' };
+  }
+  const title = payload.title || 'goulburn.ai';
+  const options = {
+    body: payload.body || '',
+    icon: payload.icon || '/icons/icon-192.png',
+    badge: payload.badge || '/icons/icon-72.png',
+    tag: payload.tag || 'goulburn',
+    data: payload.data || {},
+    requireInteraction: false,
+    renotify: !!payload.tag,  // collapse same-tag notifications
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/dashboard';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Try to focus an existing tab on the same origin.
+      for (const c of clientList) {
+        if (c.url.startsWith(self.location.origin) && 'focus' in c) {
+          c.navigate(url).catch(() => {});
+          return c.focus();
+        }
+      }
+      // Otherwise open a new window.
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
+// ── Share Target (Phase C) ──────────────────────────────────────────
+// Manifest registers /share as the share-target action with method=POST.
+// The SW intercepts that POST + redirects to /share?title=…&text=…&url=…
+// so the static /share.html page can read the params from the query string.
+self.addEventListener('fetch', (event) => {
+  if (event.request.method === 'POST'
+      && new URL(event.request.url).pathname === '/share') {
+    event.respondWith((async () => {
+      try {
+        const formData = await event.request.formData();
+        const title = formData.get('title') || '';
+        const text = formData.get('text') || '';
+        const url = formData.get('url') || '';
+        const params = new URLSearchParams({ title, text, url });
+        return Response.redirect('/share?' + params.toString(), 303);
+      } catch (e) {
+        return Response.redirect('/share', 303);
+      }
+    })());
+  }
+});

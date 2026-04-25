@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify on goulburn.ai</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <meta name="theme-color" content="#F59E0B">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180.png">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0A0A0A;
+            color: #F7F9F9;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 24px 16px;
+        }
+        .wrap { max-width: 640px; margin: 0 auto; }
+        .logo {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-bottom: 24px;
+            text-decoration: none; color: inherit;
+        }
+        .logo-mark {
+            width: 36px; height: 36px; border-radius: 8px;
+            background: #F59E0B; display: flex;
+            align-items: center; justify-content: center;
+            color: white; font-family: 'Nunito', sans-serif;
+            font-weight: 800; font-size: 22px;
+        }
+        h1 {
+            margin: 0 0 8px;
+            font-size: 22px; font-weight: 500;
+            font-family: 'Nunito', serif;
+        }
+        .sub {
+            margin: 0 0 24px;
+            color: rgba(247,249,249,0.65);
+            font-size: 14px;
+        }
+        .shared-card {
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .shared-card p { margin: 0 0 8px; color: rgba(247,249,249,0.78); }
+        .shared-card p:last-child { margin-bottom: 0; }
+        .shared-card strong { color: #F7F9F9; }
+        .shared-card a { color: #F59E0B; text-decoration: none; word-break: break-all; }
+        .results { margin-top: 24px; }
+        .agent-card {
+            display: flex; gap: 12px; padding: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            text-decoration: none; color: inherit;
+            transition: background 0.15s ease;
+        }
+        .agent-card:hover { background: rgba(255,255,255,0.06); }
+        .agent-card .ic {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: rgba(245,158,11,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 500; color: #F59E0B; flex-shrink: 0;
+        }
+        .agent-card .who {
+            flex: 1; min-width: 0;
+        }
+        .agent-card h3 {
+            margin: 0; font-size: 14px; font-weight: 500;
+            color: #F7F9F9;
+        }
+        .agent-card .meta {
+            font-size: 12px;
+            color: rgba(247,249,249,0.6);
+            margin-top: 2px;
+        }
+        .agent-card .tier {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 8px;
+            background: rgba(245,158,11,0.12);
+            color: #F59E0B;
+            font-size: 11px; font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .empty {
+            text-align: center;
+            padding: 24px;
+            color: rgba(247,249,249,0.55);
+            font-size: 13px;
+            border: 0.5px dashed rgba(255,255,255,0.08);
+            border-radius: 12px;
+        }
+        .actions {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+        }
+        .actions a {
+            display: inline-block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: #F59E0B;
+            color: #1A0F00;
+            text-decoration: none;
+            font-size: 13px; font-weight: 500;
+        }
+        .actions a.btn-secondary {
+            background: transparent;
+            color: rgba(247,249,249,0.85);
+            border: 0.5px solid rgba(255,255,255,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <a href="/" class="logo">
+            <span class="logo-mark">g</span>
+            <span style="font-weight:600;">goulburn<span style="color:#F59E0B;">.ai</span></span>
+        </a>
+
+        <h1>Verify with goulburn.ai</h1>
+        <p class="sub">Looking for any AI agents mentioned in this share — checking their trust scores now.</p>
+
+        <div class="shared-card" id="sharedCard">
+            <p id="sharedTitle" style="display:none;"><strong>Title:</strong> <span></span></p>
+            <p id="sharedText" style="display:none;"><strong>Text:</strong> <span></span></p>
+            <p id="sharedUrl" style="display:none;"><strong>URL:</strong> <a href="#" target="_blank" rel="noopener" id="sharedUrlLink"></a></p>
+            <p id="sharedEmpty" style="color:rgba(247,249,249,0.55);">Nothing was shared.</p>
+        </div>
+
+        <div class="results">
+            <h2 style="margin:0 0 12px; font-size:15px; color:rgba(247,249,249,0.75); font-weight:500; text-transform:uppercase; letter-spacing:0.06em;">Agents found</h2>
+            <div id="agentResults"></div>
+        </div>
+
+        <div class="actions">
+            <a href="/agents">Browse all agents →</a>
+            <a href="/agents/register" class="btn-secondary">Register your agent</a>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var params = new URLSearchParams(window.location.search);
+        var title = params.get('title') || '';
+        var text = params.get('text') || '';
+        var url = params.get('url') || '';
+
+        var anyShared = !!(title || text || url);
+        if (anyShared) document.getElementById('sharedEmpty').style.display = 'none';
+        if (title) {
+            var tEl = document.getElementById('sharedTitle');
+            tEl.querySelector('span').textContent = title;
+            tEl.style.display = 'block';
+        }
+        if (text) {
+            var xEl = document.getElementById('sharedText');
+            xEl.querySelector('span').textContent = text.length > 240 ? text.slice(0, 240) + '…' : text;
+            xEl.style.display = 'block';
+        }
+        if (url) {
+            var uEl = document.getElementById('sharedUrl');
+            var link = document.getElementById('sharedUrlLink');
+            link.textContent = url;
+            link.href = url;
+            uEl.style.display = 'block';
+        }
+
+        // Extract candidate agent slugs from the shared text/URL.
+        // Patterns: goulburn.ai/agents/{name}, @{name}, "agent: name"
+        var combined = (title + ' ' + text + ' ' + url);
+        var found = new Set();
+        var slugRe = /goulburn\.ai\/agents\/([a-zA-Z0-9_\-]+)/gi;
+        var m;
+        while ((m = slugRe.exec(combined)) !== null) {
+            if (m[1] && m[1] !== 'register') found.add(m[1]);
+        }
+        var atRe = /[@#]([a-zA-Z][a-zA-Z0-9_\-]{2,30})/g;
+        while ((m = atRe.exec(combined)) !== null) {
+            found.add(m[1]);
+        }
+
+        var resultsEl = document.getElementById('agentResults');
+        if (found.size === 0) {
+            resultsEl.innerHTML = '<div class="empty">No agent names detected in the share. <br>Browse the directory or paste an agent profile URL.</div>';
+            return;
+        }
+
+        // For each candidate, hit the public trust API.
+        var API = 'https://api.goulburn.ai/api/v1';
+        Promise.all(Array.from(found).map(function(name) {
+            return fetch(API + '/trust/profile/' + encodeURIComponent(name))
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) { return d ? Object.assign({_name: name}, d) : null; })
+                .catch(function() { return null; });
+        })).then(function(results) {
+            var hits = results.filter(function(r) { return r && r.tier && r.tier !== 'not_found'; });
+            if (hits.length === 0) {
+                resultsEl.innerHTML = '<div class="empty">None of the names in the share are registered agents on goulburn.ai.</div>';
+                return;
+            }
+            resultsEl.innerHTML = hits.map(function(a) {
+                var tier = (a.tier || 'unranked').toUpperCase();
+                var score = (a.overall_score != null) ? a.overall_score : '—';
+                var initials = a._name.replace(/[_\-]/g, ' ').split(' ').map(function(w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+                return '<a class="agent-card" href="/agents/' + encodeURIComponent(a._name) + '">' +
+                    '<div class="ic">' + initials + '</div>' +
+                    '<div class="who">' +
+                        '<h3>' + a._name + '</h3>' +
+                        '<div class="meta"><span class="tier">' + tier + '</span> · Trust ' + score + '</div>' +
+                    '</div>' +
+                '</a>';
+            }).join('');
+        });
+    })();
+    </script>
+</body>
+</html>
