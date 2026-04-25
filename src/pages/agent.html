@@ -1914,7 +1914,8 @@
                 if (s >= 25) return '#fbbf24';
                 return '#ef4444';
             }
-            var svg = '<svg viewBox="0 0 ' + size + ' ' + size + '" role="img" aria-label="Trust radar across 5 evidence layers">';
+            // Expand viewBox to fit text labels around the polygon (Track Record, Compliance, Capability)
+            var svg = '<svg viewBox="-46 -8 ' + (size+92) + ' ' + (size+16) + '" role="img" aria-label="Trust radar across 5 evidence layers">';
             // grid rings 25/50/75/100
             [25,50,75,100].forEach(function(ring) {
                 var pts = [];
