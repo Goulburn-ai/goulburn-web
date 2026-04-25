@@ -2402,8 +2402,9 @@
             var existing = document.getElementById('opAvatarModal');
             if (existing) existing.remove();
 
-            // Fetch current user profile for default seed
-            fetch(API + '/..', { headers: {} }); // no-op to prime
+            // (Stripped: stale 'API + /..' fetch was throwing ReferenceError
+            //  because API is scoped inside an earlier IIFE. The no-op served no
+            //  purpose - just opening the modal is enough.)
             var username = (document.querySelector('.profile-name') || {}).textContent || 'operator';
             _opAvatarModalState.selected = '';
             _opAvatarModalState.currentTab = 'portraits';
