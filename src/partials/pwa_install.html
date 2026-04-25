@@ -1,0 +1,190 @@
+    <!-- ============================================================ -->
+    <!-- PWA install: service-worker registration + install CTA + iOS  -->
+    <!-- instructions modal. Phase A of the goulburn.ai PWA setup.     -->
+    <!-- ============================================================ -->
+    <style>
+        /* Install button (placed in nav by nav.html or via JS injection) */
+        #pwaInstallBtn {
+            display: none; /* JS reveals when installable */
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            margin-right: 12px;
+            border-radius: 8px;
+            background: rgba(245, 158, 11, 0.12);
+            border: 0.5px solid rgba(245, 158, 11, 0.4);
+            color: #F59E0B;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        #pwaInstallBtn:hover { background: rgba(245, 158, 11, 0.2); }
+        #pwaInstallBtn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+        /* iOS instructions modal */
+        #pwaIosModal { display: none; }
+        #pwaIosModal.open {
+            display: flex;
+            position: fixed; inset: 0; z-index: 9998;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center; justify-content: center;
+            padding: 16px;
+        }
+        #pwaIosModal .pwa-modal-card {
+            background: #16181C;
+            border: 0.5px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            padding: 24px;
+            max-width: 400px; width: 100%;
+            color: #F7F9F9;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        #pwaIosModal h3 { margin: 0 0 8px; font-size: 17px; font-weight: 500; }
+        #pwaIosModal p { margin: 0 0 14px; font-size: 13px; color: rgba(247,249,249,0.75); line-height: 1.5; }
+        #pwaIosModal .pwa-modal-step {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 10px 0;
+            border-top: 0.5px solid rgba(255,255,255,0.06);
+            font-size: 13px; color: rgba(247,249,249,0.85);
+        }
+        #pwaIosModal .pwa-modal-step:first-of-type { border-top: none; }
+        #pwaIosModal .pwa-modal-step .pwa-step-num {
+            flex: 0 0 22px;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: rgba(245,158,11,0.15); color: #F59E0B;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600;
+        }
+        #pwaIosModal .pwa-modal-step svg { width: 18px; height: 18px; flex-shrink: 0; }
+        #pwaIosModal .pwa-modal-close {
+            margin-top: 14px;
+            padding: 9px 14px;
+            width: 100%;
+            background: #F59E0B; color: #1A0F00;
+            border: none; border-radius: 8px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+        }
+        #pwaIosModal .pwa-modal-close:hover { background: #FBB040; }
+    </style>
+
+    <!-- iOS instructions modal -->
+    <div id="pwaIosModal" role="dialog" aria-modal="true" aria-labelledby="pwaIosTitle">
+        <div class="pwa-modal-card">
+            <h3 id="pwaIosTitle">Install goulburn on your iPhone</h3>
+            <p>iPhone Safari doesn't show an automatic install prompt. Three quick taps:</p>
+            <div class="pwa-modal-step">
+                <span class="pwa-step-num">1</span>
+                <span style="flex:1;">Tap the <strong>Share</strong> button at the bottom of Safari</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+                    <polyline points="16 6 12 2 8 6"/>
+                    <line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
+            </div>
+            <div class="pwa-modal-step">
+                <span class="pwa-step-num">2</span>
+                <span style="flex:1;">Scroll down and tap <strong>Add to Home Screen</strong></span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/>
+                    <line x1="12" y1="8" x2="12" y2="16"/>
+                    <line x1="8" y1="12" x2="16" y2="12"/>
+                </svg>
+            </div>
+            <div class="pwa-modal-step">
+                <span class="pwa-step-num">3</span>
+                <span style="flex:1;">Tap <strong>Add</strong> in the top right. Done.</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+            </div>
+            <button class="pwa-modal-close" onclick="document.getElementById('pwaIosModal').classList.remove('open')">Got it</button>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        // 1. Register the service worker. Browsers require this for the
+        //    install prompt to fire and for any caching/offline behaviour
+        //    we'll add in Phase B.
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                    .then(function(reg) {
+                        // Phase B will hook updatefound here for the version-toast
+                    })
+                    .catch(function(err) {
+                        console.warn('[PWA] SW registration failed:', err);
+                    });
+            });
+        }
+
+        // 2. Detect already-installed (standalone display mode). Hide the
+        //    install button if so. Tag <body> so other UI can adapt.
+        function isStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone === true;
+        }
+        if (isStandalone()) {
+            document.documentElement.setAttribute('data-pwa', 'standalone');
+        }
+
+        // 3. Capture beforeinstallprompt (Chrome/Edge desktop + Android).
+        var deferredInstallPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            showInstallButton();
+        });
+
+        // 4. iOS detection (Safari never fires beforeinstallprompt).
+        var isIos = /iPhone|iPad|iPod/.test(navigator.userAgent || '')
+            && !window.MSStream;
+        var isIosSafari = isIos
+            && /^((?!chrome|crios|fxios|edge).)*safari/i.test(navigator.userAgent || '');
+
+        function showInstallButton() {
+            var btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'inline-flex';
+        }
+
+        // Wire up the button click. The button is rendered by nav.html.
+        function wireInstallButton() {
+            var btn = document.getElementById('pwaInstallBtn');
+            if (!btn) return;
+            btn.addEventListener('click', function() {
+                if (deferredInstallPrompt) {
+                    // Native prompt path
+                    deferredInstallPrompt.prompt();
+                    deferredInstallPrompt.userChoice.then(function(choice) {
+                        deferredInstallPrompt = null;
+                        if (choice.outcome === 'accepted') {
+                            btn.style.display = 'none';
+                        }
+                    });
+                } else if (isIosSafari) {
+                    // iOS path - show modal
+                    document.getElementById('pwaIosModal').classList.add('open');
+                }
+            });
+            // iOS Safari: reveal the button on first paint since
+            // beforeinstallprompt won't fire to do it for us.
+            if (isIosSafari && !isStandalone()) {
+                showInstallButton();
+            }
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', wireInstallButton);
+        } else {
+            wireInstallButton();
+        }
+
+        // 5. Hide the install button after successful install.
+        window.addEventListener('appinstalled', function() {
+            var btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'none';
+            deferredInstallPrompt = null;
+            document.documentElement.setAttribute('data-pwa', 'standalone');
+        });
+    })();
+    </script>
