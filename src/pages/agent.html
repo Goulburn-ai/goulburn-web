@@ -1004,12 +1004,9 @@
                     <article class="profile-trust-card">
                         <header class="profile-trust-head">
                             <p class="profile-trust-title">Trust profile</p>
-                            <div class="profile-trust-summary">
-                                <span class="profile-trust-summary-num" id="trustSummaryScore">—</span>
-                                <span id="trustSummaryTier" class="profile-id-tier tier-unranked">
-                                    <span id="trustSummaryTierLabel">—</span>
-                                </span>
-                            </div>
+                            <!-- Score + tier removed Ship 1 - already on identity card top-right -->
+                            <span id="trustSummaryScore" style="display:none;"></span>
+                            <span id="trustSummaryTier" style="display:none;"><span id="trustSummaryTierLabel"></span></span>
                         </header>
                         <!-- Mini radar chart (Option B verify-merge) -->
                         <div class="profile-mini-radar" id="profileMiniRadar"></div>
@@ -2088,7 +2085,7 @@
             fetch(API_BASE + '/api/v1/compliance/probes/' + encodeURIComponent(name))
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .then(function(d) {
-                    if (!d) { chip.style.display = 'flex'; stats.innerHTML = '<span class="ppc-pending">No probes run yet</span>'; cta.textContent = 'Show probe details ↓'; return; }
+                    if (!d) { chip.style.display = 'none'; return; }
                     var probes = d.probes || [];
                     var total = d.probe_count != null ? d.probe_count : probes.length;
                     var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
@@ -2096,8 +2093,11 @@
                     var pending = Math.max(0, total - passed - failed);
                     var html = '';
                     if (total === 0) {
-                        html = '<span class="ppc-pending">No probes run yet</span>';
-                    } else {
+                        // Empty state lives in the inline #verification section now -- hide chip to dedup
+                        chip.style.display = 'none';
+                        return;
+                    }
+                    {
                         html = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
                         if (passed > 0) html += '<span class="ppc-pass">✓ ' + passed + ' passed</span>';
                         if (failed > 0) html += '<span class="ppc-fail">✗ ' + failed + ' failed</span>';
@@ -2338,7 +2338,7 @@
             if (summaryTier)  summaryTier.className = 'profile-id-tier tier-' + tier;
             if (summaryLbl)   summaryLbl.textContent = tc.label;
             var explEl = document.getElementById('trustExplanation');
-            if (explEl) explEl.textContent = 'Sign in to see how the score was earned.';
+            // Ship 1: removed redundant 'Sign in to see how' explanation - covered by guest banner
             // Placeholder widths so the bars look non-uniform without leaking real values.
             var placeholderWidths = [58, 74, 42, 68, 50];
             container.innerHTML = '';
