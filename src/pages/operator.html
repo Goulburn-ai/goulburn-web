@@ -46,10 +46,14 @@
             .op-hero-banner { height: 96px; }
         }
         /* Avatar lifts over the banner so the visual hierarchy is hero-photo
-         * + identity card, like LinkedIn / X profiles. */
-        .op-hero-row { margin-top: -42px; }
+         * + identity card, like LinkedIn / X profiles. The negative margin
+         * is on the avatar only, NOT the whole row, so the name/badge/bio
+         * column stays in its proper position below the banner. */
+        .op-hero-row { margin-top: 8px; align-items: flex-start; }
+        .op-avatar { margin-top: -56px; }
         @media (max-width: 540px) {
-            .op-hero-row { margin-top: -32px; }
+            .op-hero-row { margin-top: 6px; }
+            .op-avatar { margin-top: -42px; }
         }
         .op-avatar.is-clickable {
             cursor: pointer;
