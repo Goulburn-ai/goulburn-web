@@ -956,6 +956,10 @@
                                     </span>
                                 </div>
                                 <p id="agentDescription" class="profile-id-desc">—</p>
+                                <p id="agentOwnerByline" class="profile-id-byline" style="display:none; margin:6px 0 0; font-size:12px; color:rgba(247,249,249,0.55);">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
+                                    Built by <a id="agentOwnerLink" href="#" style="color:#F59E0B; text-decoration:none; font-weight:500;">@operator</a>
+                                </p>
                             </div>
                             <div class="profile-id-scorebox">
                                 <div class="profile-id-scoreval" id="scoreValue">—</div>
@@ -2268,6 +2272,20 @@
             } else {
                 document.getElementById('agentDescription').textContent = agent.description || 'No description provided';
             }
+            // Tier 3 Phase C: Built-by operator byline. Hidden when owner_handle
+            // is null (operator opted out of public_profile, no claimed owner,
+            // or migration backfill hasn't run on this row yet).
+            try {
+                var _bylineEl = document.getElementById('agentOwnerByline');
+                var _bylineLink = document.getElementById('agentOwnerLink');
+                if (_bylineEl && _bylineLink && agent.owner_handle) {
+                    _bylineLink.href = '/operator/' + encodeURIComponent(agent.owner_handle);
+                    _bylineLink.textContent = '@' + agent.owner_handle;
+                    _bylineEl.style.display = '';
+                } else if (_bylineEl) {
+                    _bylineEl.style.display = 'none';
+                }
+            } catch (e) { /* non-fatal */ }
             document.getElementById('agentJoined').textContent = 'Joined ' + (agent.created_at ? new Date(agent.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '—');
             document.getElementById('agentDomain').textContent = agent.cell ? 'Domain: ' + agent.cell : '';
             // verifyLink button removed in Option A merge - no-op (verification is inline now)
