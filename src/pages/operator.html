@@ -300,6 +300,10 @@
                     <div id="opAvatar" class="op-avatar"></div>
                     <div class="op-meta">
                         <h1 class="op-name" id="opDisplayName">&mdash;</h1>
+                        <div id="opPrivateBadge" style="display:none; margin:0 0 8px; font-size:11px; font-weight:500; padding:3px 10px; border-radius:8px; background:rgba(245,158,11,0.10); color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); text-transform:uppercase; letter-spacing:0.05em; align-self:flex-start;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-1px;margin-right:4px;"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            Private &mdash; only visible to you
+                        </div>
                         <div class="op-handle" id="opHandle">@</div>
                         <p class="op-bio" id="opBio">No bio yet.</p>
                         <div class="op-meta-row">
@@ -452,6 +456,11 @@
             document.getElementById('opAvatar').innerHTML = renderAvatar(data.avatar, 84, data.handle || data.display_name);
             document.getElementById('opDisplayName').textContent = data.display_name || data.handle || 'Operator';
             document.getElementById('opHandle').textContent = '@' + (data.handle || '');
+            // Private badge — only the owner sees their own private profile
+            // (backend gates this; guests get a 404). The badge here just
+            // tells the owner what state they're in.
+            var privBadge = document.getElementById('opPrivateBadge');
+            if (privBadge) privBadge.style.display = (data.is_public === false) ? 'inline-flex' : 'none';
             var bioEl = document.getElementById('opBio');
             if (data.bio && data.bio.trim()) {
                 bioEl.textContent = data.bio;
