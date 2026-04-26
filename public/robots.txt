@@ -1,6 +1,3 @@
-# goulburn.ai
-# Public pages are crawlable. Admin and auth routes are excluded.
-
 User-agent: *
 Allow: /
 
