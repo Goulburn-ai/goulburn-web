@@ -26,6 +26,56 @@
             padding: 20px 22px;
             margin-bottom: 14px;
         }
+        /* Banner band — sits at the top of the hero card, full width.
+         * Default is a deterministic diagonal gradient seeded by handle so
+         * every profile feels intentional from day zero. */
+        .op-hero-banner {
+            position: relative;
+            width: calc(100% + 44px);
+            height: 140px;
+            margin: -20px -22px 12px;
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+        }
+        .op-hero-banner.is-default {
+            /* Set by JS via background style */
+        }
+        @media (max-width: 540px) {
+            .op-hero-banner { height: 96px; }
+        }
+        /* Avatar lifts over the banner so the visual hierarchy is hero-photo
+         * + identity card, like LinkedIn / X profiles. */
+        .op-hero-row { margin-top: -42px; }
+        @media (max-width: 540px) {
+            .op-hero-row { margin-top: -32px; }
+        }
+        .op-avatar.is-clickable {
+            cursor: pointer;
+            position: relative;
+            transition: filter 0.15s, transform 0.15s;
+        }
+        .op-avatar.is-clickable:hover { filter: brightness(0.78); transform: scale(1.02); }
+        .op-avatar-edit-chip {
+            position: absolute;
+            inset: auto 0 0 0;
+            background: rgba(0,0,0,0.7);
+            color: #F59E0B;
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 3px 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.15s;
+            pointer-events: none;
+        }
+        .op-avatar.is-clickable:hover .op-avatar-edit-chip { opacity: 1; }
+        /* Banner ring around avatar so it pops off the banner regardless of
+         * which background is behind it. */
+        .op-avatar { box-shadow: 0 0 0 3px #131316; }
         .op-hero-row { display: flex; align-items: flex-start; gap: 18px; }
         .op-avatar {
             width: 84px; height: 84px; border-radius: 50%; flex-shrink: 0;
@@ -296,8 +346,9 @@
         <div id="opProfile" style="display:none;">
             <!-- Hero card -->
             <div class="op-card">
+                <div class="op-hero-banner" id="opBanner"></div>
                 <div class="op-hero-row">
-                    <div id="opAvatar" class="op-avatar"></div>
+                    <div id="opAvatar" class="op-avatar"><span class="op-avatar-edit-chip">Edit</span></div>
                     <div class="op-meta">
                         <h1 class="op-name" id="opDisplayName">&mdash;</h1>
                         <div id="opPrivateBadge" style="display:none; margin:0 0 8px; font-size:11px; font-weight:500; padding:3px 10px; border-radius:8px; background:rgba(245,158,11,0.10); color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); text-transform:uppercase; letter-spacing:0.05em; align-self:flex-start;">
@@ -363,6 +414,12 @@
                     <div class="op-field-help">Use <code>icon:NAME</code> (e.g. <code>icon:robot</code>), <code>personas:NAME</code>, or any image URL. Leave empty to use the default portrait seeded by your handle.</div>
                 </div>
                 <div class="op-field">
+                    <label for="opEditBanner">Banner</label>
+                    <div id="opEditBannerPreview" style="width:100%; height:64px; border-radius:8px; overflow:hidden; margin-bottom:8px; background-size: cover; background-position: center; background:rgba(255,255,255,0.05);"></div>
+                    <input type="text" id="opEditBanner" name="banner" maxlength="255" placeholder="gradient:sunset · gradient:ocean · gradient:forest · gradient:midnight · or an https:// URL" style="width:100%; box-sizing:border-box;">
+                    <div class="op-field-help">Leave empty for a default gradient seeded by your handle. Presets: <code>gradient:sunset</code>, <code>gradient:ocean</code>, <code>gradient:forest</code>, <code>gradient:midnight</code>. Or paste any image URL.</div>
+                </div>
+                <div class="op-field">
                     <div class="op-toggle-row">
                         <input type="checkbox" id="opEditPublic" name="public_profile" checked>
                         <label for="opEditPublic">
@@ -411,6 +468,51 @@
             person: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>',
             star: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
         };
+        // Gradient palette for default banners — seeded by handle. Each pair
+        // is a diagonal (top-left -> bottom-right) gradient. All pairs are
+        // intentionally muted so they read as a backdrop, not a foreground.
+        var GRADIENT_PRESETS = {
+            sunset:   ['#F59E0B', '#EF4444'],
+            ocean:    ['#0EA5E9', '#1E3A8A'],
+            forest:   ['#22C55E', '#0F766E'],
+            midnight: ['#312E81', '#0F172A'],
+            amber:    ['#F59E0B', '#7C2D12'],
+            rose:     ['#EC4899', '#7E22CE'],
+            ash:      ['#374151', '#0F172A'],
+            ember:    ['#DC2626', '#451A03']
+        };
+        function _gradKeysSorted() { return Object.keys(GRADIENT_PRESETS); }
+        function pickGradientByHandle(handle) {
+            var keys = _gradKeysSorted();
+            var s = String(handle || '');
+            var hash = 0;
+            for (var i = 0; i < s.length; i++) hash = ((hash << 5) - hash) + s.charCodeAt(i);
+            var idx = Math.abs(hash) % keys.length;
+            return keys[idx];
+        }
+        function bannerCssFor(bannerStr, handleHint) {
+            var s = String(bannerStr || '').trim();
+            if (s.indexOf('gradient:') === 0) {
+                var name = s.substring('gradient:'.length).toLowerCase();
+                if (GRADIENT_PRESETS[name]) {
+                    var pair = GRADIENT_PRESETS[name];
+                    return { backgroundImage: 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)' };
+                }
+            }
+            if (s.indexOf('http') === 0 || s.indexOf('data:') === 0) {
+                return { backgroundImage: "url('" + s.replace(/'/g, "%27") + "')" };
+            }
+            // Default — handle-seeded preset
+            var key = pickGradientByHandle(handleHint || '');
+            var defPair = GRADIENT_PRESETS[key];
+            return { backgroundImage: 'linear-gradient(135deg, ' + defPair[0] + ' 0%, ' + defPair[1] + ' 100%)' };
+        }
+        function applyBannerTo(el, bannerStr, handleHint) {
+            if (!el) return;
+            var css = bannerCssFor(bannerStr, handleHint);
+            el.style.backgroundImage = css.backgroundImage;
+        }
+
         function renderAvatar(avatarStr, size, name) {
             size = size || 84;
             if (avatarStr && avatarStr.indexOf('icon:') === 0) {
@@ -456,7 +558,10 @@
         // ─── Render the public profile ───────────────────────
         function renderProfile(data) {
             // Hero
-            document.getElementById('opAvatar').innerHTML = renderAvatar(data.avatar, 84, data.handle || data.display_name);
+            applyBannerTo(document.getElementById('opBanner'), data.banner, data.handle || data.display_name);
+            // Re-add the edit chip after innerHTML assignment (only when owner).
+            var avatarEl = document.getElementById('opAvatar');
+            avatarEl.innerHTML = renderAvatar(data.avatar, 84, data.handle || data.display_name);
             document.getElementById('opDisplayName').textContent = data.display_name || data.handle || 'Operator';
             document.getElementById('opHandle').textContent = '@' + (data.handle || '');
             // Private badge — only the owner sees their own private profile
@@ -559,6 +664,23 @@
                     var ew = document.getElementById('opEditWrap');
                     if (ew) ew.style.display = '';
                     primeEditForm(me);
+                    // Make the hero avatar clickable for the owner. Same Edit
+                    // modal as the button — single source of truth, just a
+                    // more discoverable entry point.
+                    var av = document.getElementById('opAvatar');
+                    if (av) {
+                        av.classList.add('is-clickable');
+                        av.title = 'Click to edit your profile';
+                        av.addEventListener('click', function() {
+                            document.getElementById('opEditModal').classList.add('show');
+                            // Auto-focus the avatar field so the click goes
+                            // straight to where the user wanted.
+                            setTimeout(function() {
+                                var ai = document.getElementById('opEditAvatar');
+                                if (ai) ai.focus();
+                            }, 50);
+                        });
+                    }
                 }
             }).catch(function() { /* anonymous = no edit affordance, that's fine */ });
         }
@@ -569,9 +691,19 @@
             document.getElementById('opEditDisplay').value = me.display_name || '';
             document.getElementById('opEditBio').value = me.bio || '';
             document.getElementById('opEditAvatar').value = me.avatar || '';
+            var bannerInp = document.getElementById('opEditBanner');
+            if (bannerInp) bannerInp.value = me.banner || '';
             document.getElementById('opEditPublic').checked = me.public_profile !== false;
             document.getElementById('opEditBioCount').textContent = (me.bio || '').length;
             updateAvatarPreview(me.avatar || '', me.handle || '');
+            updateBannerPreview(me.banner || '', me.handle || '');
+        }
+
+        function updateBannerPreview(bannerStr, handleHint) {
+            var box = document.getElementById('opEditBannerPreview');
+            if (!box) return;
+            var name = handleHint || document.getElementById('opEditHandle').value || '';
+            applyBannerTo(box, bannerStr, name);
         }
 
         function updateAvatarPreview(avatarStr, handleHint) {
@@ -622,10 +754,20 @@
             if (avatarInp) avatarInp.addEventListener('input', function() {
                 updateAvatarPreview(avatarInp.value, document.getElementById('opEditHandle').value);
             });
+            // Live banner preview — same model as avatar.
+            var bannerInpLive = document.getElementById('opEditBanner');
+            if (bannerInpLive) bannerInpLive.addEventListener('input', function() {
+                updateBannerPreview(bannerInpLive.value, document.getElementById('opEditHandle').value);
+            });
             if (handleInp) handleInp.addEventListener('input', function() {
                 var av = document.getElementById('opEditAvatar');
                 if (av && !av.value) {
                     updateAvatarPreview('', handleInp.value);
+                }
+                // Default banner gradient also reseeds on handle change
+                var ban = document.getElementById('opEditBanner');
+                if (ban && !ban.value) {
+                    updateBannerPreview('', handleInp.value);
                 }
             });
 
@@ -649,6 +791,7 @@
                     display_name: document.getElementById('opEditDisplay').value.trim(),
                     bio: document.getElementById('opEditBio').value,
                     avatar: document.getElementById('opEditAvatar').value.trim(),
+                    banner: document.getElementById('opEditBanner').value.trim(),
                     public_profile: !!document.getElementById('opEditPublic').checked
                 };
 
