@@ -319,6 +319,92 @@
         .op-btn.primary:hover { background: rgba(245,158,11,0.25); }
         .op-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+        /* Click-to-pick swatch grids */
+        .op-picker {
+            background: rgba(255,255,255,0.03);
+            border: 0.5px solid rgba(255,255,255,0.10);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+        }
+        .op-picker-tabs {
+            display: flex; gap: 4px; padding-bottom: 8px; margin-bottom: 8px;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+        }
+        .op-picker-tab {
+            background: transparent; border: 0.5px solid rgba(255,255,255,0.10);
+            color: rgba(247,249,249,0.6); font-size: 11px; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-weight: 500;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .op-picker-tab.active {
+            background: rgba(245,158,11,0.12); color: #F59E0B; border-color: rgba(245,158,11,0.30);
+        }
+        .op-picker-pane { display: none; }
+        .op-picker-pane.active { display: block; }
+        /* Avatar swatch grid: square, rounded */
+        .op-avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+        }
+        .op-swatch {
+            width: 100%; aspect-ratio: 1;
+            border-radius: 50%;
+            border: 1.5px solid transparent;
+            cursor: pointer; overflow: hidden;
+            background: rgba(255,255,255,0.04);
+            display: flex; align-items: center; justify-content: center;
+            transition: border-color 0.12s, transform 0.12s;
+        }
+        .op-swatch:hover { transform: scale(1.05); }
+        .op-swatch.selected { border-color: #F59E0B; }
+        .op-swatch img { width: 100%; height: 100%; object-fit: cover; }
+        .op-swatch svg { width: 60%; height: 60%; color: #F59E0B; }
+        /* Icon swatches use a square shape so they read as buttons */
+        .op-icon-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+        .op-icon-swatch {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            background: rgba(245,158,11,0.08);
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: #F59E0B;
+            transition: background 0.12s, border-color 0.12s, transform 0.12s;
+        }
+        .op-icon-swatch:hover { background: rgba(245,158,11,0.18); transform: scale(1.05); }
+        .op-icon-swatch.selected { border-color: #F59E0B; background: rgba(245,158,11,0.20); }
+        .op-icon-swatch svg { width: 22px; height: 22px; }
+        /* Banner swatch grid: 2 columns of full-width gradient strips */
+        .op-banner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .op-banner-swatch {
+            height: 40px; border-radius: 8px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            position: relative;
+            transition: border-color 0.12s, transform 0.12s;
+        }
+        .op-banner-swatch:hover { transform: scale(1.02); }
+        .op-banner-swatch.selected { border-color: #F59E0B; box-shadow: 0 0 0 2px rgba(245,158,11,0.20); }
+        .op-banner-swatch-label {
+            position: absolute; inset: auto 0 0 0; padding: 2px 6px;
+            font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+            background: rgba(0,0,0,0.45); color: #fff;
+            border-radius: 0 0 6px 6px;
+            text-align: center;
+        }
+        .op-picker .op-field-help { margin-top: 6px; }
+        .op-picker input[type=text] {
+            width: 100%; box-sizing: border-box;
+            background: rgba(255,255,255,0.04);
+            border: 0.5px solid rgba(255,255,255,0.12);
+            border-radius: 6px;
+            padding: 8px 10px;
+            color: #F7F9F9; font-size: 13px;
+            font-family: inherit;
+        }
+
         .op-loading, .op-error, .op-not-found {
             padding: 60px 20px; text-align: center;
             color: rgba(247,249,249,0.5);
@@ -410,18 +496,47 @@
                     <div class="op-field-help"><span id="opEditBioCount">0</span>/500</div>
                 </div>
                 <div class="op-field">
-                    <label for="opEditAvatar">Avatar</label>
-                    <div style="display:flex; gap:12px; align-items:center;">
+                    <label>Avatar</label>
+                    <div style="display:flex; gap:12px; align-items:center; margin-bottom: 4px;">
                         <div id="opEditAvatarPreview" style="width:56px; height:56px; flex-shrink:0; border-radius:50%; overflow:hidden; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;"></div>
-                        <input type="text" id="opEditAvatar" name="avatar" maxlength="255" placeholder="icon:robot · personas:NAME · or an https:// URL" style="flex:1;">
+                        <div style="flex:1; font-size:12px; color:rgba(247,249,249,0.55);">Pick a portrait or icon below, or paste a URL.</div>
                     </div>
-                    <div class="op-field-help">Use <code>icon:NAME</code> (e.g. <code>icon:robot</code>), <code>personas:NAME</code>, or any image URL. Leave empty to use the default portrait seeded by your handle.</div>
+                    <input type="hidden" id="opEditAvatar" name="avatar">
+                    <div class="op-picker">
+                        <div class="op-picker-tabs" data-picker="avatar">
+                            <button type="button" class="op-picker-tab active" data-tab="portraits">Portraits</button>
+                            <button type="button" class="op-picker-tab" data-tab="icons">Icons</button>
+                            <button type="button" class="op-picker-tab" data-tab="url">URL</button>
+                        </div>
+                        <div class="op-picker-pane active" data-pane="portraits">
+                            <div class="op-avatar-grid" id="opAvatarPortraits"></div>
+                        </div>
+                        <div class="op-picker-pane" data-pane="icons">
+                            <div class="op-icon-grid" id="opAvatarIcons"></div>
+                        </div>
+                        <div class="op-picker-pane" data-pane="url">
+                            <input type="text" id="opEditAvatarUrl" maxlength="255" placeholder="https://example.com/me.jpg or data:image/...">
+                            <div class="op-field-help">Press Enter to apply.</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="op-field">
-                    <label for="opEditBanner">Banner</label>
-                    <div id="opEditBannerPreview" style="width:100%; height:64px; border-radius:8px; overflow:hidden; margin-bottom:8px; background-size: cover; background-position: center; background:rgba(255,255,255,0.05);"></div>
-                    <input type="text" id="opEditBanner" name="banner" maxlength="255" placeholder="gradient:sunset · gradient:ocean · gradient:forest · gradient:midnight · or an https:// URL" style="width:100%; box-sizing:border-box;">
-                    <div class="op-field-help">Leave empty for a default gradient seeded by your handle. Presets: <code>gradient:sunset</code>, <code>gradient:ocean</code>, <code>gradient:forest</code>, <code>gradient:midnight</code>. Or paste any image URL.</div>
+                    <label>Banner</label>
+                    <div id="opEditBannerPreview" style="width:100%; height:64px; border-radius:8px; overflow:hidden; margin-bottom:6px; background-size: cover; background-position: center; background:rgba(255,255,255,0.05);"></div>
+                    <input type="hidden" id="opEditBanner" name="banner">
+                    <div class="op-picker">
+                        <div class="op-picker-tabs" data-picker="banner">
+                            <button type="button" class="op-picker-tab active" data-tab="gradients">Gradients</button>
+                            <button type="button" class="op-picker-tab" data-tab="url">URL</button>
+                        </div>
+                        <div class="op-picker-pane active" data-pane="gradients">
+                            <div class="op-banner-grid" id="opBannerGradients"></div>
+                        </div>
+                        <div class="op-picker-pane" data-pane="url">
+                            <input type="text" id="opEditBannerUrl" maxlength="255" placeholder="https://example.com/banner.jpg or data:image/...">
+                            <div class="op-field-help">Press Enter to apply.</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="op-field">
                     <div class="op-toggle-row">
@@ -677,12 +792,13 @@
                         av.title = 'Click to edit your profile';
                         av.addEventListener('click', function() {
                             document.getElementById('opEditModal').classList.add('show');
-                            // Auto-focus the avatar field so the click goes
-                            // straight to where the user wanted.
+                            buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
+                            buildBannerPickers(document.getElementById('opEditBanner').value || '');
+                            // Scroll the avatar picker into view inside the modal
                             setTimeout(function() {
-                                var ai = document.getElementById('opEditAvatar');
-                                if (ai) ai.focus();
-                            }, 50);
+                                var p = document.getElementById('opAvatarPortraits');
+                                if (p) p.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 80);
                         });
                     }
                 }
@@ -701,6 +817,10 @@
             document.getElementById('opEditBioCount').textContent = (me.bio || '').length;
             updateAvatarPreview(me.avatar || '', me.handle || '');
             updateBannerPreview(me.banner || '', me.handle || '');
+            // Rebuild the picker grids so they reflect the freshly-loaded
+            // server values (and re-seed defaults by current handle).
+            buildAvatarPickers(me.avatar || '');
+            buildBannerPickers(me.banner || '');
         }
 
         function updateBannerPreview(bannerStr, handleHint) {
@@ -716,6 +836,163 @@
             var name = handleHint || document.getElementById('opEditHandle').value || '';
             box.innerHTML = renderAvatar(avatarStr, 56, name);
         }
+        // ─────────────────────────────────────────────────────────
+        // Picker builders — invoked once per open of the Edit modal
+        // ─────────────────────────────────────────────────────────
+        var PORTRAIT_SEEDS = [
+            'alice', 'bob', 'charlie', 'diana', 'eve', 'frank',
+            'grace', 'henry', 'ivy', 'jack', 'kate', 'leo'
+        ];
+        var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','person','star'];
+        var BANNER_PRESETS = ['sunset','ocean','forest','midnight','amber','rose','ash','ember'];
+
+        function buildAvatarPickers(currentValue) {
+            // Portraits
+            var p = document.getElementById('opAvatarPortraits');
+            if (p) {
+                p.innerHTML = '';
+                // First swatch is "default seeded by handle" (empty value)
+                var handle = document.getElementById('opEditHandle').value || '';
+                var defaultSwatch = document.createElement('button');
+                defaultSwatch.type = 'button';
+                defaultSwatch.className = 'op-swatch' + (!currentValue ? ' selected' : '');
+                defaultSwatch.title = 'Default (seeded by handle)';
+                defaultSwatch.dataset.avatarValue = '';
+                defaultSwatch.innerHTML = renderAvatar('', 56, handle);
+                p.appendChild(defaultSwatch);
+                PORTRAIT_SEEDS.forEach(function(seed) {
+                    var val = 'personas:' + seed;
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'op-swatch' + (currentValue === val ? ' selected' : '');
+                    b.title = seed;
+                    b.dataset.avatarValue = val;
+                    b.innerHTML = renderAvatar(val, 56, seed);
+                    p.appendChild(b);
+                });
+                p.querySelectorAll('.op-swatch').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        applyAvatarSelection(btn.dataset.avatarValue);
+                    });
+                });
+            }
+            // Icons
+            var ic = document.getElementById('opAvatarIcons');
+            if (ic) {
+                ic.innerHTML = '';
+                ICON_NAMES.forEach(function(name) {
+                    var val = 'icon:' + name;
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'op-icon-swatch' + (currentValue === val ? ' selected' : '');
+                    b.title = name;
+                    b.dataset.avatarValue = val;
+                    b.innerHTML = AVATAR_ICON_SVGS[name] || '';
+                    ic.appendChild(b);
+                });
+                ic.querySelectorAll('.op-icon-swatch').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        applyAvatarSelection(btn.dataset.avatarValue);
+                    });
+                });
+            }
+            // URL tab — preserve current URL value if it looks like one
+            var urlInp = document.getElementById('opEditAvatarUrl');
+            if (urlInp) {
+                if (currentValue && (currentValue.indexOf('http') === 0 || currentValue.indexOf('data:') === 0)) {
+                    urlInp.value = currentValue;
+                } else {
+                    urlInp.value = '';
+                }
+                urlInp.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyAvatarSelection(urlInp.value.trim());
+                    }
+                };
+            }
+        }
+
+        function buildBannerPickers(currentValue) {
+            var g = document.getElementById('opBannerGradients');
+            if (g) {
+                g.innerHTML = '';
+                // First swatch = default seeded by handle
+                var defaultBan = document.createElement('button');
+                defaultBan.type = 'button';
+                defaultBan.className = 'op-banner-swatch' + (!currentValue ? ' selected' : '');
+                defaultBan.title = 'Default (seeded by handle)';
+                var defCss = bannerCssFor('', document.getElementById('opEditHandle').value || '');
+                defaultBan.style.backgroundImage = defCss.backgroundImage;
+                defaultBan.dataset.bannerValue = '';
+                defaultBan.innerHTML = '<span class="op-banner-swatch-label">Default</span>';
+                g.appendChild(defaultBan);
+                BANNER_PRESETS.forEach(function(name) {
+                    var val = 'gradient:' + name;
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'op-banner-swatch' + (currentValue === val ? ' selected' : '');
+                    var pair = GRADIENT_PRESETS[name];
+                    b.style.backgroundImage = 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)';
+                    b.dataset.bannerValue = val;
+                    b.innerHTML = '<span class="op-banner-swatch-label">' + name + '</span>';
+                    g.appendChild(b);
+                });
+                g.querySelectorAll('.op-banner-swatch').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        applyBannerSelection(btn.dataset.bannerValue);
+                    });
+                });
+            }
+            // URL tab
+            var urlInp = document.getElementById('opEditBannerUrl');
+            if (urlInp) {
+                if (currentValue && (currentValue.indexOf('http') === 0 || currentValue.indexOf('data:') === 0)) {
+                    urlInp.value = currentValue;
+                } else {
+                    urlInp.value = '';
+                }
+                urlInp.onkeydown = function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyBannerSelection(urlInp.value.trim());
+                    }
+                };
+            }
+        }
+
+        function applyAvatarSelection(val) {
+            document.getElementById('opEditAvatar').value = val || '';
+            updateAvatarPreview(val || '', document.getElementById('opEditHandle').value);
+            // Mark selected swatch
+            document.querySelectorAll('#opAvatarPortraits .op-swatch, #opAvatarIcons .op-icon-swatch').forEach(function(s) {
+                s.classList.toggle('selected', (s.dataset.avatarValue || '') === (val || ''));
+            });
+        }
+        function applyBannerSelection(val) {
+            document.getElementById('opEditBanner').value = val || '';
+            updateBannerPreview(val || '', document.getElementById('opEditHandle').value);
+            document.querySelectorAll('#opBannerGradients .op-banner-swatch').forEach(function(s) {
+                s.classList.toggle('selected', (s.dataset.bannerValue || '') === (val || ''));
+            });
+        }
+
+        function bindPickerTabs() {
+            document.querySelectorAll('.op-picker-tabs').forEach(function(tabs) {
+                var picker = tabs.parentElement;
+                tabs.querySelectorAll('.op-picker-tab').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        var name = btn.dataset.tab;
+                        tabs.querySelectorAll('.op-picker-tab').forEach(function(b){ b.classList.remove('active'); });
+                        btn.classList.add('active');
+                        picker.querySelectorAll('.op-picker-pane').forEach(function(p) {
+                            p.classList.toggle('active', p.dataset.pane === name);
+                        });
+                    });
+                });
+            });
+        }
+
         function bindEditModal() {
             var modal = document.getElementById('opEditModal');
             var btn = document.getElementById('opEditBtn');
@@ -729,7 +1006,12 @@
             if (btn) btn.addEventListener('click', function() {
                 modal.classList.add('show');
                 errEl.style.display = 'none';
+                // Re-build pickers each open so the swatches reflect the
+                // current handle (default-seeded options re-seed live).
+                buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
+                buildBannerPickers(document.getElementById('opEditBanner').value || '');
             });
+            bindPickerTabs();
             if (cancelBtn) cancelBtn.addEventListener('click', function() {
                 modal.classList.remove('show');
             });
@@ -751,28 +1033,16 @@
                     try { handleInp.setSelectionRange(pos, pos); } catch (e) {}
                 }
             });
-            // Live avatar preview — updates on every keystroke in the avatar
-            // field, and when the handle changes (since the default portrait
-            // is seeded by handle).
-            var avatarInp = document.getElementById('opEditAvatar');
-            if (avatarInp) avatarInp.addEventListener('input', function() {
-                updateAvatarPreview(avatarInp.value, document.getElementById('opEditHandle').value);
-            });
-            // Live banner preview — same model as avatar.
-            var bannerInpLive = document.getElementById('opEditBanner');
-            if (bannerInpLive) bannerInpLive.addEventListener('input', function() {
-                updateBannerPreview(bannerInpLive.value, document.getElementById('opEditHandle').value);
-            });
+            // When the handle changes, default-seeded swatches (the first
+            // tile in each picker) also change. Re-render the pickers so the
+            // user sees the new default colour scheme + portrait.
             if (handleInp) handleInp.addEventListener('input', function() {
-                var av = document.getElementById('opEditAvatar');
-                if (av && !av.value) {
-                    updateAvatarPreview('', handleInp.value);
-                }
-                // Default banner gradient also reseeds on handle change
-                var ban = document.getElementById('opEditBanner');
-                if (ban && !ban.value) {
-                    updateBannerPreview('', handleInp.value);
-                }
+                var avVal = document.getElementById('opEditAvatar').value || '';
+                var banVal = document.getElementById('opEditBanner').value || '';
+                if (!avVal) updateAvatarPreview('', handleInp.value);
+                if (!banVal) updateBannerPreview('', handleInp.value);
+                buildAvatarPickers(avVal);
+                buildBannerPickers(banVal);
             });
 
             form.addEventListener('submit', function(e) {
