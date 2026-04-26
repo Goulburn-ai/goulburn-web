@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-04-26-06';
+const VERSION = 'c-2026-04-26-07';
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
