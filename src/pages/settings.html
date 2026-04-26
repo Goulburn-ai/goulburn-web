@@ -1763,7 +1763,7 @@
             if (!list) return;
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials', {
-                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
                 });
                 if (!res.ok) {
                     list.innerHTML = '';
@@ -1801,7 +1801,7 @@
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials/' + encodeURIComponent(credentialId), {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
                 });
                 if (res.ok) {
                     _pkStatus('Passkey revoked.');
@@ -1830,7 +1830,7 @@
                     : (navigator.platform || 'this device');
                 var beginRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/begin', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify({ device_label: deviceLabel })
                 });
                 if (!beginRes.ok) throw new Error('begin failed: ' + beginRes.status);
@@ -1862,7 +1862,7 @@
 
                 var completeRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/complete?challenge_id=' + encodeURIComponent(challengeId), {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify(body)
                 });
                 if (!completeRes.ok) {
@@ -1953,7 +1953,7 @@
                 };
                 var res = await fetch(ADMIN_BASE + '/api/v1/push/subscribe', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify(body)
                 });
                 if (!res.ok) throw new Error('server rejected subscription');
@@ -1972,7 +1972,7 @@
                 if (sub) {
                     await fetch(ADMIN_BASE + '/api/v1/push/unsubscribe', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getSession() },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                         body: JSON.stringify({ endpoint: sub.endpoint })
                     });
                     await sub.unsubscribe();
@@ -1989,7 +1989,7 @@
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/push/test-send', {
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + getSession() }
+                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
                 });
                 var data = await res.json();
                 _pushStatus('Test fired. Sent: ' + (data.sent || 0) + ' (dead: ' + (data.dead || 0) + ')');
