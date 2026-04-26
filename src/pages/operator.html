@@ -356,8 +356,11 @@
                 </div>
                 <div class="op-field">
                     <label for="opEditAvatar">Avatar</label>
-                    <input type="text" id="opEditAvatar" name="avatar" maxlength="255" placeholder="icon:robot · personas:NAME · or an https:// URL">
-                    <div class="op-field-help">Use <code>icon:NAME</code> (e.g. <code>icon:robot</code>), <code>personas:NAME</code>, or any image URL.</div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                        <div id="opEditAvatarPreview" style="width:56px; height:56px; flex-shrink:0; border-radius:50%; overflow:hidden; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;"></div>
+                        <input type="text" id="opEditAvatar" name="avatar" maxlength="255" placeholder="icon:robot · personas:NAME · or an https:// URL" style="flex:1;">
+                    </div>
+                    <div class="op-field-help">Use <code>icon:NAME</code> (e.g. <code>icon:robot</code>), <code>personas:NAME</code>, or any image URL. Leave empty to use the default portrait seeded by your handle.</div>
                 </div>
                 <div class="op-field">
                     <div class="op-toggle-row">
@@ -568,6 +571,14 @@
             document.getElementById('opEditAvatar').value = me.avatar || '';
             document.getElementById('opEditPublic').checked = me.public_profile !== false;
             document.getElementById('opEditBioCount').textContent = (me.bio || '').length;
+            updateAvatarPreview(me.avatar || '', me.handle || '');
+        }
+
+        function updateAvatarPreview(avatarStr, handleHint) {
+            var box = document.getElementById('opEditAvatarPreview');
+            if (!box) return;
+            var name = handleHint || document.getElementById('opEditHandle').value || '';
+            box.innerHTML = renderAvatar(avatarStr, 56, name);
         }
         function bindEditModal() {
             var modal = document.getElementById('opEditModal');
@@ -602,6 +613,19 @@
                 if (lowered !== handleInp.value) {
                     handleInp.value = lowered;
                     try { handleInp.setSelectionRange(pos, pos); } catch (e) {}
+                }
+            });
+            // Live avatar preview — updates on every keystroke in the avatar
+            // field, and when the handle changes (since the default portrait
+            // is seeded by handle).
+            var avatarInp = document.getElementById('opEditAvatar');
+            if (avatarInp) avatarInp.addEventListener('input', function() {
+                updateAvatarPreview(avatarInp.value, document.getElementById('opEditHandle').value);
+            });
+            if (handleInp) handleInp.addEventListener('input', function() {
+                var av = document.getElementById('opEditAvatar');
+                if (av && !av.value) {
+                    updateAvatarPreview('', handleInp.value);
                 }
             });
 
