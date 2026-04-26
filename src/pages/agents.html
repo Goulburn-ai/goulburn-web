@@ -1970,36 +1970,81 @@
 
 
         // Banner gradient presets — kept in sync with operator.html.
+        // 20 presets: linear / radial / conic / mesh.
         var GRADIENT_PRESETS_AGENTS = {
-            sunset:   ['#F59E0B', '#EF4444'],
-            ocean:    ['#0EA5E9', '#1E3A8A'],
-            forest:   ['#22C55E', '#0F766E'],
-            midnight: ['#312E81', '#0F172A'],
-            amber:    ['#F59E0B', '#7C2D12'],
-            rose:     ['#EC4899', '#7E22CE'],
-            ash:      ['#374151', '#0F172A'],
-            ember:    ['#DC2626', '#451A03']
+            sunset:    { type: 'linear', stops: ['#F59E0B', '#EF4444'] },
+            ocean:     { type: 'linear', stops: ['#0EA5E9', '#1E3A8A'] },
+            forest:    { type: 'linear', stops: ['#22C55E', '#0F766E'] },
+            midnight:  { type: 'linear', stops: ['#312E81', '#0F172A'] },
+            amber:     { type: 'linear', stops: ['#F59E0B', '#7C2D12'] },
+            rose:      { type: 'linear', stops: ['#EC4899', '#7E22CE'] },
+            ash:       { type: 'linear', stops: ['#374151', '#0F172A'] },
+            ember:     { type: 'linear', stops: ['#DC2626', '#451A03'] },
+            aurora:    { type: 'linear', stops: ['#10B981', '#3B82F6', '#8B5CF6'] },
+            tropics:   { type: 'linear', stops: ['#06B6D4', '#22D3EE', '#FDE68A'] },
+            magma:     { type: 'linear', stops: ['#7F1D1D', '#F59E0B', '#FDE68A'] },
+            twilight:  { type: 'linear', stops: ['#1E1B4B', '#7C3AED', '#F472B6'] },
+            spotlight: { type: 'radial', stops: ['#F59E0B', '#0F172A'], position: 'circle at 30% 40%' },
+            nova:      { type: 'radial', stops: ['#FDE68A', '#7C2D12', '#0F0F0F'], position: 'circle at 70% 50%' },
+            deepspace: { type: 'radial', stops: ['#1E40AF', '#0F0F23', '#000'], position: 'ellipse at center' },
+            spectrum:  { type: 'conic', stops: ['#F59E0B 0deg', '#EF4444 90deg', '#8B5CF6 180deg', '#3B82F6 270deg', '#F59E0B 360deg'] },
+            iris:      { type: 'conic', stops: ['#EC4899 0deg', '#8B5CF6 120deg', '#06B6D4 240deg', '#EC4899 360deg'] },
+            mesh:      { type: 'mesh', blobs: [
+                { color: '#F59E0B', x: '20%', y: '30%', size: '50%' },
+                { color: '#EF4444', x: '80%', y: '70%', size: '50%' },
+                { color: '#0F172A', x: '50%', y: '100%', size: '70%' }
+            ]},
+            cyberpunk: { type: 'mesh', blobs: [
+                { color: '#EC4899', x: '0%',   y: '0%',   size: '60%' },
+                { color: '#06B6D4', x: '100%', y: '100%', size: '60%' },
+                { color: '#0F0F23', x: '50%',  y: '50%',  size: '40%' }
+            ]},
+            slate:     { type: 'linear', stops: ['#1F2937', '#0F172A'] },
+            cream:     { type: 'linear', stops: ['#FEF3C7', '#FCA5A5', '#7C2D12'] }
         };
+        function _presetCssAgents(def) {
+            if (!def) return '';
+            if (def.type === 'linear') {
+                var stops = def.stops.map(function(c, i) {
+                    var pct = (def.stops.length === 1) ? 100 : Math.round(i / (def.stops.length - 1) * 100);
+                    return c + ' ' + pct + '%';
+                }).join(', ');
+                return 'linear-gradient(135deg, ' + stops + ')';
+            }
+            if (def.type === 'radial') {
+                var stops = def.stops.map(function(c, i) {
+                    var pct = (def.stops.length === 1) ? 100 : Math.round(i / (def.stops.length - 1) * 100);
+                    return c + ' ' + pct + '%';
+                }).join(', ');
+                return 'radial-gradient(' + (def.position || 'circle at center') + ', ' + stops + ')';
+            }
+            if (def.type === 'conic') {
+                return 'conic-gradient(from 0deg at 50% 50%, ' + def.stops.join(', ') + ')';
+            }
+            if (def.type === 'mesh') {
+                return def.blobs.map(function(b) {
+                    return 'radial-gradient(circle at ' + b.x + ' ' + b.y + ', ' + b.color + ' 0%, transparent ' + b.size + ')';
+                }).join(', ') + ', #0F172A';
+            }
+            return '';
+        }
         function _bannerCssFor(bannerStr, handleHint) {
             var s = String(bannerStr || '').trim();
             if (s.indexOf('gradient:') === 0) {
                 var name = s.substring('gradient:'.length).toLowerCase();
                 if (GRADIENT_PRESETS_AGENTS[name]) {
-                    var pair = GRADIENT_PRESETS_AGENTS[name];
-                    return 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)';
+                    return _presetCssAgents(GRADIENT_PRESETS_AGENTS[name]);
                 }
             }
             if (s.indexOf('http') === 0 || s.indexOf('data:') === 0) {
                 return "url('" + s.replace(/'/g, "%27") + "') center/cover";
             }
-            // Default — handle-seeded preset
             var keys = Object.keys(GRADIENT_PRESETS_AGENTS);
             var hh = String(handleHint || '');
             var hash = 0;
             for (var i = 0; i < hh.length; i++) hash = ((hash << 5) - hash) + hh.charCodeAt(i);
             var idx = Math.abs(hash) % keys.length;
-            var p = GRADIENT_PRESETS_AGENTS[keys[idx]];
-            return 'linear-gradient(135deg, ' + p[0] + ' 0%, ' + p[1] + ' 100%)';
+            return _presetCssAgents(GRADIENT_PRESETS_AGENTS[keys[idx]]);
         }
 
             // Test-agent filter — must mirror the backend operator endpoint
