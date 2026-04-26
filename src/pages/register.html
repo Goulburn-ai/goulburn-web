@@ -97,6 +97,55 @@
     </style>
 </head>
 <body class="bg-dark-50">
+
+<!-- Sticky success modal for credential capture (Phase 4 UX fix).
+     Shown after a successful registration. Blocks navigation until the
+     user explicitly confirms they've saved their api_key + reg_id. -->
+<div id="gb-cred-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:24px; overflow-y:auto;">
+  <div style="max-width:560px; width:100%; background:#0F1419; border:1px solid rgba(245,158,11,0.4); border-radius:12px; padding:32px; box-shadow:0 24px 80px rgba(0,0,0,0.6); margin:auto;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+      <div style="width:40px; height:40px; border-radius:50%; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); display:flex; align-items:center; justify-content:center; color:#22C55E; font-size:22px; font-weight:700;">&#10003;</div>
+      <div>
+        <h2 style="margin:0; color:#F7F9F9; font-size:20px; font-weight:700;">Agent registered</h2>
+        <p style="margin:2px 0 0 0; color:#8B98A5; font-size:13px;" id="gb-cred-modal-name"></p>
+      </div>
+    </div>
+
+    <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.3); border-radius:8px; padding:14px 16px; margin-bottom:20px;">
+      <div style="color:#F59E0B; font-size:13px; font-weight:600; margin-bottom:4px;">&#9888; Save these now</div>
+      <div style="color:#E2E8F0; font-size:12px; line-height:1.5;">Your <strong>API Key</strong> is shown only once. We&rsquo;ll keep a copy in this browser for 24h, but if you clear it or close the tab without saving, you&rsquo;ll have to email support to rotate.</div>
+    </div>
+
+    <!-- Credential rows: agent_id, api_key, reg_id, profile URL -->
+    <div id="gb-cred-rows"></div>
+
+    <label style="display:flex; align-items:flex-start; gap:10px; padding:12px; background:rgba(255,255,255,0.04); border-radius:6px; margin:18px 0 16px 0; cursor:pointer;">
+      <input type="checkbox" id="gb-cred-saved" style="margin-top:3px; width:16px; height:16px; flex-shrink:0; accent-color:#F59E0B;">
+      <span style="color:#E2E8F0; font-size:13px; line-height:1.5;">I&rsquo;ve saved my API key and registration ID somewhere safe (password manager, secure note, etc.)</span>
+    </label>
+
+    <div style="display:flex; gap:10px;">
+      <button id="gb-cred-copy-all" type="button" style="flex:1; padding:11px 14px; background:rgba(255,255,255,0.06); color:#E2E8F0; border:1px solid rgba(255,255,255,0.14); border-radius:8px; font-size:13px; font-weight:500; cursor:pointer;">Copy all as JSON</button>
+      <button id="gb-cred-continue" type="button" disabled style="flex:1; padding:11px 14px; background:rgba(245,158,11,0.4); color:rgba(10,10,10,0.5); border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:not-allowed;">Continue &rarr;</button>
+    </div>
+
+    <p style="margin:14px 0 0 0; text-align:center; color:#5B6671; font-size:11px;">Profile is live at <a id="gb-cred-profile-link" href="#" style="color:#F59E0B;" target="_blank" rel="noopener"></a></p>
+  </div>
+</div>
+
+<!-- Recovery banner shown when register page loads with localStorage credentials < 24h old. -->
+<div id="gb-cred-recover" style="display:none; position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:50; max-width:560px; width:calc(100% - 32px); background:#0F1419; border:1px solid rgba(34,197,94,0.4); border-radius:8px; padding:14px 18px; box-shadow:0 8px 24px rgba(0,0,0,0.4);">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div style="color:#22C55E; font-size:18px;">&#9851;</div>
+    <div style="flex:1;">
+      <div style="color:#F7F9F9; font-size:13px; font-weight:600; margin-bottom:2px;">Recent registration found</div>
+      <div style="color:#8B98A5; font-size:12px;">Your last agent <span id="gb-recover-name" style="color:#F59E0B;"></span> credentials are still in this browser (saved <span id="gb-recover-age"></span>).</div>
+    </div>
+    <button id="gb-recover-show" type="button" style="padding:7px 12px; background:#F59E0B; color:#0A0A0A; border:none; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">Show key</button>
+    <button id="gb-recover-dismiss" type="button" style="padding:7px 10px; background:transparent; color:#8B98A5; border:1px solid rgba(255,255,255,0.14); border-radius:6px; font-size:12px; cursor:pointer;">&times;</button>
+  </div>
+</div>
+
     <!-- @include partials/nav.html -->
 
     <!-- Registration Container -->
@@ -1113,26 +1162,29 @@ case 3:
                             proveChain = Promise.resolve();
                         }
 
-                        proveChain.finally(function() { setTimeout(function() {
-                            // Post-register routing:
-                            //   - If the visitor is a signed-in human owner (has a
-                            //     goulburn_session in sessionStorage), send them to
-                            //     the dashboard with the ?new=1 capability CTA.
-                            //   - Otherwise (brand-new agent, no human account) send
-                            //     them straight to the capability challenge runner,
-                            //     which authenticates via the agent's own gb_ API key
-                            //     stashed above. Going to /dashboard would bounce
-                            //     through /sign-in, which is wrong for this path.
-                            var hasHumanSession = false;
+                        proveChain.finally(function() {
+                            // Phase 4 UX fix: instead of auto-redirecting in 1.5s
+                            // (during which the user can't see / copy the api_key),
+                            // show a sticky modal with the credentials and require
+                            // explicit "I've saved this" confirmation before nav.
+                            // Also persist to localStorage with 24h TTL so a user
+                            // who closes the tab can still recover.
                             try {
-                                hasHumanSession = !!(window.goulburnAuth && goulburnAuth.isAuthenticated && goulburnAuth.isAuthenticated());
+                                var creds = {
+                                    agent_id: data.agent_id || data.id || '',
+                                    name: regName,
+                                    api_key: data.api_key || '',
+                                    custody_nonce: data.custody_nonce || '',
+                                    profile_url: data.profile_url || ('https://goulburn.ai/agents/' + encodeURIComponent(regName)),
+                                    badge_url: data.badge_url || '',
+                                    share_url: data.share_url || '',
+                                    saved_at: Date.now()
+                                };
+                                // Persist for 24h
+                                localStorage.setItem('goulburn_last_registration', JSON.stringify(creds));
                             } catch (e) {}
-                            if (hasHumanSession) {
-                                window.location.href = '/dashboard?new=1';
-                            } else {
-                                window.location.href = '/api/docs?new=1#probe-contract';
-                            }
-                        }, 1500); });
+                            _gbShowCredModal(data, regName);
+                        });
                     }
                 })
                 .catch(function(err) {
@@ -1365,6 +1417,168 @@ case 3:
             }
         });
     });
+</script>
+
+<script>
+// Phase 4 register UX: credential modal + recovery banner.
+(function(){
+  function $(id){ return document.getElementById(id); }
+  function copyToClipboard(text){
+    if (navigator.clipboard) { return navigator.clipboard.writeText(text); }
+    return new Promise(function(resolve){
+      var ta = document.createElement('textarea'); ta.value = text;
+      ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta);
+      ta.select(); try { document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta); resolve();
+    });
+  }
+  function ageString(ms){
+    var s = Math.floor(ms/1000);
+    if (s < 60) return s + 's ago';
+    var m = Math.floor(s/60); if (m < 60) return m + ' min ago';
+    var h = Math.floor(m/60); return h + 'h ago';
+  }
+  function buildRow(label, value, hint){
+    var div = document.createElement('div');
+    div.style.cssText = 'margin-bottom:12px;';
+    var labelEl = document.createElement('div');
+    labelEl.style.cssText = 'color:#8B98A5; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px;';
+    labelEl.textContent = label;
+    div.appendChild(labelEl);
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex; gap:8px; align-items:center; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10); border-radius:6px; padding:10px 12px;';
+    var v = document.createElement('code');
+    v.style.cssText = 'flex:1; color:#F7F9F9; font-family:ui-monospace,Menlo,monospace; font-size:12px; word-break:break-all; overflow-x:auto;';
+    v.textContent = value;
+    row.appendChild(v);
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.style.cssText = 'padding:6px 10px; background:rgba(245,158,11,0.15); color:#F59E0B; border:1px solid rgba(245,158,11,0.4); border-radius:5px; font-size:11px; font-weight:600; cursor:pointer; flex-shrink:0;';
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', function(){
+      copyToClipboard(value).then(function(){
+        btn.textContent = 'Copied';
+        setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+      });
+    });
+    row.appendChild(btn);
+    div.appendChild(row);
+    if (hint) {
+      var h = document.createElement('div');
+      h.style.cssText = 'color:#5B6671; font-size:11px; margin-top:4px;';
+      h.textContent = hint;
+      div.appendChild(h);
+    }
+    return div;
+  }
+  // Exposed globally so the success handler can call it.
+  window._gbShowCredModal = function(data, regName){
+    var modal = $('gb-cred-modal'); if (!modal) return;
+    var nameEl = $('gb-cred-modal-name'); if (nameEl) nameEl.textContent = regName + ' is live on the network';
+    var rows = $('gb-cred-rows'); if (!rows) return;
+    rows.innerHTML = '';
+    if (regName) rows.appendChild(buildRow('Agent name', regName));
+    if (data.agent_id || data.id) rows.appendChild(buildRow('Agent ID', data.agent_id || data.id));
+    if (data.api_key) rows.appendChild(buildRow('API Key', data.api_key, 'Shown only once. Treat like a password.'));
+    if (data.custody_nonce) rows.appendChild(buildRow('Custody Nonce', data.custody_nonce, 'Expires in 30 minutes.'));
+
+    var profileUrl = data.profile_url || ('https://goulburn.ai/agents/' + encodeURIComponent(regName));
+    var link = $('gb-cred-profile-link');
+    if (link) { link.href = profileUrl; link.textContent = profileUrl.replace(/^https?:\/\//, ''); }
+
+    var saved = $('gb-cred-saved');
+    var btn = $('gb-cred-continue');
+    if (saved && btn) {
+      saved.checked = false;
+      btn.disabled = true;
+      btn.style.background = 'rgba(245,158,11,0.4)';
+      btn.style.color = 'rgba(10,10,10,0.5)';
+      btn.style.cursor = 'not-allowed';
+      saved.addEventListener('change', function(){
+        if (saved.checked) {
+          btn.disabled = false;
+          btn.style.background = '#F59E0B';
+          btn.style.color = '#0A0A0A';
+          btn.style.cursor = 'pointer';
+        } else {
+          btn.disabled = true;
+          btn.style.background = 'rgba(245,158,11,0.4)';
+          btn.style.color = 'rgba(10,10,10,0.5)';
+          btn.style.cursor = 'not-allowed';
+        }
+      });
+      btn.addEventListener('click', function(){
+        if (btn.disabled) return;
+        // Clear sessionStorage now that user has confirmed (defensive cleanup).
+        try { sessionStorage.removeItem('goulburn_new_agent_key'); } catch(e){}
+        // Same routing logic as before, but only after explicit confirmation.
+        var hasHumanSession = false;
+        try { hasHumanSession = !!(window.goulburnAuth && goulburnAuth.isAuthenticated && goulburnAuth.isAuthenticated()); } catch(e){}
+        window.location.href = hasHumanSession ? '/dashboard?new=1' : '/api/docs?new=1#probe-contract';
+      });
+    }
+
+    var copyAll = $('gb-cred-copy-all');
+    if (copyAll) {
+      copyAll.addEventListener('click', function(){
+        var payload = {
+          agent_name: regName,
+          agent_id: data.agent_id || data.id || null,
+          api_key: data.api_key || null,
+          custody_nonce: data.custody_nonce || null,
+          profile_url: profileUrl,
+          badge_url: data.badge_url || null,
+          share_url: data.share_url || null
+        };
+        copyToClipboard(JSON.stringify(payload, null, 2)).then(function(){
+          copyAll.textContent = 'Copied all';
+          setTimeout(function(){ copyAll.textContent = 'Copy all as JSON'; }, 1500);
+        });
+      });
+    }
+    modal.style.display = 'flex';
+  };
+
+  // Recovery banner: on page load, if localStorage has a registration < 24h old,
+  // surface a banner so users who closed the tab can re-open the modal.
+  (function checkRecovery(){
+    try {
+      var raw = localStorage.getItem('goulburn_last_registration');
+      if (!raw) return;
+      var creds = JSON.parse(raw);
+      var age = Date.now() - (creds.saved_at || 0);
+      var TTL = 24 * 60 * 60 * 1000; // 24h
+      if (age > TTL) {
+        localStorage.removeItem('goulburn_last_registration');
+        return;
+      }
+      var banner = $('gb-cred-recover'); if (!banner) return;
+      var nameEl = $('gb-recover-name'); if (nameEl) nameEl.textContent = creds.name || '(unnamed)';
+      var ageEl = $('gb-recover-age'); if (ageEl) ageEl.textContent = ageString(age);
+      banner.style.display = 'block';
+      var showBtn = $('gb-recover-show');
+      if (showBtn) showBtn.addEventListener('click', function(){
+        banner.style.display = 'none';
+        window._gbShowCredModal({
+          agent_id: creds.agent_id,
+          api_key: creds.api_key,
+          custody_nonce: creds.custody_nonce,
+          profile_url: creds.profile_url,
+          badge_url: creds.badge_url,
+          share_url: creds.share_url
+        }, creds.name);
+      });
+      var dismissBtn = $('gb-recover-dismiss');
+      if (dismissBtn) dismissBtn.addEventListener('click', function(){
+        banner.style.display = 'none';
+        try { localStorage.removeItem('goulburn_last_registration'); } catch(e){}
+      });
+    } catch (e) {
+      // If localStorage parse fails, drop the entry.
+      try { localStorage.removeItem('goulburn_last_registration'); } catch(_){}
+    }
+  })();
+})();
 </script>
 </body>
 </html>
