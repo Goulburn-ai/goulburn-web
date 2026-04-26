@@ -1959,6 +1959,40 @@
                 } catch (_) {}
             }, 12000);
 
+
+        // Banner gradient presets — kept in sync with operator.html.
+        var GRADIENT_PRESETS_AGENTS = {
+            sunset:   ['#F59E0B', '#EF4444'],
+            ocean:    ['#0EA5E9', '#1E3A8A'],
+            forest:   ['#22C55E', '#0F766E'],
+            midnight: ['#312E81', '#0F172A'],
+            amber:    ['#F59E0B', '#7C2D12'],
+            rose:     ['#EC4899', '#7E22CE'],
+            ash:      ['#374151', '#0F172A'],
+            ember:    ['#DC2626', '#451A03']
+        };
+        function _bannerCssFor(bannerStr, handleHint) {
+            var s = String(bannerStr || '').trim();
+            if (s.indexOf('gradient:') === 0) {
+                var name = s.substring('gradient:'.length).toLowerCase();
+                if (GRADIENT_PRESETS_AGENTS[name]) {
+                    var pair = GRADIENT_PRESETS_AGENTS[name];
+                    return 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)';
+                }
+            }
+            if (s.indexOf('http') === 0 || s.indexOf('data:') === 0) {
+                return "url('" + s.replace(/'/g, "%27") + "') center/cover";
+            }
+            // Default — handle-seeded preset
+            var keys = Object.keys(GRADIENT_PRESETS_AGENTS);
+            var hh = String(handleHint || '');
+            var hash = 0;
+            for (var i = 0; i < hh.length; i++) hash = ((hash << 5) - hash) + hh.charCodeAt(i);
+            var idx = Math.abs(hash) % keys.length;
+            var p = GRADIENT_PRESETS_AGENTS[keys[idx]];
+            return 'linear-gradient(135deg, ' + p[0] + ' 0%, ' + p[1] + ' 100%)';
+        }
+
             // Test-agent filter — must mirror the backend operator endpoint
             // (app/api/v1/operators.py:_TEST_PATTERNS) so the sidebar's
             // agent count matches the public /operator/{handle} page.
@@ -1995,8 +2029,10 @@
                     var privatePill = (hasOp && opProfile.public_profile === false)
                         ? '<div style="margin:6px auto 0; font-size:9px; font-weight:500; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.10); color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); text-transform:uppercase; letter-spacing:0.05em; display:inline-block;">Private</div>'
                         : '';
-                    var html = '<div class="profile-card">' +
-                        '<div class="profile-avatar">' + avatarInner + '</div>' +
+                    var bannerCss = _bannerCssFor(hasOp ? opProfile.banner : '', hasOp ? opProfile.handle : displayName);
+                    var html = '<div class="profile-card" style="position:relative;">' +
+                        '<div style="position:absolute; top:0; left:0; right:0; height:60px; background:' + bannerCss + '; border-radius:12px 12px 0 0;"></div>' +
+                        '<div class="profile-avatar" style="position:relative; margin-top:24px; box-shadow:0 0 0 3px var(--bg, #0A0A0A);">' + avatarInner + '</div>' +
                         '<div class="profile-name">' + esc(displayName) + '</div>' +
                         '<div class="profile-role" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(247,249,249,0.55);">' + esc(subtitle) + '</div>' +
                         privatePill +
@@ -2035,8 +2071,10 @@
                     } catch (_) {
                         _fallbackAvatarInner = esc(_fallbackInitial);
                     }
-                    container.innerHTML = '<div class="profile-card">' +
-                        '<div class="profile-avatar">' + _fallbackAvatarInner + '</div>' +
+                    var fallbackBanner = _bannerCssFor('', _fallbackName);
+                    container.innerHTML = '<div class="profile-card" style="position:relative;">' +
+                        '<div style="position:absolute; top:0; left:0; right:0; height:60px; background:' + fallbackBanner + '; border-radius:12px 12px 0 0;"></div>' +
+                        '<div class="profile-avatar" style="position:relative; margin-top:24px; box-shadow:0 0 0 3px var(--bg, #0A0A0A);">' + _fallbackAvatarInner + '</div>' +
                         '<div class="profile-name">' + esc(_fallbackName) + '</div>' +
                         '<div class="profile-role">Agent Operator</div>' +
                         '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
