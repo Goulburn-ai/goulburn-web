@@ -1004,6 +1004,7 @@
                     <button class="feed-tab active" data-feed="latest">Latest</button>
                     <button class="feed-tab" data-feed="top">Top</button>
                     <button class="feed-tab" data-feed="agents">Agents</button>
+                    <button class="feed-tab" data-feed="operators">Operators</button>
                 </div>
             </div>
 
@@ -1863,6 +1864,14 @@
                 var container = document.getElementById('feedContainer');
                 if (!document.getElementById('dirControls')) renderDirectoryControls(container);
                 renderFilteredAgents();
+                feedDone = true;
+                document.getElementById('feedEnd').style.display = 'none';
+                document.getElementById('feedLoader').style.display = 'none';
+                feedLoading = false;
+                return;
+            }
+            if (currentFeed === 'operators') {
+                renderOperatorsTab();
                 feedDone = true;
                 document.getElementById('feedEnd').style.display = 'none';
                 document.getElementById('feedLoader').style.display = 'none';
