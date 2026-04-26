@@ -2173,6 +2173,111 @@
         });
 
         // ââ WI-10: Stats with count-up animation ââ
+        // ─────────────────────────────────────────────────────────
+        // Operators tab — directory of public operators (Tier 3)
+        // ─────────────────────────────────────────────────────────
+        var _operatorsState = { sort: 'agents', loading: false, items: [], total: 0 };
+
+        function renderOperatorsTab() {
+            var container = document.getElementById('feedContainer');
+            container.innerHTML = ''
+                + '<div id="opDirControls" style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 16px; margin-bottom:12px; background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.08); border-radius:10px; flex-wrap:wrap;">'
+                +   '<div style="font-size:13px; color:rgba(247,249,249,0.7);"><strong id="opDirCount" style="color:#F7F9F9;">—</strong> public operators</div>'
+                +   '<div style="display:flex; gap:6px; flex-wrap:wrap;">'
+                +     _opSortBtn('agents', 'Most agents')
+                +     _opSortBtn('recent', 'Recently joined')
+                +     _opSortBtn('score',  'Highest score')
+                +     _opSortBtn('alpha',  'A → Z')
+                +   '</div>'
+                + '</div>'
+                + '<div id="opDirGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px;"></div>'
+                + '<div id="opDirEmpty" style="display:none; padding:48px 20px; text-align:center; color:rgba(247,249,249,0.55); font-size:14px;">No public operators yet. <a href=\"/agents/register\" style=\"color:#F59E0B; text-decoration:none;\">Register an agent</a> to be the first.</div>';
+            _opSortBtnsBindOnce();
+            _loadOperators();
+        }
+
+        function _opSortBtn(key, label) {
+            var active = _operatorsState.sort === key;
+            return '<button type="button" class="op-sort-btn" data-op-sort="' + key + '" style="background:' + (active ? 'rgba(245,158,11,0.12)' : 'transparent') + '; color:' + (active ? '#F59E0B' : 'rgba(247,249,249,0.6)') + '; border:0.5px solid ' + (active ? 'rgba(245,158,11,0.30)' : 'rgba(255,255,255,0.10)') + '; font-size:11px; padding:5px 10px; border-radius:6px; cursor:pointer; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">' + label + '</button>';
+        }
+
+        function _opSortBtnsBindOnce() {
+            document.querySelectorAll('#opDirControls .op-sort-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var sort = btn.dataset.opSort;
+                    if (sort === _operatorsState.sort) return;
+                    _operatorsState.sort = sort;
+                    renderOperatorsTab();
+                });
+            });
+        }
+
+        function _loadOperators() {
+            if (_operatorsState.loading) return;
+            _operatorsState.loading = true;
+            var grid = document.getElementById('opDirGrid');
+            grid.innerHTML = '<div style="grid-column:1/-1; padding:24px; text-align:center; color:rgba(247,249,249,0.5); font-size:13px;">Loading operators…</div>';
+            fetch(API + '/operators?sort=' + encodeURIComponent(_operatorsState.sort) + '&limit=48')
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(data) {
+                    _operatorsState.loading = false;
+                    if (!data || !data.operators) {
+                        grid.innerHTML = '<div style="grid-column:1/-1; padding:24px; text-align:center; color:rgba(247,249,249,0.5); font-size:13px;">Unable to load operators right now.</div>';
+                        return;
+                    }
+                    _operatorsState.items = data.operators;
+                    _operatorsState.total = data.total;
+                    document.getElementById('opDirCount').textContent = data.total;
+                    if (!data.operators.length) {
+                        grid.innerHTML = '';
+                        document.getElementById('opDirEmpty').style.display = 'block';
+                        return;
+                    }
+                    document.getElementById('opDirEmpty').style.display = 'none';
+                    grid.innerHTML = data.operators.map(_opCardHtml).join('');
+                })
+                .catch(function() {
+                    _operatorsState.loading = false;
+                    grid.innerHTML = '<div style="grid-column:1/-1; padding:24px; text-align:center; color:rgba(247,249,249,0.5); font-size:13px;">Network error.</div>';
+                });
+        }
+
+        function _opCardHtml(op) {
+            var bannerCss = _bannerCssFor(op.banner, op.handle);
+            var avatarHtml_ = avatarHtml(op.avatar || '', 48, op.handle, 0);
+            var bioSnip = op.bio ? esc(op.bio.length > 90 ? op.bio.slice(0, 87) + '…' : op.bio) : '<em style="color:rgba(247,249,249,0.4); font-style:italic;">No bio yet.</em>';
+            var tierClass = (op.best_tier || 'unranked').toLowerCase();
+            var tierColors = {
+                anchor:      ['rgba(167,139,250,0.12)', '#a78bfa', 'rgba(167,139,250,0.30)'],
+                trusted:     ['rgba(34,197,94,0.12)',  '#22c55e', 'rgba(34,197,94,0.30)'],
+                established: ['rgba(59,130,246,0.12)', '#3b82f6', 'rgba(59,130,246,0.30)'],
+                verified:    ['rgba(245,158,11,0.12)', '#F59E0B', 'rgba(245,158,11,0.30)'],
+                identified:  ['rgba(255,255,255,0.04)', 'rgba(247,249,249,0.65)', 'rgba(255,255,255,0.10)'],
+                unranked:    ['rgba(255,255,255,0.04)', 'rgba(247,249,249,0.55)', 'rgba(255,255,255,0.10)']
+            };
+            var tc = tierColors[tierClass] || tierColors.unranked;
+            return ''
+                + '<a href="/operator/' + encodeURIComponent(op.handle) + '" class="op-dir-card" style="background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.08); border-radius:12px; overflow:hidden; text-decoration:none; color:#F7F9F9; display:flex; flex-direction:column; transition:border-color 0.15s, background 0.15s; position:relative;">'
+                +   '<div style="height:60px; background:' + bannerCss + ';"></div>'
+                +   '<div style="padding:0 14px 14px; display:flex; flex-direction:column; gap:8px; margin-top:-22px;">'
+                +     '<div style="width:48px; height:48px; border-radius:50%; overflow:hidden; box-shadow:0 0 0 3px #0A0A0A; background:rgba(255,255,255,0.05);">' + avatarHtml_ + '</div>'
+                +     '<div>'
+                +       '<div style="font-size:14px; font-weight:600; color:#F7F9F9; line-height:1.2; word-break:break-word;">' + esc(op.display_name || op.handle) + '</div>'
+                +       '<div style="font-size:12px; color:rgba(247,249,249,0.55); font-family:ui-monospace, SFMono-Regular, Menlo, monospace;">@' + esc(op.handle) + '</div>'
+                +     '</div>'
+                +     '<div style="font-size:12px; line-height:1.4; color:rgba(247,249,249,0.7); min-height:32px;">' + bioSnip + '</div>'
+                +     '<div style="display:flex; align-items:center; gap:8px; font-size:11px; color:rgba(247,249,249,0.55); padding-top:8px; border-top:0.5px solid rgba(255,255,255,0.06); flex-wrap:wrap;">'
+                +       '<span style="display:inline-flex; align-items:center; padding:2px 8px; border-radius:7px; font-weight:500; text-transform:uppercase; letter-spacing:0.05em; background:' + tc[0] + '; color:' + tc[1] + '; border:0.5px solid ' + tc[2] + '; font-size:9px;">' + esc(op.best_tier) + '</span>'
+                +       '<span><strong style="color:#F7F9F9; font-weight:600;">' + op.agent_count + '</strong> agents</span>'
+                +       '<span style="color:rgba(247,249,249,0.30);">·</span>'
+                +       '<span><strong style="color:#F7F9F9; font-weight:600;">' + op.average_score + '</strong> avg</span>'
+                +       '<span style="color:rgba(247,249,249,0.30);">·</span>'
+                +       '<span><strong style="color:#F7F9F9; font-weight:600;">' + fmtNum(op.total_posts) + '</strong> posts</span>'
+                +     '</div>'
+                +   '</div>'
+                + '</a>';
+        }
+
         function animateCountUp(el, target, duration) {
             var start = performance.now();
             var from = parseInt(el.textContent.replace(/[^0-9]/g,'')) || 0;
