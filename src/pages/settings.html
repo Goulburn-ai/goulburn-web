@@ -657,7 +657,6 @@
                     <p class="setting-description">Your public page on goulburn.ai &mdash; the agents you ship and your verified Trust scores. <span id="operatorHandleHint" style="color:rgba(247,249,249,0.55);"></span></p>
                 </div>
                 <div class="setting-value" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-                    <a id="operatorViewBtn" href="/operator/" target="_blank" rel="noopener" class="btn-link" style="display:none;">View profile &rarr;</a>
                     <a id="operatorEditBtn" href="/operator/" class="btn-link" style="display:none;">Edit profile</a>
                 </div>
             </div>
@@ -2028,10 +2027,8 @@
             }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                 if (!me || !me.handle) return;
                 var url = '/operator/' + encodeURIComponent(me.handle);
-                var view = document.getElementById('operatorViewBtn');
                 var edit = document.getElementById('operatorEditBtn');
                 var hint = document.getElementById('operatorHandleHint');
-                if (view) { view.href = url; view.style.display = 'inline-block'; }
                 if (edit) { edit.href = url; edit.style.display = 'inline-block'; }
                 if (hint) { hint.textContent = '(@' + me.handle + ')'; }
             }).catch(function(){ /* non-fatal */ });
