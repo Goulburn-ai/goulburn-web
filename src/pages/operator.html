@@ -336,7 +336,8 @@
                 <div class="op-field">
                     <label for="opEditHandle">Handle</label>
                     <input type="text" id="opEditHandle" name="handle"
-                           pattern="[a-z0-9_]{3,32}" maxlength="32"
+                           maxlength="32" autocomplete="off" autocapitalize="none" spellcheck="false"
+                           style="text-transform: lowercase;"
                            placeholder="lowercase letters, digits, underscore">
                     <div class="op-field-help" id="opEditHandleHelp">3&ndash;32 characters: lowercase letters, digits, underscore</div>
                 </div>
@@ -581,6 +582,18 @@
             });
             if (bio) bio.addEventListener('input', function() {
                 bioCount.textContent = bio.value.length;
+            });
+            // Auto-lowercase the handle as the user types. Backend rule is
+            // ^[a-z0-9_]{3,32}$, but we want to be lenient on input (let
+            // the user type "HyperByte_1") and normalize for them.
+            var handleInp = document.getElementById('opEditHandle');
+            if (handleInp) handleInp.addEventListener('input', function() {
+                var pos = handleInp.selectionStart;
+                var lowered = handleInp.value.toLowerCase().replace(/[^a-z0-9_]/g, '');
+                if (lowered !== handleInp.value) {
+                    handleInp.value = lowered;
+                    try { handleInp.setSelectionRange(pos, pos); } catch (e) {}
+                }
             });
 
             form.addEventListener('submit', function(e) {
