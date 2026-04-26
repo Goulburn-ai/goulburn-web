@@ -463,7 +463,7 @@
                         <p class="op-bio" id="opBio">No bio yet.</p>
                         <div class="op-meta-row">
                             <span id="opJoined">&mdash;</span>
-                            <span id="opShareWrap" style="display:none;">&middot; <a id="opShareLink" href="#">Share</a></span>
+                            <span id="opShareWrap" style="display:none;">&middot; <a id="opShareLink" href="#" role="button">Share</a></span>
                             <span id="opEditWrap" style="margin-left:auto; display:none;">
                                 <button type="button" class="op-edit-btn" id="opEditBtn">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
@@ -731,13 +731,58 @@
             else joinedStr = 'Joined ' + Math.round(joinedDays/365) + ' year' + (joinedDays >= 730 ? 's' : '') + ' ago';
             document.getElementById('opJoined').textContent = joinedStr;
 
-            // Share
+            // Share — use Web Share API on supported clients (mobile mostly),
+            // fall back to copy-to-clipboard with a small toast.
             if (data.share_url) {
                 var sw = document.getElementById('opShareWrap');
                 var sl = document.getElementById('opShareLink');
                 sl.href = data.share_url;
                 sl.textContent = 'Share';
                 sw.style.display = '';
+                sl.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var title = (data.display_name || data.handle || 'Operator') + ' on goulburn.ai';
+                    var text = data.bio ? data.bio : 'Trust scores for AI agents.';
+                    var url = data.share_url;
+                    // Web Share API path
+                    if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+                        navigator.share({ title: title, text: text, url: url }).catch(function() { /* user cancelled */ });
+                        return;
+                    }
+                    // Clipboard fallback
+                    var copyOK = function() {
+                        showShareToast('✓ Link copied to clipboard');
+                    };
+                    var copyFail = function() {
+                        // Last-resort: prompt the user
+                        try { window.prompt('Copy this link:', url); } catch (e) {}
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(url).then(copyOK).catch(copyFail);
+                    } else {
+                        // Pre-clipboard browsers
+                        var ta = document.createElement('textarea');
+                        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                        document.body.appendChild(ta); ta.select();
+                        try { document.execCommand('copy'); copyOK(); } catch (err) { copyFail(); }
+                        document.body.removeChild(ta);
+                    }
+                });
+            }
+
+            function showShareToast(msg) {
+                var existing = document.getElementById('opShareToast');
+                if (existing) existing.remove();
+                var t = document.createElement('div');
+                t.id = 'opShareToast';
+                t.textContent = msg;
+                t.style.cssText = 'position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#131316; border:0.5px solid rgba(245,158,11,0.40); color:#F59E0B; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:500; z-index:9999; box-shadow:0 4px 16px rgba(0,0,0,0.4); animation: opShareToastIn 0.2s ease-out;';
+                document.body.appendChild(t);
+                setTimeout(function() {
+                    t.style.transition = 'opacity 0.4s';
+                    t.style.opacity = '0';
+                    setTimeout(function() { if (t.parentNode) t.parentNode.removeChild(t); }, 400);
+                }, 1800);
             }
 
             // Stats strip
