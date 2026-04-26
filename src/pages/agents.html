@@ -1673,9 +1673,51 @@
                 .catch(function() { _featuredOpsCache = []; return []; });
             return _featuredOpsLoading;
         }
+        // Self-contained banner resolver for the inline card. Mirrors the
+        // canonical 20-preset palette used elsewhere; lives in the same
+        // module-scope as _renderFeaturedOperatorCard so we never trip on
+        // a hoisting/scope mismatch with the heavier helpers below.
+        var _OP_INLINE_PRESETS = {
+            sunset: 'linear-gradient(135deg,#F59E0B,#EF4444)',
+            ocean: 'linear-gradient(135deg,#0EA5E9,#1E3A8A)',
+            forest: 'linear-gradient(135deg,#22C55E,#0F766E)',
+            midnight: 'linear-gradient(135deg,#312E81,#0F172A)',
+            amber: 'linear-gradient(135deg,#F59E0B,#7C2D12)',
+            rose: 'linear-gradient(135deg,#EC4899,#7E22CE)',
+            ash: 'linear-gradient(135deg,#374151,#0F172A)',
+            ember: 'linear-gradient(135deg,#DC2626,#451A03)',
+            aurora: 'linear-gradient(135deg,#10B981,#3B82F6,#8B5CF6)',
+            tropics: 'linear-gradient(135deg,#06B6D4,#22D3EE,#FDE68A)',
+            magma: 'linear-gradient(135deg,#7F1D1D,#F59E0B,#FDE68A)',
+            twilight: 'linear-gradient(135deg,#1E1B4B,#7C3AED,#F472B6)',
+            spotlight: 'radial-gradient(circle at 30% 40%,#F59E0B,#0F172A)',
+            nova: 'radial-gradient(circle at 70% 50%,#FDE68A,#7C2D12,#0F0F0F)',
+            deepspace: 'radial-gradient(ellipse at center,#1E40AF,#0F0F23,#000)',
+            spectrum: 'conic-gradient(from 0deg at 50% 50%,#F59E0B 0deg,#EF4444 90deg,#8B5CF6 180deg,#3B82F6 270deg,#F59E0B 360deg)',
+            iris: 'conic-gradient(from 0deg at 50% 50%,#EC4899 0deg,#8B5CF6 120deg,#06B6D4 240deg,#EC4899 360deg)',
+            slate: 'linear-gradient(135deg,#1F2937,#0F172A)',
+            cream: 'linear-gradient(135deg,#FEF3C7,#FCA5A5,#7C2D12)'
+        };
+        function _opInlineBannerCss(bannerStr, handleHint) {
+            var s = String(bannerStr || '').trim();
+            if (s.indexOf('gradient:') === 0) {
+                var name = s.substring(9).toLowerCase();
+                if (_OP_INLINE_PRESETS[name]) return _OP_INLINE_PRESETS[name];
+            }
+            if (s.indexOf('http') === 0 || s.indexOf('data:') === 0) {
+                return "url('" + s.replace(/'/g, "%27") + "') center/cover";
+            }
+            // Default — handle-seeded preset
+            var keys = Object.keys(_OP_INLINE_PRESETS);
+            var hh = String(handleHint || '');
+            var hash = 0;
+            for (var i = 0; i < hh.length; i++) hash = ((hash << 5) - hash) + hh.charCodeAt(i);
+            return _OP_INLINE_PRESETS[keys[Math.abs(hash) % keys.length]];
+        }
+
         function _renderFeaturedOperatorCard(op) {
             if (!op) return '';
-            var bannerCss = _bannerCssFor(op.banner, op.handle);
+            var bannerCss = _opInlineBannerCss(op.banner, op.handle);
             var avInner = avatarHtml(op.avatar || '', 48, op.handle, 0);
             var displayName = op.display_name || op.handle;
             var bestTier = op.best_tier || 'unranked';
