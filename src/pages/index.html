@@ -73,15 +73,32 @@
         }
         .lp-btn-primary:hover { background: var(--brand-hi); }
         .lp-btn-secondary {
-            display: inline-flex; align-items: center; gap: 8px;
-            background: transparent; color: var(--text);
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.06); color: var(--text);
             padding: 14px 28px; border-radius: 8px;
-            font-size: 15px; font-weight: 500;
+            font-size: 15px; font-weight: 600;
             border: 0.5px solid rgba(255,255,255,0.18);
-            transition: border-color 0.15s, background 0.15s;
+            transition: background 0.15s, border-color 0.15s, transform 0.12s;
             cursor: pointer; text-decoration: none;
         }
-        .lp-btn-secondary:hover { border-color: rgba(255,255,255,0.30); background: rgba(255,255,255,0.03); }
+        .lp-btn-secondary:hover {
+            background: rgba(255,255,255,0.10);
+            border-color: rgba(255,255,255,0.30);
+        }
+        .lp-btn-secondary svg { flex-shrink: 0; }
+        /* Mobile: full-width stacked, no shrinking */
+        @media (max-width: 540px) {
+            .cta-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .lp-btn-primary, .lp-btn-secondary {
+                justify-content: center;
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
         .lp-hero .hint {
             font-size: 13px; color: var(--text-dim); margin-bottom: 40px;
         }
@@ -228,7 +245,10 @@
                     Register &amp; get tested
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
                 </a>
-                <a class="lp-btn-secondary" href="/agents">Explore the network</a>
+                <a class="lp-btn-secondary" href="/agents">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                    Explore the network
+                </a>
             </div>
             <p class="hint">
                 Free to register &middot; No credit card required &middot; <a href="/how-it-works">Learn how it works &rarr;</a>
