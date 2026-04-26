@@ -521,7 +521,6 @@
                             <button type="button" class="op-picker-tab active" data-tab="portraits">Portraits</button>
                             <button type="button" class="op-picker-tab" data-tab="icons">Icons</button>
                             <button type="button" class="op-picker-tab" data-tab="upload">Upload</button>
-                            <button type="button" class="op-picker-tab" data-tab="url">URL</button>
                         </div>
                         <div class="op-picker-pane active" data-pane="portraits">
                             <div class="op-avatar-grid" id="opAvatarPortraits"></div>
@@ -537,10 +536,7 @@
                             <input type="file" id="opAvatarUploadInput" accept="image/*" style="display:none;">
                             <div class="op-field-help" id="opAvatarUploadStatus">PNG, JPEG, WebP, or GIF. Resized to 256&times;256, JPEG-compressed locally before saving.</div>
                         </div>
-                        <div class="op-picker-pane" data-pane="url">
-                            <input type="text" id="opEditAvatarUrl" maxlength="2048" placeholder="https://example.com/me.jpg or data:image/...">
-                            <div class="op-field-help">Press Enter to apply.</div>
-                        </div>
+
                     </div>
                 </div>
                 <div class="op-field">
@@ -551,7 +547,6 @@
                         <div class="op-picker-tabs" data-picker="banner">
                             <button type="button" class="op-picker-tab active" data-tab="gradients">Gradients</button>
                             <button type="button" class="op-picker-tab" data-tab="upload">Upload</button>
-                            <button type="button" class="op-picker-tab" data-tab="url">URL</button>
                         </div>
                         <div class="op-picker-pane active" data-pane="gradients">
                             <div class="op-banner-grid" id="opBannerGradients"></div>
@@ -564,10 +559,7 @@
                             <input type="file" id="opBannerUploadInput" accept="image/*" style="display:none;">
                             <div class="op-field-help" id="opBannerUploadStatus">PNG, JPEG, WebP, or GIF. Cover-cropped to 1200&times;300, JPEG-compressed locally before saving.</div>
                         </div>
-                        <div class="op-picker-pane" data-pane="url">
-                            <input type="text" id="opEditBannerUrl" maxlength="2048" placeholder="https://example.com/banner.jpg or data:image/...">
-                            <div class="op-field-help">Press Enter to apply.</div>
-                        </div>
+
                     </div>
                 </div>
                 <div class="op-field">
@@ -929,21 +921,6 @@
                     });
                 });
             }
-            // URL tab — preserve current URL value if it looks like one
-            var urlInp = document.getElementById('opEditAvatarUrl');
-            if (urlInp) {
-                if (currentValue && (currentValue.indexOf('http') === 0 || currentValue.indexOf('data:') === 0)) {
-                    urlInp.value = currentValue;
-                } else {
-                    urlInp.value = '';
-                }
-                urlInp.onkeydown = function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        applyAvatarSelection(urlInp.value.trim());
-                    }
-                };
-            }
         }
 
         function buildBannerPickers(currentValue) {
@@ -976,21 +953,6 @@
                         applyBannerSelection(btn.dataset.bannerValue);
                     });
                 });
-            }
-            // URL tab
-            var urlInp = document.getElementById('opEditBannerUrl');
-            if (urlInp) {
-                if (currentValue && (currentValue.indexOf('http') === 0 || currentValue.indexOf('data:') === 0)) {
-                    urlInp.value = currentValue;
-                } else {
-                    urlInp.value = '';
-                }
-                urlInp.onkeydown = function(e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        applyBannerSelection(urlInp.value.trim());
-                    }
-                };
             }
         }
 
