@@ -386,7 +386,53 @@
                              actual response. Without an endpoint, the agent
                              can only reach the Identified tier — higher tiers
                              require live probing. -->
-                        <div class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
+                        <!-- Hosted runtime: opt into goulburn-managed proxy. User pastes their own LLM API key, we host the HTTPS endpoint. Provider-agnostic. -->
+                        <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
+                            <label class="flex items-start gap-3 cursor-pointer select-none">
+                                <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
+                                <span>
+                                    <span class="block text-sm font-semibold text-dark-900">Use my own LLM key, host the endpoint for me</span>
+                                    <span class="block text-xs text-dark-500 mt-1 leading-relaxed">Don\'t have a server to host an HTTPS endpoint? Paste your LLM provider key + a system prompt below. We\'ll run the proxy on goulburn.ai. Your provider bills <em>your</em> account directly &mdash; we never see, log, or pay for your tokens.</span>
+                                </span>
+                            </label>
+
+                            <div id="hostedRuntimeFields" class="hidden mt-4 space-y-3">
+                                <div>
+                                    <label for="rtProvider" class="block text-xs font-semibold text-dark-900 mb-1">LLM Provider</label>
+                                    <select id="rtProvider" class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm bg-dark-50">
+                                        <option value="anthropic">Anthropic (Claude)</option>
+                                        <option value="openai">OpenAI (GPT)</option>
+                                        <option value="google">Google (Gemini)</option>
+                                        <option value="mistral">Mistral</option>
+                                        <option value="xai">xAI (Grok)</option>
+                                        <option value="deepseek">DeepSeek</option>
+                                        <option value="openrouter">OpenRouter (any model)</option>
+                                        <option value="custom">Custom (OpenAI-compatible)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="rtModel" class="block text-xs font-semibold text-dark-900 mb-1">Model</label>
+                                    <select id="rtModel" class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm bg-dark-50"></select>
+                                </div>
+                                <div id="rtCustomBaseUrlWrap" class="hidden">
+                                    <label for="rtCustomBaseUrl" class="block text-xs font-semibold text-dark-900 mb-1">Custom Base URL <span class="text-xs font-normal text-dark-500">&middot; OpenAI-compatible endpoint</span></label>
+                                    <input type="url" id="rtCustomBaseUrl" placeholder="https://your-host.example.com" class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                                    <p class="text-xs text-dark-500 mt-1">e.g. Ollama / vLLM / Fireworks / Together / Groq self-hosted. Must be HTTPS.</p>
+                                </div>
+                                <div>
+                                    <label for="rtApiKey" class="block text-xs font-semibold text-dark-900 mb-1">Your Provider API Key</label>
+                                    <input type="password" id="rtApiKey" autocomplete="off" placeholder="sk-... / sk-ant-... / etc." class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono">
+                                    <p class="text-xs text-dark-500 mt-1 leading-relaxed">Encrypted at rest with Fernet (AES-128). Never logged. Used only to call your chosen provider on your behalf when probes arrive.</p>
+                                </div>
+                                <div>
+                                    <label for="rtSystemPrompt" class="block text-xs font-semibold text-dark-900 mb-1">System Prompt <span class="text-xs font-normal text-dark-500">&middot; defines your agent\'s persona</span></label>
+                                    <textarea id="rtSystemPrompt" rows="4" maxlength="4000" placeholder="You are a climate-policy analyst. Source-anchored, IPCC-grounded, allergic to false certainty." class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono leading-relaxed"></textarea>
+                                    <p class="text-xs text-dark-500 mt-1">2-4000 chars. We screen on save (LLM-as-judge) to block prompts that disable safety guardrails or impersonate real public figures.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                             <p class="text-xs text-dark-500 mt-2 leading-relaxed">An HTTPS URL where your agent accepts POSTs of <code class="text-emerald-400">{"goulburn_probe": true, "prompt": "..."}</code> and returns <code class="text-emerald-400">{"response": "..."}</code> (JSON or plain text). Goulburn probes this periodically to verify live behaviour. Without it, trust capped at Identified tier.</p>
@@ -1183,6 +1229,43 @@ case 3:
                                 // Persist for 24h
                                 localStorage.setItem('goulburn_last_registration', JSON.stringify(creds));
                             } catch (e) {}
+                            // Hosted runtime: if user opted in, POST runtime config using
+                            // the just-issued api_key. Show the modal regardless of runtime success
+                            // (the agent IS registered; runtime config can be added later).
+                            try {
+                                var rtToggle = document.getElementById('useHostedRuntime');
+                                if (rtToggle && rtToggle.checked) {
+                                    var rtP = (document.getElementById('rtProvider') || {}).value || 'anthropic';
+                                    var rtM = (document.getElementById('rtModel') || {}).value || '';
+                                    var rtK = (document.getElementById('rtApiKey') || {}).value || '';
+                                    var rtSP = (document.getElementById('rtSystemPrompt') || {}).value || '';
+                                    var rtCB = (document.getElementById('rtCustomBaseUrl') || {}).value || null;
+                                    var rtPayload = { provider: rtP, model: rtM, api_key: rtK, system_prompt: rtSP, custom_base_url: rtP === 'custom' ? rtCB : null };
+                                    if (rtK && rtM && rtSP) {
+                                        statusDiv.textContent = 'Configuring hosted runtime...';
+                                        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/runtime', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (data.api_key || '') },
+                                            body: JSON.stringify(rtPayload)
+                                        }).then(function(r) {
+                                            return r.json().then(function(j) { return { ok: r.ok, status: r.status, body: j }; });
+                                        }).then(function(res) {
+                                            if (!res.ok) {
+                                                console.warn('runtime config POST failed:', res.status, res.body);
+                                                data._runtime_warning = 'Hosted runtime not configured: ' + (res.body.detail || res.body.error || 'unknown error');
+                                            } else {
+                                                data._runtime_url = res.body.runtime_url || ('https://api.goulburn.ai/api/v1/runtime/' + (data.agent_id || data.id));
+                                            }
+                                        }).catch(function(rtErr) {
+                                            console.warn('runtime config POST network error:', rtErr);
+                                            data._runtime_warning = 'Hosted runtime not configured (network error). Configure later from the dashboard.';
+                                        }).finally(function() {
+                                            _gbShowCredModal(data, regName);
+                                        });
+                                        return;
+                                    }
+                                }
+                            } catch (rtErr) { console.warn('hosted runtime block failed (non-fatal):', rtErr); }
                             _gbShowCredModal(data, regName);
                         });
                     }
@@ -1578,6 +1661,68 @@ case 3:
       try { localStorage.removeItem('goulburn_last_registration'); } catch(_){}
     }
   })();
+})();
+</script>
+
+<script>
+// Hosted runtime UX glue: toggle visibility + provider->model cascade.
+(function(){
+  function $(id){ return document.getElementById(id); }
+  var MODELS_BY_PROVIDER = {
+    anthropic: ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
+    openai: ["gpt-4o", "gpt-4o-mini", "o1", "o3-mini"],
+    google: ["gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash"],
+    mistral: ["mistral-large-latest", "codestral-latest", "mistral-small-latest"],
+    xai: ["grok-2", "grok-2-mini"],
+    deepseek: ["deepseek-chat", "deepseek-reasoner"],
+    openrouter: ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-2.0-flash-exp", "meta-llama/llama-3.3-70b-instruct", "mistralai/mistral-large", "qwen/qwen-2.5-72b-instruct"],
+    custom: ["specify-in-custom-base-url"]
+  };
+  function rebuildModelOptions() {
+    var prov = ($('rtProvider') || {}).value || 'anthropic';
+    var sel = $('rtModel');
+    if (!sel) return;
+    var opts = MODELS_BY_PROVIDER[prov] || [];
+    sel.innerHTML = '';
+    opts.forEach(function(m){
+      var opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      sel.appendChild(opt);
+    });
+    var wrap = $('rtCustomBaseUrlWrap');
+    if (wrap) wrap.classList.toggle('hidden', prov !== 'custom');
+  }
+  function onToggleChange() {
+    var toggle = $('useHostedRuntime');
+    var fields = $('hostedRuntimeFields');
+    var manual = $('manualEndpointBlock');
+    if (!toggle || !fields) return;
+    var on = toggle.checked;
+    fields.classList.toggle('hidden', !on);
+    if (manual) {
+      manual.style.opacity = on ? '0.45' : '';
+      manual.style.pointerEvents = on ? 'none' : '';
+      var manualInput = $('agentEndpointUrl');
+      if (manualInput) {
+        if (on) {
+          manualInput.dataset._stash = manualInput.value;
+          manualInput.value = '';
+          manualInput.placeholder = 'Auto-set to your hosted runtime URL on submit';
+        } else if (manualInput.dataset._stash !== undefined) {
+          manualInput.value = manualInput.dataset._stash;
+          manualInput.placeholder = 'https://your-agent.example.com/v1/respond';
+        }
+      }
+    }
+    if (on) rebuildModelOptions();
+  }
+  document.addEventListener('DOMContentLoaded', function() {
+    var toggle = $('useHostedRuntime');
+    var prov = $('rtProvider');
+    if (toggle) toggle.addEventListener('change', onToggleChange);
+    if (prov) prov.addEventListener('change', rebuildModelOptions);
+    rebuildModelOptions();
+  });
 })();
 </script>
 </body>
