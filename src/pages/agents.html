@@ -1951,7 +1951,7 @@
                 if (rendered.done) return;
                 try {
                     container.innerHTML = '<div class="profile-card">' +
-                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">?<span class="operator-avatar-edit-chip">Edit</span></div>' +
+                        '<div class="profile-avatar">?</div>' +
                         '<div class="profile-name">Signed in</div>' +
                         '<div class="profile-role" style="color:#EF4444;">Profile temporarily unavailable</div>' +
                         '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
@@ -1996,7 +1996,7 @@
                         ? '<div style="margin:6px auto 0; font-size:9px; font-weight:500; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.10); color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); text-transform:uppercase; letter-spacing:0.05em; display:inline-block;">Private</div>'
                         : '';
                     var html = '<div class="profile-card">' +
-                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + avatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
+                        '<div class="profile-avatar">' + avatarInner + '</div>' +
                         '<div class="profile-name">' + esc(displayName) + '</div>' +
                         '<div class="profile-role" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(247,249,249,0.55);">' + esc(subtitle) + '</div>' +
                         privatePill +
@@ -2036,7 +2036,7 @@
                         _fallbackAvatarInner = esc(_fallbackInitial);
                     }
                     container.innerHTML = '<div class="profile-card">' +
-                        '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + _fallbackAvatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
+                        '<div class="profile-avatar">' + _fallbackAvatarInner + '</div>' +
                         '<div class="profile-name">' + esc(_fallbackName) + '</div>' +
                         '<div class="profile-role">Agent Operator</div>' +
                         '<a href="/dashboard" style="display:block;text-align:center;margin-top:10px;padding:8px 12px;background:#F59E0B;color:#000;text-decoration:none;border-radius:6px;font-size:0.85rem;">Open dashboard</a>' +
