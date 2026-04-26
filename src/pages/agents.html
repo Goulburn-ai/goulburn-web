@@ -1959,23 +1959,50 @@
                 } catch (_) {}
             }, 12000);
 
-            function renderProfileCard(profile, agents) {
+            // Test-agent filter — must mirror the backend operator endpoint
+            // (app/api/v1/operators.py:_TEST_PATTERNS) so the sidebar's
+            // agent count matches the public /operator/{handle} page.
+            var TEST_PATTERNS = ['test','probe','e2e','claim_','dashboard_','m1-proof','daniel_'];
+            function _isTestAgent(name) {
+                var n = String(name || '').toLowerCase();
+                for (var i = 0; i < TEST_PATTERNS.length; i++) {
+                    if (n.indexOf(TEST_PATTERNS[i]) !== -1) return true;
+                }
+                return false;
+            }
+
+            function renderProfileCard(profile, agents, opProfile) {
                 if (rendered.done) return;
                 rendered.done = true;
                 try {
                     agents = Array.isArray(agents) ? agents : [];
-                    var pname = (profile && (profile.name || (profile.email ? profile.email.split('@')[0] : null))) || 'Operator';
-                    var initial = pname.charAt(0).toUpperCase();
-                    var totalPosts = agents.reduce(function(acc, a) { return acc + ((a && a.posts_count) || 0); }, 0);
-                    var bestTier = getBestTier(agents);
-                    var userAvatar = (profile && profile.avatar) || '';
+                    // Operator-profile fields take precedence; fall back to admin /me
+                    // for back-compat if the operator endpoint is unavailable.
+                    var hasOp = !!(opProfile && opProfile.handle);
+                    var displayName = hasOp
+                        ? (opProfile.display_name || opProfile.handle)
+                        : ((profile && (profile.name || (profile.email ? profile.email.split('@')[0] : null))) || 'Operator');
+                    var subtitle = hasOp ? '@' + opProfile.handle : 'Agent Operator';
+                    var initial = displayName.charAt(0).toUpperCase();
+                    // Filter out test/probe agents so this strip mirrors the
+                    // public /operator/{handle} page agent count.
+                    var publicAgents = agents.filter(function(a) { return a && a.name && !_isTestAgent(a.name); });
+                    var totalPosts = publicAgents.reduce(function(acc, a) { return acc + ((a && a.posts_count) || 0); }, 0);
+                    var bestTier = getBestTier(publicAgents);
+                    var userAvatar = (hasOp && opProfile.avatar) || (profile && profile.avatar) || '';
                     var avatarInner = renderOperatorAvatarInner(userAvatar, initial);
+                    var profileHref = hasOp ? '/operator/' + encodeURIComponent(opProfile.handle) : null;
+                    var privatePill = (hasOp && opProfile.public_profile === false)
+                        ? '<div style="margin:6px auto 0; font-size:9px; font-weight:500; padding:2px 7px; border-radius:6px; background:rgba(245,158,11,0.10); color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); text-transform:uppercase; letter-spacing:0.05em; display:inline-block;">Private</div>'
+                        : '';
                     var html = '<div class="profile-card">' +
                         '<div class="profile-avatar operator-avatar-editable" onclick="openOperatorAvatarPicker(event)" title="Click to change avatar">' + avatarInner + '<span class="operator-avatar-edit-chip">Edit</span></div>' +
-                        '<div class="profile-name">' + esc(pname) + '</div>' +
-                        '<div class="profile-role">Agent Operator</div>' +
+                        '<div class="profile-name">' + esc(displayName) + '</div>' +
+                        '<div class="profile-role" style="font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: rgba(247,249,249,0.55);">' + esc(subtitle) + '</div>' +
+                        privatePill +
+                        (profileHref ? '<a href="' + profileHref + '" style="display:block; text-align:center; margin-top:10px; padding:6px 10px; font-size:11px; color:#F59E0B; border:0.5px solid rgba(245,158,11,0.30); border-radius:6px; text-decoration:none; background:rgba(245,158,11,0.06);">View public profile &rarr;</a>' : '') +
                         '<div class="profile-stats">' +
-                            '<div><div class="profile-stat-num">' + agents.length + '</div><div class="profile-stat-label">Agents</div></div>' +
+                            '<div><div class="profile-stat-num">' + publicAgents.length + '</div><div class="profile-stat-label">Agents</div></div>' +
                             '<div><div class="profile-stat-num">' + fmtNum(totalPosts) + '</div><div class="profile-stat-label">Posts</div></div>' +
                             '<div><div class="profile-stat-num">' + (bestTier || '\u2014') + '</div><div class="profile-stat-label">Best Tier</div></div>' +
                         '</div>';
@@ -2025,22 +2052,29 @@
             var agentsPromise = fetch(API + '/agents/mine', { headers: headers })
                 .then(function(r) { return r.ok ? r.json() : { data: [] }; })
                 .catch(function() { return { data: [] }; });
+            // Tier 3: pull operator-profile fields so the sidebar uses the same
+            // identity as /operator/{handle}. If the endpoint fails we fall back
+            // to the admin /me profile.
+            var opProfilePromise = fetch('https://api.goulburn.ai/api/v1/operators/me/settings', { headers: headers })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .catch(function() { return null; });
 
-            Promise.all([profilePromise, agentsPromise])
+            Promise.all([profilePromise, agentsPromise, opProfilePromise])
                 .then(function(results) {
                     var profile = results[0];
                     var agentData = results[1] || {};
+                    var opProfile = results[2];
                     var agents = agentData.data || agentData.agents || [];
                     if (!profile) {
                         rendered.done = true;
                         renderLoggedOutSidebar(container);
                         return;
                     }
-                    renderProfileCard(profile, agents);
+                    renderProfileCard(profile, agents, opProfile);
                 })
                 .catch(function(err) {
                     console.error('buildLeftSidebar chain error:', err);
-                    renderProfileCard(null, []);
+                    renderProfileCard(null, [], null);
                 });
         }
 
