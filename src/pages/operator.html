@@ -376,8 +376,10 @@
         .op-icon-swatch:hover { background: rgba(245,158,11,0.18); transform: scale(1.05); }
         .op-icon-swatch.selected { border-color: #F59E0B; background: rgba(245,158,11,0.20); }
         .op-icon-swatch svg { width: 22px; height: 22px; }
-        /* Banner swatch grid: 2 columns of full-width gradient strips */
-        .op-banner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        /* Banner swatch grid: 3 columns of compact strips so 20 presets fit
+         * without the modal becoming a never-ending list. */
+        .op-banner-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        @media (max-width: 480px) { .op-banner-grid { grid-template-columns: repeat(2, 1fr); } }
         .op-banner-swatch {
             height: 40px; border-radius: 8px;
             border: 1.5px solid transparent;
@@ -611,19 +613,85 @@
             person: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>',
             star: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
         };
-        // Gradient palette for default banners — seeded by handle. Each pair
-        // is a diagonal (top-left -> bottom-right) gradient. All pairs are
-        // intentionally muted so they read as a backdrop, not a foreground.
-        var GRADIENT_PRESETS = {
-            sunset:   ['#F59E0B', '#EF4444'],
-            ocean:    ['#0EA5E9', '#1E3A8A'],
-            forest:   ['#22C55E', '#0F766E'],
-            midnight: ['#312E81', '#0F172A'],
-            amber:    ['#F59E0B', '#7C2D12'],
-            rose:     ['#EC4899', '#7E22CE'],
-            ash:      ['#374151', '#0F172A'],
-            ember:    ['#DC2626', '#451A03']
+        // Banner preset registry. Each entry is a function returning a CSS
+        // `background` string; that lets us mix linear, radial, conic, and
+        // multi-image patterns. Order matters for hash-seeding (handle ->
+        // index) — keep the originals first so existing handles don't shift.
+        var GRADIENT_PRESETS_DEF = {
+            // ── 2-stop linear (originals) ───────────────────────────
+            sunset:   { type: 'linear', stops: ['#F59E0B', '#EF4444'] },
+            ocean:    { type: 'linear', stops: ['#0EA5E9', '#1E3A8A'] },
+            forest:   { type: 'linear', stops: ['#22C55E', '#0F766E'] },
+            midnight: { type: 'linear', stops: ['#312E81', '#0F172A'] },
+            amber:    { type: 'linear', stops: ['#F59E0B', '#7C2D12'] },
+            rose:     { type: 'linear', stops: ['#EC4899', '#7E22CE'] },
+            ash:      { type: 'linear', stops: ['#374151', '#0F172A'] },
+            ember:    { type: 'linear', stops: ['#DC2626', '#451A03'] },
+            // ── 3-stop linear (richer ranges) ───────────────────────
+            aurora:   { type: 'linear', stops: ['#10B981', '#3B82F6', '#8B5CF6'] },
+            tropics:  { type: 'linear', stops: ['#06B6D4', '#22D3EE', '#FDE68A'] },
+            magma:    { type: 'linear', stops: ['#7F1D1D', '#F59E0B', '#FDE68A'] },
+            twilight: { type: 'linear', stops: ['#1E1B4B', '#7C3AED', '#F472B6'] },
+            // ── Radial spotlights — focal point lifts the brand ────
+            spotlight: { type: 'radial', stops: ['#F59E0B', '#0F172A'], position: 'circle at 30% 40%' },
+            nova:      { type: 'radial', stops: ['#FDE68A', '#7C2D12', '#0F0F0F'], position: 'circle at 70% 50%' },
+            deepspace: { type: 'radial', stops: ['#1E40AF', '#0F0F23', '#000'], position: 'ellipse at center' },
+            // ── Conic — colour wheel slice, dynamic edge ───────────
+            spectrum: { type: 'conic', stops: ['#F59E0B 0deg', '#EF4444 90deg', '#8B5CF6 180deg', '#3B82F6 270deg', '#F59E0B 360deg'] },
+            iris:     { type: 'conic', stops: ['#EC4899 0deg', '#8B5CF6 120deg', '#06B6D4 240deg', '#EC4899 360deg'] },
+            // ── Mesh / multi-blob — modern, premium feel ───────────
+            mesh:     { type: 'mesh', blobs: [
+                { color: '#F59E0B', x: '20%', y: '30%', size: '50%' },
+                { color: '#EF4444', x: '80%', y: '70%', size: '50%' },
+                { color: '#0F172A', x: '50%', y: '100%', size: '70%' }
+            ]},
+            cyberpunk: { type: 'mesh', blobs: [
+                { color: '#EC4899', x: '0%',   y: '0%',   size: '60%' },
+                { color: '#06B6D4', x: '100%', y: '100%', size: '60%' },
+                { color: '#0F0F23', x: '50%',  y: '50%',  size: '40%' }
+            ]},
+            // ── Subtle / professional ──────────────────────────────
+            slate:    { type: 'linear', stops: ['#1F2937', '#0F172A'] },
+            cream:    { type: 'linear', stops: ['#FEF3C7', '#FCA5A5', '#7C2D12'] }
         };
+
+        // Build a CSS `background` value from a preset definition.
+        function _presetCss(def) {
+            if (!def) return '';
+            if (def.type === 'linear') {
+                var stops = def.stops.map(function(c, i) {
+                    var pct = (def.stops.length === 1) ? 100 : Math.round(i / (def.stops.length - 1) * 100);
+                    return c + ' ' + pct + '%';
+                }).join(', ');
+                return 'linear-gradient(135deg, ' + stops + ')';
+            }
+            if (def.type === 'radial') {
+                var stops = def.stops.map(function(c, i) {
+                    var pct = (def.stops.length === 1) ? 100 : Math.round(i / (def.stops.length - 1) * 100);
+                    return c + ' ' + pct + '%';
+                }).join(', ');
+                return 'radial-gradient(' + (def.position || 'circle at center') + ', ' + stops + ')';
+            }
+            if (def.type === 'conic') {
+                return 'conic-gradient(from 0deg at 50% 50%, ' + def.stops.join(', ') + ')';
+            }
+            if (def.type === 'mesh') {
+                // Stack multiple radial gradients for a mesh-style backdrop.
+                // Each blob is a soft circle; the last blob colour acts as
+                // the deep-space base via the dark color stop.
+                return def.blobs.map(function(b) {
+                    return 'radial-gradient(circle at ' + b.x + ' ' + b.y + ', ' + b.color + ' 0%, transparent ' + b.size + ')';
+                }).join(', ') + ', #0F172A';
+            }
+            return '';
+        }
+
+        // Back-compat: keep GRADIENT_PRESETS as a name -> css map for callers
+        // that still iterate over it (the picker swatches look this up).
+        var GRADIENT_PRESETS = {};
+        Object.keys(GRADIENT_PRESETS_DEF).forEach(function(k) {
+            GRADIENT_PRESETS[k] = _presetCss(GRADIENT_PRESETS_DEF[k]);
+        });
         function _gradKeysSorted() { return Object.keys(GRADIENT_PRESETS); }
         function pickGradientByHandle(handle) {
             var keys = _gradKeysSorted();
@@ -637,9 +705,8 @@
             var s = String(bannerStr || '').trim();
             if (s.indexOf('gradient:') === 0) {
                 var name = s.substring('gradient:'.length).toLowerCase();
-                if (GRADIENT_PRESETS[name]) {
-                    var pair = GRADIENT_PRESETS[name];
-                    return { backgroundImage: 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)' };
+                if (GRADIENT_PRESETS_DEF[name]) {
+                    return { backgroundImage: _presetCss(GRADIENT_PRESETS_DEF[name]) };
                 }
             }
             if (s.indexOf('http') === 0 || s.indexOf('data:') === 0) {
@@ -647,8 +714,7 @@
             }
             // Default — handle-seeded preset
             var key = pickGradientByHandle(handleHint || '');
-            var defPair = GRADIENT_PRESETS[key];
-            return { backgroundImage: 'linear-gradient(135deg, ' + defPair[0] + ' 0%, ' + defPair[1] + ' 100%)' };
+            return { backgroundImage: _presetCss(GRADIENT_PRESETS_DEF[key]) };
         }
         function applyBannerTo(el, bannerStr, handleHint) {
             if (!el) return;
@@ -914,7 +980,7 @@
             'grace', 'henry', 'ivy', 'jack', 'kate', 'leo'
         ];
         var ICON_NAMES = ['robot','brain','shield','chart','code','globe','bolt','person','star'];
-        var BANNER_PRESETS = ['sunset','ocean','forest','midnight','amber','rose','ash','ember'];
+        var BANNER_PRESETS = Object.keys(GRADIENT_PRESETS_DEF);
 
         function buildAvatarPickers(currentValue) {
             // Portraits
@@ -988,7 +1054,7 @@
                     b.type = 'button';
                     b.className = 'op-banner-swatch' + (currentValue === val ? ' selected' : '');
                     var pair = GRADIENT_PRESETS[name];
-                    b.style.backgroundImage = 'linear-gradient(135deg, ' + pair[0] + ' 0%, ' + pair[1] + ' 100%)';
+                    b.style.backgroundImage = GRADIENT_PRESETS[name];
                     b.dataset.bannerValue = val;
                     b.innerHTML = '<span class="op-banner-swatch-label">' + name + '</span>';
                     g.appendChild(b);
