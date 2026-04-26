@@ -395,6 +395,20 @@
             text-align: center;
         }
         .op-picker .op-field-help { margin-top: 6px; }
+        .op-upload-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245,158,11,0.10);
+            border: 0.5px dashed rgba(245,158,11,0.40);
+            color: #F59E0B;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .op-upload-btn:hover { background: rgba(245,158,11,0.18); border-color: rgba(245,158,11,0.60); }
+        .op-upload-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .op-picker input[type=text] {
             width: 100%; box-sizing: border-box;
             background: rgba(255,255,255,0.04);
@@ -506,6 +520,7 @@
                         <div class="op-picker-tabs" data-picker="avatar">
                             <button type="button" class="op-picker-tab active" data-tab="portraits">Portraits</button>
                             <button type="button" class="op-picker-tab" data-tab="icons">Icons</button>
+                            <button type="button" class="op-picker-tab" data-tab="upload">Upload</button>
                             <button type="button" class="op-picker-tab" data-tab="url">URL</button>
                         </div>
                         <div class="op-picker-pane active" data-pane="portraits">
@@ -514,8 +529,16 @@
                         <div class="op-picker-pane" data-pane="icons">
                             <div class="op-icon-grid" id="opAvatarIcons"></div>
                         </div>
+                        <div class="op-picker-pane" data-pane="upload">
+                            <button type="button" class="op-upload-btn" id="opAvatarUploadBtn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                Choose image
+                            </button>
+                            <input type="file" id="opAvatarUploadInput" accept="image/*" style="display:none;">
+                            <div class="op-field-help" id="opAvatarUploadStatus">PNG, JPEG, WebP, or GIF. Resized to 256&times;256, JPEG-compressed locally before saving.</div>
+                        </div>
                         <div class="op-picker-pane" data-pane="url">
-                            <input type="text" id="opEditAvatarUrl" maxlength="255" placeholder="https://example.com/me.jpg or data:image/...">
+                            <input type="text" id="opEditAvatarUrl" maxlength="2048" placeholder="https://example.com/me.jpg or data:image/...">
                             <div class="op-field-help">Press Enter to apply.</div>
                         </div>
                     </div>
@@ -527,13 +550,22 @@
                     <div class="op-picker">
                         <div class="op-picker-tabs" data-picker="banner">
                             <button type="button" class="op-picker-tab active" data-tab="gradients">Gradients</button>
+                            <button type="button" class="op-picker-tab" data-tab="upload">Upload</button>
                             <button type="button" class="op-picker-tab" data-tab="url">URL</button>
                         </div>
                         <div class="op-picker-pane active" data-pane="gradients">
                             <div class="op-banner-grid" id="opBannerGradients"></div>
                         </div>
+                        <div class="op-picker-pane" data-pane="upload">
+                            <button type="button" class="op-upload-btn" id="opBannerUploadBtn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                                Choose image
+                            </button>
+                            <input type="file" id="opBannerUploadInput" accept="image/*" style="display:none;">
+                            <div class="op-field-help" id="opBannerUploadStatus">PNG, JPEG, WebP, or GIF. Cover-cropped to 1200&times;300, JPEG-compressed locally before saving.</div>
+                        </div>
                         <div class="op-picker-pane" data-pane="url">
-                            <input type="text" id="opEditBannerUrl" maxlength="255" placeholder="https://example.com/banner.jpg or data:image/...">
+                            <input type="text" id="opEditBannerUrl" maxlength="2048" placeholder="https://example.com/banner.jpg or data:image/...">
                             <div class="op-field-help">Press Enter to apply.</div>
                         </div>
                     </div>
@@ -794,7 +826,8 @@
                             document.getElementById('opEditModal').classList.add('show');
                             buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
                             buildBannerPickers(document.getElementById('opEditBanner').value || '');
-                            // Scroll the avatar picker into view inside the modal
+                            _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', _resizeAvatar, applyAvatarSelection);
+                            _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', _resizeBanner, applyBannerSelection);
                             setTimeout(function() {
                                 var p = document.getElementById('opAvatarPortraits');
                                 if (p) p.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -961,6 +994,101 @@
             }
         }
 
+        // ─────────────────────────────────────────────────────────
+        // Image upload — client-side resize + JPEG compress to data URL.
+        // No backend storage; the data URL is saved straight into the avatar
+        // or banner field via PATCH /me/settings (TEXT column on Postgres).
+        // ─────────────────────────────────────────────────────────
+        var MAX_INPUT_BYTES = 5 * 1024 * 1024; // 5MB raw input cap
+
+        function _readFileAsImage(file) {
+            return new Promise(function(resolve, reject) {
+                if (!file) return reject(new Error('No file selected.'));
+                if (!/^image\//.test(file.type)) return reject(new Error('Please choose an image file (PNG, JPEG, WebP, GIF).'));
+                if (file.size > MAX_INPUT_BYTES) return reject(new Error('Image is larger than 5MB. Please pick a smaller file.'));
+                var reader = new FileReader();
+                reader.onload = function() {
+                    var img = new Image();
+                    img.onload = function() { resolve(img); };
+                    img.onerror = function() { reject(new Error('Could not decode that image.')); };
+                    img.src = reader.result;
+                };
+                reader.onerror = function() { reject(new Error('Could not read that file.')); };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function _resizeAvatar(img) {
+            // Square 256x256, contain-fit (centre-crop the longer dimension).
+            var TARGET = 256;
+            var canvas = document.createElement('canvas');
+            canvas.width = TARGET; canvas.height = TARGET;
+            var ctx = canvas.getContext('2d');
+            // Centre-crop a square from the source then draw to target.
+            var srcSize = Math.min(img.width, img.height);
+            var sx = (img.width - srcSize) / 2;
+            var sy = (img.height - srcSize) / 2;
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, TARGET, TARGET);
+            ctx.drawImage(img, sx, sy, srcSize, srcSize, 0, 0, TARGET, TARGET);
+            return canvas.toDataURL('image/jpeg', 0.85);
+        }
+
+        function _resizeBanner(img) {
+            // Banner 1200x300 cover-crop. Source aspect kept; cropped to 4:1.
+            var TW = 1200, TH = 300;
+            var canvas = document.createElement('canvas');
+            canvas.width = TW; canvas.height = TH;
+            var ctx = canvas.getContext('2d');
+            // Compute cover-fit dest dimensions
+            var srcAspect = img.width / img.height;
+            var dstAspect = TW / TH;
+            var sx = 0, sy = 0, sw = img.width, sh = img.height;
+            if (srcAspect > dstAspect) {
+                // Source is wider than 4:1 -> crop sides
+                sw = img.height * dstAspect;
+                sx = (img.width - sw) / 2;
+            } else {
+                // Source is taller -> crop top/bottom
+                sh = img.width / dstAspect;
+                sy = (img.height - sh) / 2;
+            }
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, TW, TH);
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, TW, TH);
+            return canvas.toDataURL('image/jpeg', 0.80);
+        }
+
+        function _wireUpload(btnId, inputId, statusId, processor, applyFn) {
+            var btn = document.getElementById(btnId);
+            var input = document.getElementById(inputId);
+            var status = document.getElementById(statusId);
+            if (!btn || !input) return;
+            btn.onclick = function() { input.click(); };
+            input.onchange = function() {
+                var file = input.files && input.files[0];
+                if (!file) return;
+                status.textContent = 'Processing image…';
+                status.style.color = 'rgba(247,249,249,0.55)';
+                _readFileAsImage(file).then(function(img) {
+                    var dataUrl = processor(img);
+                    var sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
+                    if (sizeKB > 240) {
+                        // Past our 256KB column tolerance — refuse rather than
+                        // saving and letting the backend reject.
+                        throw new Error('Compressed image is still too large (' + sizeKB + 'KB). Try a smaller crop.');
+                    }
+                    applyFn(dataUrl);
+                    status.textContent = '✓ Uploaded (' + sizeKB + 'KB). Click Save to keep it.';
+                    status.style.color = '#22C55E';
+                }).catch(function(err) {
+                    status.textContent = err.message;
+                    status.style.color = '#F87171';
+                }).then(function() {
+                    // Always reset so picking the same file again retriggers
+                    input.value = '';
+                });
+            };
+        }
+
         function applyAvatarSelection(val) {
             document.getElementById('opEditAvatar').value = val || '';
             updateAvatarPreview(val || '', document.getElementById('opEditHandle').value);
@@ -1006,10 +1134,10 @@
             if (btn) btn.addEventListener('click', function() {
                 modal.classList.add('show');
                 errEl.style.display = 'none';
-                // Re-build pickers each open so the swatches reflect the
-                // current handle (default-seeded options re-seed live).
                 buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
                 buildBannerPickers(document.getElementById('opEditBanner').value || '');
+                _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', _resizeAvatar, applyAvatarSelection);
+                _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', _resizeBanner, applyBannerSelection);
             });
             bindPickerTabs();
             if (cancelBtn) cancelBtn.addEventListener('click', function() {
