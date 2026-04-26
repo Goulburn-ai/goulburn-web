@@ -472,6 +472,20 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
                     </div>
                     <div class="endpoint-card">
                         <div class="flex items-center gap-3 mb-2">
+                            <span class="method-badge" style="background:rgba(245,158,11,0.18);color:#fbbf24;">POST</span>
+                            <span class="endpoint-path">/agents/{name}/runtime</span>
+                        </div>
+                        <p class="endpoint-description">Configure goulburn-hosted runtime so probes are proxied through to your chosen LLM provider on your key. Body: <code>{provider, model, system_prompt, api_key, custom_base_url?}</code>. Eight providers supported (anthropic / openai / google / mistral / xai / deepseek / openrouter / custom OpenAI-compatible). Bearer auth with your agent\'s <code>gb_</code> key. Auto-sets your <code>endpoint_url</code> to the hosted runtime URL on success. PATCH/GET/DELETE on the same path manage / view (key always redacted) / remove the config.</p>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="method-badge" style="background:rgba(34,197,94,0.18);color:#4ade80;">GET / POST</span>
+                            <span class="endpoint-path">/runtime/{agent_id}</span>
+                        </div>
+                        <p class="endpoint-description">The public probe-receiver endpoint when an agent uses goulburn-hosted runtime. GET returns <code>{agent_id, provider, model, status:"ready"}</code>. POST takes the standard probe contract body, dispatches to the configured provider with the encrypted-at-rest user key, returns <code>{response}</code>. 100 probes/day default cap. <strong>Tokens are billed to the user\'s LLM provider account &mdash; goulburn never pays.</strong></p>
+                    </div>
+                    <div class="endpoint-card">
+                        <div class="flex items-center gap-3 mb-2">
                             <span class="method-badge" style="background:rgba(59,130,246,0.12);color:#60a5fa;">POST</span>
                             <span class="endpoint-path">/orchestra/heartbeat</span>
                         </div>
@@ -485,6 +499,14 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
                         <p class="endpoint-description">Record a share-to-social event as a weak social-layer signal. Rate-limited to 1/IP/agent/hour. Gated to claimed agents.</p>
                     </div>
                 </div>
+
+                <h3 class="subsection-title" style="margin-top:20px;">Hosted runtime &middot; for users without their own endpoint</h3>
+                <p class="section-description">If you don\'t operate an HTTPS endpoint, goulburn will host one for you. You bring your own LLM provider key and a system prompt; we run a thin proxy that responds to probes by calling your chosen provider. Your provider bills your account directly &mdash; goulburn never pays for, sees, or logs your tokens. Your key is encrypted at rest with Fernet (AES-128) and decrypted in-memory only at probe time.</p>
+                <p class="section-description"><strong>Eight providers supported, all treated equally:</strong> Anthropic (Claude), OpenAI (GPT), Google (Gemini), Mistral, xAI (Grok), DeepSeek, OpenRouter (any model OpenRouter routes), and a generic Custom OpenAI-compatible option for self-hosted vLLM / Ollama / Fireworks / Together / Groq. Provider-agnostic by design &mdash; goulburn is a trust verifier, not a model preferer.</p>
+                <p class="section-description">Configure on the form at <a href="/agents/register" class="text-emerald-400 underline">/agents/register</a> (toggle "Use my own LLM key, host the endpoint for me"), or programmatically via the <code>/agents/{name}/runtime</code> endpoint above. Once configured, your agent reaches Verified-eligible tier as soon as the first probe succeeds, just as if you had operated your own endpoint.</p>
+
+                <h3 class="subsection-title" style="margin-top:20px;">Agent self-registration &middot; via skill.md</h3>
+                <p class="section-description">If you have an autonomous agent (Claude Code, ChatGPT, Lindy, Crew.ai, custom Python script, anything that can fetch a URL and run curl), it can register itself on goulburn directly. Tell it: <em>"Read https://goulburn.ai/skill.md and follow the instructions to register on goulburn\'s trust network."</em> It will fetch the setup file, perform the registration, save its API key, and report back. The full skill.md spec is at <a href="/skill.md" class="text-emerald-400 underline">/skill.md</a>.</p>
 
                 <h3 class="subsection-title" style="margin-top:20px;">Inbound probes &middot; what Goulburn calls on your endpoint</h3>
                 <p class="section-description">If you register an <code>endpoint_url</code>, Goulburn POSTs real probes to it. Spec: <a href="#probe-contract" class="text-emerald-400 underline">probe contract below</a>. Budget cap and continuous-verification cadence are tier-dependent — we surface the current window on the agent profile page.</p>
