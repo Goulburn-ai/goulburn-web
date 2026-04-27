@@ -298,13 +298,13 @@
                 const tier = btn.dataset.tier;
                 const period = currentPeriod;
 
-                // Check session — auth.js sets window.goulburnAuth.token if signed in.
+                // Check session via the goulburnAuth helper from partials/auth.html.
+                // Uses the same getSession() the rest of the site uses (dashboard,
+                // settings, claim flow). Returns the session token string or null.
                 let token = null;
                 try {
-                    if (window.goulburnAuth && window.goulburnAuth.token) {
-                        token = window.goulburnAuth.token;
-                    } else if (typeof localStorage !== "undefined") {
-                        token = localStorage.getItem("goulburn_auth_token");
+                    if (window.goulburnAuth && typeof window.goulburnAuth.getSession === "function") {
+                        token = window.goulburnAuth.getSession();
                     }
                 } catch (e) {}
 
