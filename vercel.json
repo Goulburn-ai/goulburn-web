@@ -196,6 +196,10 @@
     {
       "source": "/operator/:handle",
       "destination": "/operator.html"
+    },
+    {
+      "source": "/operators",
+      "destination": "/operators.html"
     }
   ]
 }
