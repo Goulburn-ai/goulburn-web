@@ -259,6 +259,43 @@
 
     (function() {
             const API_BASE = goulburnAuth.ADMIN_BASE;
+
+        // ─── Shared post-auth redirect ─────────────────────────────────────────
+        // If the user came from /pricing with ?next=checkout&tier=X&period=Y,
+        // bypass the back-to-pricing detour and POST directly to the billing
+        // endpoint, then redirect to Stripe. Otherwise fall back to ?redirect=.
+        async function redirectAfterAuth(token) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('next') === 'checkout' && token) {
+                    const tier = params.get('tier');
+                    const period = params.get('period') || 'monthly';
+                    if (tier) {
+                        try {
+                            const resp = await fetch(`${API_BASE}/api/v1/billing/owner-checkout`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                body: JSON.stringify({ tier: tier, period: period }),
+                            });
+                            if (resp.ok) {
+                                const j = await resp.json();
+                                if (j.checkout_url) { window.location.href = j.checkout_url; return; }
+                            }
+                            // On failure, fall through to /pricing so user can retry visibly
+                            window.location.href = '/pricing?checkout_error=1&tier=' + encodeURIComponent(tier);
+                            return;
+                        } catch (e) {
+                            window.location.href = '/pricing?checkout_error=network&tier=' + encodeURIComponent(tier);
+                            return;
+                        }
+                    }
+                }
+                const dest = params.get('redirect') || '/agents';
+                window.location.href = dest;
+            } catch (e) {
+                window.location.href = '/agents';
+            }
+        }
         const PLATFORMS = ['github', 'twitter', 'discord', 'linkedin'];
         const BUTTON_MAP = {
             'GitHub': 'github',
@@ -416,9 +453,7 @@
                 .then(res => {
                     if (res.ok && res.data.session_token) {
                         _persistSession(res.data);
-                        const params = new URLSearchParams(window.location.search);
-                        var _dest = params.get('redirect') || '/agents';
-                        window.location.href = _dest;
+                        redirectAfterAuth(res.data.session_token);
                         return;
                     }
                     if (res.status === 403 && res.data.detail && res.data.detail.includes('verify')) {
@@ -441,9 +476,7 @@
                     } else if (data.session_token) {
                         _persistSession(data);
                         if (data.registration_id) sessionStorage.setItem('goulburn_reg_id', data.registration_id);
-                        const params = new URLSearchParams(window.location.search);
-                        var _dest = params.get('redirect') || '/agents';
-                        window.location.href = _dest;
+                        redirectAfterAuth(data.session_token);
                     } else {
                         authUI.showStatus(data.message || data.detail || 'Invalid email or password', true);
                     }
@@ -474,9 +507,7 @@
                 .then(data => {
                     if (data.session_token) {
                         sessionStorage.setItem('goulburn_session', data.session_token);
-                        const params = new URLSearchParams(window.location.search);
-                        const redirect = params.get('redirect') || '/agents';
-                        window.location.href = redirect;
+                        redirectAfterAuth(data.session_token);
                     } else {
                         authUI.showStatus(data.message || 'Invalid code', true);
                     }
@@ -692,10 +723,8 @@
                         goulburnAuth.setSession(data.session_token);
                     }
 
-                    // 7. Redirect — honour ?redirect=
-                    var params = new URLSearchParams(window.location.search);
-                    var dest = params.get('redirect') || '/agents';
-                    window.location.href = dest;
+                    // 7. Redirect — honour ?redirect= and ?next=checkout
+                    redirectAfterAuth(data.session_token);
                 } catch (e) {
                     console.error('[passkey] sign-in failed:', e);
                     btn.disabled = false;
@@ -712,3 +741,5 @@
 </script>
 </body>
 </html>
+path: src/pages/sign-in.html
+size: 41799
