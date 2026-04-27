@@ -279,54 +279,52 @@
     <main class="hiw-container">
         <nav class="hiw-toc" aria-label="Table of contents">
             <h2>On this page</h2>
-            <ul style="list-style: none; padding-left: 0; margin: 0;">
+            <ol style="list-style: none; padding-left: 0; margin: 0;">
                 <li style="margin: 0.35rem 0;">
                     <a href="#mental-model" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#71767B;font-size:0.85em;">&middot;</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">1.</span>
                         The mental model
                     </a>
                 </li>
-            </ul>
-            <ol style="list-style: none; padding-left: 0; margin: 0.35rem 0 0 0; counter-reset: hiw-toc;">
-                <li style="margin: 0.35rem 0; counter-increment: hiw-toc;">
+                <li style="margin: 0.35rem 0;">
                     <a href="#register" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">1.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">2.</span>
                         Registering an agent
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#endpoint" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">2.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">3.</span>
                         The endpoint contract
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#tiers" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">3.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">4.</span>
                         Trust tiers &amp; scoring
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#claim" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">4.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">5.</span>
                         Claiming an orphan agent
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#share" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">5.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">6.</span>
                         Sharing the credential
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#manage" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">6.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">7.</span>
                         Managing your agent
                     </a>
                 </li>
                 <li style="margin: 0.35rem 0;">
                     <a href="#integrate" style="color:#D1D5DB;text-decoration:none;">
-                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">7.</span>
+                        <span style="display:inline-block;width:1.5rem;color:#F59E0B;font-weight:600;">8.</span>
                         Integrating as a platform
                     </a>
                 </li>
@@ -335,7 +333,7 @@
 
         <!-- ── 1. Mental Model ────────────────────────────────────── -->
         <section class="hiw-section" id="mental-model">
-            <h2>The mental model</h2>
+            <h2><span class="num">1</span> The mental model</h2>
             <p class="lede">Goulburn is <strong style="color:#F7F9F9;">identity + verification infrastructure</strong> for AI agents — not hosting, not a marketplace, not a social network.</p>
 
             <div class="hiw-illus">
@@ -462,7 +460,7 @@
 
         <!-- ── 2. Register ──────────────────────────────────────────── -->
         <section class="hiw-section" id="register">
-            <h2><span class="num">1</span> Registering an agent</h2>
+            <h2><span class="num">2</span> Registering an agent</h2>
             <p class="lede">Three paths, same backend. Human-friendly 3-step wizard, a single cURL call from your shell, or a one-line snippet sent to your AI agent that lets it register itself.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg">
@@ -554,7 +552,7 @@
 
         <!-- ── 3. Endpoint ───────────────────────────────────────── -->
         <section class="hiw-section" id="endpoint">
-            <h2><span class="num">2</span> The endpoint contract</h2>
+            <h2><span class="num">3</span> The endpoint contract</h2>
             <p class="lede">If you registered an <code>endpoint_url</code>, this is what Goulburn calls on it.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg">
@@ -639,7 +637,7 @@
 
         <!-- ── 4. Tiers ────────────────────────────────────────────── -->
         <section class="hiw-section" id="tiers">
-            <h2><span class="num">3</span> Trust tiers &amp; scoring</h2>
+            <h2><span class="num">4</span> Trust tiers &amp; scoring</h2>
             <p class="lede">Every agent has a single score (0–100) rolled up from five evidence layers. Score bands map to named tiers.</p>
             
             <!-- Trust tier scale visual: 0-100 bar with 6 colour-coded bands -->
@@ -743,7 +741,7 @@
 
         <!-- ── 5. Claim ────────────────────────────────────────────── -->
         <section class="hiw-section" id="claim">
-            <h2><span class="num">4</span> Claiming an orphan agent</h2>
+            <h2><span class="num">5</span> Claiming an orphan agent</h2>
             <p class="lede">You registered an agent without signing in — it's an <em>orphan</em>. Claiming binds it to a real human, which unlocks shareable credentials.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
@@ -811,7 +809,7 @@
 
         <!-- ── 6. Share ────────────────────────────────────────────── -->
         <section class="hiw-section" id="share">
-            <h2><span class="num">5</span> Sharing the credential</h2>
+            <h2><span class="num">6</span> Sharing the credential</h2>
             <p class="lede">Human-owned agents can publish their trust credential anywhere. Orphans can't — it's what makes the credential mean something.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 310" xmlns="http://www.w3.org/2000/svg">
@@ -868,7 +866,7 @@
 
         <!-- ── 7. Manage ────────────────────────────────────────── -->
         <section class="hiw-section" id="manage">
-            <h2><span class="num">6</span> Managing your agent</h2>
+            <h2><span class="num">7</span> Managing your agent</h2>
             <p class="lede">Once an agent is registered and claimed, the owner's profile shows an action row with seven buttons. Here's what each one does.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
@@ -980,7 +978,7 @@
 
         <!-- ── 8. Integrate ────────────────────────────────────────── -->
         <section class="hiw-section" id="integrate">
-            <h2><span class="num">7</span> Integrating as a platform</h2>
+            <h2><span class="num">8</span> Integrating as a platform</h2>
             <p class="lede">You're building a platform that will grant AI agents access to something (an API, a workspace, a tool). Here's how you gate on trust.</p>
             <div class="hiw-illus">
                 <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
