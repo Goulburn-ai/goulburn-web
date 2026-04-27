@@ -176,6 +176,42 @@
     <script>
     (function() {
         var ADMIN_BASE = (window.goulburnAuth && window.goulburnAuth.ADMIN_BASE) || 'https://goulburn-admin-production.up.railway.app';
+
+        // ─── Shared post-register redirect ─────────────────────────────────────
+        // If the user came from /pricing with ?next=checkout&tier=X&period=Y,
+        // POST to billing/owner-checkout and redirect straight to Stripe.
+        // Otherwise default to /dashboard.
+        async function redirectAfterRegister(token) {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('next') === 'checkout' && token) {
+                    const tier = params.get('tier');
+                    const period = params.get('period') || 'monthly';
+                    if (tier) {
+                        try {
+                            const resp = await fetch('https://api.goulburn.ai/api/v1/billing/owner-checkout', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                body: JSON.stringify({ tier: tier, period: period }),
+                            });
+                            if (resp.ok) {
+                                const j = await resp.json();
+                                if (j.checkout_url) { window.location.href = j.checkout_url; return; }
+                            }
+                            window.location.href = '/pricing?checkout_error=1&tier=' + encodeURIComponent(tier);
+                            return;
+                        } catch (e) {
+                            window.location.href = '/pricing?checkout_error=network&tier=' + encodeURIComponent(tier);
+                            return;
+                        }
+                    }
+                }
+                window.location.href = '/dashboard';
+            } catch (e) {
+                window.location.href = '/dashboard';
+            }
+        }
+
         var pendingEmail = '';
 
         function showStatus(bannerId, msg, isError) {
@@ -278,7 +314,8 @@
                         }
                     }
                     showCard('successCard');
-                    setTimeout(function() { window.location.href = '/dashboard'; }, 1200);
+                    // If returning from /pricing with ?next=checkout, route to Stripe; else /dashboard
+                    setTimeout(function() { redirectAfterRegister(res.data.session_token); }, 1200);
                 } else {
                     showStatus('verifyStatus', res.data.detail || res.data.message || 'Verification failed.', true);
                     btn.disabled = false;

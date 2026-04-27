@@ -692,6 +692,66 @@
             </div>
         </div>
 
+        
+        <!-- Billing & Subscription Section -->
+        <div class="settings-card" id="billingCard">
+            <h2>Billing &amp; Subscription</h2>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <p class="setting-label">Plan</p>
+                    <p class="setting-description">Your current goulburn.ai subscription. <a href="/pricing" class="btn-link" style="color:var(--brand-500);">Compare plans</a></p>
+                </div>
+                <div class="setting-value" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+                    <span id="billingPlanPill" style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:0.8em;font-weight:600;background:rgba(255,255,255,0.08);color:var(--dark-700);">Loading&hellip;</span>
+                    <span id="billingRenewal" style="font-size:0.78em;color:rgba(247,249,249,0.55);">&nbsp;</span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <p class="setting-label">Operator status</p>
+                    <p class="setting-description">Public badge shown on your operator profile and next to your handle on agent pages.</p>
+                </div>
+                <div class="setting-value">
+                    <span id="operatorStatusPill" style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:0.8em;font-weight:600;background:rgba(255,255,255,0.08);color:var(--dark-700);">&mdash;</span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <p class="setting-label">Agent capacity</p>
+                    <p class="setting-description">How many active agents you can claim under this plan.</p>
+                </div>
+                <div class="setting-value">
+                    <span id="billingAgentCap" style="color:var(--dark-900);font-weight:500;">&mdash;</span>
+                </div>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <p class="setting-label">Daily probe cap</p>
+                    <p class="setting-description">Hosted-runtime requests per agent per day on this plan.</p>
+                </div>
+                <div class="setting-value">
+                    <span id="billingProbeCap" style="color:var(--dark-900);font-weight:500;">&mdash;</span>
+                </div>
+            </div>
+
+            <div class="setting-row" style="border-top:1px solid var(--dark-200);padding-top:1rem;margin-top:0.5rem;">
+                <div class="setting-info">
+                    <p class="setting-label" id="billingActionLabel">Manage subscription</p>
+                    <p class="setting-description" id="billingActionDescription">Update your card, view invoices, or cancel via the Stripe customer portal.</p>
+                </div>
+                <div class="setting-value" style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <a id="billingUpgradeBtn" href="/pricing" class="btn btn-primary" style="display:none;">Upgrade plan</a>
+                    <button id="billingPortalBtn" class="btn btn-secondary" type="button" style="display:none;" onclick="openBillingPortal()">Manage subscription</button>
+                </div>
+            </div>
+
+            <div id="billingStatus" style="margin-top:0.75rem;font-size:0.85em;color:rgba(247,249,249,0.6);"></div>
+        </div>
+
         <!-- Connected Platforms Section -->
         <div class="settings-card">
             <h2>Connected Platforms</h2>
@@ -1072,7 +1132,136 @@
     }
 
     // ── Load Settings ──
-    function loadSettingsData() {
+    
+        // ─── Billing & Subscription (loads /api/v1/billing/owner-status) ─────────
+        var API_BASE_FOR_BILLING = 'https://api.goulburn.ai';
+
+        // Tier → CSS color mapping. Mirrors the operator-status visual ladder.
+        // free=grey, builder=amber, studio=blue, proplus=purple, enterprise=gold/dark.
+        function _setPillTier(el, tier) {
+            var tone = {
+                free:       { bg: 'rgba(255,255,255,0.08)', fg: 'var(--dark-700)' },
+                builder:    { bg: 'rgba(245,158,11,0.18)',  fg: '#fbbf24' },
+                studio:     { bg: 'rgba(59,130,246,0.18)',  fg: '#60a5fa' },
+                proplus:    { bg: 'rgba(167,139,250,0.18)', fg: '#c4b5fd' },
+                enterprise: { bg: 'rgba(244,205,98,0.20)',  fg: '#f6d160' },
+            }[tier || 'free'] || { bg: 'rgba(255,255,255,0.08)', fg: 'var(--dark-700)' };
+            el.style.background = tone.bg;
+            el.style.color = tone.fg;
+        }
+        // Backwards-compat: keep _setPillTone for any out-of-tree callers.
+        function _setPillTone(el, tone) {
+            _setPillTier(el, tone === 'paid' ? 'builder' : 'free');
+        }
+
+        function loadBillingStatus() {
+            var token = goulburnAuth.getSession();
+            if (!token) return;
+            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-status', {
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+            })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, status: r.status, data: j }; }); })
+            .then(function(res) {
+                var card = document.getElementById('billingCard');
+                if (!res.ok) {
+                    document.getElementById('billingPlanPill').textContent = 'Unavailable';
+                    document.getElementById('billingStatus').textContent = 'Could not load billing status (HTTP ' + res.status + ').';
+                    return;
+                }
+                var d = res.data || {};
+                var pill = document.getElementById('billingPlanPill');
+                pill.textContent = d.tier_label || 'Free';
+                _setPillTier(pill, d.paid_tier || 'free');
+
+                var statusPill = document.getElementById('operatorStatusPill');
+                statusPill.textContent = d.operator_status || 'Operator';
+                _setPillTier(statusPill, d.paid_tier || 'free');
+
+                // Internal owners get a clearly-labeled pill so we don't pretend they're a paying customer
+                if (d.is_internal) {
+                    pill.textContent = 'Internal';
+                    statusPill.textContent = 'Internal Operator';
+                    pill.style.background = '#1f2937'; pill.style.color = '#a78bfa';
+                    statusPill.style.background = '#1f2937'; statusPill.style.color = '#a78bfa';
+                }
+
+                document.getElementById('billingProbeCap').textContent = (d.daily_probe_cap_display || (d.daily_probe_cap || '—')) + ' / day';
+                document.getElementById('billingAgentCap').textContent =
+                    (d.agent_cap_display || (d.agent_cap || '—')) + ' active ' +
+                    (d.agent_cap === 1 ? 'agent' : 'agents');
+
+                var renewal = document.getElementById('billingRenewal');
+                if (d.is_paid && d.renews_on) {
+                    var dt = new Date(d.renews_on);
+                    renewal.textContent = 'Renews ' + dt.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+                } else if (!d.is_paid) {
+                    renewal.textContent = '$0 forever';
+                } else {
+                    renewal.textContent = '';
+                }
+
+                var upgradeBtn = document.getElementById('billingUpgradeBtn');
+                var portalBtn = document.getElementById('billingPortalBtn');
+                var actionLabel = document.getElementById('billingActionLabel');
+                var actionDesc = document.getElementById('billingActionDescription');
+
+                if (d.is_paid && d.stripe_customer_id_present) {
+                    portalBtn.style.display = 'inline-block';
+                    upgradeBtn.style.display = 'inline-block';
+                    upgradeBtn.textContent = (d.paid_tier === 'proplus' || d.paid_tier === 'enterprise') ? 'Change plan' : 'Upgrade plan';
+                    actionLabel.textContent = 'Manage subscription';
+                    actionDesc.textContent = 'Update your card, view invoices, or cancel via the Stripe customer portal.';
+                } else if (d.is_internal) {
+                    portalBtn.style.display = 'none';
+                    upgradeBtn.style.display = 'none';
+                    actionLabel.textContent = 'Internal account';
+                    actionDesc.textContent = 'You are flagged as an internal Goulburn/Anthropic account. Tier caps do not apply.';
+                } else {
+                    portalBtn.style.display = 'none';
+                    upgradeBtn.style.display = 'inline-block';
+                    upgradeBtn.textContent = 'Upgrade plan';
+                    actionLabel.textContent = 'Upgrade your plan';
+                    actionDesc.textContent = d.upgrade_pitch || 'Move to Builder for 5 agents, 300 probes/day, priority probe queue, and more.';
+                }
+            })
+            .catch(function(err) {
+                document.getElementById('billingPlanPill').textContent = 'Unavailable';
+                document.getElementById('billingStatus').textContent = 'Network error loading billing status.';
+            });
+        }
+
+        function openBillingPortal() {
+            var token = goulburnAuth.getSession();
+            if (!token) { window.location.href = '/sign-in?redirect=%2Fsettings'; return; }
+            var btn = document.getElementById('billingPortalBtn');
+            btn.disabled = true;
+            var original = btn.textContent;
+            btn.textContent = 'Opening Stripe…';
+            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-portal', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ return_url: window.location.origin + '/settings' })
+            })
+            .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, status: r.status, data: j }; }); })
+            .then(function(res) {
+                if (res.ok && res.data && res.data.portal_url) {
+                    window.location.href = res.data.portal_url;
+                } else {
+                    var msg = (res.data && res.data.detail) ? res.data.detail : ('Could not open portal (HTTP ' + res.status + ').');
+                    document.getElementById('billingStatus').textContent = msg;
+                    btn.disabled = false;
+                    btn.textContent = original;
+                }
+            })
+            .catch(function(err) {
+                document.getElementById('billingStatus').textContent = 'Network error reaching Stripe.';
+                btn.disabled = false;
+                btn.textContent = original;
+            });
+        }
+
+        function loadSettingsData() {
+        loadBillingStatus();
         var session = goulburnAuth.getSession();
         var headers = {
             'Content-Type': 'application/json',
