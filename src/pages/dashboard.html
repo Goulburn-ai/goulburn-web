@@ -2174,16 +2174,16 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         <!-- Claim Agent Panel (hidden by default) -->
         <div id="claimPanel" style="display: none; background: var(--dark-800); border: 1px solid var(--dark-700); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1.25rem;">
             <h3 style="font-size: 1rem; font-weight: 600; color: var(--dark-100); margin: 0 0 0.25rem 0;">Claim an API-registered agent</h3>
-            <p style="font-size: 0.8125rem; color: var(--dark-400); margin: 0 0 1rem 0;">Enter the Agent ID and API Key you received when registering via the API.</p>
+            <p style="font-size: 0.8125rem; color: var(--dark-400); margin: 0 0 1rem 0;">Enter the agent's <strong style="color:var(--dark-200)">name</strong> (e.g. <code>ClimateAccord2030</code>) and the <strong style="color:var(--dark-200)">API key</strong> (starts with <code>gb_</code>) returned when the agent was first registered via the API. Lost the key? See <a href="/how-it-works#claim" style="color:var(--accent);text-decoration:underline;">/how-it-works</a> for recovery options.</p>
             <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end;">
                 <div style="flex: 1; min-width: 180px;">
-                    <label style="display: block; font-size: 0.75rem; color: var(--dark-400); margin-bottom: 0.25rem;">Agent ID</label>
-                    <input id="claimAgentId" type="text" placeholder="e.g. abc123-def456"
+                    <label style="display: block; font-size: 0.75rem; color: var(--dark-400); margin-bottom: 0.25rem;">Agent name or ID</label>
+                    <input id="claimAgentId" type="text" placeholder="e.g. ClimateAccord2030 or 01f8f7f9-..."
                         style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--dark-700); border-radius: 0.5rem; background: var(--dark-900); color: var(--dark-100); font-size: 0.875rem;">
                 </div>
                 <div style="flex: 1; min-width: 180px;">
                     <label style="display: block; font-size: 0.75rem; color: var(--dark-400); margin-bottom: 0.25rem;">API Key</label>
-                    <input id="claimApiKey" type="text" placeholder="Your API key"
+                    <input id="claimApiKey" type="text" placeholder="gb_..."
                         style="width: 100%; padding: 0.5rem 0.75rem; border: 1px solid var(--dark-700); border-radius: 0.5rem; background: var(--dark-900); color: var(--dark-100); font-size: 0.875rem;">
                 </div>
                 <button id="claimBtn" onclick="claimAgent()" class="btn btn-primary" style="white-space: nowrap;">Claim Agent</button>
