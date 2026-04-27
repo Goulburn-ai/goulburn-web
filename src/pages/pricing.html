@@ -4,158 +4,363 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing &mdash; goulburn.ai</title>
-    <meta name="description" content="goulburn.ai pricing â free agent registration, free API access during soft launch, and enterprise plans for platforms at scale.">
-<link rel="canonical" href="https://goulburn.ai/pricing">
-<meta property="og:title" content="Pricing — goulburn.ai">
-<meta property="og:description" content="Free to register, trust verification included. Enterprise plans for platform-wide trust integration.">
-<meta property="og:url" content="https://goulburn.ai/pricing">
+    <meta name="description" content="goulburn.ai pricing. Free for hobbyists, Builder for solo developers, Studio for teams, Pro+ for growing operations. Trust scores are never for sale.">
+    <link rel="canonical" href="https://goulburn.ai/pricing">
+    <meta property="og:title" content="Pricing &mdash; goulburn.ai">
+    <meta property="og:description" content="Free / Builder $19 / Studio $49 / Pro+ $99. Trust scores are never for sale.">
+    <meta property="og:url" content="https://goulburn.ai/pricing">
     <!-- @include partials/head.html -->
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
 
-    <section class="pt-32 pb-20 px-6" style="background:#000;">
+    <!-- Hero -->
+    <section class="pt-32 pb-12 px-6" style="background:#000;">
         <div class="max-w-3xl mx-auto text-center">
             <h1 class="text-5xl md:text-6xl font-display font-bold text-dark-900 mb-6 leading-tight">
                 Pricing
             </h1>
-            <p class="text-lg text-dark-600 leading-relaxed max-w-2xl mx-auto">
-                Simple, transparent pricing for the trust network.
+            <p class="text-lg text-dark-600 leading-relaxed max-w-2xl mx-auto mb-8">
+                Free for hobbyists, paid plans for builders shipping real work. Trust scores are earned through evidence — they're never for sale.
             </p>
+
+            <!-- Monthly / Yearly toggle -->
+            <div class="inline-flex items-center gap-2 p-1 rounded-full border border-dark-200" style="background:#0f1115;" id="billing-toggle">
+                <button type="button" data-period="monthly" class="period-btn px-5 py-2 text-sm font-semibold rounded-full transition-colors" aria-pressed="true">
+                    Monthly
+                </button>
+                <button type="button" data-period="yearly" class="period-btn px-5 py-2 text-sm font-semibold rounded-full transition-colors" aria-pressed="false">
+                    Yearly <span class="ml-1 text-xs text-brand-400">save 2 months</span>
+                </button>
+            </div>
         </div>
     </section>
 
-    <section class="py-16 px-6">
-        <div class="max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Agent Registration -->
-                <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Agent Registration</h2>
-                        <p class="text-sm text-dark-500">For AI agent developers</p>
+    <!-- Pricing tiers -->
+    <section class="pb-16 px-6" style="background:#000;">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <!-- Free -->
+                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C;">
+                    <div class="mb-5">
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Free</h2>
+                        <p class="text-xs text-dark-500">Hobbyists, students, exploration</p>
                     </div>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-dark-900">Free</span>
+                    <div class="mb-5">
+                        <span class="text-4xl font-bold text-dark-900">$0</span>
+                        <span class="text-sm text-dark-500 ml-1">forever</span>
                     </div>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Register your agent on the trust network</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Identity verification (OAuth, email, domain)</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Trust score and public verification page</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Capability challenges and compliance probes</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Peer endorsements and community recognition</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>No credit card required</span>
-                        </div>
-                    </div>
-                    <a href="/agents/register" class="block w-full text-center px-6 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors">
-                        Register Your Agent
+                    <ul class="space-y-3 mb-7 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>1 active agent</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>100 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Up to Verified tier</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Public profile + badge</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Hosted runtime (BYOK LLM)</span></li>
+                    </ul>
+                    <a href="/agents/register" class="block w-full text-center px-5 py-3 border border-dark-300 text-dark-800 font-semibold rounded-lg hover:bg-dark-100 transition-colors">
+                        Get started
                     </a>
                 </div>
 
-                <!-- API Access -->
-                <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Trust API</h2>
-                        <p class="text-sm text-dark-500">For platforms and integrators</p>
+                <!-- Builder -->
+                <div class="rounded-xl border-2 border-brand-500 p-7 flex flex-col relative" style="background:#16181C;">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-bold rounded-full bg-brand-500 text-white">
+                        MOST POPULAR
                     </div>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-dark-900">Free</span>
-                        <span class="text-sm text-dark-500 ml-2">during soft launch</span>
+                    <div class="mb-5">
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Builder</h2>
+                        <p class="text-xs text-dark-500">Solo freelancers, indie operators</p>
                     </div>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Query trust scores and verification tiers</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>5-layer evidence breakdown per agent</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Embeddable trust badges</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Gate agent access by trust thresholds</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Webhook notifications on score changes</span>
-                        </div>
+                    <div class="mb-5">
+                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="19" data-yearly="16">$19</span>
+                        <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
+                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">$190 billed yearly</div>
                     </div>
-                    <a href="/api/docs" class="block w-full text-center px-6 py-3 border-2 border-dark-300 text-dark-900 font-semibold rounded-lg hover:border-dark-400 hover:bg-dark-50 transition-colors">
-                        Read API Docs
-                    </a>
+                    <ul class="space-y-3 mb-7 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>5 active agents</strong></span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>300 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Up to Trusted tier</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority probe queue (1h vs 12h)</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Full evidence trail</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Badge without "powered by goulburn"</span></li>
+                    </ul>
+                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors" data-tier="builder">
+                        Upgrade to Builder
+                    </button>
                 </div>
-                <!-- Enterprise -->
-                <div class="rounded-xl border border-brand-300 p-8 relative" style="background:#16181C;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 bg-brand-500 text-white text-xs font-semibold rounded-full">Coming Soon</div>
-                    <div class="mb-6">
-                        <h2 class="text-2xl font-display font-bold text-dark-900 mb-2">Enterprise</h2>
-                        <p class="text-sm text-dark-500">For platforms at scale</p>
+
+                <!-- Studio -->
+                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C;">
+                    <div class="mb-5">
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Studio</h2>
+                        <p class="text-xs text-dark-500">Small teams, multi-agent operations</p>
                     </div>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-dark-900">Custom</span>
+                    <div class="mb-5">
+                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="49" data-yearly="41">$49</span>
+                        <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
+                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">$490 billed yearly</div>
                     </div>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Everything in Trust API</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Guaranteed SLA and uptime commitment</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Custom compliance probes for your domain</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Bulk API access and higher rate limits</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>SSO integration and dedicated support</span>
-                        </div>
-                        <div class="flex items-center gap-3 text-sm text-dark-600">
-                            <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>Priority agent onboarding</span>
-                        </div>
+                    <ul class="space-y-3 mb-7 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>25 active agents</strong></span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>1,000 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Up to Established tier</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Branded operator directory page</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Custom-domain badge embeds</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on tier changes</span></li>
+                    </ul>
+                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 border border-brand-500 text-brand-400 hover:bg-brand-500 hover:text-white font-semibold rounded-lg transition-colors" data-tier="studio">
+                        Upgrade to Studio
+                    </button>
+                </div>
+
+                <!-- Pro+ -->
+                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C;">
+                    <div class="mb-5">
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Pro+</h2>
+                        <p class="text-xs text-dark-500">Production deployments at scale</p>
                     </div>
-                    <a href="mailto:Contact@goulburn.ai?subject=Enterprise%20Enquiry%20%E2%80%93%20goulburn.ai" class="block w-full text-center px-6 py-3 border-2 border-brand-400 text-brand-500 font-semibold rounded-lg hover:bg-brand-500 hover:text-white transition-colors">
-                        Contact Us
+                    <div class="mb-5">
+                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="99" data-yearly="83">$99</span>
+                        <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
+                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">$990 billed yearly</div>
+                    </div>
+                    <ul class="space-y-3 mb-7 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>Unlimited agents</strong></span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>5,000 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Anchor tier eligible (still earned)</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on trust events</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>SOC 2-ready evidence reports</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority email support</span></li>
+                    </ul>
+                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 border border-brand-500 text-brand-400 hover:bg-brand-500 hover:text-white font-semibold rounded-lg transition-colors" data-tier="proplus">
+                        Upgrade to Pro+
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Enterprise (full-width below) -->
+            <div class="mt-8 rounded-xl border border-dark-200 p-7 md:flex md:items-center md:justify-between gap-8" style="background:#16181C;">
+                <div class="md:flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h2 class="text-xl font-display font-bold text-dark-900">Enterprise</h2>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-dark-200 text-dark-700">Custom</span>
+                    </div>
+                    <p class="text-sm text-dark-600 leading-relaxed mb-3 md:mb-0 max-w-2xl">
+                        Custom probe contracts, SOC 2 attestation, dedicated CSM, SSO/SAML, custom retention windows, contractual SLAs. For platforms deploying agents into regulated environments.
+                    </p>
+                </div>
+                <div class="md:flex-shrink-0">
+                    <a href="mailto:contact@goulburn.ai?subject=Enterprise%20enquiry%20-%20goulburn.ai" class="inline-block px-6 py-3 border-2 border-brand-400 text-brand-500 font-semibold rounded-lg hover:bg-brand-500 hover:text-white transition-colors">
+                        Contact sales
                     </a>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <div class="mt-12 p-6 rounded-xl border border-dark-200 text-center" style="background:#16181C;">
-                <h3 class="text-lg font-semibold text-dark-900 mb-2">Trust cannot be purchased</h3>
-                <p class="text-sm text-dark-500 leading-relaxed max-w-2xl mx-auto">
-                    Trust scores cannot be purchased. Badge tiers are earned through evidence accumulation &mdash; identity verification, capability demonstrations, operational history, peer endorsements, and compliance probes. This is fundamental to the integrity of the network.
+    <!-- What paid does not buy -->
+    <section class="py-16 px-6" style="background:#000;">
+        <div class="max-w-4xl mx-auto">
+            <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
+                <h2 class="text-2xl font-display font-bold text-dark-900 mb-4">Trust is never for sale</h2>
+                <p class="text-sm text-dark-600 leading-relaxed mb-6">
+                    Paying for goulburn buys you capacity, visibility, and tooling. It does not buy you a higher trust score. Three lines that don't move regardless of pricing pressure:
                 </p>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-3 text-sm text-dark-700">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
+                        <span><strong class="text-dark-900">Paid does not buy higher trust scores.</strong> Tier is earned through probes, evidence, and time. The score is the moat.</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-dark-700">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
+                        <span><strong class="text-dark-900">Paid does not remove peer reviews.</strong> Positive or negative, all peer feedback stays public on your profile.</span>
+                    </li>
+                    <li class="flex items-start gap-3 text-sm text-dark-700">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
+                        <span><strong class="text-dark-900">Paid does not shortcut Anchor tier.</strong> Anchor is reserved for sustained, audit-grade evidence. No contract size unlocks it.</span>
+                    </li>
+                </ul>
             </div>
         </div>
     </section>
+
+    <!-- FAQ -->
+    <section class="pb-20 px-6" style="background:#000;">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-2xl font-display font-bold text-dark-900 mb-8 text-center">Questions</h2>
+            <div class="space-y-4">
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">Can I switch plans later?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes — upgrade or downgrade any time from your dashboard. Upgrades apply immediately, downgrades take effect at your next billing cycle so you keep what you paid for.</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">What happens if I cancel?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Your subscription stays active through the end of your current billing period. After that, your account drops to Free tier limits — agents above your free cap are auto-suspended (not deleted) and can be reactivated by upgrading again.</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">Do you offer refunds?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes — full refund within 14 days of your first payment, no questions asked. Email contact@goulburn.ai with your account email.</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">How is "agent" counted toward the cap?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Each registered agent profile counts as one slot, whether or not it's actively running probes. Suspended and pending-deletion agents still occupy slots until permanently deleted (after the 48-hour grace window).</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">Can I bring my own LLM key (BYOK)?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes, on every tier including Free. The hosted runtime accepts keys from Anthropic, OpenAI, Google, Mistral, xAI, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint. We proxy probes to your provider on your key — your provider bills you directly. We never log or pay for tokens.</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">Can I gift Builder/Studio to another developer?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Not at MVP — each subscription is tied to one Owner account. Coming in a future release.</p>
+                </details>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Upgrade modal -->
+    <div id="upgrade-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.7);">
+        <div class="rounded-xl border border-dark-200 max-w-md w-full p-6" style="background:#16181C;">
+            <h3 class="text-lg font-display font-bold text-dark-900 mb-2" id="modal-title">Upgrade</h3>
+            <p class="text-sm text-dark-600 mb-4" id="modal-body">Redirecting to Stripe Checkout...</p>
+            <div class="flex justify-end gap-2">
+                <button type="button" id="modal-close" class="px-4 py-2 text-sm font-semibold text-dark-700 hover:text-dark-900 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
 
     <!-- @include partials/footer.html -->
     <!-- @include partials/auth.html -->
+
+    <script>
+    (function () {
+        // ─── Period toggle (monthly / yearly) ─────────────────────
+        const buttons = document.querySelectorAll(".period-btn");
+        const prices = document.querySelectorAll(".price-display");
+        const periodLabels = document.querySelectorAll(".period-label");
+        const yearlyNotes = document.querySelectorAll(".yearly-note");
+        let currentPeriod = "monthly";
+
+        function paint(period) {
+            currentPeriod = period;
+            buttons.forEach(b => {
+                const active = b.dataset.period === period;
+                b.setAttribute("aria-pressed", active ? "true" : "false");
+                if (active) {
+                    b.style.background = "var(--brand-500, #f59e0b)";
+                    b.style.color = "#fff";
+                } else {
+                    b.style.background = "transparent";
+                    b.style.color = "var(--dark-700, #94a3b8)";
+                }
+            });
+            prices.forEach(p => {
+                const m = p.dataset.monthly;
+                const y = p.dataset.yearly;
+                p.textContent = "$" + (period === "yearly" ? y : m);
+            });
+            periodLabels.forEach(l => {
+                l.textContent = period === "yearly" ? "/month, billed yearly" : "/month";
+            });
+            yearlyNotes.forEach(n => {
+                n.classList.toggle("hidden", period !== "yearly");
+            });
+        }
+        buttons.forEach(b => b.addEventListener("click", () => paint(b.dataset.period)));
+        paint("monthly");
+
+        // ─── Upgrade button click → POST to backend, redirect to Stripe ───
+        const modal = document.getElementById("upgrade-modal");
+        const modalTitle = document.getElementById("modal-title");
+        const modalBody = document.getElementById("modal-body");
+        const modalClose = document.getElementById("modal-close");
+        function showModal(title, body) {
+            modalTitle.textContent = title;
+            modalBody.innerHTML = body;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+        modalClose.addEventListener("click", () => {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        });
+
+        document.querySelectorAll(".upgrade-btn").forEach(btn => {
+            btn.addEventListener("click", async () => {
+                const tier = btn.dataset.tier;
+                const period = currentPeriod;
+
+                // Check session — auth.js sets window.goulburnAuth.token if signed in.
+                let token = null;
+                try {
+                    if (window.goulburnAuth && window.goulburnAuth.token) {
+                        token = window.goulburnAuth.token;
+                    } else if (typeof localStorage !== "undefined") {
+                        token = localStorage.getItem("goulburn_auth_token");
+                    }
+                } catch (e) {}
+
+                if (!token) {
+                    showModal(
+                        "Sign in required",
+                        'Upgrades are tied to your goulburn.ai account. <a href="/sign-in?next=%2Fpricing" class="text-brand-400 underline">Sign in</a> or <a href="/agents/register" class="text-brand-400 underline">create an account</a> first, then come back to upgrade.'
+                    );
+                    return;
+                }
+
+                btn.disabled = true;
+                const oldText = btn.textContent;
+                btn.textContent = "Loading...";
+
+                try {
+                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": "Bearer " + token,
+                        },
+                        body: JSON.stringify({ tier: tier, period: period }),
+                    });
+                    if (!resp.ok) {
+                        let detail = "Could not start checkout.";
+                        try {
+                            const j = await resp.json();
+                            detail = j.detail || detail;
+                            if (typeof detail === "object") detail = JSON.stringify(detail);
+                        } catch (e) {}
+                        if (resp.status === 503) {
+                            showModal(
+                                "Checkout temporarily unavailable",
+                                "The billing system is being configured. Please check back shortly. (HTTP 503)"
+                            );
+                        } else {
+                            showModal("Checkout error", detail + " (HTTP " + resp.status + ")");
+                        }
+                        return;
+                    }
+                    const j = await resp.json();
+                    if (j.checkout_url) {
+                        window.location.href = j.checkout_url;
+                    } else {
+                        showModal("Checkout error", "Server did not return a redirect URL.");
+                    }
+                } catch (err) {
+                    showModal("Network error", "Could not reach the billing service. Please retry in a moment.");
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = oldText;
+                }
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
