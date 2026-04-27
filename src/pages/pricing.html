@@ -12,6 +12,12 @@
     <!-- @include partials/head.html -->
 </head>
 <body class="bg-dark-50">
+        <div style="max-width:900px; margin:80px auto 0; padding:12px 20px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.3); border-radius:8px; color:#fbbf24; font-size:14px; line-height:1.5; text-align:center;">
+            <strong style="color:#fef3c7; font-weight:600;">Free is available now.</strong>
+            Builder, Studio, and Pro+ are launching soon as we wrap up our payment provider activation.
+            <a href="mailto:hello@goulburn.ai?subject=Notify%20me%20when%20paid%20plans%20launch" style="color:#fef3c7; text-decoration:underline;">Get on the list &rarr;</a>
+        </div>
+
     <!-- @include partials/nav.html -->
 
     <!-- Hero -->
@@ -63,11 +69,10 @@
                     </a>
                 </div>
 
-                <!-- Builder -->
-                <div class="rounded-xl border-2 border-brand-500 p-7 flex flex-col relative" style="background:#16181C;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-bold rounded-full bg-brand-500 text-white">
-                        MOST POPULAR
-                    </div>
+                <!-- Builder (ghosted — paid tiers gated on Stripe activation) -->
+                <div class="rounded-xl border-2 border-brand-500 p-7 flex flex-col relative" style="background:#16181C; opacity:0.55; filter:grayscale(0.4);">
+                    <span style="position:absolute; top:-3px; right:14px; padding:4px 10px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
+                    <!-- MOST POPULAR badge hidden while paid tiers are ghosted -->
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Builder</h2>
                         <p class="text-xs text-dark-500">Solo freelancers, indie operators</p>
@@ -85,13 +90,13 @@
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Full evidence trail</span></li>
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Badge without "powered by goulburn"</span></li>
                     </ul>
-                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-lg transition-colors" data-tier="builder">
-                        Upgrade to Builder
-                    </button>
+                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
+                    <a href="mailto:hello@goulburn.ai?subject=Notify%20me%20when%20Builder%20launches" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:rgba(247,249,249,0.55); text-decoration:none;">Email me when Builder launches</a>
                 </div>
 
-                <!-- Studio -->
-                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C;">
+                <!-- Studio (ghosted) -->
+                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C; opacity:0.55; filter:grayscale(0.4); position:relative;">
+                    <span style="position:absolute; top:-3px; right:14px; padding:4px 10px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Studio</h2>
                         <p class="text-xs text-dark-500">Small teams, multi-agent operations</p>
@@ -109,13 +114,13 @@
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Custom-domain badge embeds</span></li>
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on tier changes</span></li>
                     </ul>
-                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 border border-brand-500 text-brand-400 hover:bg-brand-500 hover:text-white font-semibold rounded-lg transition-colors" data-tier="studio">
-                        Upgrade to Studio
-                    </button>
+                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
+                    <a href="mailto:hello@goulburn.ai?subject=Notify%20me%20when%20Studio%20launches" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:rgba(247,249,249,0.55); text-decoration:none;">Email me when Studio launches</a>
                 </div>
 
-                <!-- Pro+ -->
-                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C;">
+                <!-- Pro+ (ghosted) -->
+                <div class="rounded-xl border border-dark-200 p-7 flex flex-col" style="background:#16181C; opacity:0.55; filter:grayscale(0.4); position:relative;">
+                    <span style="position:absolute; top:-3px; right:14px; padding:4px 10px; font-size:10px; font-weight:700; background:rgba(245,158,11,0.18); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Pro+</h2>
                         <p class="text-xs text-dark-500">Production deployments at scale</p>
@@ -133,9 +138,8 @@
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>SOC 2-ready evidence reports</span></li>
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority email support</span></li>
                     </ul>
-                    <button type="button" class="upgrade-btn block w-full text-center px-5 py-3 border border-brand-500 text-brand-400 hover:bg-brand-500 hover:text-white font-semibold rounded-lg transition-colors" data-tier="proplus">
-                        Upgrade to Pro+
-                    </button>
+                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
+                    <a href="mailto:hello@goulburn.ai?subject=Notify%20me%20when%20Pro%2B%20launches" style="display:block; text-align:center; margin-top:10px; font-size:12px; color:rgba(247,249,249,0.55); text-decoration:none;">Email me when Pro+ launches</a>
                 </div>
 
             </div>
@@ -258,6 +262,10 @@
                 const params = new URLSearchParams(window.location.search);
                 if (params.get("next") !== "checkout") return;
                 const tier = params.get("tier");
+                if (tier === "builder" || tier === "studio" || tier === "proplus") {
+                    showModal("Coming soon", "Paid plans are launching soon as we wrap up our payment provider activation. Email <a href=\"mailto:hello@goulburn.ai\" style=\"color:#fbbf24;text-decoration:underline;\">hello@goulburn.ai</a> to be notified.");
+                    return;
+                }
                 const period = params.get("period") || "monthly";
                 if (!tier) return;
                 const token = (window.goulburnAuth && window.goulburnAuth.getSession)
