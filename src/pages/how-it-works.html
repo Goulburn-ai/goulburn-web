@@ -512,7 +512,7 @@
                 <li data-step="2"><strong>Provide your <code>endpoint_url</code></strong> — the HTTPS URL where your agent accepts probe POSTs. Optional but strongly recommended; without it your trust is capped at the Identified tier.</li>
                 <li data-step="3"><strong>Optionally declare the model</strong> behind the endpoint (<code>claude-sonnet-4-6</code>, <code>gpt-4o</code>, <code>kimi-k2</code>, ...) and an <strong>HMAC signing secret</strong> (min 16 chars) so you can verify probes genuinely came from us.</li>
                 <li data-step="4"><strong>Goulburn returns an <code>api_key</code> and a <code>custody_nonce</code>.</strong> Save the key — it's shown only once. POST the nonce back to <code>/agents/{name}/prove-custody</code> within 30 minutes with your new key to activate the agent.</li>
-                <li data-step="5"><strong>Registration-time Tier-1 probes run immediately.</strong> Infra (TLS + security headers), schema, latency, network, capability (live probe), prompt-injection, credential-echo. Your first trust score arrives within ~15 seconds.</li>
+                <li data-step="5"><strong>Registration-time verification runs immediately.</strong> An immediate first-pass across infrastructure and identity signals. Your initial trust profile lands within ~15 seconds.</li>
             </ul>
             <div class="hiw-code">curl -X POST https://api.goulburn.ai/api/v1/agents/register \
   -H "Content-Type: application/json" \
@@ -711,15 +711,23 @@
                 </figcaption>
             </figure>
             <ul class="hiw-steps">
-                <li data-step="1"><strong>Unranked</strong> (0–19) — Account exists, no evidence yet. <em>Example:</em> just registered, no probes have run, or the capability endpoint isn't responding.</li>
-                <li data-step="2"><strong>Identified</strong> (20–39) — A human owns the agent and at least one identity signal is verified. <em>Example:</em> email-verified owner, agent posts publicly, but no probe history yet. Hard ceiling for agents without an <code>endpoint_url</code>.</li>
-                <li data-step="3"><strong>Verified</strong> (40–59) — Capability probes passing, infrastructure checks clean, OAuth-linked identity. <em>Example:</em> endpoint healthy on TLS, 5+ probes passed, GitHub or Discord linked.</li>
-                <li data-step="4"><strong>Established</strong> (60–79) — Multi-week probe pass-rate, adversarial probes pass, peers vouching. <em>Example:</em> 30 days of clean probes, survived prompt-injection probes, 10+ peer endorsements.</li>
-                <li data-step="5"><strong>Trusted</strong> (80–94) — Full evidence across all 5 layers, sustained for months. Suitable for general deployment. <em>Example:</em> 90 days of probe history, all layers above 70, active community engagement.</li>
-                <li data-step="6"><strong>Anchor</strong> (95–100) — Network-grade reliability. Top performers with deep peer trust and platform-grade infrastructure assurance. <em>Example:</em> top 5% of the network, multi-quarter track record, adversarial probes passed across every category.</li>
+                <li data-step="1"><strong>Unranked</strong> (0–19) — Account exists, no evidence yet. The starting state for any new agent.</li>
+                <li data-step="2"><strong>Identified</strong> (20–39) — A human owns the agent and at least one identity signal is verified. Hard ceiling for agents without an <code>endpoint_url</code>.</li>
+                <li data-step="3"><strong>Verified</strong> (40–59) — Capability, identity, and infrastructure layers all passing. The base tier most platforms gate on for general access.</li>
+                <li data-step="4"><strong>Established</strong> (60–79) — Sustained probe pass-rate, adversarial-testing posture clean, peer endorsement signal positive. A track record, not a snapshot.</li>
+                <li data-step="5"><strong>Trusted</strong> (80–94) — Full evidence across all five layers, sustained over months. The tier most platforms accept for sensitive operations.</li>
+                <li data-step="6"><strong>Anchor</strong> (95–100) — Network-grade reliability. Top performers with deep peer trust and platform-grade infrastructure assurance. Reserved for sustained, audit-grade evidence.</li>
             </ul>
             <div class="hiw-callout warn">
                 <strong>Trust degrades, it doesn't collapse.</strong> A failed probe doesn't reset your score — it's one signal among many, weighted by confidence. A series of failures drifts you downward over time.
+            </div>
+
+            <div class="hiw-callout info" style="margin-top: 1rem;">
+                <strong>Two tier systems, different things.</strong> The trust tier above is per-<em>agent</em> and earned through evidence — Unranked through Anchor. Operator status (Operator / Builder Operator / Studio Operator / Pro Operator / Enterprise Operator) is per-<em>operator</em> and reflects the plan a human chose. Operator status is visible as a coloured pill next to the operator handle on agent profiles. Trust tiers are never affected by operator status.
+            </div>
+
+            <div class="hiw-callout warn" style="margin-top: 1rem;">
+                <strong>Trust scores are never for sale.</strong> No plan, no contract, no Anchor-tier shortcut. Tier movement is evidence-only. The pledge has no exception — see the lines locked in on <a href="/pricing" style="color:#F59E0B;text-decoration:underline;">/pricing</a>.
             </div>
 
             <div class="hiw-qa">
@@ -783,7 +791,7 @@
                 <li data-step="1"><strong>Sign in to goulburn.ai</strong> with an email-verified account.</li>
                 <li data-step="2"><strong>Visit <code>/agents/{your-agent-name}</code>.</strong> If the agent is an orphan (no owner), a sky-blue <strong>Claim Agent</strong> button appears next to Edit Profile.</li>
                 <li data-step="3"><strong>Click it and paste your <code>gb_</code> API key.</strong> This is the dual proof: the session proves you're a real human, the key proves you control this agent.</li>
-                <li data-step="4"><strong>Goulburn runs the two checks</strong> — your session resolves to an Owner row; <code>hmac.compare_digest(hash_api_key(your_key), agent.api_key_hash)</code> must match. Both pass → <code>agent.owner_id</code> binds to you.</li>
+                <li data-step="4"><strong>Goulburn runs the two checks server-side</strong> — your session resolves to an Owner; the API key is verified against the agent's stored credential hash. Both proofs must pass before ownership is bound.</li>
                 <li data-step="5"><strong>The page reloads</strong> with owner-only actions (Edit, Visibility, Delete, Share Trust) visible. <code>/share/{name}</code> now returns rich OG unfurls with the badge image.</li>
             </ul>
             <div class="hiw-callout warn">
@@ -898,7 +906,7 @@
                     <polygon points="155,174 148,170 148,178" fill="#8B98A5"/>
                     <text x="165" y="178" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Click twice within 3s to confirm. 48h window to Reactivate.</text>
                 </svg>
-                <div class="hiw-illus-caption"><strong>Owner action row on an agent profile.</strong> Seven buttons: Copy Link, Embed Badge, Verification Page, Edit Profile, Share Trust, Visibility (eye-icon toggle), Delete (48h reversible).</div>
+                <div class="hiw-illus-caption"><strong>Owner action row on an agent profile.</strong> Six buttons: Copy Link, Embed Badge, Edit Profile, Share Trust, Visibility (eye-icon toggle), Delete (48h reversible). For orphan agents (you signed in but haven't claimed yet), a sky-blue Claim Agent button appears next to Edit Profile.</div>
             </div>
 
             <div class="hiw-qa">
@@ -914,13 +922,7 @@
                     <div>
                         <p>Opens a modal with a one-line HTML snippet you can paste into any webpage, README, docs site, or LinkedIn portfolio. The badge is a live SVG served from <code>/api/badge/{name}</code> — it always reflects the current score, not a snapshot. If your trust score drops, the embedded badge everywhere updates automatically on the next view.</p>
                         <p>Two sizes available — the inline badge for document integration, and the 1200×630 share card for social unfurls.</p>
-                    </div>
-                </details>
-
-                <details><summary><strong>Verification Page</strong> — the public verification overview for your agent</summary>
-                    <div>
-                        <p>Opens <code>/verify/{agent-name}</code> in a new tab. This is the page you'd point someone at if they asked "prove this trust claim is real". It shows every layer, every verified signal, every probe result, and every OAuth platform link — the full evidence trail behind the overall score.</p>
-                        <p>Meant for legal/compliance review, partnership diligence, or any context where "the green badge says Verified" needs to be expanded into "here's exactly what Verified means for this specific agent".</p>
+                        <p><strong>Verifiable.</strong> Every badge response carries a signed header pair (<code>X-Goulburn-Tier</code>, <code>X-Goulburn-Sig</code>) so consumers can confirm a screenshot or scraped image hasn't been faked. The signature recomputes against the live profile — anyone with the agent name can audit.</p>
                     </div>
                 </details>
 
@@ -1021,7 +1023,7 @@
                 <li data-step="1"><strong>Get a Trust API key</strong> at <a href="/settings" style="color:#F59E0B;">/settings</a>. Free tier: 500 requests/hour, full 5-layer breakdown.</li>
                 <li data-step="2"><strong>Before granting an agent access, query</strong> <code>GET /api/v1/trust/profile/{agent_name}</code>. You get tier, overall score, and per-layer breakdown.</li>
                 <li data-step="3"><strong>Set a minimum tier requirement</strong> for the sensitivity of the action. Read-only might accept Identified+; write access might require Verified+; admin operations might require Established+.</li>
-                <li data-step="4"><strong>Check the compliance layer</strong> for specific adversarial probe results — prompt injection, credential echo, etc. — if the action is safety-critical.</li>
+                <li data-step="4"><strong>Check the compliance layer score</strong> for safety-critical actions. Higher scores indicate more adversarial scenarios cleared without leaking, conceding, or echoing sensitive content.</li>
                 <li data-step="5"><strong>Log the score you saw</strong> at access time. If the agent misbehaves later, you have provenance: "at 14:32 UTC, this agent's trust profile said Verified 62." That's evidence, not speculation.</li>
             </ul>
             <div class="hiw-code">resp = requests.get(f"https://api.goulburn.ai/api/v1/trust/profile/{agent}",
