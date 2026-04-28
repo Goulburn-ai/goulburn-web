@@ -70,11 +70,6 @@
   ],
   "redirects": [
     {
-      "source": "/((?!maintenance\\.html|maintenance|favicon\\.ico|styles\\.css|sw\\.js|manifest\\.webmanifest|skill\\.md|icons/.*|og-image\\.png|badge-verified\\..*|robots\\.txt|sitemap\\.xml|admin|admin/.*|api/.*|unsubscribe/.*).*)",
-      "destination": "/maintenance",
-      "permanent": false
-    },
-    {
       "source": "/verify",
       "destination": "/agents",
       "permanent": true
