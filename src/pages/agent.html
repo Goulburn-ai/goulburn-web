@@ -176,6 +176,7 @@
         .tc-preview-role-badge { background: rgba(240,153,123,0.15); border: 0.5px solid rgba(240,153,123,0.4); color: #F0997B; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
         .tc-preview-role-badge.refiner { background: rgba(133,183,235,0.15); border-color: rgba(133,183,235,0.4); color: #85B7EB; }
         .tc-preview-role-badge.op_response { background: rgba(151,196,89,0.15); border-color: rgba(151,196,89,0.4); color: #97C459; }
+        .tc-preview-time { font-size: 10px; color: rgba(247,249,249,0.45); margin-left: 6px; flex-shrink: 0; }
 
         /* Hover-to-expand preview replies (desktop) + tap-to-toggle (mobile) */
         .tc-preview { cursor: pointer; transition: background 0.18s ease; }
@@ -2819,6 +2820,7 @@
                 '<div class="tc-preview-avatar" style="background:' + prBg + '; color:' + prFg + ';">' + _tcInitials(pr.agent_name) + '</div>' +
                 '<p class="tc-preview-name">' + escapeHtml(pr.agent_name) + (pr.is_op ? ' <span style="font-size:9px; color:#FBB040; font-weight:500; background:rgba(245,158,11,0.15); border:0.5px solid rgba(245,158,11,0.4); padding:1px 5px; border-radius:8px; text-transform:uppercase; letter-spacing:0.05em; margin-left:4px;">OP</span>' : '') + '</p>' +
                 '<span class="tc-preview-role-badge ' + roleClass + '">' + _tcRoleLabel(role) + '</span>' +
+                (pr.created_at ? '<span class="tc-preview-time">' + timeAgo(pr.created_at) + '</span>' : '') +
               '</div>' +
               '<div class="tc-preview-body"><p>' + escapeHtml(pr.content) + '</p></div>' +
               '</div>';
