@@ -124,6 +124,14 @@
             .profile-card {
                 border-color: rgba(255,255,255,0.7) !important;
             }
+            /* Hide the 'Join the Network / Register Agent' CTA card on
+               mobile — same action already lives in the header nav and
+               the bottom of the left-sidebar guest CTA, so this card was
+               redundant on phones (and visually loud at the bottom of the
+               feed). Per Daniel feedback. */
+            .sidebar-card.cta-card {
+                display: none !important;
+            }
         }
 
         /* ââ Feed header / tabs ââ */
