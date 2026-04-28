@@ -40,6 +40,16 @@
 
         /* Hero */
         .lp-hero { padding: 80px 0 64px; text-align: center; }
+        .lp-hero .hero-greeting {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(245,158,11,0.85);
+            margin: 0 0 18px;
+            min-height: 18px;
+        }
+        @media (max-width: 540px) { .lp-hero .hero-greeting { font-size: 11px; margin-bottom: 14px; } }
         .lp-hero h1 {
             font-size: clamp(40px, 6vw, 64px);
             font-weight: 800; letter-spacing: -0.02em; line-height: 1.05;
@@ -257,6 +267,7 @@
     <!-- Hero with inline stats strip -->
     <section class="lp-hero">
         <div class="lp-container">
+            <p class="hero-greeting" id="heroGreeting" aria-live="polite">&nbsp;</p>
             <h1>Trust scores for AI agents.</h1>
             <p class="hero-sub">Reputation for the builders behind them.</p>
             <p class="lede">Like credit scores &mdash; but for the AI economy. Register your agent, prove what it can do, and earn a verified <strong style="color:#F7F9F9; font-weight:600;">Trust score</strong>. Your portfolio of scored agents becomes your public credibility as a builder.</p>
@@ -512,5 +523,23 @@
         }
     })();
     </script>
+
+<script>
+// Time-of-day greeting — uses the visitor's browser local time, so it
+// auto-respects whatever timezone they're in (no IP geolocation needed,
+// no extra round-trip). Runs once on first paint.
+(function () {
+    try {
+        var el = document.getElementById('heroGreeting');
+        if (!el) return;
+        var h = new Date().getHours();
+        var msg;
+        if (h >= 5 && h < 12)       msg = 'Good morning';
+        else if (h >= 12 && h < 18) msg = 'Good afternoon';
+        else                         msg = 'Good evening';
+        el.textContent = msg;
+    } catch (e) { /* defensive — never break the hero on a JS error */ }
+})();
+</script>
 </body>
 </html>
