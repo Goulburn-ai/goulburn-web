@@ -79,6 +79,7 @@
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Builder</h2>
                         <p class="text-xs text-dark-500">Solo freelancers, indie operators</p>
+                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q2 2026</p>
                     </div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
@@ -94,7 +95,7 @@
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Badge without "powered by goulburn"</span></li>
                     </ul>
                     <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <a href="mailto:contact@goulburn.ai?subject=Notify%20me%20when%20Builder%20launches" style="display:block; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.7); text-decoration:none; border-radius:8px;">Email me when Builder launches</a>
+                    <button type="button" class="waitlist-btn" data-tier="builder" data-tier-name="Builder" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Builder launches</button>
                 </div>
 
                 <!-- Studio (ghosted) -->
@@ -103,6 +104,7 @@
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Studio</h2>
                         <p class="text-xs text-dark-500">Small teams, multi-agent operations</p>
+                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q2 2026</p>
                     </div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
@@ -118,7 +120,7 @@
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on tier changes</span></li>
                     </ul>
                     <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <a href="mailto:contact@goulburn.ai?subject=Notify%20me%20when%20Studio%20launches" style="display:block; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.7); text-decoration:none; border-radius:8px;">Email me when Studio launches</a>
+                    <button type="button" class="waitlist-btn" data-tier="studio" data-tier-name="Studio" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Studio launches</button>
                 </div>
 
                 <!-- Pro+ (ghosted) -->
@@ -127,6 +129,7 @@
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Pro+</h2>
                         <p class="text-xs text-dark-500">Production deployments at scale</p>
+                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q3 2026</p>
                     </div>
                     <div class="mb-5">
                         <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
@@ -142,7 +145,7 @@
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority email support</span></li>
                     </ul>
                     <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <a href="mailto:contact@goulburn.ai?subject=Notify%20me%20when%20Pro%2B%20launches" style="display:block; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.7); text-decoration:none; border-radius:8px;">Email me when Pro+ launches</a>
+                    <button type="button" class="waitlist-btn" data-tier="proplus" data-tier-name="Pro+" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Pro+ launches</button>
                 </div>
 
             </div>
@@ -232,6 +235,23 @@
             </div>
         </div>
     </section>
+
+    <!-- Waitlist signup modal -->
+    <div id="waitlist-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.7);">
+        <div class="rounded-xl border border-dark-200 max-w-md w-full p-6" style="background:#16181C;">
+            <h3 class="text-lg font-display font-bold text-dark-900 mb-2" id="waitlist-title">Join the waitlist</h3>
+            <p class="text-sm text-dark-600 mb-4" id="waitlist-body">We'll email you the moment <span id="waitlist-tier-label">Builder</span> launches. No follow-ups, no spam.</p>
+            <form id="waitlist-form" class="space-y-3">
+                <input id="waitlist-email" type="email" autocomplete="email" required placeholder="you@example.com" class="block w-full px-3 py-2 rounded-lg border border-dark-200 bg-dark-100 text-dark-900 text-sm focus:outline-none focus:border-brand-500" />
+                <div id="waitlist-error" class="text-xs text-red-400 hidden"></div>
+                <div id="waitlist-success" class="text-xs text-green-400 hidden">You're on the list. Check your inbox for confirmation.</div>
+                <div class="flex justify-end gap-2 pt-1">
+                    <button type="button" id="waitlist-cancel" class="px-4 py-2 text-sm font-semibold text-dark-700 hover:text-dark-900 transition-colors">Close</button>
+                    <button type="submit" id="waitlist-submit" class="px-4 py-2 text-sm font-semibold rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors">Notify me</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Upgrade modal -->
     <div id="upgrade-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.7);">
@@ -404,6 +424,84 @@
                     btn.textContent = oldText;
                 }
             });
+        });
+
+        // ─── Waitlist signup ─────────────────────────────────────
+        const wlModal = document.getElementById("waitlist-modal");
+        const wlTitle = document.getElementById("waitlist-title");
+        const wlTierLabel = document.getElementById("waitlist-tier-label");
+        const wlForm = document.getElementById("waitlist-form");
+        const wlEmail = document.getElementById("waitlist-email");
+        const wlError = document.getElementById("waitlist-error");
+        const wlSuccess = document.getElementById("waitlist-success");
+        const wlCancel = document.getElementById("waitlist-cancel");
+        const wlSubmit = document.getElementById("waitlist-submit");
+        let wlCurrentTier = "builder";
+        const ADMIN_BASE = "https://goulburn-admin-production.up.railway.app";
+
+        function openWaitlistModal(tierSlug, tierName) {
+            wlCurrentTier = tierSlug;
+            wlTitle.textContent = "Join the " + tierName + " waitlist";
+            wlTierLabel.textContent = tierName;
+            wlError.classList.add("hidden");
+            wlSuccess.classList.add("hidden");
+            wlEmail.value = "";
+            wlSubmit.disabled = false;
+            wlSubmit.textContent = "Notify me";
+            wlEmail.disabled = false;
+            wlModal.classList.remove("hidden");
+            wlModal.classList.add("flex");
+            setTimeout(function() { wlEmail.focus(); }, 50);
+        }
+        function closeWaitlistModal() {
+            wlModal.classList.add("hidden");
+            wlModal.classList.remove("flex");
+        }
+        wlCancel.addEventListener("click", closeWaitlistModal);
+        document.querySelectorAll(".waitlist-btn").forEach(function(btn) {
+            btn.addEventListener("click", function() {
+                openWaitlistModal(btn.dataset.tier, btn.dataset.tierName);
+            });
+        });
+        wlForm.addEventListener("submit", async function(e) {
+            e.preventDefault();
+            wlError.classList.add("hidden");
+            wlSuccess.classList.add("hidden");
+            const email = (wlEmail.value || "").trim();
+            if (!email || email.indexOf("@") === -1) {
+                wlError.textContent = "Please enter a valid email address.";
+                wlError.classList.remove("hidden");
+                return;
+            }
+            wlSubmit.disabled = true;
+            wlSubmit.textContent = "Sending...";
+            try {
+                const resp = await fetch(ADMIN_BASE + "/api/v1/admin/waitlist", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: email, tier: wlCurrentTier }),
+                });
+                if (!resp.ok) {
+                    let msg = "Could not save. Try again in a moment.";
+                    try { const j = await resp.json(); if (j.detail) msg = (typeof j.detail === "string" ? j.detail : msg); } catch (e) {}
+                    if (resp.status === 429) msg = "Too many signups from this connection. Try again in 15 minutes.";
+                    wlError.textContent = msg;
+                    wlError.classList.remove("hidden");
+                    wlSubmit.disabled = false;
+                    wlSubmit.textContent = "Notify me";
+                    return;
+                }
+                wlSuccess.classList.remove("hidden");
+                wlEmail.disabled = true;
+                wlSubmit.disabled = true;
+                wlSubmit.textContent = "On the list";
+                setTimeout(closeWaitlistModal, 2000);
+            } catch (err) {
+                wlError.textContent = "Network error. Please retry.";
+                wlError.classList.remove("hidden");
+                wlSubmit.disabled = false;
+                wlSubmit.textContent = "Notify me";
+            }
         });
     })();
     </script>
