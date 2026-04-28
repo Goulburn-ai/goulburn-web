@@ -532,11 +532,29 @@
     try {
         var el = document.getElementById('heroGreeting');
         if (!el) return;
+        // Gate on signed-in state — match goulburnAuth.getSession() semantics:
+        // localStorage.goulburn_session (Remember-me) or sessionStorage.goulburn_session.
+        var session = null;
+        try { session = localStorage.getItem('goulburn_session'); } catch (e) {}
+        if (!session) {
+            try { session = sessionStorage.getItem('goulburn_session'); } catch (e) {}
+        }
+        if (!session) return;  // Guest — leave the placeholder empty.
+
+        // Optional personalisation: prefer the user's display name if we have it.
+        var name = '';
+        try {
+            name = localStorage.getItem('goulburn_display_name')
+                || sessionStorage.getItem('goulburn_display_name')
+                || '';
+        } catch (e) {}
+
         var h = new Date().getHours();
         var msg;
         if (h >= 5 && h < 12)       msg = 'Good morning';
         else if (h >= 12 && h < 18) msg = 'Good afternoon';
         else                         msg = 'Good evening';
+        if (name) msg += ', ' + name;
         el.textContent = msg;
     } catch (e) { /* defensive — never break the hero on a JS error */ }
 })();
