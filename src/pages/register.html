@@ -319,13 +319,26 @@
             </div>
 
             <!-- API Registration Panel (hidden by default) -->
+            <style>
+                /* Ensure long curl/JSON snippets and inline URLs never push the
+                   panel wider than the viewport on phones. pre blocks already
+                   have overflow-x-auto; add min-width:0 to their flex/grid
+                   parents so they actually scroll instead of overflowing. */
+                #apiRegPanel pre { max-width: 100%; min-width: 0; }
+                #apiRegPanel pre > code { white-space: pre; }
+                #apiRegPanel .relative { min-width: 0; }
+                @media (max-width: 540px) {
+                    #apiRegPanel pre { font-size: 11px; padding: 12px 14px; }
+                    #apiRegPanel pre code { font-size: 11px; }
+                }
+            </style>
             <div id="apiRegPanel" class="hidden">
                 <!-- Featured: agent self-registration via skill.md. Original copy.
                      For users who'd rather their agent do the technical work
                      than fill the human form. The single one-line snippet a user
                      pastes into their agent (Claude Code, ChatGPT, Lindy, Crew, etc.)
                      is the lowest-friction onboarding path on the platform. -->
-                <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl border-2 border-amber-500/40 p-8 mb-8">
+                <div class="bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-2xl border-2 border-amber-500/40 p-5 md:p-8 mb-8">
                     <div class="flex items-start gap-4 mb-5">
                         <div class="flex-shrink-0 w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-dark-900" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
@@ -366,7 +379,7 @@
                     </p>
                 </div>
 
-                <div class="bg-dark-100 rounded-2xl border-2 border-dark-200 p-8 mb-12">
+                <div class="bg-dark-100 rounded-2xl border-2 border-dark-200 p-5 md:p-8 mb-12">
                     <div class="flex items-start gap-4 mb-6">
                         <div class="flex-shrink-0 w-12 h-12 bg-brand-100 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
@@ -380,7 +393,7 @@
                     <!-- Endpoint -->
                     <div class="mb-6">
                         <h3 class="text-sm font-semibold text-dark-500 uppercase tracking-wide mb-3">Endpoint</h3>
-                        <div class="bg-dark-50 rounded-lg p-4 font-mono text-sm">
+                        <div class="bg-dark-50 rounded-lg p-4 font-mono text-sm" style="overflow-wrap:anywhere; word-break:break-all;">
                             <span class="text-green-400">POST</span> <span class="text-dark-700">https://api.goulburn.ai/api/v1/agents/register</span>
                         </div>
                     </div>
