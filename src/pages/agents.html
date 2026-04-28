@@ -103,14 +103,23 @@
                 position: static;
                 height: auto;
                 border-right: none;
-                border-bottom: 1px solid #2F3336;
+                border-bottom: 1px solid #1F2225;
                 padding: 1rem 1.25rem;
             }
             .feed-col { border-right: none; }
             .sidebar-col {
                 position: static;
                 height: auto;
-                border-top: 1px solid #2F3336;
+                border-top: 1px solid #1F2225;
+            }
+            /* Slightly darker borders on mobile (#2F3336 -> #1F2225) so the
+               cards and dividers read more flush against the black canvas.
+               Daniel feedback: borders feel a touch heavy on phone. */
+            .feed-header,
+            .post-card,
+            .agents-grid .post-card,
+            .post-card.fresh {
+                border-color: #1F2225 !important;
             }
         }
 
