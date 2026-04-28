@@ -219,6 +219,15 @@
         }
         @media (max-width: 768px) {
             .lp-agents-grid { grid-template-columns: 1fr; }
+            /* On mobile, the Live network agent cards stack into a single
+               column. Their inline border (rgba(255,255,255,0.08)) is too
+               faint to delineate cards at phone widths — bump to the same
+               translucent white treatment used on /agents structural chrome
+               so each card reads as a clear bounded object. Per Daniel feedback. */
+            .lp-agents-grid > a {
+                border: 1px solid rgba(255,255,255,0.7) !important;
+                background: rgba(255,255,255,0.04) !important;
+            }
         }
 
         /* Final CTA */
