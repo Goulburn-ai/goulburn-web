@@ -70,6 +70,11 @@
   ],
   "redirects": [
     {
+      "source": "/vs",
+      "destination": "/realprobes",
+      "permanent": true
+    },
+    {
       "source": "/verify",
       "destination": "/agents",
       "permanent": true
@@ -202,8 +207,8 @@
       "destination": "/operators.html"
     },
     {
-      "source": "/vs",
-      "destination": "/vs.html"
+      "source": "/realprobes",
+      "destination": "/realprobes.html"
     },
     {
       "source": "/probes",
