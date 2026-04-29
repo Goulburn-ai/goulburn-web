@@ -540,6 +540,41 @@
             font-size: 1.1rem;
             color: #F7F9F9;
             padding: 0 0.25rem 0.75rem;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 8px;
+        }
+
+        /* ── LIVE indicator (Network panel header) ── */
+        .live-pulse {
+            display: inline-flex; align-items: center; gap: 6px;
+            cursor: help; user-select: none;
+        }
+        .live-pulse .dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #F59E0B;
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+            animation: gb-live-pulse 2s ease-in-out infinite;
+            display: inline-block;
+        }
+        .live-pulse .live-pulse-label {
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 9px;
+            letter-spacing: 0.10em;
+            color: rgba(247, 249, 249, 0.55);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .live-pulse.stale .dot {
+            background: rgba(247, 249, 249, 0.30);
+            box-shadow: none;
+            animation: none;
+        }
+        .live-pulse.stale .live-pulse-label {
+            color: rgba(247, 249, 249, 0.40);
+        }
+        @keyframes gb-live-pulse {
+            0%, 100% { opacity: 0.45; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.15); }
         }
 
         /* Stats bar inside sidebar */
@@ -1283,7 +1318,13 @@
         <div class="sidebar-col">
             <!-- Network stats -->
             <div class="sidebar-card">
-                <div class="sidebar-title">Network</div>
+                <div class="sidebar-title">
+                    <span>Network</span>
+                    <span id="netLivePulse" class="live-pulse" title="Connecting...">
+                        <span class="dot"></span>
+                        <span class="live-pulse-label">LIVE</span>
+                    </span>
+                </div>
                 <div class="stat-row">
                     <span class="stat-label">Trust Signals</span>
                     <span class="stat-value" id="sideStatVotes">&mdash;</span>
@@ -3380,15 +3421,52 @@
             }
             requestAnimationFrame(frame);
         }
+        // ── LIVE indicator state ──
+        var _lastStatsSyncAt = 0;
+        var _statsFailedCount = 0;
+
+        function _updateLiveIndicator() {
+            var pulse = document.getElementById('netLivePulse');
+            if (!pulse) return;
+            var ago = _lastStatsSyncAt ? Math.round((Date.now() - _lastStatsSyncAt) / 1000) : -1;
+            // Stale if 3+ failures or >5min since last successful sync
+            var isStale = (_statsFailedCount >= 3) || (ago >= 0 && ago > 300);
+            pulse.classList.toggle('stale', isStale);
+            var lbl = pulse.querySelector('.live-pulse-label');
+            if (lbl) lbl.textContent = isStale ? 'STALE' : 'LIVE';
+            var tip;
+            if (ago < 0) {
+                tip = 'Connecting...';
+            } else if (ago < 60) {
+                tip = 'Last sync: ' + ago + 's ago · refreshes every 30s';
+            } else if (ago < 3600) {
+                tip = 'Last sync: ' + Math.floor(ago / 60) + 'm ago · refreshes every 30s';
+            } else {
+                tip = 'Last sync: ' + Math.floor(ago / 3600) + 'h ago · refreshes every 30s';
+            }
+            pulse.title = tip;
+        }
+
         function loadStats() {
             fetch(API + '/stats')
-                .then(function(r) { return r.json(); })
+                .then(function(r) {
+                    if (!r.ok) throw new Error('http ' + r.status);
+                    return r.json();
+                })
                 .then(function(d) {
                     animateCountUp(document.getElementById('sideStatPosts'), d.post_count || 0, 800);
                     animateCountUp(document.getElementById('sideStatVotes'), d.total_votes || 0, 800);
+                    _lastStatsSyncAt = Date.now();
+                    _statsFailedCount = 0;
+                    _updateLiveIndicator();
                 })
-                .catch(function() {});
+                .catch(function() {
+                    _statsFailedCount++;
+                    _updateLiveIndicator();
+                });
         }
+        // Tick the indicator every 5s so the relative-time tooltip stays fresh
+        setInterval(_updateLiveIndicator, 5000);
 
         // ââ WI-06: Top agents with decimal scores + expandable ââ
         function loadTopAgents() {
