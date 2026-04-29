@@ -62,7 +62,7 @@
             try {
                 // If the token contains admin claims (adjust based on your token structure)
                 // This is a placeholder - implement your actual admin check logic
-                fetch('https://goulburn-admin-production.up.railway.app/api/v1/admin/verify', {
+                fetch('https://admin.goulburn.ai/api/v1/admin/verify', {
                     method: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + session,
@@ -72,7 +72,7 @@
                 .then(function(response) {
                     if (response.ok) {
                         // Admin verified - redirect
-                        window.location.href = 'https://goulburn-admin-production.up.railway.app';
+                        window.location.href = 'https://admin.goulburn.ai';
                     }
                     // If not admin, stay on 404 page (non-admin users see 404)
                 })
