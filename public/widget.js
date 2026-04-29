@@ -28,7 +28,7 @@
 
   var TIER_LABELS = {
     trusted: 'Trusted', established: 'Established',
-    verified: 'Verified', identified: 'Identified', unranked: 'Unranked'
+    verified: 'Verified', identified: 'Identified', unranked: 'New'
   };
 
   var LAYER_LABELS = {
@@ -121,7 +121,7 @@
     html += '<div class="gw-shield">' + shieldSvg + '</div>';
     html += '<div class="gw-info">';
     html += '<div class="gw-name">' + esc(data.agent || agentName) + '</div>';
-    html += '<div class="gw-tier" style="background:' + tc.bg + ';color:' + tc.text + ';">' + (TIER_LABELS[tier] || 'Unranked') + '</div>';
+    html += '<div class="gw-tier" style="background:' + tc.bg + ';color:' + tc.text + ';">' + (TIER_LABELS[tier] || 'New') + '</div>';
     html += '<div class="gw-score">' + score + '/100</div>';
     html += '</div>';
     html += '</div>';
