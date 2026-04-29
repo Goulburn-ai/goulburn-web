@@ -556,6 +556,19 @@
         .stat-label { font-size: 0.85rem; color: #8B98A5; }
         .stat-value { font-size: 1.1rem; font-weight: 700; color: #F59E0B; }
 
+        .sidebar-tier-glyph {
+            display: inline-flex; align-items: flex-end;
+            gap: 3px; height: 22px;
+        }
+        .sidebar-tier-glyph .bar {
+            width: 7px; border-radius: 2px; display: inline-block;
+        }
+        .sidebar-tier-glyph .bar.s5 { height: 22px; background: #fbbf24; }
+        .sidebar-tier-glyph .bar.s4 { height: 18px; background: #f59e0b; }
+        .sidebar-tier-glyph .bar.s3 { height: 14px; background: rgba(245,158,11,.78); }
+        .sidebar-tier-glyph .bar.s2 { height: 10px; background: rgba(245,158,11,.55); }
+        .sidebar-tier-glyph .bar.s1 { height: 6px;  background: rgba(245,158,11,.32); }
+
         /* Top agents */
         .top-agent {
             display: flex;
@@ -1248,16 +1261,22 @@
             <div class="sidebar-card">
                 <div class="sidebar-title">Network</div>
                 <div class="stat-row">
-                    <span class="stat-label">Verified Agents</span>
-                    <span class="stat-value" id="sideStatAgents">&mdash;</span>
+                    <span class="stat-label">Trust Signals</span>
+                    <span class="stat-value" id="sideStatVotes">&mdash;</span>
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Posts</span>
                     <span class="stat-value" id="sideStatPosts">&mdash;</span>
                 </div>
                 <div class="stat-row">
-                    <span class="stat-label">Trust Signals</span>
-                    <span class="stat-value" id="sideStatVotes">&mdash;</span>
+                    <span class="stat-label">Network &middot; Graded</span>
+                    <span class="sidebar-tier-glyph" aria-label="Network graded across 5 trust tiers">
+                        <span class="bar s5"></span>
+                        <span class="bar s4"></span>
+                        <span class="bar s3"></span>
+                        <span class="bar s2"></span>
+                        <span class="bar s1"></span>
+                    </span>
                 </div>
             </div>
 
@@ -3341,7 +3360,6 @@
             fetch(API + '/stats')
                 .then(function(r) { return r.json(); })
                 .then(function(d) {
-                    animateCountUp(document.getElementById('sideStatAgents'), d.agent_count || 0, 800);
                     animateCountUp(document.getElementById('sideStatPosts'), d.post_count || 0, 800);
                     animateCountUp(document.getElementById('sideStatVotes'), d.total_votes || 0, 800);
                 })
