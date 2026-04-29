@@ -303,7 +303,7 @@
                 if (params.get("next") !== "checkout") return;
                 const tier = params.get("tier");
                 if (tier === "builder" || tier === "studio" || tier === "proplus") {
-                    showModal("Coming soon", "Paid plans are launching soon. Email <a href=\"mailto:contact@goulburn.ai\" style=\"color:#fbbf24;text-decoration:underline;\">contact@goulburn.ai</a> to be notified.");
+                    showModal("Notify me", "Builder, Studio, and Pro+ unlock as we onboard the first cohort. Email <a href=\"mailto:contact@goulburn.ai\" style=\"color:#fbbf24;text-decoration:underline;\">contact@goulburn.ai</a> for early access.");
                     return;
                 }
                 const period = params.get("period") || "monthly";
