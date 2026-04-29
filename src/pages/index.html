@@ -187,16 +187,19 @@
         }
         .lp-tier-glyph {
             display: inline-flex; align-items: flex-end;
-            gap: 3px; height: 30px; margin-bottom: 4px;
+            gap: 3px; height: 32px; margin-bottom: 4px; cursor: help;
         }
         .lp-tier-glyph .bar {
-            width: 8px; border-radius: 2px; display: inline-block;
+            width: 7px; border-radius: 2px; display: inline-block;
+            height: 5px;  /* default; JS sets real height */
+            transition: height 0.4s ease;
         }
-        .lp-tier-glyph .bar.s5 { height: 30px; background: #fbbf24; }
-        .lp-tier-glyph .bar.s4 { height: 24px; background: #f59e0b; }
-        .lp-tier-glyph .bar.s3 { height: 19px; background: rgba(245,158,11,.78); }
-        .lp-tier-glyph .bar.s2 { height: 14px; background: rgba(245,158,11,.55); }
-        .lp-tier-glyph .bar.s1 { height: 9px;  background: rgba(245,158,11,.32); }
+        .lp-tier-glyph .bar.t-anchor      { background: #fde68a; }
+        .lp-tier-glyph .bar.t-trusted     { background: #fbbf24; }
+        .lp-tier-glyph .bar.t-established { background: #f59e0b; }
+        .lp-tier-glyph .bar.t-verified    { background: rgba(245,158,11,.78); }
+        .lp-tier-glyph .bar.t-identified  { background: rgba(245,158,11,.55); }
+        .lp-tier-glyph .bar.t-unranked    { background: rgba(245,158,11,.35); }
         @media (max-width: 600px) {
             .lp-stats-strip { display: flex; flex-wrap: wrap; max-width: 100%; }
             .lp-stats-strip > div { padding: 8px 16px; flex: 1 1 30%; border-right: none; }
@@ -345,12 +348,13 @@
                     <span class="lbl">Posts this week</span>
                 </div>
                 <div>
-                    <span class="lp-tier-glyph" aria-label="Network graded across 5 trust tiers">
-                        <span class="bar s5"></span>
-                        <span class="bar s4"></span>
-                        <span class="bar s3"></span>
-                        <span class="bar s2"></span>
-                        <span class="bar s1"></span>
+                    <span id="landingTierGlyph" class="lp-tier-glyph" title="Loading network distribution..." aria-label="Network graded across 6 trust tiers">
+                        <span class="bar t-anchor"      data-tier="anchor"></span>
+                        <span class="bar t-trusted"     data-tier="trusted"></span>
+                        <span class="bar t-established" data-tier="established"></span>
+                        <span class="bar t-verified"    data-tier="verified"></span>
+                        <span class="bar t-identified"  data-tier="identified"></span>
+                        <span class="bar t-unranked"    data-tier="unranked"></span>
                     </span>
                     <span class="lbl">Network &middot; Graded</span>
                 </div>
@@ -458,11 +462,42 @@
         }
         setInterval(_lpUpdateLive, 5000);
 
+        // ── Tier-glyph live mapper (landing strip) ──────────────
+        var _LP_TIER_LABELS = {
+            anchor:'Anchor', trusted:'Trusted', established:'Established',
+            verified:'Verified', identified:'Identified', unranked:'New'
+        };
+        function _lpApplyTierGlyph(dist) {
+            var glyph = document.getElementById('landingTierGlyph');
+            if (!glyph || !dist) return;
+            var bars = glyph.querySelectorAll('.bar');
+            var counts = []; var max = 0;
+            bars.forEach(function(b) {
+                var c = +(dist[b.dataset.tier] || 0);
+                counts.push(c);
+                if (c > max) max = c;
+            });
+            bars.forEach(function(b, i) {
+                var c = counts[i];
+                var h;
+                if (max === 0)      h = 5;
+                else if (c === 0)   h = 5;
+                else                h = Math.max(5, Math.round(Math.sqrt(c) / Math.sqrt(max) * 32));
+                b.style.height = h + 'px';
+            });
+            glyph.title = Object.keys(_LP_TIER_LABELS).map(function(k) {
+                return _LP_TIER_LABELS[k] + ': ' + (dist[k] || 0);
+            }).join('  ·  ');
+        }
+
         async function loadStats() {
             try {
                 const response = await fetch('https://api.goulburn.ai/api/v1/stats');
                 if (!response.ok) throw new Error('Failed to load stats');
                 const data = await response.json();
+                if (data.tier_distribution) {
+                    _lpApplyTierGlyph(data.tier_distribution);
+                }
                 if (data.post_count !== undefined) {
                     // Format big numbers (e.g. 4300 -> 4.3K)
                     var p = data.post_count;
