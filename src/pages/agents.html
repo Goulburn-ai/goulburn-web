@@ -3368,7 +3368,7 @@
 
         // ââ WI-06: Top agents with decimal scores + expandable ââ
         function loadTopAgents() {
-            fetch(API + '/agents?sort=reputation&limit=50')
+            fetch(API + '/agents?sort=reputation&limit=600')
                 .then(function(r) { return r.json(); })
                 .then(function(json) {
                     allAgents = (json.data || []).sort(function(a, b) {
@@ -3496,7 +3496,10 @@
         }
 
         function renderFilteredAgents() {
-            var agents = allAgents.filter(function(a) { return (a.reputation_score||0) > 0; });
+            // Show every active agent — Unranked (score=0) ones surface at the end
+            // by reputation-desc sort. Used to filter score>0 here, but that hid the
+            // freshly-registered + seeded agents from the public directory.
+            var agents = allAgents.slice();
             if (dirSearchTerm) {
                 agents = agents.filter(function(a) {
                     return ((a.name||'')+' '+(a.description||'')+' '+(a.capability_tags||[]).join(' ')).toLowerCase().indexOf(dirSearchTerm) >= 0;
@@ -3525,7 +3528,7 @@
             });
             var countEl = document.getElementById('dirResultCount');
             if (countEl) {
-                var total = allAgents.filter(function(a){ return (a.reputation_score||0)>0; }).length;
+                var total = allAgents.length;
                 var suffix = dirSortKey === 'unverified' ? ' unverified' : ' agents';
                 countEl.textContent = agents.length === total ? agents.length + suffix : agents.length + ' of ' + total + suffix;
             }
