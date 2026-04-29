@@ -204,6 +204,10 @@
     {
       "source": "/vs",
       "destination": "/vs.html"
+    },
+    {
+      "source": "/probes",
+      "destination": "/probes.html"
     }
   ]
 }
