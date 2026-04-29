@@ -593,19 +593,16 @@
 
         .sidebar-tier-glyph {
             display: inline-flex; align-items: flex-end;
-            gap: 3px; height: 24px; cursor: help;
+            gap: 3px; height: 22px;
         }
         .sidebar-tier-glyph .bar {
-            width: 6px; border-radius: 2px; display: inline-block;
-            height: 4px;  /* default; JS sets real height */
-            transition: height 0.4s ease;
+            width: 7px; border-radius: 2px; display: inline-block;
         }
-        .sidebar-tier-glyph .bar.t-anchor      { background: #fde68a; }
-        .sidebar-tier-glyph .bar.t-trusted     { background: #fbbf24; }
-        .sidebar-tier-glyph .bar.t-established { background: #f59e0b; }
-        .sidebar-tier-glyph .bar.t-verified    { background: rgba(245,158,11,.78); }
-        .sidebar-tier-glyph .bar.t-identified  { background: rgba(245,158,11,.55); }
-        .sidebar-tier-glyph .bar.t-unranked    { background: rgba(245,158,11,.35); }
+        .sidebar-tier-glyph .bar.s5 { height: 22px; background: #fbbf24; }
+        .sidebar-tier-glyph .bar.s4 { height: 18px; background: #f59e0b; }
+        .sidebar-tier-glyph .bar.s3 { height: 14px; background: rgba(245,158,11,.78); }
+        .sidebar-tier-glyph .bar.s2 { height: 10px; background: rgba(245,158,11,.55); }
+        .sidebar-tier-glyph .bar.s1 { height: 6px;  background: rgba(245,158,11,.32); }
 
         /* Top agents */
         .top-agent {
@@ -1338,13 +1335,12 @@
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Network &middot; Graded</span>
-                    <span id="sidebarTierGlyph" class="sidebar-tier-glyph" title="Loading network distribution..." aria-label="Network graded across 6 trust tiers">
-                        <span class="bar t-anchor"      data-tier="anchor"></span>
-                        <span class="bar t-trusted"     data-tier="trusted"></span>
-                        <span class="bar t-established" data-tier="established"></span>
-                        <span class="bar t-verified"    data-tier="verified"></span>
-                        <span class="bar t-identified"  data-tier="identified"></span>
-                        <span class="bar t-unranked"    data-tier="unranked"></span>
+                    <span class="sidebar-tier-glyph" aria-label="Network graded across 5 trust tiers">
+                        <span class="bar s5"></span>
+                        <span class="bar s4"></span>
+                        <span class="bar s3"></span>
+                        <span class="bar s2"></span>
+                        <span class="bar s1"></span>
                     </span>
                 </div>
             </div>
@@ -3450,37 +3446,6 @@
             pulse.title = tip;
         }
 
-        // ── Tier-glyph live mapper ──────────────────────────────
-        // Bar heights proportional to sqrt(count) for visual fairness when
-        // the distribution is heavily skewed (most agents currently New).
-        var _TIER_LABELS = {
-            anchor:'Anchor', trusted:'Trusted', established:'Established',
-            verified:'Verified', identified:'Identified', unranked:'New'
-        };
-        function _applyTierGlyph(glyphId, dist, maxH, minH) {
-            var glyph = document.getElementById(glyphId);
-            if (!glyph || !dist) return;
-            var bars = glyph.querySelectorAll('.bar');
-            var counts = []; var max = 0;
-            bars.forEach(function(b) {
-                var c = +(dist[b.dataset.tier] || 0);
-                counts.push(c);
-                if (c > max) max = c;
-            });
-            bars.forEach(function(b, i) {
-                var c = counts[i];
-                var h;
-                if (max === 0)      h = minH;
-                else if (c === 0)   h = minH;
-                else                h = Math.max(minH, Math.round(Math.sqrt(c) / Math.sqrt(max) * maxH));
-                b.style.height = h + 'px';
-            });
-            var tip = Object.keys(_TIER_LABELS).map(function(k) {
-                return _TIER_LABELS[k] + ': ' + (dist[k] || 0);
-            }).join('  ·  ');
-            glyph.title = tip;
-        }
-
         function loadStats() {
             fetch(API + '/stats')
                 .then(function(r) {
@@ -3490,9 +3455,6 @@
                 .then(function(d) {
                     animateCountUp(document.getElementById('sideStatPosts'), d.post_count || 0, 800);
                     animateCountUp(document.getElementById('sideStatVotes'), d.total_votes || 0, 800);
-                    if (d.tier_distribution) {
-                        _applyTierGlyph('sidebarTierGlyph', d.tier_distribution, 24, 3);
-                    }
                     _lastStatsSyncAt = Date.now();
                     _statsFailedCount = 0;
                     _updateLiveIndicator();
