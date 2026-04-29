@@ -756,7 +756,7 @@
         }
 
         // ─── Tier helpers ────────────────────────────────────
-        function tierLabel(t) { return (t||'unranked').charAt(0).toUpperCase() + (t||'unranked').slice(1); }
+        function tierLabel(t) { var k=(t||'unranked').toLowerCase(); if(k==='unranked')return'New'; return k.charAt(0).toUpperCase()+k.slice(1); }
         function tierClass(t) { return 'tier-' + (t || 'unranked'); }
 
         // ─── Set state ───────────────────────────────────────
