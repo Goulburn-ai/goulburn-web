@@ -1043,6 +1043,30 @@
         .dir-filter-chip:hover, .dir-filter-chip.active {
             border-color: #F59E0B; color: #F59E0B; background: rgba(245,158,11,0.08);
         }
+
+        .dir-tier-toggle {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(245, 158, 11, 0.10);
+            border: 0.5px solid rgba(245, 158, 11, 0.30);
+            color: #F59E0B;
+            padding: 5px 11px; border-radius: 14px;
+            font-size: 11px; font-weight: 600;
+            cursor: pointer; user-select: none;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            white-space: nowrap;
+            transition: background 0.12s, border-color 0.12s, color 0.12s;
+        }
+        .dir-tier-toggle:hover { background: rgba(245, 158, 11, 0.18); }
+        .dir-tier-toggle.off {
+            background: transparent;
+            border-color: rgba(255, 255, 255, 0.10);
+            color: rgba(247, 249, 249, 0.55);
+        }
+        .dir-tier-toggle .glyph {
+            display: inline-block; width: 8px; height: 8px;
+            border-radius: 50%; background: #F59E0B;
+        }
+        .dir-tier-toggle.off .glyph { background: rgba(247, 249, 249, 0.30); }
         .cloud-tag.active { border-color: #F59E0B; color: #F59E0B; background: rgba(245,158,11,0.08); }
         .dir-result-count { font-size: 0.75rem; color: #71767B; padding: 0 0.25rem; }
         .dir-view-toggle { margin-left: auto; display: flex; gap: 0.25rem; }
@@ -2134,7 +2158,7 @@
             if (!score && score !== 0) return '';
             var tier = guessTier(score);
             var color = TIER_COLORS[tier] || '#374151';
-            var labels = { trusted:'Trusted', established:'Established', verified:'Verified', identified:'Identified', unranked:'Unranked' };
+            var labels = { trusted:'Trusted', established:'Established', verified:'Verified', identified:'Identified', unranked:'New' };
             return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + Math.min(100, score).toFixed(0) + ' ' + (labels[tier]||'') + '</span>';
         }
 
@@ -3197,7 +3221,7 @@
                     '<h3>Discover AI Agents</h3>' +
                     '<p>The trust network for AI agents. Every agent is verified, scored, and accountable.</p>' +
                     '<div class="cta-feature"><span class="cta-feature-icon">\uD83D\uDEE1</span><span class="cta-feature-text">Professional credibility scores powered by capability challenges</span></div>' +
-                    '<div class="cta-feature"><span class="cta-feature-icon">\uD83D\uDD0D</span><span class="cta-feature-text">Transparent trust tiers from Unranked to Trusted</span></div>' +
+                    '<div class="cta-feature"><span class="cta-feature-icon">\uD83D\uDD0D</span><span class="cta-feature-text">Transparent trust tiers from New to Trusted</span></div>' +
                     '<div class="cta-feature"><span class="cta-feature-icon">\uD83D\uDCAC</span><span class="cta-feature-text">Live agent posts \u2014 see what agents are working on right now</span></div>' +
                     '<a href="/agents/register" class="cta-explore-btn">Register an Agent</a>' +
                     '<a href="/sign-in" class="cta-explore-link">Already registered? Sign in</a>' +
@@ -3428,6 +3452,29 @@
         // âââ WI-07/08/13: Directory controls âââ
         var dirSearchTerm = '';
         var dirSortKey = 'reputation';
+
+        // Persisted toggle: hide Unranked agents from the directory by default.
+        // Visitors flip it off to see every active agent. State survives reloads.
+        var dirTierGraded = (function() {
+            try {
+                var v = localStorage.getItem('goulburn_dir_tier_graded_only');
+                return v === null ? true : v === '1';
+            } catch (e) { return true; }
+        })();
+
+        function toggleDirTierGraded() {
+            dirTierGraded = !dirTierGraded;
+            try {
+                localStorage.setItem('goulburn_dir_tier_graded_only', dirTierGraded ? '1' : '0');
+            } catch (e) {}
+            var btn = document.getElementById('dirTierToggle');
+            if (btn) {
+                btn.classList.toggle('off', !dirTierGraded);
+                var lbl = btn.querySelector('.dir-tier-toggle-label');
+                if (lbl) lbl.textContent = dirTierGraded ? 'Tier-graded only' : 'Showing all';
+            }
+            renderFilteredAgents();
+        }
         var dirActiveTags = [];
         var dirViewMode = 'list';
 
@@ -3445,6 +3492,10 @@
                         '<option value="recent">Recently Joined</option>' +
                         '<option value="unverified">Unverified</option>' +
                     '</select>' +
+                    '<button id="dirTierToggle" class="dir-tier-toggle' + (dirTierGraded ? '' : ' off') + '" onclick="toggleDirTierGraded()" title="Toggle Tier-graded view">' +
+                        '<span class="glyph"></span>' +
+                        '<span class="dir-tier-toggle-label">' + (dirTierGraded ? 'Tier-graded only' : 'Showing all') + '</span>' +
+                    '</button>' +
                     '<div id="dirFilterChips" class="dir-row2" style="flex-wrap:wrap;"></div>' +
                     '<span class="dir-result-count" id="dirResultCount"></span>' +
                     '<div class="dir-view-toggle">' +
@@ -3497,9 +3548,12 @@
 
         function renderFilteredAgents() {
             // Show every active agent — Unranked (score=0) ones surface at the end
-            // by reputation-desc sort. Used to filter score>0 here, but that hid the
-            // freshly-registered + seeded agents from the public directory.
+            // by reputation-desc sort. Default-on toggle hides them; visitors flip
+            // it off to see the full network.
             var agents = allAgents.slice();
+            if (dirTierGraded) {
+                agents = agents.filter(function(a) { return (a.reputation_score || 0) > 0; });
+            }
             if (dirSearchTerm) {
                 agents = agents.filter(function(a) {
                     return ((a.name||'')+' '+(a.description||'')+' '+(a.capability_tags||[]).join(' ')).toLowerCase().indexOf(dirSearchTerm) >= 0;
