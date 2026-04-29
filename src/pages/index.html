@@ -133,6 +133,40 @@
             display: inline-flex; align-items: center; gap: 0;
             background: var(--surface); border: 0.5px solid var(--border);
             border-radius: 12px; padding: 6px;
+            position: relative;
+        }
+
+        /* ── LIVE indicator on landing strip ── */
+        .lp-live-pulse {
+            position: absolute;
+            top: -10px; right: 14px;
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--surface);
+            padding: 2px 8px; border-radius: 12px;
+            border: 0.5px solid var(--border);
+            cursor: help; user-select: none;
+        }
+        .lp-live-pulse .lp-live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: #F59E0B;
+            box-shadow: 0 0 7px rgba(245, 158, 11, 0.55);
+            animation: lp-live-pulse-anim 2s ease-in-out infinite;
+            display: inline-block;
+        }
+        .lp-live-pulse .lp-live-label {
+            font-family: ui-monospace, Menlo, Consolas, monospace;
+            font-size: 8.5px; font-weight: 700;
+            letter-spacing: 0.10em;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+        .lp-live-pulse.stale .lp-live-dot {
+            background: var(--text-dim);
+            box-shadow: none; animation: none;
+        }
+        @keyframes lp-live-pulse-anim {
+            0%, 100% { opacity: 0.50; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.15); }
         }
         .lp-stats-strip > div {
             padding: 10px 22px;
@@ -298,6 +332,10 @@
             </p>
 
             <div class="lp-stats-strip">
+                <span id="lpLivePulse" class="lp-live-pulse" title="Connecting...">
+                    <span class="lp-live-dot"></span>
+                    <span class="lp-live-label">LIVE</span>
+                </span>
                 <div>
                     <strong id="statVotes">&mdash;</strong>
                     <span class="lbl">Trust signals</span>
@@ -400,6 +438,26 @@
 
     <script>
     (function() {
+        // ── LIVE indicator state ──
+        var _lpLastStatsSyncAt = 0;
+        var _lpStatsFailedCount = 0;
+        function _lpUpdateLive() {
+            var pulse = document.getElementById('lpLivePulse');
+            if (!pulse) return;
+            var ago = _lpLastStatsSyncAt ? Math.round((Date.now() - _lpLastStatsSyncAt) / 1000) : -1;
+            var isStale = (_lpStatsFailedCount >= 3) || (ago >= 0 && ago > 300);
+            pulse.classList.toggle('stale', isStale);
+            var lbl = pulse.querySelector('.lp-live-label');
+            if (lbl) lbl.textContent = isStale ? 'STALE' : 'LIVE';
+            var tip;
+            if (ago < 0) tip = 'Connecting...';
+            else if (ago < 60) tip = 'Last sync: ' + ago + 's ago · refreshes every 60s';
+            else if (ago < 3600) tip = 'Last sync: ' + Math.floor(ago / 60) + 'm ago · refreshes every 60s';
+            else tip = 'Last sync: ' + Math.floor(ago / 3600) + 'h ago · refreshes every 60s';
+            pulse.title = tip;
+        }
+        setInterval(_lpUpdateLive, 5000);
+
         async function loadStats() {
             try {
                 const response = await fetch('https://api.goulburn.ai/api/v1/stats');
@@ -416,8 +474,13 @@
                     var f = v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'K' : v.toString();
                     document.getElementById('statVotes').textContent = f;
                 }
+                _lpLastStatsSyncAt = Date.now();
+                _lpStatsFailedCount = 0;
+                _lpUpdateLive();
             } catch (e) {
                 console.warn('stats load failed', e);
+                _lpStatsFailedCount++;
+                _lpUpdateLive();
             }
         }
 
