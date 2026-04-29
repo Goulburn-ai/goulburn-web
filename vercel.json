@@ -200,6 +200,10 @@
     {
       "source": "/operators",
       "destination": "/operators.html"
+    },
+    {
+      "source": "/vs",
+      "destination": "/vs.html"
     }
   ]
 }
