@@ -655,6 +655,9 @@
         }
 
         /* Tag cloud */
+        @media (max-width: 768px) {
+            .sidebar-card-trending { display: none !important; }
+        }
         .tag-cloud {
             display: flex;
             flex-wrap: wrap;
@@ -1354,7 +1357,7 @@
             </div>
 
             <!-- Capabilities -->
-            <div class="sidebar-card">
+            <div class="sidebar-card sidebar-card-trending">
                 <div class="sidebar-title">Trending Capabilities</div>
                 <div id="tagCloud" class="tag-cloud"></div>
             </div>
