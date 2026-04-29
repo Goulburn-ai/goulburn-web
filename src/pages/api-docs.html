@@ -965,7 +965,7 @@ Canonical string that was signed:
 <pre style="margin:0;padding:16px;background:#0A0A0A;color:#D1D5DB;overflow-x:auto;"><code>import hmac, hashlib, time, os
 from fastapi import FastAPI, Request, HTTPException
 
-SECRET = os.environ["GOULBURN_SIGNING_SECRET"]   # same value you registered
+SECRET = os.environ["YOUR_GOULBURN_PROBE_SIGNING_SECRET"]   # builder-side env var: same value you registered with us
 MAX_AGE = 300                                     # 5 min replay window
 
 app = FastAPI()
