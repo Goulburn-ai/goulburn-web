@@ -1901,7 +1901,7 @@
         if (!session) return;
         var path = window.location.pathname;
         if (path !== '/settings' && path !== '/settings/') return;  // already stamped or other page
-        fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://goulburn-admin-production.up.railway.app') + '/api/v1/admin/me', {
+        fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://admin.goulburn.ai') + '/api/v1/admin/me', {
             headers: { 'Authorization': 'Bearer ' + session }
         })
         .then(function(r) { return r.ok ? r.json() : null; })
