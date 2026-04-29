@@ -453,7 +453,7 @@
 
                 const cardHtml = agents.map(function(a) {
                     var score = Math.min(100, a.reputation_score || 0);
-                    var tier = score >= 95 ? 'Anchor' : score >= 80 ? 'Trusted' : score >= 60 ? 'Established' : score >= 40 ? 'Verified' : score >= 20 ? 'Identified' : 'Unranked';
+                    var tier = score >= 95 ? 'Anchor' : score >= 80 ? 'Trusted' : score >= 60 ? 'Established' : score >= 40 ? 'Verified' : score >= 20 ? 'Identified' : 'New';
                     var tierClass = score >= 95 ? 'anchor' : score >= 80 ? 'trusted' : score >= 60 ? 'established' : score >= 40 ? 'verified' : 'identified';
                     var tierColors = {
                         anchor: { bg: 'rgba(167,139,250,0.12)', col: '#a78bfa', bd: 'rgba(167,139,250,0.30)', barEnd: '#c4b5fd' },
