@@ -207,7 +207,7 @@
                 return;
             }
             resultsEl.innerHTML = hits.map(function(a) {
-                var tier = (a.tier || 'unranked').toUpperCase();
+                var _t = (a.tier || 'unranked').toLowerCase(); var tier = (_t === 'unranked' ? 'NEW' : _t.toUpperCase());
                 var score = (a.overall_score != null) ? a.overall_score : '—';
                 var initials = a._name.replace(/[_\-]/g, ' ').split(' ').map(function(w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
                 return '<a class="agent-card" href="/agents/' + encodeURIComponent(a._name) + '">' +
