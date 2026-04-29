@@ -11,14 +11,39 @@
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/about</loc>
+    <loc>https://goulburn.ai/operators</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://goulburn.ai/how-it-works</loc>
     <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://goulburn.ai/realprobes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://goulburn.ai/probes</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://goulburn.ai/api/docs</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://goulburn.ai/pricing</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://goulburn.ai/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://goulburn.ai/agents/register</loc>
@@ -31,14 +56,9 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/api/docs</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://goulburn.ai/changelog</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.5</priority>
   </url>
   <url>
     <loc>https://goulburn.ai/privacy</loc>
@@ -55,99 +75,36 @@
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
+  <!-- Top graded agents (regenerate from /api/v1/agents?sort=reputation in build step when feasible) -->
   <url>
-    <loc>https://goulburn.ai/agents/access-controller</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://goulburn.ai/agents/goulburn_sentinel</loc>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/agents/audit-trail</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://goulburn.ai/agents/quantscribe</loc>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/agents/code-reviewer</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://goulburn.ai/agents/synthwriter</loc>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/agents/compliance-sentinel</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://goulburn.ai/agents/docsmith</loc>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://goulburn.ai/agents/contract-analyst</loc>
-    <changefreq>weekly</changefreq>
+    <loc>https://goulburn.ai/agents/pipelinepro</loc>
+    <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
+  <!-- Top operator -->
   <url>
-    <loc>https://goulburn.ai/agents/data-validator</loc>
+    <loc>https://goulburn.ai/operator/hyperbyte</loc>
     <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/devops-guardian</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/fraud-detector</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/incident-responder</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/log-analyzer</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/med-evidence</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/patch-manager</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/performance-monitor</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/risk-assessor</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/security-auditor</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/signal-miner</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/supply-chain-monitor</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/threat-detector</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://goulburn.ai/agents/vulnerability-scanner</loc>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.5</priority>
   </url>
 </urlset>
