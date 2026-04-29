@@ -69,6 +69,66 @@
         }
 
         /* Tier achievement notification */
+        /* ── Tier usage strip (Free / Builder / Studio / Pro+) ── */
+        .tier-usage-strip {
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(245, 158, 11, 0.06);
+            border: 1px solid rgba(245, 158, 11, 0.22);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin: 0 0 1.5rem 0;
+            gap: 16px; flex-wrap: wrap;
+        }
+        .tus-left { display: flex; flex-direction: column; gap: 3px; min-width: 220px; }
+        .tus-name {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700; color: #F7F9F9; font-size: 14.5px;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .tus-name::before {
+            content: ''; display: inline-block; width: 6px; height: 6px;
+            background: #F59E0B; border-radius: 50%;
+            box-shadow: 0 0 6px rgba(245, 158, 11, 0.55);
+        }
+        .tus-tagline {
+            font-size: 13px; color: rgba(247, 249, 249, 0.62);
+        }
+        .tus-right {
+            display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+        }
+        .tus-count {
+            font-size: 13px; color: rgba(247, 249, 249, 0.75);
+            font-family: 'Inter', sans-serif;
+        }
+        .tus-count strong {
+            color: #F59E0B; font-size: 19px; font-weight: 700;
+            margin: 0 4px;
+        }
+        .tus-remaining {
+            font-family: ui-monospace, monospace;
+            font-size: 11.5px; color: rgba(247, 249, 249, 0.65);
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 0.5px solid rgba(255, 255, 255, 0.10);
+            border-radius: 6px;
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .tus-remaining strong { color: #F7F9F9; font-weight: 700; }
+        .tus-upgrade {
+            font-size: 12.5px; font-weight: 600;
+            color: #F59E0B; text-decoration: none;
+            padding: 7px 14px;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+            border-radius: 8px;
+            transition: background 0.12s, border-color 0.12s;
+        }
+        .tus-upgrade:hover {
+            background: rgba(245, 158, 11, 0.10);
+            border-color: rgba(245, 158, 11, 0.60);
+        }
+        .tier-usage-strip.tus-full .tus-count strong { color: #f87171; }
+
         .tier-achievement {
             background: linear-gradient(135deg, #0A0A0A, #1e293b);
             border-radius: 12px;
@@ -2132,6 +2192,23 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             </div>
         </div>
 
+        <!-- Tier usage strip — Free / Builder / Studio / Pro+ -->
+        <div id="tierUsageStrip" class="tier-usage-strip" style="display:none;">
+            <div class="tus-left">
+                <div class="tus-name" id="tusName">Free</div>
+                <div class="tus-tagline" id="tusTagline">Solo builders shipping their first agents</div>
+            </div>
+            <div class="tus-right">
+                <div class="tus-count">
+                    <strong id="tusActive">—</strong>of<strong id="tusCap">4</strong>active agents
+                </div>
+                <div class="tus-remaining">
+                    <strong id="tusRemaining">—</strong> remaining
+                </div>
+                <a href="/pricing" class="tus-upgrade" id="tusUpgrade">Upgrade &rarr;</a>
+            </div>
+        </div>
+
         <!-- Agent Section -->
         <div class="section-header">
             <h2>
@@ -2939,7 +3016,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 fetch(API_BASE + '/api/v1/operators/me/settings', {
                     headers: { 'Authorization': 'Bearer ' + _opSession }
                 }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
-                    if (!me || !me.handle) return;
+                    if (!me) return;
+                    if (window._tusSetTier && me.paid_tier) window._tusSetTier(me.paid_tier);
+                    if (!me.handle) return;
                     var link = document.getElementById('operatorProfileLink');
                     if (!link) return;
                     link.href = '/operator/' + encodeURIComponent(me.handle);
@@ -2948,6 +3027,50 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             }
         } catch (e) { /* non-fatal */ }
         }
+
+        // ── Tier usage strip wiring ────────────────────────────
+        var TIER_INFO = {
+            free:       { name: 'Free',       cap: 4,    tagline: 'Solo builders shipping their first agents', upgrade: true },
+            builder:    { name: 'Builder',    cap: 5,    tagline: 'Solo freelancers, indie operators',         upgrade: true },
+            studio:     { name: 'Studio',     cap: 25,   tagline: 'Small studios + freelance teams',           upgrade: true },
+            proplus:    { name: 'Pro+',       cap: null, tagline: 'Production-grade fleets',                   upgrade: false },
+            'pro+':     { name: 'Pro+',       cap: null, tagline: 'Production-grade fleets',                   upgrade: false },
+            enterprise: { name: 'Enterprise', cap: null, tagline: 'SOC 2, SSO, custom retention',              upgrade: false }
+        };
+        var _tusTierInfo = TIER_INFO.free;  // default until profile loads
+        function _tusUpdate(activeCount) {
+            var strip = document.getElementById('tierUsageStrip');
+            if (!strip) return;
+            var info = _tusTierInfo;
+            document.getElementById('tusName').textContent = info.name;
+            document.getElementById('tusTagline').textContent = info.tagline;
+            document.getElementById('tusActive').textContent = activeCount;
+            var capEl = document.getElementById('tusCap');
+            var remEl = document.getElementById('tusRemaining');
+            if (info.cap === null) {
+                capEl.textContent = '∞';
+                remEl.parentElement.style.display = 'none';
+            } else {
+                capEl.textContent = info.cap;
+                var rem = Math.max(0, info.cap - (activeCount || 0));
+                remEl.textContent = rem;
+                remEl.parentElement.style.display = '';
+                strip.classList.toggle('tus-full', rem === 0);
+            }
+            var up = document.getElementById('tusUpgrade');
+            up.style.display = info.upgrade ? '' : 'none';
+            strip.style.display = 'flex';
+        }
+        // Track active count and tier independently — whichever resolves first
+        // sets a default; subsequent updates refine.
+        window._tusSetTier = function(tier) {
+            var key = (tier || 'free').toLowerCase();
+            _tusTierInfo = TIER_INFO[key] || TIER_INFO.free;
+            // Re-render with whatever active count is currently shown.
+            var current = parseInt(document.getElementById('tusActive').textContent, 10);
+            _tusUpdate(isNaN(current) ? 0 : current);
+        };
+        window._tusSetActive = function(n) { _tusUpdate(n || 0); };
 
         loadDashboardData();
         initCapabilityCta();
@@ -3068,6 +3191,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         document.getElementById('agentCount').textContent = agents.length;
+        if (window._tusSetActive) window._tusSetActive(agents.length);
 
 
     // ── Avatar rendering (icon:name + data URL + fallback initial) ──
