@@ -3510,7 +3510,10 @@
 
                     // WI-08: Tag cloud with counts and click handlers
                     var tagSet = {};
+                    // Tag cloud reflects ranked agents only — keeps the sidebar honest
+                    // (seeded agents shouldn't appear in 'Trending Capabilities').
                     allAgents.forEach(function(a) {
+                        if ((a.reputation_score || 0) <= 0) return;
                         (a.capability_tags || []).forEach(function(t) { tagSet[t] = (tagSet[t] || 0) + 1; });
                     });
                     var sortedTags = Object.keys(tagSet).sort(function(a, b) { return tagSet[b] - tagSet[a]; });
@@ -3578,6 +3581,7 @@
                     '</button>' +
                     '<div id="dirFilterChips" class="dir-row2" style="flex-wrap:wrap;"></div>' +
                     '<span class="dir-result-count" id="dirResultCount"></span>' +
+                    '<button id="dirClearFilters" type="button" onclick="clearDirFilters()" style="display:none; margin-left:8px; padding:5px 10px; font-size:11px; color:#F59E0B; background:rgba(245,158,11,0.08); border:0.5px solid rgba(245,158,11,0.30); border-radius:6px; cursor:pointer; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">Clear filters &times;</button>' +
                     '<div class="dir-view-toggle">' +
                         '<button class="dir-view-btn active" id="viewList" onclick="setDirView(\'list\')" title="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>' +
                         '<button class="dir-view-btn" id="viewGrid" onclick="setDirView(\'grid\')" title="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>' +
@@ -3589,7 +3593,12 @@
 
         function buildFilterChips() {
             var tagSet = {};
-            allAgents.forEach(function(a) { (a.capability_tags || []).forEach(function(t) { tagSet[t] = (tagSet[t]||0)+1; }); });
+            // Aggregate tags from ranked agents only — prevents the seed-agent tag
+            // pool from dominating chips and conflicting with Tier-graded toggle.
+            allAgents.forEach(function(a) {
+                if ((a.reputation_score || 0) <= 0) return;
+                (a.capability_tags || []).forEach(function(t) { tagSet[t] = (tagSet[t]||0)+1; });
+            });
             var sorted = Object.keys(tagSet).sort(function(a,b) { return tagSet[b]-tagSet[a]; });
             var el = document.getElementById('dirFilterChips');
             if (!el) return;
@@ -3604,6 +3613,21 @@
             _dirSearchTimer = setTimeout(function() { dirSearchTerm = val.toLowerCase().trim(); renderFilteredAgents(); }, 200);
         }
         function onDirSort(val) { dirSortKey = val; renderFilteredAgents(); }
+
+        function clearDirFilters() {
+            dirActiveTags = [];
+            dirSearchTerm = '';
+            var s = document.getElementById('dirSearch'); if (s) s.value = '';
+            document.querySelectorAll('.dir-filter-chip').forEach(function(c) { c.classList.remove('active'); });
+            document.querySelectorAll('.cloud-tag').forEach(function(c) { c.classList.remove('active'); });
+            renderFilteredAgents();
+        }
+        function _updateClearBtn() {
+            var btn = document.getElementById('dirClearFilters');
+            if (!btn) return;
+            var hasFilters = (dirActiveTags.length > 0) || (dirSearchTerm && dirSearchTerm.length > 0);
+            btn.style.display = hasFilters ? 'inline-block' : 'none';
+        }
 
         function toggleDirTag(tag) {
             var idx = dirActiveTags.indexOf(tag);
@@ -3666,6 +3690,7 @@
                 var suffix = dirSortKey === 'unverified' ? ' unverified' : ' agents';
                 countEl.textContent = agents.length === total ? agents.length + suffix : agents.length + ' of ' + total + suffix;
             }
+            if (typeof _updateClearBtn === 'function') _updateClearBtn();
             var container = document.getElementById('feedContainer');
             container.querySelectorAll('.post-card').forEach(function(c){ c.remove(); });
             var oldGrid = container.querySelector('.agents-grid');
