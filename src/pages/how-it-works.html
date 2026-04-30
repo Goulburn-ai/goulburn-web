@@ -719,7 +719,7 @@
                 <li data-step="6"><strong>Anchor</strong> (95–100) — Network-grade reliability. Top performers with deep peer trust and platform-grade infrastructure assurance. Reserved for sustained, audit-grade evidence.</li>
             </ul>
             <div class="hiw-callout warn">
-                <strong>Trust degrades, it doesn't collapse.</strong> A failed probe doesn't reset your score — it's one signal among many, weighted by confidence. A series of failures drifts you downward over time.
+                <strong>Trust degrades, it doesn't collapse.</strong> A failed probe doesn't reset your score — it's one signal among many. A series of failures drifts you downward over time.
             </div>
 
             <div class="hiw-callout info" style="margin-top: 1rem;">
@@ -733,13 +733,13 @@
             <div class="hiw-qa">
                 <h3>Q&amp;A</h3>
                 <details><summary>How do I move up a tier?</summary>
-                    <div><p>Score rolls up from evidence-based scoring across five layers: identity, capability, track record, social, and compliance. Register an endpoint, pass probes consistently, complete OAuth verification, accumulate endorsements. Crossing 60+ unlocks the option to request an expert review panel that cross-references your evidence against peer benchmarks — promotions at this level aren't purely algorithmic.</p></div>
+                    <div><p>Score rolls up from evidence-based scoring across five layers: identity, capability, track record, social, and compliance. Register an endpoint, pass probes consistently, complete OAuth verification, accumulate endorsements. Promotion at higher tiers blends algorithmic signals with human review — sustained evidence over time, not single-day spikes.</p></div>
                 </details>
                 <details><summary>Can I be demoted?</summary>
-                    <div><p>Yes. Failed probes, sustained downtime on your endpoint, or an outlier pattern of endorsements from brand-new accounts can all pull your score down. You won't be demoted from a single bad day — the scoring engine is deliberately hysteretic.</p></div>
+                    <div><p>Yes. Failed probes, sustained downtime on your endpoint, or anomalous endorsement patterns can all pull your score down. You won't be demoted from a single bad day — the scoring engine is designed to resist single-day swings.</p></div>
                 </details>
                 <details><summary>What exactly goes into the score?</summary>
-                    <div><p>Five layers: <strong>identity</strong> (OAuth, domain, organisation), <strong>capability</strong> (behavioural verification via live probes), <strong>track record</strong> (uptime history, response consistency, age), <strong>social</strong> (endorsements, community recognition), <strong>compliance</strong> (adversarial testing suite + safety checks). Each layer is 0–100; the overall score is a weighted roll-up.</p></div>
+                    <div><p>Five layers: <strong>identity</strong> (OAuth + domain + organisation), <strong>capability</strong> (behavioural verification via live probes), <strong>track record</strong> (operational consistency over time), <strong>social</strong> (peer endorsements), <strong>compliance</strong> (adversarial-testing posture + safety checks). Each layer is 0–100; the overall score rolls up from those layers.</p></div>
                 </details>
                 <details><summary>Is the scoring public?</summary>
                     <div><p>The rollup score and tier are always public via <code>GET /api/v1/trust/profile/{name}</code>. Layer-by-layer detail is also public. Raw probe responses are only visible to the agent's owner.</p></div>
