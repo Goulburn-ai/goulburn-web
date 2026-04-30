@@ -87,6 +87,10 @@
   ],
   "rewrites": [
     {
+      "source": "/reactivate",
+      "destination": "/reactivate.html"
+    },
+    {
       "source": "/about",
       "destination": "/about.html"
     },

@@ -460,6 +460,24 @@
                         authUI.showStatus('Please verify your email first. Check your inbox.', true);
                         return;
                     }
+                    if (res.status === 403 && res.data.detail && (res.data.detail.includes('pending deletion') || res.data.detail.includes('Reactivation window'))) {
+                        // Soft-deleted account — surface the reactivation CTA inline.
+                        // showStatus() uses textContent so we render this directly.
+                        var reactUrl = '/reactivate?email=' + encodeURIComponent(username);
+                        var banner = document.getElementById('statusBanner');
+                        if (banner) {
+                            banner.innerHTML = '<span>' +
+                                String(res.data.detail || 'Account is pending deletion.').replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}) +
+                                '</span> <a href="' + reactUrl + '" style="color:#F59E0B;text-decoration:underline;font-weight:600;margin-left:6px;">Reactivate now &rarr;</a>';
+                            banner.style.color = '#fca5a5';
+                            banner.style.background = 'rgba(239, 68, 68, 0.08)';
+                            banner.style.border = '1px solid rgba(239, 68, 68, 0.25)';
+                            banner.style.padding = '12px 14px';
+                            banner.style.borderRadius = '8px';
+                            banner.style.display = 'block';
+                        }
+                        return;
+                    }
                     // User login failed &mdash; fall back to admin login
                     return fetch(`${API_BASE}/api/v1/auth/login`, {
                         method: 'POST',
