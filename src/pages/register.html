@@ -1918,6 +1918,26 @@ case 3:
         // ── Step Navigation ──
         document.querySelectorAll('.stepBtn.next').forEach(function(btn) {
             btn.addEventListener('click', function() {
+                // Endpoint gap warning — only at step 1 → 2 transition.
+                // If the operator hasn't filled in the endpoint URL OR enabled
+                // hosted runtime, surface the impact before proceeding.
+                var stepNum = parseInt(btn.getAttribute('data-step') || '0', 10);
+                if (stepNum === 1) {
+                    var endpointInput = document.getElementById('agentEndpointUrl');
+                    var hostedRuntimeToggle = document.getElementById('useHostedRuntime');
+                    var endpointVal = endpointInput ? endpointInput.value.trim() : '';
+                    var hostedActive = hostedRuntimeToggle ? hostedRuntimeToggle.checked : false;
+                    if (!endpointVal && !hostedActive) {
+                        var proceed = window.confirm(
+                            "No endpoint configured.\n\n" +
+                            "Without an endpoint URL (or hosted runtime), capability and compliance probes can't run against your agent. Your reputation will cap at the Identified tier (~49/100) until you add one.\n\n" +
+                            "You can still register and add the endpoint later from your dashboard.\n\n" +
+                            "OK — register without an endpoint (capped at Identified tier)\n" +
+                            "Cancel — go back and add an endpoint URL now"
+                        );
+                        if (!proceed) return;
+                    }
+                }
                 advanceStep('next');
             });
         });
