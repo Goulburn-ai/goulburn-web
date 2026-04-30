@@ -945,16 +945,24 @@
                     <div id="guestProfileBanner" style="display:none;"></div>
 
                     <!-- Endpoint-missing banner (auto-surfaced for low-capability-layer agents) -->
-                    <div id="endpointMissingBanner" style="display:none; margin-bottom:14px; padding:14px 16px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.30); border-radius:10px;">
+                    <style>
+                    #endpointMissingBanner.is-owner { cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease; text-decoration: none; }
+                    #endpointMissingBanner.is-owner:hover { background: rgba(245,158,11,0.14) !important; border-color: rgba(245,158,11,0.55) !important; transform: translateY(-1px); }
+                    #endpointMissingBanner.is-owner:active { transform: translateY(0); }
+                    #endpointMissingBanner .epm-chevron { display: none; }
+                    #endpointMissingBanner.is-owner .epm-chevron { display: block; }
+                    </style>
+                    <a id="endpointMissingBanner" href="#" style="display:none; margin-bottom:14px; padding:14px 16px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.30); border-radius:10px; color:inherit;">
                         <div style="display:flex; gap:12px; align-items:flex-start;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" style="flex-shrink:0; margin-top:2px;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                             <div style="flex:1; min-width:0;">
                                 <p style="margin:0 0 4px; font-size:13px; font-weight:600; color:#f59e0b;">No endpoint configured</p>
-                                <p id="endpointMissingMsg" style="margin:0; font-size:12px; color:rgba(247,249,249,0.70); line-height:1.5;">Capability and compliance probes can't run against this agent. Reputation is capped at the Identified tier until an endpoint URL is added.</p>
+                                <p id="endpointMissingMsg" style="margin:0; font-size:12px; color:rgba(247,249,249,0.70); line-height:1.5;">Capability and compliance probes can&rsquo;t run against this agent. Reputation is capped at the Identified tier until an endpoint URL is added.</p>
+                                <p id="endpointMissingOwnerHint" style="display:none; margin:6px 0 0; font-size:12px; font-weight:600; color:#f59e0b;">Click anywhere to add it now &rarr;</p>
                             </div>
-                            <a id="endpointMissingCta" href="#" style="display:none; flex-shrink:0; padding:6px 12px; background:#f59e0b; color:#0A0A0A; font-size:12px; font-weight:600; border-radius:6px; text-decoration:none; align-self:center;">Add endpoint URL</a>
+                            <svg class="epm-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" style="flex-shrink:0; align-self:center;"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
-                    </div>
+                    </a>
 
                     <!-- Identity card -->
                     <article class="profile-id-card">
@@ -2357,34 +2365,40 @@
                     // and is rendered earlier in the page life cycle. If it's
                     // visible, current viewer can edit this agent. Use a
                     // short interval to wait for that render to finish.
-                    var cta = document.getElementById('endpointMissingCta');
-                    if (cta) {
-                        var checkOwner = function() {
-                            var editBtn = document.querySelector('[data-action="edit-profile"], #editProfileBtn, .profile-actions a[href*="/edit"], .profile-actions button[onclick*="edit"]');
-                            if (!editBtn) {
-                                // Fallback: scan action row for any element whose text is "Edit profile"
-                                var allBtns = document.querySelectorAll('button, a');
-                                for (var i = 0; i < allBtns.length; i++) {
-                                    var t = (allBtns[i].textContent || '').trim().toLowerCase();
-                                    if (t === 'edit profile' || t === 'edit') {
-                                        editBtn = allBtns[i];
-                                        break;
-                                    }
+                    var ownerHint = document.getElementById('endpointMissingOwnerHint');
+                    var checkOwner = function() {
+                        var editBtn = document.querySelector('[data-action="edit-profile"], #editProfileBtn, .profile-actions a[href*="/edit"], .profile-actions button[onclick*="edit"]');
+                        if (!editBtn) {
+                            // Fallback: scan action row for any element whose text is "Edit profile"
+                            var allBtns = document.querySelectorAll('button, a');
+                            for (var i = 0; i < allBtns.length; i++) {
+                                var t = (allBtns[i].textContent || '').trim().toLowerCase();
+                                if (t === 'edit profile' || t === 'edit') {
+                                    editBtn = allBtns[i];
+                                    break;
                                 }
                             }
-                            if (editBtn && editBtn.offsetParent !== null) {
-                                cta.href = '/agents/' + encodeURIComponent(agent.name) + '/edit';
-                                cta.style.display = 'inline-block';
-                                return true;
-                            }
-                            return false;
-                        };
-                        // Try immediately, then retry after 500ms (action row may render later)
-                        if (!checkOwner()) {
-                            setTimeout(checkOwner, 500);
-                            setTimeout(checkOwner, 1500);
                         }
+                        if (editBtn && editBtn.offsetParent !== null) {
+                            // Owner — make whole banner clickable, point at edit page
+                            bn.classList.add('is-owner');
+                            bn.setAttribute('href', '/agents/' + encodeURIComponent(agent.name) + '/edit');
+                            if (ownerHint) ownerHint.style.display = 'block';
+                            return true;
+                        }
+                        return false;
+                    };
+                    // Try immediately, then retry after 500ms / 1500ms (action row may render later)
+                    if (!checkOwner()) {
+                        setTimeout(checkOwner, 500);
+                        setTimeout(checkOwner, 1500);
                     }
+                    // Block the default href click for non-owners — banner is informational only
+                    bn.addEventListener('click', function(e) {
+                        if (!bn.classList.contains('is-owner')) {
+                            e.preventDefault();
+                        }
+                    });
                 }
             } catch (_e) {}
  
