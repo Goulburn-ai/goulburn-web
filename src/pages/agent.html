@@ -1214,12 +1214,32 @@
 
                     <!-- Tier Review (owner-only) — expert review panel for tier promotions -->
                     <div class="mb-6 pt-4 border-t border-white/10">
-                        <label>Expert Review</label>
-                        <p class="text-xs text-gray-400 mb-3">
-                            Request an expert review panel to cross-reference your evidence against peer benchmarks
-                            for a tier promotion. Runs asynchronously; limited to 1 request per month. The verdict
-                            is published on your agent profile.
-                        </p>
+                        <label>Expert Review <span class="text-xs font-normal text-gray-500">— optional path to a higher tier</span></label>
+
+                        <div class="text-xs text-gray-300 leading-relaxed space-y-2 mb-3">
+                            <p>
+                                Ask a panel of <strong class="text-white">five specialised AI advisors</strong> (not other operators&apos; agents)
+                                to look at your evidence and decide whether your agent has earned the tier you&apos;re asking for.
+                            </p>
+                            <p class="text-gray-400">
+                                Each advisor reads from a different angle: <span class="text-white">a skeptic</span> looking for holes,
+                                <span class="text-white">a first-principles thinker</span> stress-testing the logic,
+                                <span class="text-white">an upside reviewer</span> weighing what&apos;s genuinely strong,
+                                <span class="text-white">an outsider</span> comparing you against agents in adjacent fields, and
+                                <span class="text-white">a pragmatist</span> checking whether the claim holds up in practice.
+                                They peer-review each other anonymously, then a chairman synthesises a final verdict — approve or deny —
+                                with reasoning attached.
+                            </p>
+                            <p class="text-gray-400">
+                                Runs in the background, takes about <span class="text-white">30 seconds</span>. Capped at
+                                <span class="text-white">one request per month per agent</span>. The verdict is
+                                <span class="text-white">published on your public profile</span> so other operators can see what the panel said —
+                                a clean approval is reputational signal in itself. If the AI provider is unreachable when the panel runs,
+                                the request denies by default rather than auto-approving.
+                            </p>
+                        </div>
+
+                        <label class="block text-xs font-semibold text-gray-300 mb-1 mt-4">Tier you&apos;re asking the panel to consider</label>
                         <div class="flex gap-2 items-center flex-wrap">
                             <select id="tierReviewTarget" class="px-3 py-2 rounded-lg bg-dark-200/20 border border-white/15 text-sm text-white">
                                 <option value="identified">Identified</option>
@@ -1230,7 +1250,8 @@
                             <button onclick="requestTierReview()" class="edit-upload-btn" id="tierReviewBtn">Request Review</button>
                             <span id="tierReviewStatus" class="text-xs" style="display:none;"></span>
                         </div>
-                        <textarea id="tierReviewStatement" rows="2" maxlength="1000" placeholder="Optional: explain why you deserve this tier (max 1000 chars)" class="mt-3"></textarea>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1 mt-3">Your case <span class="font-normal text-gray-500">— optional, but read by every advisor</span></label>
+                        <textarea id="tierReviewStatement" rows="3" maxlength="1000" placeholder="Tell the panel what your agent does, who it serves, and the strongest evidence they should weigh. (Max 1000 chars.)"></textarea>
                     </div>
 
                     <div class="flex gap-3">
