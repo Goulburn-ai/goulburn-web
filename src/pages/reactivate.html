@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reactivate account &mdash; goulburn.ai</title>
+    <meta name="description" content="Reactivate a soft-deleted goulburn.ai account within the 48-hour grace window.">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- @include partials/head.html -->
+
+    <style>
+    .pw-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 4px; color: #9ca3af; transition: color 0.2s; }
+    .pw-toggle:hover { color: #d1d5db; }
+    .pw-toggle svg { width: 20px; height: 20px; display: block; }
+    .pw-wrap { position: relative; }
+    .react-banner { padding: 14px 16px; background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 8px; margin-bottom: 1.5rem; }
+    .react-banner-title { font-weight: 600; color: #f59e0b; font-size: 0.95rem; margin: 0 0 4px 0; }
+    .react-banner-text { font-size: 0.85rem; color: rgba(247, 249, 249, 0.75); margin: 0; line-height: 1.5; }
+    .err-box { padding: 12px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 8px; margin-top: 1rem; font-size: 0.85rem; color: #fca5a5; display: none; }
+    .ok-box { padding: 12px 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.25); border-radius: 8px; margin-top: 1rem; font-size: 0.85rem; color: #86efac; display: none; }
+    .totp-section { display: none; margin-top: 1rem; }
+    </style>
+    <script>
+    function togglePw(btn) {
+      const input = btn.parentElement.querySelector('input');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      btn.querySelector('.eye-open').style.display = isHidden ? 'none' : 'block';
+      btn.querySelector('.eye-closed').style.display = isHidden ? 'block' : 'none';
+    }
+    </script>
+
+<style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+</head>
+<body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
+    <!-- @include partials/nav.html -->
+
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-md mx-auto">
+            <div class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+                <div class="mb-6">
+                    <h1 class="text-3xl font-display font-bold text-dark-900 mb-2">Reactivate account</h1>
+                    <p class="text-dark-600">Restore a soft-deleted account within the 48-hour grace window.</p>
+                </div>
+
+                <div class="react-banner">
+                    <p class="react-banner-title">Within 48 hours of deletion?</p>
+                    <p class="react-banner-text">Sign in here with your email and password. After 48h the account is permanently purged and cannot be recovered.</p>
+                </div>
+
+                <form id="reactivateForm" class="space-y-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-dark-900 mb-1">Email</label>
+                        <input id="email" type="email" autocomplete="email" required
+                            class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent bg-dark-50 text-dark-900"
+                            placeholder="you@example.com">
+                    </div>
+
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-dark-900 mb-1">Password</label>
+                        <div class="pw-wrap">
+                            <input id="password" type="password" autocomplete="current-password" required minlength="8"
+                                class="w-full px-3 py-2 pr-10 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent bg-dark-50 text-dark-900"
+                                placeholder="Your account password">
+                            <button type="button" class="pw-toggle" onclick="togglePw(this)">
+                                <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="totpSection" class="totp-section">
+                        <label for="totpCode" class="block text-sm font-medium text-dark-900 mb-1">2FA code</label>
+                        <input id="totpCode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
+                            class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent bg-dark-50 text-dark-900 font-mono tracking-widest text-center"
+                            placeholder="123456">
+                        <p class="text-xs text-dark-500 mt-1">2FA was enabled on this account. Enter your authenticator code (or backup code).</p>
+                    </div>
+
+                    <button id="submitBtn" type="submit"
+                        class="w-full bg-brand-500 hover:bg-brand-600 text-white font-semibold py-2.5 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        Reactivate &amp; sign in
+                    </button>
+
+                    <div id="errBox" class="err-box"></div>
+                    <div id="okBox" class="ok-box"></div>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-dark-200 text-center">
+                    <a href="/sign-in" class="text-sm text-dark-600 hover:text-brand-500 transition-colors">&larr; Back to sign in</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- @include partials/footer.html -->
+    <!-- @include partials/auth.html -->
+
+    <script>
+    (function() {
+        try {
+            var preEmail = new URLSearchParams(window.location.search).get('email');
+            if (preEmail) document.getElementById('email').value = preEmail;
+        } catch (e) {}
+
+        var ADMIN_BASE = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE) || 'https://admin.goulburn.ai';
+        var form = document.getElementById('reactivateForm');
+        var submitBtn = document.getElementById('submitBtn');
+        var errBox = document.getElementById('errBox');
+        var okBox = document.getElementById('okBox');
+        var totpSection = document.getElementById('totpSection');
+
+        function showErr(msg) { errBox.textContent = msg; errBox.style.display = 'block'; okBox.style.display = 'none'; }
+        function showOk(msg) { okBox.textContent = msg; okBox.style.display = 'block'; errBox.style.display = 'none'; }
+        function clearMsgs() { errBox.style.display = 'none'; okBox.style.display = 'none'; }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearMsgs();
+            var email = document.getElementById('email').value.trim().toLowerCase();
+            var password = document.getElementById('password').value;
+            var totpCode = document.getElementById('totpCode').value.trim();
+
+            if (!email || !password) { showErr('Email and password required.'); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Reactivating…';
+
+            var payload = { email: email, password: password };
+            if (totpCode) payload.totp_code = totpCode;
+
+            fetch(ADMIN_BASE + '/api/v1/auth/reactivate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function(r) { return r.json().then(function(j) { return { status: r.status, body: j }; }); })
+            .then(function(res) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reactivate & sign in';
+
+                if (res.status === 200 && res.body.session_token) {
+                    try {
+                        localStorage.setItem('goulburn_session', res.body.session_token);
+                        if (res.body.registration_id) localStorage.setItem('goulburn_reg_id', res.body.registration_id);
+                        if (res.body.user_id) localStorage.setItem('goulburn_user_id', res.body.user_id);
+                    } catch (e) {}
+                    showOk('Account reactivated. Signing you in…');
+                    setTimeout(function() { window.location.href = '/dashboard'; }, 800);
+                    return;
+                }
+
+                if (res.status === 401 && res.body.detail && res.body.detail.indexOf('2FA code required') !== -1) {
+                    totpSection.style.display = 'block';
+                    showErr('This account has 2FA enabled. Enter your 6-digit code and try again.');
+                    return;
+                }
+                if (res.status === 401) { showErr('Invalid credentials. Check email and password.'); return; }
+                if (res.status === 404) { showErr('No account found for that email.'); return; }
+                if (res.status === 409) { showErr('This account is not in a deleted state. Try the regular sign-in page.'); return; }
+                if (res.status === 410) { showErr('The 48-hour reactivation window has expired. This account can no longer be recovered.'); return; }
+                if (res.status === 422) { showErr(res.body.detail || 'Invalid input.'); return; }
+                showErr(res.body.detail || res.body.message || ('Reactivation failed (HTTP ' + res.status + ').'));
+            })
+            .catch(function(err) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reactivate & sign in';
+                showErr('Network error during reactivation.');
+                console.error('Reactivate error:', err);
+            });
+        });
+    })();
+    </script>
+</body>
+</html>
