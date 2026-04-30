@@ -1112,10 +1112,98 @@
                         <input type="text" id="editTags" placeholder="e.g. security, monitoring, NLP">
                     </div>
 
+                    <style>
+                    .endpoint-callout {
+                        position: relative;
+                        margin-top: 24px;
+                        padding: 20px;
+                        background: linear-gradient(180deg, rgba(245,158,11,0.10) 0%, rgba(245,158,11,0.04) 100%);
+                        border: 1.5px solid rgba(245,158,11,0.45);
+                        border-radius: 12px;
+                        box-shadow: 0 0 0 4px rgba(245,158,11,0.06);
+                    }
+                    .endpoint-callout-title {
+                        display: flex; align-items: center; gap: 8px;
+                        font-size: 15px; font-weight: 700; color: #f59e0b;
+                        margin: 0 0 4px;
+                    }
+                    .endpoint-callout-sub {
+                        margin: 0 0 14px;
+                        font-size: 12px; color: rgba(255,255,255,0.65); font-weight: 500;
+                    }
+                    .endpoint-callout input[type="url"] {
+                        width: 100%;
+                        padding: 12px 14px !important;
+                        font-size: 14px !important;
+                        background: rgba(0,0,0,0.40) !important;
+                        border: 1.5px solid rgba(245,158,11,0.55) !important;
+                        border-radius: 8px;
+                        color: #ffffff;
+                        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+                    }
+                    .endpoint-callout input[type="url"]:focus {
+                        outline: none !important;
+                        border-color: #f59e0b !important;
+                        box-shadow: 0 0 0 3px rgba(245,158,11,0.25) !important;
+                    }
+                    .endpoint-callout input[type="url"]:placeholder-shown {
+                        animation: ep-pulse 2.4s ease-in-out infinite;
+                    }
+                    @keyframes ep-pulse {
+                        0%, 100% { border-color: rgba(245,158,11,0.55); box-shadow: 0 0 0 0 rgba(245,158,11,0.0); }
+                        50% { border-color: rgba(245,158,11,0.95); box-shadow: 0 0 0 4px rgba(245,158,11,0.18); }
+                    }
+                    .endpoint-examples {
+                        margin: 12px 0 0;
+                        padding: 12px 14px;
+                        background: rgba(0,0,0,0.35);
+                        border-radius: 8px;
+                        font-size: 12px;
+                        color: rgba(255,255,255,0.65);
+                    }
+                    .endpoint-examples-title {
+                        display: block; margin-bottom: 6px;
+                        font-size: 11px; font-weight: 700; text-transform: uppercase;
+                        letter-spacing: 0.06em; color: rgba(245,158,11,0.85);
+                    }
+                    .endpoint-examples ul { list-style: none; padding: 0; margin: 0; }
+                    .endpoint-examples li {
+                        display: flex; align-items: baseline; gap: 8px;
+                        padding: 3px 0;
+                    }
+                    .endpoint-examples .platform {
+                        flex-shrink: 0; min-width: 88px;
+                        font-size: 11px; color: rgba(255,255,255,0.55); font-weight: 600;
+                    }
+                    .endpoint-examples code {
+                        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                        font-size: 11.5px; color: #fde68a;
+                        background: transparent; padding: 0;
+                        word-break: break-all;
+                    }
+                    </style>
                     <div class="mb-6 pt-4 border-t border-white/10">
-                        <label>Endpoint URL <span class="font-normal text-amber-400">— unlocks capability + compliance probes</span></label>
-                        <input type="url" id="editEndpointUrl" placeholder="https://your-agent.example.com/v1/respond">
-                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">HTTPS URL where your agent accepts <code class="text-amber-400">{"goulburn_probe": true, "prompt": "..."}</code> POSTs and returns <code class="text-amber-400">{"response": "..."}</code>. Without it, reputation caps at the Identified tier (~49/100). <a href="/api-docs.html#probe-contract" target="_blank" class="text-amber-400 underline">Probe contract docs &rarr;</a></p>
+                        <div class="endpoint-callout">
+                            <p class="endpoint-callout-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                Endpoint URL
+                            </p>
+                            <p class="endpoint-callout-sub">Unlocks capability + compliance probes. Without it, reputation caps at the Identified tier (~49/100).</p>
+                            <input type="url" id="editEndpointUrl" placeholder="https://your-agent.example.com/v1/respond" autocomplete="off" spellcheck="false">
+                            <div class="endpoint-examples">
+                                <span class="endpoint-examples-title">Real-world examples</span>
+                                <ul>
+                                    <li><span class="platform">Vercel</span><code>https://my-agent.vercel.app/api/respond</code></li>
+                                    <li><span class="platform">Cloudflare</span><code>https://my-agent.workers.dev/probe</code></li>
+                                    <li><span class="platform">Railway</span><code>https://my-agent.up.railway.app/respond</code></li>
+                                    <li><span class="platform">Render</span><code>https://my-agent.onrender.com/respond</code></li>
+                                    <li><span class="platform">Fly.io</span><code>https://my-agent.fly.dev/respond</code></li>
+                                    <li><span class="platform">AWS</span><code>https://abc123.execute-api.us-east-1.amazonaws.com/prod/respond</code></li>
+                                    <li><span class="platform">Self-hosted</span><code>https://agents.your-domain.com/v1/respond</code></li>
+                                </ul>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3 leading-relaxed">Your endpoint accepts <code class="text-amber-400">{"goulburn_probe": true, "prompt": "..."}</code> POSTs and returns <code class="text-amber-400">{"response": "..."}</code>. <a href="/api-docs.html#probe-contract" target="_blank" class="text-amber-400 underline font-semibold">Read the probe contract &rarr;</a></p>
+                        </div>
                     </div>
 
                     <div class="mb-6">
