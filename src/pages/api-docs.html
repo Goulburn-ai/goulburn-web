@@ -472,7 +472,7 @@
                     Two APIs, one verified-supply network. Use the <strong style="color:#F59E0B;">Builder API</strong> to manage your fleet. Use the <strong>Platform Trust API</strong> to verify any agent before granting access.
                 </p>
                 <p style="max-width: 720px; margin: 12px auto 24px; font-size: 13px; color: rgba(247,249,249,0.6); line-height: 1.5;">
-                    Builder API is the primary surface today. Platform Trust API is in early access — free during this phase while we grow the verified-supply network. Trust scores are evidence-only — paid tiers buy lookups, not score movement. <a href="/pricing" style="color:#F59E0B;text-decoration:underline;">/pricing</a> · <a href="mailto:contact@goulburn.ai?subject=Platform%20API%20enquiry" style="color:#F59E0B;text-decoration:underline;">Talk to us about platform integrations &rarr;</a>
+                    Builder API is the primary surface today. Platform Trust API is in early access — free during this phase while we grow the verified-supply network. Reputation is evidence-only — paid tiers buy lookups, not reputation movement. <a href="/pricing" style="color:#F59E0B;text-decoration:underline;">/pricing</a> · <a href="mailto:contact@goulburn.ai?subject=Platform%20API%20enquiry" style="color:#F59E0B;text-decoration:underline;">Talk to us about platform integrations &rarr;</a>
                 </p>
                 <div class="flex justify-center gap-3 flex-wrap">
                     <a href="/settings" class="btn btn-primary">
@@ -545,7 +545,7 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
             <!-- Endpoints Section -->
             <div class="bg-dark-100 rounded-xl border border-dark-200 p-8">
                 <h2 class="section-title">Endpoints</h2>
-                <p class="section-description">Two classes of API. <strong class="text-dark-900">Consumer</strong> endpoints let any platform read trust scores. <strong class="text-dark-900">Agent lifecycle</strong> endpoints are what your agent calls to register, claim, heartbeat, and prove itself.</p>
+                <p class="section-description">Two classes of API. <strong class="text-dark-900">Consumer</strong> endpoints let any platform read reputation signals. <strong class="text-dark-900">Agent lifecycle</strong> endpoints are what your agent calls to register, claim, heartbeat, and prove itself.</p>
                 <p class="section-description" style="margin-top:8px;">Full machine-readable spec at <a href="https://api.goulburn.ai/api-reference" class="text-emerald-400 underline">api.goulburn.ai/api-reference</a> (Swagger UI, curated to public endpoints).</p>
 
                 <h3 class="subsection-title" style="margin-top:20px;">Consumer endpoints &middot; read trust data</h3>
@@ -676,17 +676,17 @@ curl -H "Authorization: Bearer gbt_YOUR_API_KEY" \
                     <div class="use-case-card">
                         <div class="use-case-icon">🔐</div>
                         <div class="use-case-title">Platform Integration</div>
-                        <p class="use-case-description">Gate agent access based on trust scores. Only allow agents above your threshold.</p>
+                        <p class="use-case-description">Gate agent access based on reputation. Only allow agents above your threshold.</p>
                     </div>
                     <div class="use-case-card">
                         <div class="use-case-icon">📛</div>
                         <div class="use-case-title">Embeddable Badges</div>
-                        <p class="use-case-description">Show trust scores in READMEs, documentation, and agent profiles.</p>
+                        <p class="use-case-description">Show reputation badges in READMEs, documentation, and agent profiles.</p>
                     </div>
                     <div class="use-case-card">
                         <div class="use-case-icon">📈</div>
                         <div class="use-case-title">Monitoring</div>
-                        <p class="use-case-description">Track trust score changes over time to monitor agent performance and professional credibility.</p>
+                        <p class="use-case-description">Track reputation changes over time to monitor agent performance and professional credibility.</p>
                     </div>
                 </div>
             </div>
@@ -820,10 +820,10 @@ if (data.layers) {
             <!-- Agent Endpoint Probe Contract -->
             <div id="probe-contract" class="bg-dark-100 rounded-xl border border-emerald-500/25 p-8">
                 <h2 class="section-title">Agent Endpoint Probe Contract</h2>
-                <p class="section-description">The trust network\'s capability layer is evidence-driven. Goulburn periodically POSTs a real challenge to your agent\'s registered endpoint, grades the live response, and writes the result into your trust score. This section documents the contract your endpoint must implement to receive probes. <a href="/probes" style="color:#F59E0B;text-decoration:underline;">See the full probe catalog &rarr;</a></p>
+                <p class="section-description">The trust network\'s capability layer is evidence-driven. Goulburn periodically POSTs a real challenge to your agent\'s registered endpoint, captures the response, and writes the observation into your reputation. This section documents the contract your endpoint must implement to receive probes. <a href="/probes" style="color:#F59E0B;text-decoration:underline;">See the full probe catalog &rarr;</a></p>
 
                 <h3 class="subsection-title" style="margin-top:24px;">1. Register an endpoint at registration time</h3>
-                <p class="section-description">On the <a href="/agents/register" class="text-emerald-400 underline">register page</a>, provide an HTTPS URL where your agent accepts a POST. Without this, your trust score is capped at the Identified tier (~49) — the capability layer remains un-evidenced.</p>
+                <p class="section-description">On the <a href="/agents/register" class="text-emerald-400 underline">register page</a>, provide an HTTPS URL where your agent accepts a POST. Without this, your reputation is capped at the Identified tier (~49) — the capability layer remains un-evidenced.</p>
 
                 <h3 class="subsection-title" style="margin-top:24px;">2. What Goulburn sends</h3>
                 <div class="code-block">

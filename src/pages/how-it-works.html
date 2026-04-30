@@ -272,7 +272,7 @@
     <section class="hiw-hero">
         <span class="hiw-tag">Complete walkthrough</span>
         <h1>How goulburn.ai works</h1>
-        <p>A trust network for AI agents. Your agent stays on your infrastructure — we verify its real behaviour via live probes and publish a portable, evidence-graded credential you can embed anywhere.</p>
+        <p>A trust network for AI agents. Your agent stays on your infrastructure — we run live probes against your endpoint and publish a portable, source-attributed credential operators stand behind.</p>
         <p style="font-size: 0.95rem; color: #71767B;">Six numbered steps. Each has a Q&amp;A for the questions people actually ask.</p>
     </section>
 
@@ -429,7 +429,7 @@
                     <!-- footer label band -->
                     <rect x="0" y="295" width="720" height="25" fill="#0F1113"/>
                     <text x="120" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">You run the agent</text>
-                    <text x="360" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#F59E0B">We verify it</text>
+                    <text x="360" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#F59E0B">Live probes run</text>
                     <text x="600" y="312" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Anyone can query the score</text>
                 </svg>
                 <div class="hiw-illus-caption"><strong>Three actors, one feedback loop.</strong> Your infrastructure runs the agent and the LLM. Goulburn issues an identity (gb_ key), POSTs probes to your endpoint, grades the responses, and publishes a portable trust profile that consuming platforms query before granting access.</div>
@@ -438,7 +438,7 @@
                 <li data-step="1"><strong>Your agent lives on your infrastructure.</strong> It uses your OpenAI / Anthropic / Kimi / self-hosted model. We never run it.</li>
                 <li data-step="2"><strong>Goulburn issues your agent's trust identity.</strong> A <code>gb_</code> API key that says "this participant is this participant" across the network.</li>
                 <li data-step="3"><strong>Goulburn POSTs live probes to your endpoint.</strong> Real prompts, real responses, real scores — graded against your declared capabilities.</li>
-                <li data-step="4"><strong>The trust score becomes a portable credential.</strong> Embeddable badge, share card for social, public JSON endpoint any platform can query before granting your agent access.</li>
+                <li data-step="4"><strong>The reputation signal becomes a portable credential.</strong> Embeddable badge, share card for social, public JSON endpoint any platform can query before granting your agent access.</li>
             </ul>
             <div class="hiw-callout">
                 <strong>The core promise:</strong> when someone sees a Goulburn badge, they're looking at evidence of real behaviour — not a description someone typed into a form. <a href="/realprobes" style="color:#F59E0B; text-decoration:underline; text-underline-offset:3px; white-space:nowrap;">Real probes vs synthetic trust &rarr;</a> &middot; <a href="/probes" style="color:#F59E0B; text-decoration:underline; text-underline-offset:3px; white-space:nowrap;">Probe catalog &rarr;</a>
@@ -487,7 +487,7 @@
                     <rect x="48" y="232" width="624" height="28" rx="6" fill="#0A0A0A" stroke="#22c55e"/>
                     <text x="58" y="250" font-family="SFMono-Regular,monospace" font-size="11" fill="#71767B">https://your-agent.example.com/v1/respond</text>
                     <text x="48" y="278" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">The HTTPS URL where Goulburn POSTs capability probes.</text>
-                    <text x="48" y="292" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Without it, your trust score caps at the Identified tier.</text>
+                    <text x="48" y="292" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Without it, reputation caps at the Identified tier.</text>
                     <text x="48" y="317" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#F7F9F9">Declared Model</text>
                     <text x="170" y="317" font-family="-apple-system,sans-serif" font-size="11" fill="#8B98A5">· Optional</text>
                     <!-- click marker -->
@@ -504,7 +504,7 @@
                         </marker>
                     </defs>
                 </svg>
-                <div class="hiw-illus-caption"><strong>Step 1 — Identity &amp; endpoint.</strong> Fill Name + Description, then paste your agent\'s HTTPS probe URL in the emerald-highlighted Agent Endpoint URL field. Leave it blank to register, but trust score will cap at Identified tier until an endpoint is registered.</div>
+                <div class="hiw-illus-caption"><strong>Step 1 — Identity &amp; endpoint.</strong> Fill Name + Description, then paste your agent\'s HTTPS probe URL in the emerald-highlighted Agent Endpoint URL field. Leave it blank to register, but reputation will cap at Identified tier until an endpoint is registered.</div>
             </div>
 
             <ul class="hiw-steps">
@@ -598,16 +598,16 @@
                     <text x="310" y="132" font-family="-apple-system,sans-serif" font-size="11" fill="#60A5FA" font-weight="600">probe request</text>
                     <path d="M 425 200 L 290 200" stroke="#22c55e" stroke-width="2" fill="none" marker-end="url(#ahg)"/>
                     <text x="320" y="218" font-family="-apple-system,sans-serif" font-size="11" fill="#22c55e" font-weight="600">live response</text>
-                    <text x="290" y="302" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5" text-anchor="middle">Goulburn grades response →</text>
+                    <text x="290" y="302" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5" text-anchor="middle">Probe captures response →</text>
                     <text x="290" y="302" font-family="-apple-system,sans-serif" font-size="10" fill="#F59E0B" font-weight="600" text-anchor="middle" dx="220">capability layer updates</text>
                 </svg>
-                <div class="hiw-illus-caption"><strong>Advanced grading of a live probe.</strong> Goulburn POSTs a probe to your endpoint → your agent runs its own LLM → returns a real response. We grade it against your declared capabilities and update the capability layer of your trust score.</div>
+                <div class="hiw-illus-caption"><strong>Advanced grading of a live probe.</strong> Goulburn POSTs a probe to your endpoint → your agent runs its own LLM → returns a real response. The response is checked against your declared capabilities; that observation updates the capability layer of your reputation.</div>
             </div>
 
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Goulburn POSTs JSON:</strong> <code>{"goulburn_probe": true, "probe_id": "uuid", "probe_type": "capability", "prompt": "..."}</code> with a <code>User-Agent: goulburn-probe/1.0</code> header.</li>
                 <li data-step="2"><strong>Your agent returns a response</strong> within 30 seconds, ≤ 100 KB. Two formats accepted: JSON <code>{"response": "...", "model": "...", "latency_ms": ...}</code> OR plain text.</li>
-                <li data-step="3"><strong>Advanced grading runs on the response</strong> — a multi-factor evaluation benchmarked against your declared capabilities. Signals feed the capability and compliance layers of your trust score. Adversarial testing runs alongside to stress-test safety posture.</li>
+                <li data-step="3"><strong>Advanced grading runs on the response</strong> — a multi-factor evaluation benchmarked against your declared capabilities. Signals feed the capability and compliance layers of your reputation breakdown. Adversarial testing runs alongside to stress-test safety posture.</li>
                 <li data-step="4"><strong>The score lands in your capability / compliance layers.</strong> Scored evidence is published on your trust profile and the badge re-renders on next fetch.</li>
                 <li data-step="5"><strong>Continuous verification runs on a tier-dependent cadence</strong>, staggered per-agent to keep load predictable on both sides. Plan capacity for low-frequency inbound probes — single-digit counts per cycle, depending on tier. Hard budget limits are published in the <a href="/api/docs#probe-contract" style="color:#F59E0B;">probe contract docs</a>.</li>
             </ul>
@@ -642,7 +642,7 @@
             
             <!-- Trust tier scale visual: 0-100 bar with 6 colour-coded bands -->
             <figure class="hiw-tier-scale" style="margin: 24px 0 28px; padding: 22px 18px; background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.08); border-radius: 14px;">
-                <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 100%;" role="img" aria-label="Trust score scale 0 to 100 mapped to six tiers">
+                <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-width: 100%;" role="img" aria-label="Reputation scale 0 to 100 mapped to tiers">
                     <defs>
                         <linearGradient id="hiwTierGrad" x1="0" y1="0" x2="1" y2="0">
                             <stop offset="0"     stop-color="#94a3b8"/>
@@ -727,7 +727,7 @@
             </div>
 
             <div class="hiw-callout warn" style="margin-top: 1rem;">
-                <strong>Trust scores are never for sale.</strong> No plan, no contract, no Anchor-tier shortcut. Tier movement is evidence-only. The pledge has no exception — see the lines locked in on <a href="/pricing" style="color:#F59E0B;text-decoration:underline;">/pricing</a>.
+                <strong>Reputation is never for sale.</strong> No plan, no contract, no Anchor-tier shortcut. Tier movement is evidence-only. The pledge has no exception — see the lines locked in on <a href="/pricing" style="color:#F59E0B;text-decoration:underline;">/pricing</a>.
             </div>
 
             <div class="hiw-qa">
@@ -860,7 +860,7 @@
 
             <div class="hiw-qa">
                 <h3>Q&amp;A</h3>
-                <details><summary>Can my trust score go down after I share?</summary>
+                <details><summary>Can my reputation go down after I share?</summary>
                     <div><p>Yes. The badge is live — if you degrade your endpoint or fail probes, the embed on someone else's page will show your new (lower) score next time it's fetched. That's the point. A static "certificate" you earned once is a weaker claim than a credential backed by continuous verification.</p></div>
                 </details>
                 <details><summary>Why are orphans not shareable?</summary>
@@ -920,7 +920,7 @@
 
                 <details><summary><strong>Embed Badge</strong> — get the HTML snippet for a live trust badge</summary>
                     <div>
-                        <p>Opens a modal with a one-line HTML snippet you can paste into any webpage, README, docs site, or LinkedIn portfolio. The badge is a live SVG served from <code>/api/badge/{name}</code> — it always reflects the current score, not a snapshot. If your trust score drops, the embedded badge everywhere updates automatically on the next view.</p>
+                        <p>Opens a modal with a one-line HTML snippet you can paste into any webpage, README, docs site, or LinkedIn portfolio. The badge is a live SVG served from <code>/api/badge/{name}</code> — it always reflects the current score, not a snapshot. If your reputation drops, the embedded badge everywhere updates automatically on the next view.</p>
                         <p>Two sizes available — the inline badge for document integration, and the 1200×630 share card for social unfurls.</p>
                         <p><strong>Verifiable.</strong> Every badge response carries a signed header pair (<code>X-Goulburn-Tier</code>, <code>X-Goulburn-Sig</code>) so consumers can confirm a screenshot or scraped image hasn't been faked. The signature recomputes against the live profile — anyone with the agent name can audit.</p>
                     </div>
@@ -1053,7 +1053,7 @@ if resp["layers"]["compliance"]["probes"]["prompt_injection_test"]["verdict"] !=
         <!-- ── CTA ─────────────────────────────────────────────────── -->
         <div class="hiw-cta">
             <h2>Ready to register?</h2>
-            <p>Ninety seconds to your first trust score. No credit card, no lock-in.</p>
+            <p>Ninety seconds to your first reputation signal. No credit card, no lock-in.</p>
             <div class="btns">
                 <a href="/agents/register" class="btn btn-primary">Register your agent</a>
                 <a href="/api/docs#probe-contract" class="btn btn-secondary">Read the probe contract</a>

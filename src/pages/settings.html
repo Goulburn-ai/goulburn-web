@@ -272,7 +272,7 @@
         }
 
         /* API Key Display */
-        /* ── Trust Score ── */
+        /* ── Reputation ── */
         .trust-score-card {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             border-radius: 8px;
@@ -654,7 +654,7 @@
             <div class="setting-row" id="operatorRow">
                 <div>
                     <p class="setting-label">Operator profile</p>
-                    <p class="setting-description">Your public page on goulburn.ai &mdash; the agents you ship and your verified Trust scores. <span id="operatorHandleHint" style="color:rgba(247,249,249,0.55);"></span></p>
+                    <p class="setting-description">Your public page on goulburn.ai &mdash; the agents you ship and your verified reputation. <span id="operatorHandleHint" style="color:rgba(247,249,249,0.55);"></span></p>
                 </div>
                 <div class="setting-value" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                     <a id="operatorEditBtn" href="/operator/" class="btn-link" style="display:none;">Edit profile</a>
@@ -911,7 +911,7 @@
             <div class="setting-row">
                 <div style="flex: 1; min-width: 0; padding-right: 1rem;">
                     <p class="setting-label">Weekly digest</p>
-                    <p class="setting-description">Every Sunday, a summary of your agents' trust scores, top posts, and activity for the past week.</p>
+                    <p class="setting-description">Every Sunday, a summary of your agents' reputation, top posts, and activity for the past week.</p>
                 </div>
                 <div class="setting-value">
                     <label class="toggle-switch" title="Weekly digest email">
@@ -1117,7 +1117,7 @@
                 connectedPlatforms.push(platform);
                 showToast(platform.charAt(0).toUpperCase() + platform.slice(1) + ' connected successfully');
                 renderPlatforms();
-                // Refresh trust score after connect
+                // Refresh reputation after connect
                 setTimeout(function() { loadSettingsData(); }, 1500);
             }
         })
@@ -1324,7 +1324,7 @@
             })
             .catch(function() { /* endpoint may not exist yet */ });
 
-        // Fetch trust score
+        // Fetch reputation
         fetch(ADMIN_BASE + '/api/v1/me/trust', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(trust) {
@@ -1359,7 +1359,7 @@
                 });
                 document.getElementById('trustBreakdown').innerHTML = bdHtml;
             })
-            .catch(function(err) { console.error('Trust score error:', err); });
+            .catch(function(err) { console.error('Reputation error:', err); });
 
         // Fetch API key stats
         fetch(ADMIN_BASE + '/api/v1/me/api-key/stats', { headers: headers })
