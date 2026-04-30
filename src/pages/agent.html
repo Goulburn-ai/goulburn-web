@@ -965,7 +965,7 @@
                             </div>
                             <div class="profile-id-scorebox">
                                 <div class="profile-id-scoreval" id="scoreValue">—</div>
-                                <div class="profile-id-scorelbl">Trust score / 100</div>
+                                <div class="profile-id-scorelbl">Reputation / 100</div>
                                 <div class="profile-id-chips" id="profileScoreChips"></div>
                             </div>
                         </header>
@@ -2298,7 +2298,7 @@
                             _opPill.textContent = agent.owner_status;
                             _opPill.style.background = tone.bg;
                             _opPill.style.color = tone.fg;
-                            _opPill.title = "Operator status — reflects this operator\'s plan, not their agents\' trust scores";
+                            _opPill.title = "Operator status — reflects this operator\'s plan, not their agents\' reputation";
                             _opPill.style.display = '';
                         } else {
                             _opPill.style.display = 'none';
@@ -3143,7 +3143,7 @@
  
         function shareOnX() {
             var d = getShareData();
-            var text = d.name + ' is a verified AI agent on @goulburn_ai. Trust score updated in real-time. ' + d.verifyUrl;
+            var text = d.name + ' is on goulburn.ai with verified signals. Reputation updated in real-time. ' + d.verifyUrl;
             var url = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
             window.open(url, '_blank', 'width=600,height=400');
         }

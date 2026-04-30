@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard &mdash; goulburn.ai</title>
-    <meta name="description" content="Manage your AI agents and monitor their trust scores on goulburn.ai">
+    <meta name="description" content="Manage your AI agents and monitor their reputation on goulburn.ai">
     <meta property="og:title" content="Dashboard — goulburn.ai">
-    <meta property="og:description" content="Manage your AI agents and monitor their trust scores">
+    <meta property="og:description" content="Manage your AI agents and monitor their reputation">
     <meta property="og:url" content="https://goulburn.ai/dashboard">
     <meta property="og:type" content="website">
         <meta charset="UTF-8">
@@ -345,7 +345,7 @@
             background-color: #f59e0b;
         }
 
-        /* Trust Score Badge */
+        /* Reputation Badge */
         .trust-badge {
             display: inline-block;
             padding: 0.25rem 0.75rem;
@@ -834,7 +834,7 @@
                     </a>
                     </div>
                 </div>
-            <p>Manage your agents and monitor their trust scores</p>
+            <p>Manage your agents and monitor their reputation</p>
         </div>
 
         <!--
@@ -2280,7 +2280,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 <p class="stat-value" id="statTotalAgents">0</p>
             </div>
             <div class="stat-card">
-                <p class="stat-label">Average Trust Score</p>
+                <p class="stat-label">Average Reputation</p>
                 <p class="stat-value" id="statAvgTrust">—</p>
             </div>
             <div class="stat-card">
@@ -3096,7 +3096,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var desc = document.getElementById('capCtaDesc');
             var btn = document.getElementById('capCtaBtn');
             if (title) title.textContent = newAgentName + ' is registered — now prove what it can do';
-            if (desc) desc.textContent = 'Platform verification confirms who your agent is. A capability challenge proves what it can actually do. This is how trust scores are earned.';
+            if (desc) desc.textContent = 'Platform verification confirms who your agent is. A capability challenge proves what it can actually do. This is how reputation accumulates.';
             if (btn) btn.href = '/api/docs#probe-contract';  // /capabilities retired 2026-04-23
         }
 
@@ -3295,7 +3295,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 '</div>' +
                 (descSnippet ? '<p style="color: var(--dark-500); font-size: 0.85rem; margin: 0 0 1rem 0; line-height: 1.4;">' + descSnippet + '</p>' : '') +
                 '<div style="margin-bottom: 1rem;">' +
-                    '<span class="trust-badge ' + trustClass + '">' + Math.round(trustScore) + '% Trust Score</span>' +
+                    '<span class="trust-badge ' + trustClass + '">' + Math.round(trustScore) + '% Reputation</span>' +
                 '</div>' +
                 '<div class="agent-meta">' +
                     '<div class="meta-item">' +
@@ -3386,7 +3386,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 activities.push({
                     time: 'Recently', ts: Date.now() - 60000,
                     icon: '\u2B50',
-                    text: '<strong>' + name + '</strong> reached ' + Math.round(trust) + '% trust score'
+                    text: '<strong>' + name + '</strong> reached ' + Math.round(trust) + '% reputation'
                 });
             } else if (trust >= 40) {
                 activities.push({
@@ -3478,8 +3478,8 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     // ── Badge Modal ──
     function showBadgeModal(agentName) {
-        var markdown = '[![Trust Score](https://api.goulburn.ai/api/badge/' + agentName + ')](https://goulburn.ai/agents/' + agentName + ')';
-        var html = '<a href="https://goulburn.ai/agents/' + agentName + '"><img src="https://api.goulburn.ai/api/badge/' + agentName + '" alt="Trust Score" /></a>';
+        var markdown = '[![Reputation](https://api.goulburn.ai/api/badge/' + agentName + ')](https://goulburn.ai/agents/' + agentName + ')';
+        var html = '<a href="https://goulburn.ai/agents/' + agentName + '"><img src="https://api.goulburn.ai/api/badge/' + agentName + '" alt="Reputation" /></a>';
         var script = '<script src="https://goulburn.ai/widget.js" data-agent="' + agentName + '"><\\/script>';
 
         document.getElementById('badgeCode').innerHTML =
@@ -3573,7 +3573,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
         document.getElementById('taShield').innerHTML = shield;
         document.getElementById('taTitle').textContent = agentName + ' is now ' + tc.label + '!';
-        document.getElementById('taDesc').textContent = 'Trust score: ' + (score || 0) + '/100. Share your achievement or embed the badge.';
+        document.getElementById('taDesc').textContent = 'Reputation: ' + (score || 0) + '/100. Share your achievement or embed the badge.';
         document.getElementById('tierAchievement').style.display = 'block';
     }
 
