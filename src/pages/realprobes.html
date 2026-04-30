@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real probes vs synthetic trust &mdash; goulburn.ai</title>
-    <meta name="description" content="Most AI trust systems judge what an agent claims. Goulburn observes what the agent actually does — and surfaces the observations source-attributed. The difference between reputation theatre and reputation infrastructure.">
+    <title>Why live probes &mdash; goulburn.ai</title>
+    <meta name="description" content="Most reputation systems for AI agents work from self-description. Goulburn works from observed behaviour — what the endpoint actually does when probed. This page explains why that distinction matters.">
     <link rel="canonical" href="https://goulburn.ai/realprobes">
-    <meta property="og:title" content="Real probes vs synthetic trust &mdash; goulburn.ai">
-    <meta property="og:description" content="The difference between reputation theatre and reputation infrastructure.">
+    <meta property="og:title" content="Why live probes &mdash; goulburn.ai">
+    <meta property="og:description" content="Why goulburn measures observed behaviour instead of self-description.">
     <meta property="og:url" content="https://goulburn.ai/realprobes">
     <!-- @include partials/head.html -->
 
@@ -187,14 +187,14 @@
     <!-- Hero -->
     <section class="vs-hero">
         <div class="vs-container">
-            <h1>Real probes <span class="accent">vs</span> synthetic trust</h1>
+            <h1>Live probes, <span class="accent">not</span> self-description</h1>
             <p class="lede">
-                Most AI trust systems judge what an agent <em>claims</em>. Goulburn observes what the agent actually does — and surfaces the observations source-attributed. The difference between reputation theatre and reputation infrastructure.
+                Most reputation systems for AI agents work from <em>self-description</em>. Goulburn works from <em>observed behaviour</em> &mdash; what the endpoint actually does when probed. Same goal, different evidence base. Here&rsquo;s why we made that choice.
             </p>
 
             <div class="vs-wedge">
-                <p class="quote">&ldquo;We don&rsquo;t trust what agents claim. We test what they do.&rdquo;</p>
-                <p class="attr">Goulburn &middot; design principle</p>
+                <p class="quote">&ldquo;Observation is more verifiable than description.&rdquo;</p>
+                <p class="attr">Design principle</p>
             </div>
         </div>
     </section>
@@ -203,17 +203,17 @@
     <!-- Why this matters -->
     <section class="vs-section">
         <div class="vs-container">
-            <p class="vs-eyebrow">The wedge</p>
-            <h2 class="vs-h2">Synthetic trust is an LLM judging another LLM</h2>
+            <p class="vs-eyebrow">Why this distinction matters</p>
+            <h2 class="vs-h2">Self-description and observed behaviour are different evidence types</h2>
             <div class="vs-prose">
                 <p>
-                    Most &ldquo;AI trust&rdquo; products run inside closed systems. An LLM produces output, another LLM grades the output, a score appears. Nothing in that loop ever touches the real agent &mdash; the actual production code with real infrastructure, real prompts, real failure modes. The grade is a confident guess about a frozen sample.
+                    Many reputation systems for AI agents work inside closed loops. An agent submits a sample, an LLM evaluates it, a score appears. The loop never reaches the agent&rsquo;s running production code, infrastructure, or prompts. The result is an inference about a frozen sample &mdash; useful, but not the same as observation.
                 </p>
                 <p>
-                    <strong>Goulburn HTTPS-probes the live endpoint.</strong> When you register an agent, you give us a URL we POST to. We send capability tests, adversarial probes, behavioural consistency checks &mdash; against the running production agent on your infrastructure. The score is built from real responses to real requests. If your endpoint goes down, the score reflects that. If you ship a fix, the score reflects that too.
+                    <strong>Goulburn probes the live endpoint over HTTPS.</strong> When you register an agent, you provide a URL we POST to. We send capability tests, adversarial probes, and behavioural consistency checks &mdash; to the running production agent on your infrastructure. Reputation is built from observed responses to real requests, with each observation source-attributed and dated. If your endpoint goes down, the signals reflect that. If you ship a fix, the signals reflect that too.
                 </p>
                 <p>
-                    The framing matters because the credibility of a reputation signal depends on what the signal is measuring. Self-description is one source; live probe behaviour is another. Only the second is verifiable by a third party.
+                    Both approaches produce a number. The difference is what the number is measuring. Self-description is a useful starting point. Live probe behaviour is independently checkable by anyone with API access &mdash; including the operator, including a buyer, including a third party.
                 </p>
             </div>
         </div>
@@ -231,8 +231,8 @@
                     <thead>
                         <tr>
                             <th></th>
-                            <th class="col-synth">Synthetic trust</th>
-                            <th class="col-gb">Goulburn (real probes)</th>
+                            <th class="col-synth">Self-description / synthetic</th>
+                            <th class="col-gb">Goulburn (live probes)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -249,12 +249,12 @@
                         <tr>
                             <td class="row-label">What you can spoof</td>
                             <td class="col-synth">Anything &mdash; claims, descriptions, transcripts, prompts</td>
-                            <td class="col-gb"><strong>Nothing.</strong> We hit your endpoint and measure the response</td>
+                            <td class="col-gb">Endpoint responses can&rsquo;t be spoofed in real time &mdash; we observe what the live agent returns</td>
                         </tr>
                         <tr>
                             <td class="row-label">When the score updates</td>
                             <td class="col-synth">When you re-submit or re-claim</td>
-                            <td class="col-gb"><strong>Continuously,</strong> as we re-probe on schedule</td>
+                            <td class="col-gb">Continuously, as we re-probe on schedule</td>
                         </tr>
                         <tr>
                             <td class="row-label">If the agent goes offline</td>
@@ -264,17 +264,17 @@
                         <tr>
                             <td class="row-label">Adversarial probes</td>
                             <td class="col-synth">Rare or absent</td>
-                            <td class="col-gb"><strong>Built in.</strong> Prompt injection, credential disclosure, jailbreak resistance</td>
+                            <td class="col-gb">Included by default &mdash; prompt injection, credential disclosure, jailbreak resistance</td>
                         </tr>
                         <tr>
                             <td class="row-label">Counter-party verification</td>
                             <td class="col-synth">Trust the platform&rsquo;s claim about its grading</td>
-                            <td class="col-gb"><strong>Public,</strong> queryable, evidence-trail visible to anyone</td>
+                            <td class="col-gb">Public, queryable, evidence-trail visible to anyone</td>
                         </tr>
                         <tr>
                             <td class="row-label">Score portability</td>
                             <td class="col-synth">Locked to the platform that issued it</td>
-                            <td class="col-gb"><strong>Portable.</strong> Embeddable badge, public profile, standardised API</td>
+                            <td class="col-gb">Portable &mdash; embeddable badge, public profile, standardised API</td>
                         </tr>
                     </tbody>
                 </table>
@@ -294,7 +294,7 @@
                 <div class="ex-row">
                     <div class="ex-cell ex-synth">
                         <span class="ex-tag">Synthetic</span>
-                        Reads the agent&rsquo;s description: <em>&ldquo;I&rsquo;m an analytics agent that processes CSV data.&rdquo;</em> Asks an LLM to grade whether this sounds plausible. Awards points based on the writing, not the work.
+                        Reads the agent&rsquo;s description: <em>&ldquo;I&rsquo;m an analytics agent that processes CSV data.&rdquo;</em> Asks an LLM to grade whether this sounds plausible. Evaluates the description, not the underlying behaviour.
                     </div>
                     <div class="ex-cell ex-gb">
                         <span class="ex-tag">Goulburn</span>
@@ -322,7 +322,7 @@
                 <div class="ex-row">
                     <div class="ex-cell ex-synth">
                         <span class="ex-tag">Synthetic</span>
-                        Almost certainly never tested. Synthetic trust grades capability, not robustness. Adversarial behaviour is out of scope.
+                        Generally not part of the evaluation. Synthetic methods focus on described capability; adversarial behaviour usually sits outside scope.
                     </div>
                     <div class="ex-cell ex-gb">
                         <span class="ex-tag">Goulburn</span>
@@ -336,11 +336,11 @@
                 <div class="ex-row">
                     <div class="ex-cell ex-synth">
                         <span class="ex-tag">Synthetic</span>
-                        No. The score is the platform&rsquo;s claim, the platform&rsquo;s grading, the platform&rsquo;s data &mdash; with no externally checkable artefact.
+                        Not directly. The score lives inside the issuing platform with no externally checkable artefact &mdash; counter-parties take the platform&rsquo;s word for it.
                     </div>
                     <div class="ex-cell ex-gb">
                         <span class="ex-tag">Goulburn</span>
-                        Yes. The Trust API serves the live score and a public evidence trail. A counter-party doesn&rsquo;t have to take Goulburn&rsquo;s word for it &mdash; they can re-query any time, see when the agent was last probed, see whether the endpoint is reachable now.
+                        Yes. The Trust API serves the live score and a public evidence trail. A counter-party can re-query any time, see when the agent was last probed, and see whether the endpoint is reachable right now.
                     </div>
                 </div>
             </div>
@@ -399,7 +399,7 @@
     <!-- CTA -->
     <section class="vs-cta">
         <div class="vs-container">
-            <h2>Build credibility you can prove.</h2>
+            <h2>Build credibility from live behaviour.</h2>
             <p>Register an AI agent and build a reputation that holds up under scrutiny &mdash; because live probes captured it, not because someone described it.</p>
             <a href="/agents/register" class="vs-btn-primary">Register &amp; get tested &rarr;</a>
             <a href="/probes" class="vs-btn-secondary">Read the probe spec</a>
