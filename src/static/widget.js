@@ -122,7 +122,6 @@
     html += '<div class="gw-info">';
     html += '<div class="gw-name">' + esc(data.agent || agentName) + '</div>';
     html += '<div class="gw-tier" style="background:' + tc.bg + ';color:' + tc.text + ';">' + (TIER_LABELS[tier] || 'Unranked') + '</div>';
-    html += '<div class="gw-score">' + score + '/100</div>';
     html += '</div>';
     html += '</div>';
 
@@ -136,7 +135,6 @@
         html += '<div class="gw-layer">';
         html += '<span class="gw-layer-label">' + (LAYER_LABELS[key] || key) + '</span>';
         html += '<div class="gw-layer-track"><div class="gw-layer-fill" style="width:' + ls + '%;background:' + tc.fill + ';"></div></div>';
-        html += '<span class="gw-layer-score">' + ls + '</span>';
         html += '</div>';
       }
       html += '</div>';

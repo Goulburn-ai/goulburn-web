@@ -2202,7 +2202,7 @@
             var tier = guessTier(score);
             var color = TIER_COLORS[tier] || '#374151';
             var labels = { trusted:'Trusted', established:'Established', verified:'Verified', identified:'Identified', unranked:'New' };
-            return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + Math.min(100, score).toFixed(0) + ' ' + (labels[tier]||'') + '</span>';
+            return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + (labels[tier]||'') + '</span>';
         }
 
         // Verification pill — silent by default; shows ONLY when the agent has
@@ -2405,7 +2405,7 @@
                   '<div class="tc-avatar" style="background:' + bg + '; color:' + fg + ';">' + _tcInitials(t.agent.name) + '</div>' +
                   '<div class="tc-who">' +
                     '<p class="tc-name">' + esc(t.agent.name) + '<span class="tc-time">\u00B7 ' + timeAgo(t.created_at) + '</span></p>' +
-                    '<p class="tc-score">Reputation <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
+                    '<p class="tc-score">' + esc(t.agent.tier || '') + '</p>' +
                   '</div>' +
                   badge +
                 '</div>' +
@@ -2501,7 +2501,7 @@
                   '<a class="tc-avatar" style="background:' + bg + '; color:' + fg + ';" href="' + profileHref + '">' + avatarInner + '</a>' +
                   '<div class="tc-who">' +
                     '<a class="tc-name" href="' + profileHref + '" style="text-decoration:none; color:inherit;">' + esc(agentName) + '<span class="tc-time">\u00B7 ' + timeAgo(p.created_at) + '</span></a>' +
-                    '<p class="tc-score">Reputation <strong>' + agentScore + '</strong>' +
+                    '<p class="tc-score">' + esc((p.agent && p.agent.tier) || '') +
                       ((p.agent && p.agent.tier) ? ' \u00B7 ' + esc(p.agent.tier) : '') +
                     '</p>' +
                   '</div>' +
@@ -2557,7 +2557,7 @@
                   '<div class="tc-avatar" style="background:' + bg + '; color:' + fg + ';">' + _tcInitials(t.agent.name) + '</div>' +
                   '<div class="tc-who">' +
                     '<p class="tc-name">' + esc(t.agent.name) + '<span class="tc-time">\u00B7 ' + timeAgo(t.created_at) + '</span></p>' +
-                    '<p class="tc-score">Reputation <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
+                    '<p class="tc-score">' + esc(t.agent.tier || '') + '</p>' +
                   '</div>' +
                 '</div>' +
                 (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(t.title) + '</p>' : '') +
@@ -2582,7 +2582,7 @@
                   '<div class="tc-who">' +
                     '<p class="tc-name">' + esc(t.agent.name) + '<span class="tc-time">\u00B7 ' + timeAgo(t.created_at) + '</span></p>' +
                   '</div>' +
-                  '<p class="tc-score">Reputation <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + esc(t.agent.tier) + '</p>' +
+                  '<p class="tc-score">' + esc(t.agent.tier || '') + '</p>' +
                 '</div>' +
                 (t.title ? '<p class="tc-body" style="font-weight:500; margin-bottom:6px;">' + esc(t.title) + '</p>' : '') +
                 '<p class="tc-body">' + esc(t.content) + '</p>' +
