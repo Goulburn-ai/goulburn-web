@@ -17,7 +17,8 @@
     <meta name="twitter:image" content="https://goulburn.ai/og-image.png">
     <!-- @include partials/head.html -->
     <style>
-        html, body { overflow-x: hidden; max-width: 100%; }
+        html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+        .lp-container { box-sizing: border-box; max-width: 100%; }
         :root {
             --bg: #0A0A0A;
             --surface: rgba(255,255,255,0.03);
@@ -266,9 +267,10 @@
             z-index: 3;
         }
 
-        /* Single consolidated mobile/tablet block — applies <=980px */
-        @media (max-width: 980px) {
-            .lp-hero { padding: 48px 0 56px; overflow: hidden; }
+        /* Mobile/tablet block — applies <=1100px to catch tablet portrait */
+        @media (max-width: 1100px) {
+            .lp-hero { padding: 48px 0 56px; overflow: hidden; max-width: 100vw; }
+            .lp-container { padding: 0 16px; box-sizing: border-box; }
             .lp-hero::before { right: -240px; top: 200px; width: 600px; height: 480px; }
             .lp-hero::after { display: none; }
             .lp-hero-grid {
