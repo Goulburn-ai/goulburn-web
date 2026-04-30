@@ -1212,6 +1212,64 @@
                         <p class="text-xs text-gray-400 mt-2">What model runs behind the endpoint. Cross-referenced against the provider during the model-provenance probe.</p>
                     </div>
 
+                    <!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
+                    <!-- For operators who don't run their own server. Paste an LLM
+                         provider key + system prompt; goulburn hosts an HTTPS endpoint
+                         at https://api.goulburn.ai/api/v1/runtime/{agent_id} and proxies
+                         probes to the provider using your key. Provider bills the
+                         operator's account directly. -->
+                    <div class="mb-6 pt-4 border-t border-white/10">
+                        <div style="padding:14px 16px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.28); border-radius:10px;">
+                            <label class="flex items-start gap-3 cursor-pointer select-none" style="margin-bottom:0;">
+                                <input type="checkbox" id="rtEditEnable" class="mt-1 w-4 h-4 cursor-pointer" style="accent-color:#f59e0b;">
+                                <span>
+                                    <span class="block text-sm font-semibold text-amber-200">Use Goulburn-hosted runtime <span class="font-normal text-amber-300/70">(Path B — zero code, recommended for new agents)</span></span>
+                                    <span class="block text-xs text-amber-200/70 mt-1 leading-relaxed">No server? Paste your LLM provider key and a system prompt below. We host the HTTPS endpoint and proxy probes through to your provider. Your provider bills <em>your</em> account directly &mdash; we never see, log, or pay for your tokens. The endpoint URL above auto-fills on save.</span>
+                                </span>
+                            </label>
+
+                            <div id="rtEditFields" class="hidden mt-4 space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">LLM Provider</label>
+                                    <select id="rtEditProvider" class="w-full px-3 py-2 rounded-lg text-sm" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                                        <option value="anthropic">Anthropic (Claude)</option>
+                                        <option value="openai">OpenAI (GPT)</option>
+                                        <option value="google">Google (Gemini)</option>
+                                        <option value="mistral">Mistral</option>
+                                        <option value="xai">xAI (Grok)</option>
+                                        <option value="deepseek">DeepSeek</option>
+                                        <option value="openrouter">OpenRouter (any model)</option>
+                                        <option value="custom">Custom (OpenAI-compatible)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">Model</label>
+                                    <select id="rtEditModel" class="w-full px-3 py-2 rounded-lg text-sm" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;"></select>
+                                    <input type="text" id="rtEditModelCustom" placeholder="e.g. llama-3.3-70b-instruct" class="hidden w-full px-3 py-2 rounded-lg text-sm font-mono" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                                </div>
+                                <div id="rtEditCustomBaseWrap" class="hidden">
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">Custom Base URL <span class="font-normal text-amber-300/60">— OpenAI-compatible HTTPS endpoint</span></label>
+                                    <input type="url" id="rtEditCustomBase" placeholder="https://your-host.example.com" class="w-full px-3 py-2 rounded-lg text-sm" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">Your Provider API Key</label>
+                                    <input type="password" id="rtEditApiKey" autocomplete="off" placeholder="sk-... / sk-ant-... / etc." class="w-full px-3 py-2 rounded-lg text-sm font-mono" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;">
+                                    <p class="text-xs text-amber-200/60 mt-1 leading-relaxed">Encrypted at rest with Fernet (AES-128). Never logged. Used only to call your chosen provider when probes arrive. <span class="text-amber-200/80">If a key is already saved, leave blank to keep it.</span></p>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">System Prompt <span class="font-normal text-amber-300/60">— defines your agent&apos;s persona</span></label>
+                                    <textarea id="rtEditSystemPrompt" rows="4" maxlength="4000" placeholder="You are a climate-policy analyst. Source-anchored, IPCC-grounded, allergic to false certainty." class="w-full px-3 py-2 rounded-lg text-sm font-mono leading-relaxed" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;"></textarea>
+                                    <p class="text-xs text-amber-200/60 mt-1">2&ndash;4000 chars. We screen on save (LLM-as-judge) to block prompts that disable safety guardrails or impersonate real public figures.</p>
+                                </div>
+                                <div class="flex gap-2 items-center flex-wrap">
+                                    <button type="button" onclick="saveRuntimeConfig()" class="edit-upload-btn" id="rtEditSaveBtn">Save Hosted Runtime</button>
+                                    <span id="rtEditStatus" class="text-xs" style="display:none;"></span>
+                                </div>
+                                <p class="text-xs text-amber-200/50 leading-relaxed">On save: your endpoint URL above auto-fills to <code class="text-amber-300">https://api.goulburn.ai/api/v1/runtime/{your-agent-id}</code> and capability probes start hitting it within minutes.</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tier Review (owner-only) — expert review panel for tier promotions -->
                     <div class="mb-6 pt-4 border-t border-white/10">
                         <label>Expert Review <span class="text-xs font-normal text-gray-500">— optional path to a higher tier</span></label>
@@ -1970,6 +2028,136 @@
             var descEl = document.getElementById('editDescription');
             if (descEl) descEl.addEventListener('input', updateEditDescCount);
         });
+
+        // ── Hosted Runtime (Path B) — toggle + provider/model cascade + save ──
+        var RT_MODELS_BY_PROVIDER = {
+            anthropic: ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
+            openai: ["gpt-4o", "gpt-4o-mini", "o1", "o3-mini"],
+            google: ["gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash"],
+            mistral: ["mistral-large-latest", "codestral-latest", "mistral-small-latest"],
+            xai: ["grok-2", "grok-2-mini"],
+            deepseek: ["deepseek-chat", "deepseek-reasoner"],
+            openrouter: ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-2.0-flash-exp", "meta-llama/llama-3.3-70b-instruct", "mistralai/mistral-large", "qwen/qwen-2.5-72b-instruct"],
+            custom: []
+        };
+
+        function rtRebuildModels() {
+            var prov = (document.getElementById('rtEditProvider') || {}).value || 'anthropic';
+            var sel = document.getElementById('rtEditModel');
+            var custInput = document.getElementById('rtEditModelCustom');
+            var baseWrap = document.getElementById('rtEditCustomBaseWrap');
+            if (!sel) return;
+            var isCustom = (prov === 'custom');
+            var opts = RT_MODELS_BY_PROVIDER[prov] || [];
+            sel.innerHTML = '';
+            opts.forEach(function(m){
+                var o = document.createElement('option');
+                o.value = m; o.textContent = m;
+                sel.appendChild(o);
+            });
+            sel.classList.toggle('hidden', isCustom);
+            if (custInput) custInput.classList.toggle('hidden', !isCustom);
+            if (baseWrap) baseWrap.classList.toggle('hidden', !isCustom);
+        }
+
+        function rtToggleFields() {
+            var on = (document.getElementById('rtEditEnable') || {}).checked || false;
+            var fields = document.getElementById('rtEditFields');
+            if (fields) fields.classList.toggle('hidden', !on);
+            if (on) rtRebuildModels();
+        }
+
+        // Wire on DOMContentLoaded — listeners attach once.
+        document.addEventListener('DOMContentLoaded', function() {
+            var togg = document.getElementById('rtEditEnable');
+            var prov = document.getElementById('rtEditProvider');
+            if (togg) togg.addEventListener('change', rtToggleFields);
+            if (prov) prov.addEventListener('change', rtRebuildModels);
+        });
+
+        async function saveRuntimeConfig() {
+            var status = document.getElementById('rtEditStatus');
+            var btn = document.getElementById('rtEditSaveBtn');
+            function show(msg, color) {
+                if (!status) return;
+                status.textContent = msg;
+                status.style.color = color || '#f59e0b';
+                status.style.display = 'inline';
+            }
+            try {
+                var prov = document.getElementById('rtEditProvider').value;
+                var modelEl = (prov === 'custom')
+                    ? document.getElementById('rtEditModelCustom')
+                    : document.getElementById('rtEditModel');
+                var model = (modelEl && modelEl.value || '').trim();
+                var apiKey = (document.getElementById('rtEditApiKey').value || '').trim();
+                var sysPrompt = (document.getElementById('rtEditSystemPrompt').value || '').trim();
+                var custBase = (document.getElementById('rtEditCustomBase').value || '').trim();
+
+                var missing = [];
+                if (!prov) missing.push('Provider');
+                if (!model) missing.push('Model');
+                if (!apiKey) missing.push('API Key');
+                if (!sysPrompt || sysPrompt.length < 2) missing.push('System Prompt');
+                if (prov === 'custom' && !custBase) missing.push('Custom Base URL');
+                if (missing.length) {
+                    show('Missing: ' + missing.join(', '), '#f87171');
+                    return;
+                }
+
+                if (!currentAgent || !currentAgent.name) {
+                    show('Agent context not loaded — refresh the page.', '#f87171');
+                    return;
+                }
+
+                var key = sessionStorage.getItem('goulburn_session') ||
+                          localStorage.getItem('goulburn_session') ||
+                          sessionStorage.getItem('goulburn_new_agent_key') || '';
+                if (!key) {
+                    show('Sign in required to update runtime.', '#f87171');
+                    return;
+                }
+
+                if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+                show('Configuring hosted runtime…', '#f59e0b');
+
+                var payload = {
+                    provider: prov,
+                    model: model,
+                    api_key: apiKey,
+                    system_prompt: sysPrompt
+                };
+                if (prov === 'custom') payload.custom_base_url = custBase;
+
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+                    body: JSON.stringify(payload)
+                });
+                var body = null;
+                try { body = await res.json(); } catch(e) {}
+                if (!res.ok) {
+                    var detail = (body && (body.detail || body.error || body.message)) || ('HTTP ' + res.status);
+                    show('Save failed: ' + detail, '#f87171');
+                    if (btn) { btn.disabled = false; btn.textContent = 'Save Hosted Runtime'; }
+                    return;
+                }
+
+                show('Runtime configured ✓ — endpoint URL auto-filled. Probes will hit it within minutes.', '#4ade80');
+                // Auto-update the endpoint URL field if the response gave us one
+                var rtUrl = (body && body.runtime_url) || ('https://api.goulburn.ai/api/v1/runtime/' + (currentAgent.id || ''));
+                var epField = document.getElementById('editEndpointUrl');
+                if (epField && rtUrl) epField.value = rtUrl;
+                // Wipe the api_key field after success — defensive
+                var apiKeyEl = document.getElementById('rtEditApiKey');
+                if (apiKeyEl) apiKeyEl.value = '';
+                if (btn) { btn.disabled = false; btn.textContent = 'Save Hosted Runtime'; }
+            } catch (err) {
+                console.error('saveRuntimeConfig error', err);
+                show('Network error — try again.', '#f87171');
+                if (btn) { btn.disabled = false; btn.textContent = 'Save Hosted Runtime'; }
+            }
+        }
 
         async function saveAgentEdits() {
             if (gateOnPendingDeletion("Save Changes")) return;
