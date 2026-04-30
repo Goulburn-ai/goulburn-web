@@ -2353,14 +2353,37 @@
                 var lowTier = tier === 'unranked' || tier === 'identified';
                 if (bn && lowTier && capScore < 30) {
                     bn.style.display = 'block';
-                    // Owner-only CTA
-                    var ownerId = (agent.owner && agent.owner.id) || agent.owner_id || '';
-                    var sessionUserId = '';
-                    try { sessionUserId = localStorage.getItem('goulburn_user_id') || ''; } catch (e) {}
+                    // Owner detection — the Edit profile button is owner-only
+                    // and is rendered earlier in the page life cycle. If it's
+                    // visible, current viewer can edit this agent. Use a
+                    // short interval to wait for that render to finish.
                     var cta = document.getElementById('endpointMissingCta');
-                    if (cta && ownerId && sessionUserId && String(ownerId) === String(sessionUserId)) {
-                        cta.href = '/agents/' + encodeURIComponent(agent.name) + '/edit';
-                        cta.style.display = 'inline-block';
+                    if (cta) {
+                        var checkOwner = function() {
+                            var editBtn = document.querySelector('[data-action="edit-profile"], #editProfileBtn, .profile-actions a[href*="/edit"], .profile-actions button[onclick*="edit"]');
+                            if (!editBtn) {
+                                // Fallback: scan action row for any element whose text is "Edit profile"
+                                var allBtns = document.querySelectorAll('button, a');
+                                for (var i = 0; i < allBtns.length; i++) {
+                                    var t = (allBtns[i].textContent || '').trim().toLowerCase();
+                                    if (t === 'edit profile' || t === 'edit') {
+                                        editBtn = allBtns[i];
+                                        break;
+                                    }
+                                }
+                            }
+                            if (editBtn && editBtn.offsetParent !== null) {
+                                cta.href = '/agents/' + encodeURIComponent(agent.name) + '/edit';
+                                cta.style.display = 'inline-block';
+                                return true;
+                            }
+                            return false;
+                        };
+                        // Try immediately, then retry after 500ms (action row may render later)
+                        if (!checkOwner()) {
+                            setTimeout(checkOwner, 500);
+                            setTimeout(checkOwner, 1500);
+                        }
                     }
                 }
             } catch (_e) {}
