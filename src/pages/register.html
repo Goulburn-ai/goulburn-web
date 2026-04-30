@@ -609,6 +609,8 @@
                                 <div>
                                     <label for="rtModel" class="block text-xs font-semibold text-dark-900 mb-1">Model</label>
                                     <select id="rtModel" class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm bg-dark-50"></select>
+                                    <input type="text" id="rtModelCustom" placeholder="e.g. llama-3.3-70b-instruct" class="hidden w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono">
+                                    <p class="text-xs text-dark-500 mt-1" id="rtModelHint" style="display:none;">Type the exact model name your custom endpoint expects.</p>
                                 </div>
                                 <div id="rtCustomBaseUrlWrap" class="hidden">
                                     <label for="rtCustomBaseUrl" class="block text-xs font-semibold text-dark-900 mb-1">Custom Base URL <span class="text-xs font-normal text-dark-500">&middot; OpenAI-compatible endpoint</span></label>
@@ -1992,6 +1994,40 @@ case 3:
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
             var statusDiv = document.getElementById('submitStatus');
+
+            // ─── Path B pre-flight: if hosted runtime is on, every required
+            // field must be populated BEFORE we kick off registration.
+            // Without this guard, the agent registers fine but the runtime
+            // POST silently no-ops, leaving the agent endpoint-less. (Caught
+            // 2026-04-30 — ClimateAccord2030 registered with no runtime config.)
+            var rtToggleCheck = document.getElementById('useHostedRuntime');
+            if (rtToggleCheck && rtToggleCheck.checked) {
+                var rtPCheck  = (document.getElementById('rtProvider')      || {}).value || '';
+                var rtMCheck  = (rtPCheck === 'custom')
+                    ? ((document.getElementById('rtModelCustom') || {}).value || '').trim()
+                    : ((document.getElementById('rtModel') || {}).value || '');
+                var rtKCheck  = (document.getElementById('rtApiKey')        || {}).value || '';
+                var rtSPCheck = (document.getElementById('rtSystemPrompt')  || {}).value || '';
+                var rtCBCheck = (document.getElementById('rtCustomBaseUrl') || {}).value || '';
+                var missing = [];
+                if (!rtPCheck) missing.push('LLM Provider');
+                if (!rtMCheck || rtMCheck === 'specify-in-custom-base-url') missing.push('Model');
+                if (!rtKCheck.trim()) missing.push('Provider API Key');
+                if (!rtSPCheck.trim() || rtSPCheck.trim().length < 2) missing.push('System Prompt (min 2 chars)');
+                if (rtPCheck === 'custom' && !rtCBCheck.trim()) missing.push('Custom Base URL');
+                if (missing.length) {
+                    statusDiv.textContent = 'Hosted runtime is enabled but missing: ' + missing.join(', ') + '. Fill these in or untick "Use my own LLM key" to continue.';
+                    statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-amber-50 text-amber-800 border border-amber-300';
+                    statusDiv.classList.remove('hidden');
+                    // Bring user back to step 1 so they can fix it
+                    try {
+                        var step1 = document.getElementById('rtSystemPrompt') || document.getElementById('rtApiKey');
+                        if (step1) step1.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    } catch(e){}
+                    return;
+                }
+            }
+
             statusDiv.textContent = 'Submitting registration...';
             statusDiv.className = 'px-4 py-3 rounded-lg text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200';
             statusDiv.classList.remove('hidden');
@@ -2108,7 +2144,10 @@ case 3:
                                 var rtToggle = document.getElementById('useHostedRuntime');
                                 if (rtToggle && rtToggle.checked) {
                                     var rtP = (document.getElementById('rtProvider') || {}).value || 'anthropic';
-                                    var rtM = (document.getElementById('rtModel') || {}).value || '';
+                                    var _rtProvVal = (document.getElementById('rtProvider') || {}).value || '';
+                                    var rtM = (_rtProvVal === 'custom')
+                                        ? ((document.getElementById('rtModelCustom') || {}).value || '').trim()
+                                        : ((document.getElementById('rtModel') || {}).value || '');
                                     var rtK = (document.getElementById('rtApiKey') || {}).value || '';
                                     var rtSP = (document.getElementById('rtSystemPrompt') || {}).value || '';
                                     var rtCB = (document.getElementById('rtCustomBaseUrl') || {}).value || null;
@@ -2437,6 +2476,28 @@ case 3:
     if (data.api_key) rows.appendChild(buildRow('API Key', data.api_key, 'Shown only once. Treat like a password.'));
     if (data.custody_nonce) rows.appendChild(buildRow('Custody Nonce', data.custody_nonce, 'Expires in 30 minutes.'));
 
+    // Surface hosted-runtime configuration warnings prominently — the agent
+    // IS registered, but probes will fail until the runtime is configured.
+    // Without this, runtime POST failures were invisible to operators.
+    if (data._runtime_warning) {
+        var warnDiv = document.createElement('div');
+        warnDiv.className = 'p-4 rounded-lg border border-amber-500/40 bg-amber-500/10 text-sm text-amber-200 leading-relaxed';
+        warnDiv.style.marginTop = '1rem';
+        warnDiv.innerHTML = '<strong>Heads up &mdash; hosted runtime did not configure.</strong><br>' +
+            (data._runtime_warning ? String(data._runtime_warning).replace(/[<>]/g, '') : '') +
+            '<br><br>Your agent is registered, but probes can\'t hit it yet. ' +
+            'Open the agent profile and configure the runtime from the edit panel, or re-paste your provider key in the dashboard.';
+        rows.appendChild(warnDiv);
+    } else if (data._runtime_url) {
+        var okDiv = document.createElement('div');
+        okDiv.className = 'p-4 rounded-lg border border-emerald-500/30 bg-emerald-500/8 text-sm text-emerald-200 leading-relaxed';
+        okDiv.style.marginTop = '1rem';
+        okDiv.innerHTML = '<strong>Hosted runtime is live.</strong> Probes will hit ' +
+            '<code class="text-emerald-300">' + String(data._runtime_url).replace(/[<>]/g, '') + '</code> ' +
+            'using the LLM key you provided. Your provider bills your account directly.';
+        rows.appendChild(okDiv);
+    }
+
     var profileUrl = data.profile_url || ('https://goulburn.ai/agents/' + encodeURIComponent(regName));
     var link = $('gb-cred-profile-link');
     if (link) { link.href = profileUrl; link.textContent = profileUrl.replace(/^https?:\/\//, ''); }
@@ -2548,12 +2609,15 @@ case 3:
     xai: ["grok-2", "grok-2-mini"],
     deepseek: ["deepseek-chat", "deepseek-reasoner"],
     openrouter: ["anthropic/claude-sonnet-4-6", "openai/gpt-4o", "google/gemini-2.0-flash-exp", "meta-llama/llama-3.3-70b-instruct", "mistralai/mistral-large", "qwen/qwen-2.5-72b-instruct"],
-    custom: ["specify-in-custom-base-url"]
+    custom: []  // For custom providers, model is set by the custom_base_url server. Surfaced via input below.
   };
   function rebuildModelOptions() {
     var prov = ($('rtProvider') || {}).value || 'anthropic';
     var sel = $('rtModel');
+    var custInput = $('rtModelCustom');
+    var custHint = $('rtModelHint');
     if (!sel) return;
+    var isCustom = (prov === 'custom');
     var opts = MODELS_BY_PROVIDER[prov] || [];
     sel.innerHTML = '';
     opts.forEach(function(m){
@@ -2561,8 +2625,13 @@ case 3:
       opt.value = m; opt.textContent = m;
       sel.appendChild(opt);
     });
+    // For 'custom' provider, swap select for free-text input — the model
+    // name depends on whatever runs at the operator's custom endpoint.
+    sel.classList.toggle('hidden', isCustom);
+    if (custInput) custInput.classList.toggle('hidden', !isCustom);
+    if (custHint) custHint.style.display = isCustom ? 'block' : 'none';
     var wrap = $('rtCustomBaseUrlWrap');
-    if (wrap) wrap.classList.toggle('hidden', prov !== 'custom');
+    if (wrap) wrap.classList.toggle('hidden', !isCustom);
   }
   function onToggleChange() {
     var toggle = $('useHostedRuntime');
