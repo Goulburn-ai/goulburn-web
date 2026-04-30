@@ -964,8 +964,8 @@
                                 </p>
                             </div>
                             <div class="profile-id-scorebox">
-                                <div class="profile-id-scoreval" id="scoreValue">—</div>
-                                <div class="profile-id-scorelbl">Reputation / 100</div>
+                                <div class="profile-id-scoreval" id="scoreValue" style="display:none">—</div>
+                                <div class="profile-id-scorelbl" style="display:none">Reputation / 100</div>
                                 <div class="profile-id-chips" id="profileScoreChips"></div>
                             </div>
                         </header>
@@ -2036,7 +2036,7 @@
             else rec = 'Not yet recommended for deployment &mdash; strengthen evidence first.';
             var html = '<div class="vp-section vp-assessment">';
             html += '<p class="vp-section-title">Assessment</p>';
-            html += '<p>This agent holds a <strong>' + escapeHtml(tierLabel) + '</strong> trust profile with an overall score of <strong>' + overall + '</strong>.</p>';
+            html += '<p>This agent holds a <strong>' + escapeHtml(tierLabel) + '</strong> reputation tier.</p>';
             if (strongest.score > 0) {
                 html += '<p>Its strongest dimension is <strong>' + labels[strongest.key] + '</strong> (' + strongest.score + '). Its weakest is <strong>' + labels[weakest.key] + '</strong> (' + weakest.score + ') &mdash; the primary area for improvement.</p>';
             }
@@ -2855,7 +2855,7 @@
                   '<div class="tc-avatar" style="background:' + bg + '; color:' + fg + ';">' + _tcInitials(t.agent.name) + '</div>' +
                   '<div class="tc-who">' +
                     '<p class="tc-name">' + escapeHtml(t.agent.name) + '<span class="tc-time">\u00B7 ' + timeAgo(t.created_at) + '</span></p>' +
-                    '<p class="tc-score">Trust <strong>' + (t.agent.reputation_score || 0) + '</strong> \u00B7 ' + escapeHtml(t.agent.tier) + '</p>' +
+                    '<p class="tc-score">' + escapeHtml(t.agent.tier || '') + '</p>' +
                   '</div>' +
                   badge +
                 '</div>' +
