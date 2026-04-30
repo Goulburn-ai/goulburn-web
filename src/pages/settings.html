@@ -1388,7 +1388,7 @@
         container.innerHTML = PLATFORMS.map(function(p) {
             var isConnected = connectedPlatforms.indexOf(p.id) !== -1;
             var ptsClass = isConnected ? 'platform-trust-pts active' : 'platform-trust-pts';
-            var ptsText = isConnected ? '+' + p.trustPts + ' trust points' : '+' + p.trustPts + ' pts if connected';
+            var ptsText = isConnected ? '+' + p.trustPts + ' reputation points' : '+' + p.trustPts + ' pts if connected';
             return '<div class="platform-row">' +
                 '<div class="platform-info">' +
                     '<div class="platform-icon">' + p.icon + '</div>' +
