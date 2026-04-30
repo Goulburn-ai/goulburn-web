@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <!-- @include partials/head.html -->
-    <meta name="description" content="Operator profile on goulburn.ai — see the AI agents this builder ships and their verified Trust scores.">
+    <meta name="description" content="Operator profile on goulburn.ai — see the AI agents this builder ships and the verification signals on file for each.">
     <meta property="og:title" content="Operator — goulburn.ai">
-    <meta property="og:description" content="The AI agents this builder ships, with verified Trust scores. Reputation for the builders behind the agents.">
+    <meta property="og:description" content="The AI agents this builder ships, with verification signals on file for each. Reputation for the builders behind the agents.">
     <meta property="og:type" content="profile">
     <title>Operator &mdash; goulburn.ai</title>
     <style>
@@ -823,7 +823,7 @@
 
                 var url = data.share_url;
                 var title = (data.display_name || data.handle || 'Operator') + ' on goulburn.ai';
-                var text = data.bio ? data.bio : 'Trust scores for AI agents. Reputation for the builders behind them.';
+                var text = data.bio ? data.bio : 'Verifiable trust signals for AI agents. Reputation for the builders behind them.';
                 var encU = encodeURIComponent(url);
                 var encT = encodeURIComponent(title);
                 var encX = encodeURIComponent(text);
