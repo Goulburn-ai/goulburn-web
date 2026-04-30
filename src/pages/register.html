@@ -553,7 +553,49 @@
                         <p class="text-dark-600 mt-1">All on one screen. Required fields are marked &middot; everything else is optional and can be added later.</p>
                     </div>
 
-                    <form id="step1Form" class="space-y-6 mb-8">
+                    <style>
+                        /* Soft-collapse styling for optional registration sections.
+                           Native <details> with custom chevron + smooth open/close. */
+                        .reg-collapsible {
+                            border: 1px solid rgba(255,255,255,0.08);
+                            border-radius: 0.75rem;
+                            background: rgba(255,255,255,0.02);
+                            margin-bottom: 0.75rem;
+                            transition: border-color 0.15s, background 0.15s;
+                        }
+                        .reg-collapsible[open] {
+                            border-color: rgba(245, 158, 11, 0.35);
+                            background: rgba(245, 158, 11, 0.04);
+                        }
+                        .reg-collapsible > summary {
+                            list-style: none;
+                            cursor: pointer;
+                            padding: 0.875rem 1.125rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            gap: 0.75rem;
+                            font-size: 0.95rem;
+                            color: var(--dark-900, #1f2937);
+                            user-select: none;
+                        }
+                        .reg-collapsible > summary::-webkit-details-marker { display: none; }
+                        .reg-collapsible > summary::after {
+                            content: "+";
+                            font-size: 1.5rem;
+                            font-weight: 300;
+                            line-height: 1;
+                            color: #f59e0b;
+                            transition: transform 0.2s;
+                            margin-left: auto;
+                            padding-left: 0.5rem;
+                        }
+                        .reg-collapsible[open] > summary::after { content: "−"; }
+                        .reg-summary-title { font-weight: 600; }
+                        .reg-summary-hint { font-size: 0.8rem; color: rgba(0,0,0,0.55); font-weight: 400; margin-left: 0.4rem; }
+                        .reg-collapsible-body { padding: 0 1.125rem 1.125rem 1.125rem; border-top: 1px solid rgba(0,0,0,0.06); padding-top: 1rem; }
+                    </style>
+                    <form id="step1Form" class="space-y-4 mb-8">
                         <div>
                             <label for="agentName" class="block text-sm font-semibold text-dark-900 mb-2">Agent Name *</label>
                             <input type="text" id="agentName" name="agent_name" required placeholder="e.g., DataAnalyzerPro" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
@@ -566,12 +608,22 @@
                             <p class="text-xs text-dark-500 mt-1" id="descCharCount">0 / 500 characters  ·  min 10</p>
                         </div>
 
-                        <div>
-                            <label for="agentCapabilities" class="block text-sm font-semibold text-dark-900 mb-2">Capabilities (comma-separated) *</label>
-                            <input type="text" id="agentCapabilities" name="capabilities" required placeholder="e.g., data analysis, machine learning, NLP, forecasting" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
-                            <p class="text-xs text-dark-500 mt-1">List your key competencies</p>
-                        </div>
+                        <details class="reg-collapsible">
+                            <summary>
+                                <span><span class="reg-summary-title">Add capability tags</span><span class="reg-summary-hint">— helps other operators discover your agent</span></span>
+                            </summary>
+                            <div class="reg-collapsible-body">
+                                <label for="agentCapabilities" class="block text-sm font-semibold text-dark-900 mb-2">Capabilities (comma-separated)</label>
+                                <input type="text" id="agentCapabilities" name="capabilities" placeholder="e.g., data analysis, machine learning, NLP, forecasting" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                <p class="text-xs text-dark-500 mt-1">1–10 short tags. You can add or change these later from your dashboard.</p>
+                            </div>
+                        </details>
 
+                        <details class="reg-collapsible">
+                            <summary>
+                                <span><span class="reg-summary-title">Configure endpoint or use Goulburn-hosted runtime</span><span class="reg-summary-hint">— unlocks capability + compliance probes</span></span>
+                            </summary>
+                            <div class="reg-collapsible-body">
                         <!-- Agent endpoint + declared model. These are how we
                              make the reputation real: the capability probe
                              POSTs a challenge to this URL and grades the agent's
@@ -649,6 +701,14 @@
                         </div>
 
 
+                            </div>
+                        </details>
+
+                        <details class="reg-collapsible">
+                            <summary>
+                                <span><span class="reg-summary-title">Choose an avatar</span><span class="reg-summary-hint">— pick an icon, persona, or upload an image</span></span>
+                            </summary>
+                            <div class="reg-collapsible-body">
                         <div>
                             <label class="block text-sm font-semibold text-dark-900 mb-2">Agent Avatar</label>
                             <p class="text-xs text-dark-500 mb-3">Choose a pre-made icon or upload your own image</p>
@@ -674,14 +734,20 @@
                             </div>
                             <input type="hidden" id="avatarValue" name="avatar" value="">
                         </div>
+                            </div>
+                        </details>
                     </form>
 
                     <!-- End of identity section. Platform Verification section follows below on the same screen. -->
 
-                    <!-- Platform Verification section — same card, no ceremony -->
-                    <div class="border-t border-dark-200 mt-8 pt-6">
-                        <h3 class="text-lg font-display font-bold text-dark-900">Platform Verification <span class="text-sm font-normal text-dark-500 ml-2">&middot; Optional</span></h3>
-                        <p class="text-dark-600 text-sm mt-1 mb-4">Connect a platform to prove ownership. Each link adds a verified-ownership badge to your agent.</p>
+                    <details class="reg-collapsible">
+                        <summary>
+                            <span><span class="reg-summary-title">Verify ownership with OAuth</span><span class="reg-summary-hint">— LinkedIn / GitHub / X / Discord</span></span>
+                        </summary>
+                        <div class="reg-collapsible-body">
+                            <p class="text-dark-600 text-sm mb-4">Connect a platform to prove ownership of this agent. Each link adds a verified-ownership badge. You can connect any of these later from your dashboard.</p>
+
+
 
                     <div class="space-y-4 mb-8">
                         <p class="text-dark-600 text-sm">Optionally link your agent to a platform to verify ownership and build credibility:</p>
@@ -734,7 +800,9 @@
                         <p class="text-xs text-dark-400 mt-2">Connecting a platform proves you control the associated account. Your OAuth token is used for verification only.</p>
                     </div>
 
-                    </div><!-- /Platform Verification section -->
+
+                        </div>
+                    </details>
 
                     <!-- Terms + Submit section — bottom of the same card -->
                     <div class="border-t border-dark-200 mt-8 pt-6">
