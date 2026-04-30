@@ -1112,6 +1112,18 @@
                         <input type="text" id="editTags" placeholder="e.g. security, monitoring, NLP">
                     </div>
 
+                    <div class="mb-6 pt-4 border-t border-white/10">
+                        <label>Endpoint URL <span class="font-normal text-amber-400">— unlocks capability + compliance probes</span></label>
+                        <input type="url" id="editEndpointUrl" placeholder="https://your-agent.example.com/v1/respond">
+                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">HTTPS URL where your agent accepts <code class="text-amber-400">{"goulburn_probe": true, "prompt": "..."}</code> POSTs and returns <code class="text-amber-400">{"response": "..."}</code>. Without it, reputation caps at the Identified tier (~49/100). <a href="/api-docs.html#probe-contract" target="_blank" class="text-amber-400 underline">Probe contract docs &rarr;</a></p>
+                    </div>
+
+                    <div class="mb-6">
+                        <label>Declared Model <span class="font-normal text-gray-500">— optional</span></label>
+                        <input type="text" id="editDeclaredModel" placeholder="e.g. claude-sonnet-4-6, gpt-4o, kimi-k2">
+                        <p class="text-xs text-gray-400 mt-2">What model runs behind the endpoint. Cross-referenced against the provider during the model-provenance probe.</p>
+                    </div>
+
                     <!-- Tier Review (owner-only) — expert review panel for tier promotions -->
                     <div class="mb-6 pt-4 border-t border-white/10">
                         <label>Expert Review</label>
@@ -1737,6 +1749,10 @@
                 _editAvatar = currentAgent.avatar || '';
                 document.getElementById('editDescription').value = currentAgent.description || '';
                 document.getElementById('editTags').value = (currentAgent.capability_tags || []).join(', ');
+                var epEl = document.getElementById('editEndpointUrl');
+                if (epEl) epEl.value = currentAgent.endpoint_url || '';
+                var dmEl = document.getElementById('editDeclaredModel');
+                if (dmEl) dmEl.value = currentAgent.declared_model || '';
                 updateEditDescCount();
                 updateEditAvatarPreview();
                 renderEditIconGrid();
@@ -1865,11 +1881,25 @@
             var desc = document.getElementById('editDescription').value.trim();
             var tagsRaw = document.getElementById('editTags').value;
             var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(function(t) { return t.length > 0; });
+            var endpointEl = document.getElementById('editEndpointUrl');
+            var modelEl = document.getElementById('editDeclaredModel');
+            var endpointVal = endpointEl ? endpointEl.value.trim() : '';
+            var modelVal = modelEl ? modelEl.value.trim() : '';
 
             var payload = {};
             if (desc !== (currentAgent.description || '')) payload.description = desc;
             if (_editAvatar !== (currentAgent.avatar || '')) payload.avatar = _editAvatar;
             if (JSON.stringify(tags) !== JSON.stringify(currentAgent.capability_tags || [])) payload.capability_tags = tags;
+            if (endpointVal !== (currentAgent.endpoint_url || '')) {
+                if (endpointVal && !endpointVal.toLowerCase().startsWith('https://')) {
+                    showEditStatus('Endpoint URL must start with https://', '#ef4444');
+                    btn.disabled = false;
+                    btn.textContent = 'Save Changes';
+                    return;
+                }
+                payload.endpoint_url = endpointVal;
+            }
+            if (modelVal !== (currentAgent.declared_model || '')) payload.declared_model = modelVal;
 
             if (Object.keys(payload).length === 0) {
                 showEditStatus('No changes to save', '#8B98A5');
@@ -1898,6 +1928,13 @@
                 if (payload.description !== undefined) currentAgent.description = payload.description;
                 if (payload.avatar !== undefined) currentAgent.avatar = payload.avatar;
                 if (payload.capability_tags) currentAgent.capability_tags = payload.capability_tags;
+                if (payload.endpoint_url !== undefined) currentAgent.endpoint_url = payload.endpoint_url;
+                if (payload.declared_model !== undefined) currentAgent.declared_model = payload.declared_model;
+                // Hide endpoint-missing banner immediately if endpoint was just added
+                if (payload.endpoint_url) {
+                    var epb = document.getElementById('endpointMissingBanner');
+                    if (epb) epb.style.display = 'none';
+                }
 
                 // Re-render hero with updated data
                 renderHero(currentAgent, currentTrust);
@@ -2380,9 +2417,11 @@
                             }
                         }
                         if (editBtn && editBtn.offsetParent !== null) {
-                            // Owner — make whole banner clickable, point at edit page
+                            // Owner — make whole banner clickable. Click opens
+                            // the inline edit panel and focuses the endpoint
+                            // field. No navigation away from the page.
                             bn.classList.add('is-owner');
-                            bn.setAttribute('href', '/agents/' + encodeURIComponent(agent.name) + '/edit');
+                            bn.setAttribute('href', '#endpoint-edit');
                             if (ownerHint) ownerHint.style.display = 'block';
                             return true;
                         }
@@ -2393,11 +2432,26 @@
                         setTimeout(checkOwner, 500);
                         setTimeout(checkOwner, 1500);
                     }
-                    // Block the default href click for non-owners — banner is informational only
+                    // Owner click → open the inline edit panel + focus the endpoint field.
+                    // Non-owner click → no-op (banner is informational only).
                     bn.addEventListener('click', function(e) {
-                        if (!bn.classList.contains('is-owner')) {
-                            e.preventDefault();
-                        }
+                        e.preventDefault();
+                        if (!bn.classList.contains('is-owner')) return;
+                        // Open the existing inline edit panel
+                        try {
+                            if (typeof toggleEditPanel === 'function') {
+                                var panel = document.getElementById('editPanel');
+                                if (panel && panel.style.display === 'none') toggleEditPanel();
+                                // Wait a tick for the panel to render, then focus + scroll
+                                setTimeout(function() {
+                                    var ep = document.getElementById('editEndpointUrl');
+                                    if (ep) {
+                                        ep.scrollIntoView({behavior: 'smooth', block: 'center'});
+                                        ep.focus();
+                                    }
+                                }, 50);
+                            }
+                        } catch (_e) {}
                     });
                 }
             } catch (_e) {}
