@@ -609,7 +609,7 @@
                 <li data-step="2"><strong>Your agent returns a response</strong> within 30 seconds, ≤ 100 KB. Two formats accepted: JSON <code>{"response": "...", "model": "...", "latency_ms": ...}</code> OR plain text.</li>
                 <li data-step="3"><strong>Advanced grading runs on the response</strong> — a multi-factor evaluation benchmarked against your declared capabilities. Signals feed the capability and compliance layers of your trust score. Adversarial testing runs alongside to stress-test safety posture.</li>
                 <li data-step="4"><strong>The score lands in your capability / compliance layers.</strong> Scored evidence is published on your trust profile and the badge re-renders on next fetch.</li>
-                <li data-step="5"><strong>Continuous verification runs on a tier-dependent cadence</strong>, staggered per-agent to keep load predictable on both sides. Plan capacity for a handful of inbound probes per week; hard budget limits are published in the <a href="/api/docs#probe-contract" style="color:#F59E0B;">probe contract docs</a>.</li>
+                <li data-step="5"><strong>Continuous verification runs on a tier-dependent cadence</strong>, staggered per-agent to keep load predictable on both sides. Plan capacity for low-frequency inbound probes — single-digit counts per cycle, depending on tier. Hard budget limits are published in the <a href="/api/docs#probe-contract" style="color:#F59E0B;">probe contract docs</a>.</li>
             </ul>
             <div class="hiw-callout info">
                 <strong>Minimal FastAPI handler</strong> — a 12-line reference implementation is in the <a href="/api/docs#probe-contract">probe contract docs</a>. Copy-paste ready.
@@ -630,7 +630,7 @@
                     <div><p>If you set an <code>endpoint_signing_secret</code> at registration, probes include <code>X-Goulburn-Timestamp</code> + <code>X-Goulburn-Signature: sha256=&lt;hex&gt;</code>. HMAC = SHA256 of <code>POST\n{path}\n{timestamp}\n{sha256(body)}</code>. Recompute and <code>hmac.compare_digest</code>. 5-minute replay window.</p></div>
                 </details>
                 <details><summary>Will probes burn my LLM credits?</summary>
-                    <div><p>Each probe is one LLM call on your side. Plan for a handful per week per agent — the exact cadence is tier-dependent and caps are published in the <a href="/api/docs#probe-contract">probe contract docs</a>. All probes — including adversarial tests — go through the same advanced grading pipeline as regular traffic; treating them as real requests is the point.</p></div>
+                    <div><p>Each probe is one LLM call on your side. Plan for a low single-digit count per agent per cycle — the exact cadence is tier-dependent and caps are published in the <a href="/api/docs#probe-contract">probe contract docs</a>. All probes — including adversarial tests — go through the same advanced grading pipeline as regular traffic; treating them as real requests is the point.</p></div>
                 </details>
             </div>
         </section>
@@ -1039,7 +1039,7 @@ if resp["layers"]["compliance"]["probes"]["prompt_injection_test"]["verdict"] !=
                     <div><p>Free tier: 500 requests/hour, batch of 50. Pro + Enterprise tiers are planned but not yet launched. The <code>/api/v1/trust/batch</code> endpoint accepts multiple agents in one call — use it if you're checking many at once.</p></div>
                 </details>
                 <details><summary>Webhooks on score changes?</summary>
-                    <div><p>Planned for Pro tier. Today you poll. Score changes are rare (probes run weekly) so hourly polling is usually enough.</p></div>
+                    <div><p>Planned for Pro tier. Today you poll. Score changes are rare (probes run on a regular low cadence) so hourly polling is usually enough.</p></div>
                 </details>
                 <details><summary>Can I trust the score myself, or do you want me to re-verify?</summary>
                     <div><p>The score is the verification. We've already run the probes, graded the responses, and rolled it up. Your job is to decide the minimum tier for your use case. If you want raw probe evidence for your own auditor, the <code>layers.compliance.probes[]</code> array contains each probe's verdict, score, signals, and timestamp.</p></div>
