@@ -56,15 +56,29 @@
         .lp-hero-right { position: relative; perspective: 1600px; perspective-origin: 50% 50%; }
         .lp-hero-right::before {
             content: ''; position: absolute;
-            inset: -50px;
-            background: radial-gradient(ellipse at center,
-                rgba(245,158,11,0.22) 0%,
-                rgba(245,158,11,0.10) 35%,
-                transparent 72%);
-            filter: blur(48px);
+            inset: -90px -70px -110px -70px;
+            background:
+                radial-gradient(ellipse at 50% 50%,
+                    rgba(245,158,11,0.45) 0%,
+                    rgba(245,158,11,0.25) 22%,
+                    rgba(245,158,11,0.10) 50%,
+                    transparent 80%);
+            filter: blur(60px);
             z-index: -1;
             pointer-events: none;
-            border-radius: 40px;
+            border-radius: 60px;
+        }
+        .lp-hero-right::after {
+            content: ''; position: absolute;
+            inset: -30px;
+            background: radial-gradient(ellipse at 50% 50%,
+                rgba(245,158,11,0.18) 0%,
+                rgba(245,158,11,0.08) 40%,
+                transparent 80%);
+            filter: blur(28px);
+            z-index: -1;
+            pointer-events: none;
+            border-radius: 30px;
         }
 
         .lp-hero .hero-greeting {
@@ -239,11 +253,12 @@
                 0 4px 12px -2px rgba(0,0,0,0.6),
                 0 20px 50px -12px rgba(0,0,0,0.85),
                 0 60px 120px -30px rgba(0,0,0,0.95),
-                0 30px 80px -20px rgba(245,158,11,0.18),
+                0 30px 80px -20px rgba(245,158,11,0.35),
+                0 50px 110px -10px rgba(245,158,11,0.22),
                 inset 0 1px 0 rgba(255,255,255,0.08),
                 inset 0 -1px 0 rgba(0,0,0,0.4),
-                0 0 0 1px rgba(255,255,255,0.10);
-            border: 0.5px solid rgba(255,255,255,0.14);
+                0 0 0 1px rgba(245,158,11,0.18);
+            border: 0.5px solid rgba(245,158,11,0.20);
             transition: transform 0.4s ease;
         }
         .product-frame:hover {
@@ -309,15 +324,16 @@
             }
             .lp-hero-right { display: flex; justify-content: center; }
             .product-frame { max-width: 560px; margin: 0 auto; }
-            .lp-hero-right::before { display: none; }
+            .lp-hero-right::before { inset: -40px; filter: blur(40px); border-radius: 30px; }
             .product-frame {
                 transform: none;
                 width: 100%; max-width: 100%; box-sizing: border-box;
                 box-shadow:
                     0 4px 12px -2px rgba(0,0,0,0.6),
                     0 16px 40px -10px rgba(0,0,0,0.85),
-                    0 24px 60px -20px rgba(245,158,11,0.20),
-                    0 0 0 1px rgba(255,255,255,0.10);
+                    0 30px 80px -10px rgba(245,158,11,0.40),
+                    0 50px 110px -20px rgba(245,158,11,0.25),
+                    0 0 0 1px rgba(245,158,11,0.20);
             }
             .product-frame:hover { transform: none; }
             /* Simplified inside layout — drop side rails, only show thread card */
