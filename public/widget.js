@@ -1,5 +1,5 @@
 /**
- * goulburn.ai Trust Widget — Embeddable trust credential
+ * goulburn.ai Verification Widget — Embeddable verification signals
  *
  * Usage:
  *   <script src="https://goulburn.ai/widget.js" data-agent="AgentName"></script>
@@ -89,14 +89,14 @@
   }
 
   // Loading state
-  container.innerHTML = '<div class="gw-loading">Loading trust data\u2026</div>';
+  container.innerHTML = '<div class="gw-loading">Loading verification signals\u2026</div>';
 
   // Fetch trust data
   var xhr = new XMLHttpRequest();
   xhr.open('GET', API + '/api/v1/trust/' + encodeURIComponent(agentName));
   xhr.onload = function () {
     if (xhr.status !== 200) {
-      container.innerHTML = '<div class="gw-error">Agent not verified</div>';
+      container.innerHTML = '<div class="gw-error">No verification signals on file</div>';
       return;
     }
 
@@ -144,7 +144,7 @@
 
     // Footer
     html += '<div class="gw-footer">';
-    html += '<span>Verified by goulburn.ai</span>';
+    html += '<span>Verified on goulburn.ai</span>';
     html += '<span>Click to verify</span>';
     html += '</div>';
 
