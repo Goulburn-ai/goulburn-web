@@ -2300,6 +2300,27 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 <div class="empty-activity">No recent activity</div>
             </div>
         </div>
+
+        <!-- Recent Logins -->
+        <h2 style="font-size: 1.125rem; font-weight: 700; color: var(--dark-900); margin: 2.5rem 0 1.5rem 0;">Recent Logins</h2>
+        <p style="font-size: 0.8125rem; color: var(--dark-400); margin: -0.75rem 0 1.5rem 0;">
+            Last 5 sign-ins to your account. Sessions auto-expire after 30 minutes of inactivity.
+        </p>
+        <div class="recent-logins-section">
+            <table class="recent-logins-table" style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--dark-200); color: var(--dark-400); text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.04em;">
+                        <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">When</th>
+                        <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">Device</th>
+                        <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">IP address</th>
+                        <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">Method</th>
+                    </tr>
+                </thead>
+                <tbody id="recentLoginsBody">
+                    <tr><td colspan="4" style="padding: 1.25rem 0.75rem; color: var(--dark-400); text-align: center;">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
     </main>
 
     <!-- Badge Modal -->
@@ -3840,6 +3861,94 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         });
     }
 
-</script>
+
+        // ─── Recent Logins (last 5 sign-ins) ───
+        // Fetched from goulburn-admin /api/v1/me/recent-logins.
+        // Returns up to 5 entries with {ip, ts, ua, method}.
+        function _parseUserAgent(ua) {
+            if (!ua) return 'Unknown device';
+            var browser = 'Unknown', os = 'Unknown';
+            if (/Edg\//i.test(ua)) browser = 'Edge';
+            else if (/Chrome\//i.test(ua) && !/Edg/i.test(ua)) browser = 'Chrome';
+            else if (/Firefox\//i.test(ua)) browser = 'Firefox';
+            else if (/Safari\//i.test(ua) && !/Chrome/i.test(ua)) browser = 'Safari';
+            else if (/curl\//i.test(ua)) browser = 'curl';
+            else if (/python/i.test(ua)) browser = 'Python';
+            if (/Windows/i.test(ua)) os = 'Windows';
+            else if (/Mac OS X|Macintosh/i.test(ua)) os = 'macOS';
+            else if (/Android/i.test(ua)) os = 'Android';
+            else if (/iPhone|iPad|iOS/i.test(ua)) os = 'iOS';
+            else if (/Linux/i.test(ua)) os = 'Linux';
+            if (browser === 'Unknown' && os === 'Unknown') return ua.slice(0, 40);
+            return browser + ' on ' + os;
+        }
+
+        function _relativeTime(isoTs) {
+            try {
+                var t = new Date(isoTs).getTime();
+                var diff = Date.now() - t;
+                if (diff < 0) return 'just now';
+                var s = Math.floor(diff / 1000);
+                if (s < 60) return s + 's ago';
+                var m = Math.floor(s / 60);
+                if (m < 60) return m + 'm ago';
+                var h = Math.floor(m / 60);
+                if (h < 24) return h + 'h ago';
+                var d = Math.floor(h / 24);
+                if (d < 7) return d + 'd ago';
+                return new Date(isoTs).toLocaleDateString();
+            } catch (e) {
+                return isoTs || '—';
+            }
+        }
+
+        function _esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"\'":'&#39;'}[c];
+        }); }
+
+        function _renderRecentLogins() {
+            var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
+            var tbody = document.getElementById('recentLoginsBody');
+            if (!session || !tbody) return;
+            var ADMIN_BASE = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE) || 'https://admin.goulburn.ai';
+            fetch(ADMIN_BASE + '/api/v1/me/recent-logins', {
+                headers: { 'Authorization': 'Bearer ' + session }
+            }).then(function(r) {
+                if (!r.ok) return null;
+                return r.json();
+            }).then(function(data) {
+                if (!data || !data.sessions || !data.sessions.length) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 1.25rem 0.75rem; color: var(--dark-400); text-align: center;">No recent sign-ins on file yet. Your next sign-in will appear here.</td></tr>';
+                    return;
+                }
+                var rows = data.sessions.slice(0, 5).map(function(s, i) {
+                    var device = _parseUserAgent(s.ua);
+                    var when = _relativeTime(s.ts);
+                    var whenAbs = '';
+                    try { whenAbs = new Date(s.ts).toLocaleString(); } catch (e) {}
+                    var method = s.method || 'unknown';
+                    var isLatest = i === 0;
+                    return '<tr style="border-bottom: 1px solid var(--dark-200);' + (isLatest ? ' background: rgba(245, 158, 11, 0.04);' : '') + '">'
+                        + '<td style="padding: 0.875rem 0.75rem;" title="' + _esc(whenAbs) + '">' + _esc(when)
+                        + (isLatest ? ' <span style="margin-left: 0.375rem; padding: 0.125rem 0.5rem; background: rgba(245, 158, 11, 0.16); color: #F59E0B; border-radius: 9999px; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Latest</span>' : '')
+                        + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; color: var(--dark-100);">' + _esc(device) + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; font-family: ui-monospace, monospace; color: var(--dark-300); font-size: 0.75rem;">' + _esc(s.ip || '—') + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; color: var(--dark-100);">' + _esc(method) + '</td>'
+                        + '</tr>';
+                }).join('');
+                tbody.innerHTML = rows;
+            }).catch(function(err) {
+                tbody.innerHTML = '<tr><td colspan="4" style="padding: 1.25rem 0.75rem; color: #EF4444; text-align: center;">Could not load recent sign-ins.</td></tr>';
+            });
+        }
+        // Trigger on load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', _renderRecentLogins);
+        } else {
+            _renderRecentLogins();
+        }
+
+        </script>
 </body>
 </html>
