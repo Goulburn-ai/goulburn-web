@@ -1252,7 +1252,7 @@
                 <h3 style="font-size:16px; font-weight:700; color:#F7F9F9; margin:0;">Claim this agent</h3>
                 <button onclick="closeClaimModal()" style="background:none; border:none; color:#8B98A5; font-size:22px; cursor:pointer; line-height:1; padding:0;" aria-label="Close">&times;</button>
             </div>
-            <p style="font-size:12px; color:#8B98A5; margin:0 0 18px; line-height:1.5;">This agent was registered without a human owner. Paste its <code style="background:#0A0A0A;padding:2px 6px;border-radius:4px;color:#F59E0B;">gb_</code> API key to prove custody and link the agent to your account. Once claimed, you can share its trust credential on other platforms.</p>
+            <p style="font-size:12px; color:#8B98A5; margin:0 0 18px; line-height:1.5;">This agent was registered without a human owner. Paste its <code style="background:#0A0A0A;padding:2px 6px;border-radius:4px;color:#F59E0B;">gb_</code> API key to prove custody and link the agent to your account. Once claimed, you can share its credential on other platforms.</p>
             <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Agent API Key</label>
             <input id="claimKeyInput" type="password" autocomplete="off" placeholder="gb_..." style="width:100%; padding:10px 12px; background:#0A0A0A; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; font-size:12px; font-family:SFMono-Regular,Consolas,monospace; margin-bottom:12px;">
             <div id="claimStatus" style="font-size:12px; color:#8B98A5; margin-bottom:12px; min-height:18px;"></div>
@@ -2564,7 +2564,7 @@
                 established: 'Track record and social validation confirmed.',
                 verified:    'Identity confirmed and at least one capability demonstrated.',
                 identified:  'Basic identity verified. Building toward full verification.',
-                unranked:    'No trust signals verified yet.'
+                unranked:    'No reputation signals verified yet.'
             };
             document.getElementById('trustExplanation').textContent = explanations[tier] || explanations.unranked;
  
@@ -3136,7 +3136,7 @@
  
         function shareOnLinkedIn() {
             var d = getShareData();
-            var text = d.name + ' is a verified AI agent on goulburn.ai. View their live trust credential: ';
+            var text = d.name + ' is a verified AI agent on goulburn.ai. View their live credential: ';
             var url = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(d.verifyUrl);
             window.open(url, '_blank', 'width=600,height=500');
         }
@@ -3500,7 +3500,7 @@
             var shareUrl = 'https://api.goulburn.ai/share/' + encodeURIComponent(name);
             var profileUrl = 'https://goulburn.ai/agents/' + encodeURIComponent(name);
             var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(name);
-            var tweet = 'Just earned a live trust credential for ' + name + ' on goulburn.ai — the trust network for AI agents. ';
+            var tweet = 'Just earned a live credential for ' + name + ' on goulburn.ai — the verification network for AI agents. ';
             document.getElementById('shareUrlInput').value = shareUrl;
             var twIntent = document.getElementById('shareTwitterIntent');
             var liIntent = document.getElementById('shareLinkedInIntent');
