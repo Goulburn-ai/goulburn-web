@@ -611,6 +611,24 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+        /* Reset uppercase inside the hosted-runtime block — that block has its
+           own typography (sentence-case headings + body copy) and should not
+           inherit the form-label uppercase rule above. */
+        #rtEditFields, #rtEditFields label,
+        .edit-panel label.rt-toggle-label, .edit-panel label.rt-toggle-label * {
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        /* The toggle wrapper label still needs to render its body copy in
+           normal case. Override the form-label rule when this class is set. */
+        label.rt-toggle-label {
+            font-size: inherit !important;
+            font-weight: inherit !important;
+            color: inherit !important;
+            margin-bottom: 0 !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+        }
         .edit-panel textarea, .edit-panel input[type="text"] {
             width: 100%;
             background: #0A0A0A;
@@ -1220,7 +1238,7 @@
                          operator's account directly. -->
                     <div class="mb-6 pt-4 border-t border-white/10">
                         <div style="padding:14px 16px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.28); border-radius:10px;">
-                            <label class="flex items-start gap-3 cursor-pointer select-none" style="margin-bottom:0;">
+                            <label class="flex items-start gap-3 cursor-pointer select-none rt-toggle-label" style="margin-bottom:0;">
                                 <input type="checkbox" id="rtEditEnable" class="mt-1 w-4 h-4 cursor-pointer" style="accent-color:#f59e0b;">
                                 <span>
                                     <span class="block text-sm font-semibold text-amber-200">Use Goulburn-hosted runtime <span class="font-normal text-amber-300/70">(Path B — zero code, recommended for new agents)</span></span>
@@ -1923,9 +1941,77 @@
                 updateEditDescCount();
                 updateEditAvatarPreview();
                 renderEditIconGrid();
+                // Pre-fill the hosted-runtime block from the existing
+                // AgentRuntimeConfig if the agent has one. Without this, the
+                // toggle defaults to unchecked even when the runtime IS
+                // configured — which is what was confusing operators clicking
+                // 'Save Changes' and seeing nothing happen.
+                _loadExistingRuntimeConfig();
             }
             panel.style.display = 'block';
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        async function _loadExistingRuntimeConfig() {
+            try {
+                if (!currentAgent || !currentAgent.name) return;
+                var key = sessionStorage.getItem('goulburn_session') ||
+                          localStorage.getItem('goulburn_session') || '';
+                if (!key) return;
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                    method: 'GET',
+                    headers: { 'Authorization': 'Bearer ' + key }
+                });
+                if (!res.ok) {
+                    // 404 = no runtime configured; leave toggle off. Anything else
+                    // is a soft error — do nothing rather than confuse the form.
+                    return;
+                }
+                var cfg = await res.json();
+                if (!cfg || !cfg.provider) return;
+                var togg = document.getElementById('rtEditEnable');
+                if (togg) {
+                    togg.checked = true;
+                    if (typeof rtToggleFields === 'function') rtToggleFields();
+                }
+                var prov = document.getElementById('rtEditProvider');
+                if (prov && cfg.provider) {
+                    prov.value = cfg.provider;
+                    if (typeof rtRebuildModels === 'function') rtRebuildModels();
+                }
+                if (cfg.provider === 'custom') {
+                    var custModel = document.getElementById('rtEditModelCustom');
+                    if (custModel) custModel.value = cfg.model || '';
+                    var custBase = document.getElementById('rtEditCustomBase');
+                    if (custBase) custBase.value = cfg.custom_base_url || '';
+                } else {
+                    var modelSel = document.getElementById('rtEditModel');
+                    if (modelSel && cfg.model) {
+                        // Add the model as an option if it isn't already there
+                        // (e.g. a model that was valid when configured but isn't
+                        // in the curated dropdown today). Prevents value-loss.
+                        var found = false;
+                        for (var i = 0; i < modelSel.options.length; i++) {
+                            if (modelSel.options[i].value === cfg.model) { found = true; break; }
+                        }
+                        if (!found) {
+                            var opt = document.createElement('option');
+                            opt.value = cfg.model;
+                            opt.textContent = cfg.model;
+                            modelSel.appendChild(opt);
+                        }
+                        modelSel.value = cfg.model;
+                    }
+                }
+                var sysPrompt = document.getElementById('rtEditSystemPrompt');
+                if (sysPrompt) sysPrompt.value = cfg.system_prompt || '';
+                // API key is intentionally NOT pre-filled — it's encrypted at
+                // rest and never returned by the API. The placeholder hint
+                // already tells operators they can leave it blank to keep
+                // the existing key.
+            } catch (e) {
+                console.warn('runtime config load failed:', e);
+            }
         }
 
         function renderEditIconGrid() {
