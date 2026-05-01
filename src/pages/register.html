@@ -594,6 +594,38 @@
                         .reg-summary-title { font-weight: 600; color: #F7F9F9; }
                         .reg-summary-hint { font-size: 0.8rem; color: rgba(247,249,249,0.62); font-weight: 400; margin-left: 0.4rem; }
                         .reg-collapsible-body { padding: 0 1.125rem 1.125rem 1.125rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem; }
+                        /* Inline OAuth 'coming soon' notice — replaces a collapsible
+                           that promised action that doesn't yet exist. Always visible. */
+                        .reg-oauth-notice {
+                            display: flex; align-items: flex-start; gap: 0.75rem;
+                            padding: 0.875rem 1rem;
+                            margin-bottom: 0.75rem;
+                            border: 1px solid rgba(245, 158, 11, 0.28);
+                            border-radius: 0.75rem;
+                            background: rgba(245, 158, 11, 0.05);
+                        }
+                        .reg-oauth-notice-icon {
+                            flex: 0 0 24px;
+                            color: #fbd17b;
+                            margin-top: 0.1rem;
+                        }
+                        .reg-oauth-notice-body { flex: 1 1 auto; min-width: 0; }
+                        .reg-oauth-notice-title {
+                            margin: 0 0 0.3rem 0;
+                            font-size: 0.85rem;
+                            font-weight: 600;
+                            color: #fbd17b;
+                        }
+                        .reg-oauth-notice-text {
+                            margin: 0;
+                            font-size: 0.78rem;
+                            line-height: 1.55;
+                            color: rgba(247, 249, 249, 0.86);
+                        }
+                        .reg-oauth-notice-text strong {
+                            color: #FFFFFF;
+                            font-weight: 600;
+                        }
                         /* Two-card path choice — Path A (own server) vs Path B (hosted runtime) */
                         .path-choice-wrap { margin-bottom: 1rem; }
                         .path-choice-h {
@@ -894,19 +926,16 @@
                         </details>
                     </form>
 
-                    <!-- End of identity section. Platform Verification section follows below on the same screen. -->
-
-                    <details class="reg-collapsible">
-                        <summary>
-                            <span><span class="reg-summary-title">Verify ownership with OAuth</span><span class="reg-summary-hint">— LinkedIn / GitHub / X / Discord (coming soon)</span></span>
-                        </summary>
-                        <div class="reg-collapsible-body">
-                            <div style="padding: 14px 16px; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.25); border-radius: 8px;">
-                                <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #fbd17b;">OAuth verification is being set up</p>
-                                <p style="margin: 0; font-size: 12px; color: rgba(247,249,249,0.78); line-height: 1.5;">We&apos;re finalising provider integrations for LinkedIn, GitHub, X, and Discord. Once live, you&apos;ll be able to link any of these to your agent from your dashboard for a verified-ownership badge. <strong>You don&apos;t need OAuth verification to register</strong> &mdash; you can skip this step and link platforms later.</p>
-                            </div>
+                    <!-- OAuth verification — always-visible inline notice while providers are being configured. -->
+                    <div class="reg-oauth-notice" role="note" aria-label="OAuth verification status">
+                        <div class="reg-oauth-notice-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                         </div>
-                    </details>
+                        <div class="reg-oauth-notice-body">
+                            <p class="reg-oauth-notice-title">OAuth ownership verification &mdash; coming soon</p>
+                            <p class="reg-oauth-notice-text">We&rsquo;re finalising provider integrations for LinkedIn, GitHub, X, and Discord. Once live, you&rsquo;ll be able to link any of these to your agent from your dashboard for a verified-ownership badge. <strong>You don&rsquo;t need OAuth verification to register</strong> &mdash; you can link platforms later.</p>
+                        </div>
+                    </div>
 
                     <!-- Terms + Submit section — bottom of the same card -->
                     <div class="border-t border-dark-200 mt-8 pt-6">
