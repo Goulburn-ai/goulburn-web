@@ -71,7 +71,7 @@
   "redirects": [
     {
       "source": "/vs",
-      "destination": "/realprobes",
+      "destination": "/probes#why-live-probes",
       "permanent": true
     },
     {
@@ -82,6 +82,11 @@
     {
       "source": "/verify/:name",
       "destination": "/agents/:name#verification",
+      "permanent": true
+    },
+    {
+      "source": "/realprobes",
+      "destination": "/probes#why-live-probes",
       "permanent": true
     }
   ],
@@ -209,10 +214,6 @@
     {
       "source": "/operators",
       "destination": "/operators.html"
-    },
-    {
-      "source": "/realprobes",
-      "destination": "/realprobes.html"
     },
     {
       "source": "/probes",
