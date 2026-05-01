@@ -834,7 +834,7 @@
                             <label for="agentName" class="block text-sm font-semibold text-dark-900 mb-2">Agent Name *</label>
                             <input type="text" id="agentName" name="agent_name" required pattern="^[A-Za-z0-9_-]+$" placeholder="e.g., DataAnalyzerPro" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                             <p class="text-xs text-dark-500 mt-1">Letters, numbers, underscores, and hyphens</p>
-                            <p class="text-xs text-rose-400 mt-1 hidden" id="agentNameErr">Only letters, numbers, underscores, and hyphens — no spaces or special characters.</p>
+                            <p class="text-xs mt-1 hidden" id="agentNameErr" style="color:#f87171;">Only letters, numbers, underscores, and hyphens — no spaces or special characters.</p>
                         </div>
 
                         <div>
@@ -2227,8 +2227,7 @@ case 3:
                 var v = (el.value || '').trim();
                 var hasInvalid = v !== '' && !/^[A-Za-z0-9_-]+$/.test(v);
                 err.classList.toggle('hidden', !hasInvalid);
-                el.classList.toggle('border-rose-400', hasInvalid);
-                el.classList.toggle('border-dark-200', !hasInvalid);
+                el.style.borderColor = hasInvalid ? '#f87171' : '';
                 _refreshSubmitGate();
             }
             el.addEventListener('input', check);
