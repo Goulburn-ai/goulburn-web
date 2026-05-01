@@ -2456,21 +2456,62 @@ case 3:
                 } catch(_){}
             }
 
-            // Send button handler — Step 1 placeholder. Real POST wired in Step 3.
+            // Send button handler — POSTs to backend verify/start endpoint.
             var sendBtn = $('ownerEmailSendBtn');
             if (sendBtn) {
-                sendBtn.addEventListener('click', function(e) {
+                sendBtn.addEventListener('click', async function(e) {
                     e.preventDefault();
                     var email = ($('ownerEmailInput').value || '').trim();
                     if (!email) { showErr('Enter your email address.'); return; }
                     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
                         showErr('That doesn\u2019t look like a valid email.'); return;
                     }
+                    var agentNameEl = document.getElementById('agentName');
+                    var agentName = (agentNameEl && agentNameEl.value || '').trim();
+                    if (!agentName) {
+                        showErr('Enter your agent name first \u2014 the email links your verification to that name.');
+                        if (agentNameEl) agentNameEl.focus();
+                        return;
+                    }
+                    if (!/^[a-zA-Z0-9_-]{2,64}$/.test(agentName)) {
+                        showErr('Agent name must be 2\u201364 chars: letters, numbers, _ or -.');
+                        if (agentNameEl) agentNameEl.focus();
+                        return;
+                    }
                     showErr('');
-                    // PLACEHOLDER — Step 3 will replace this with a real API call.
-                    // For now, show the sent-state UI so the visual flow is testable
-                    // in maintenance mode.
-                    setSentState(email);
+                    sendBtn.disabled = true;
+                    sendBtn.textContent = 'Sending...';
+                    try {
+                        var res = await fetch(API_BASE + '/api/v1/owner-email/verify/start', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email: email, agent_name: agentName })
+                        });
+                        var body = null;
+                        try { body = await res.json(); } catch(_){}
+                        if (res.ok) {
+                            // Persist current form state so the magic-link redirect can restore it
+                            try {
+                                if (typeof saveState === 'function') saveState();
+                                sessionStorage.setItem('goulburn_owner_email_pending', email);
+                            } catch(_){}
+                            setSentState(email);
+                        } else if (res.status === 429) {
+                            showErr('Too many verification attempts. Wait 15 minutes and try again.');
+                        } else {
+                            var detail = (body && (body.detail || body.error)) || ('HTTP ' + res.status);
+                            if (Array.isArray(detail)) {
+                                detail = detail.map(function(d){ return d.msg || JSON.stringify(d); }).join('; ');
+                            }
+                            showErr('Could not send verification email: ' + detail);
+                        }
+                    } catch (err) {
+                        console.error('verify start network error:', err);
+                        showErr('Network error \u2014 check your connection and try again.');
+                    } finally {
+                        sendBtn.disabled = false;
+                        sendBtn.textContent = 'Send verification email \u2192';
+                    }
                 });
             }
             var resendBtn = $('ownerEmailResendBtn');
@@ -2602,6 +2643,20 @@ case 3:
             if (endpointVal) payload.endpoint_url = endpointVal;
             if (declaredModelVal) payload.declared_model = declaredModelVal;
             if (signingSecretVal) payload.endpoint_signing_secret = signingSecretVal;
+
+            // Owner email verification — pull from hidden field (set when the
+            // operator clicked the magic link). The post-confirm token rides
+            // along so the backend can stamp Owner.email_verified_at.
+            try {
+                var oeTokenEl = document.getElementById('ownerEmailVerifiedToken');
+                var oeToken = oeTokenEl ? (oeTokenEl.value || '').trim() : '';
+                var oeAddrEl = document.getElementById('ownerEmailDoneAddr');
+                var oeAddr = oeAddrEl ? (oeAddrEl.textContent || '').trim() : '';
+                if (oeToken && oeAddr) {
+                    payload.owner_email = oeAddr;
+                    payload.owner_email_verification_token = oeToken;
+                }
+            } catch(_){}
 
             fetch(API_BASE + '/api/v1/agents/register', {
                 method: 'POST',
