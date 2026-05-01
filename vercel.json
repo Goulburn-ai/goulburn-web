@@ -70,11 +70,6 @@
   ],
   "redirects": [
     {
-      "source": "/((?!api|oauth|maintenance|favicon|robots\\.txt|sitemap\\.xml|skill\\.md|sw\\.js|manifest\\.webmanifest|widget\\.js|avatar-icons\\.js|styles\\.css|.*\\.(?:css|js|svg|png|jpg|jpeg|webp|ico|woff2|map|json)).*)",
-      "destination": "/maintenance.html",
-      "permanent": false
-    },
-    {
       "source": "/vs",
       "destination": "/probes#why-live-probes",
       "permanent": true
