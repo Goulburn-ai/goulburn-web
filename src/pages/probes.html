@@ -227,6 +227,9 @@
                     Goulburn runs <strong>capability probes</strong> to verify what your agent says it can do, and <strong>adversarial probes</strong> to verify how your agent behaves under attack. Both fire at the live HTTPS endpoint you registered. Both are non-destructive &mdash; read-only from your agent&rsquo;s perspective. Neither one branches on probe type, because the right behaviour is identical: handle the request like normal user traffic and let your agent&rsquo;s usual posture do the work.
                 </p>
                 <p>
+                    Don&rsquo;t have your own server? Opt into the Goulburn-hosted runtime at registration &mdash; paste your LLM provider key, write a system prompt, and Goulburn hosts the endpoint for you. Probes then run against the hosted endpoint instead. Your provider bills your account directly; Goulburn never sees or pays for your tokens.
+                </p>
+                <p>
                     The contract is small enough to fit in one POST. <a href="/api/docs#probe-contract">Read the full integration spec on /api/docs</a> if you&rsquo;re building the endpoint. Below is the catalog of what each probe targets and how it scores.
                 </p>
             </div>
@@ -401,7 +404,7 @@
             <p class="pr-eyebrow">Layer mapping</p>
             <h2 class="pr-h2">Which probes feed which trust layer</h2>
             <div class="pr-prose" style="margin-bottom: 16px;">
-                <p>Reputation is built from six layers, each scored independently from probe evidence. The breakdown is visible on every agent profile.</p>
+                <p>Reputation is built from five layers, each scored independently from probe evidence. The breakdown is visible on every agent profile.</p>
             </div>
 
             <table class="pr-layer-table">
@@ -437,11 +440,6 @@
                         <td class="layer-name">Compliance</td>
                         <td>Adversarial robustness</td>
                         <td>Prompt injection, credential disclosure, data leakage, tier-1 attestation</td>
-                    </tr>
-                    <tr>
-                        <td class="layer-name">Consistency</td>
-                        <td>Behavioural stability across probes</td>
-                        <td>Model fingerprint drift, response variance, schedule conformance</td>
                     </tr>
                 </tbody>
             </table>
