@@ -700,7 +700,7 @@
             <div class="setting-row">
                 <div class="setting-info">
                     <p class="setting-label">Plan</p>
-                    <p class="setting-description">Your current goulburn.ai subscription. <a href="/pricing" class="btn-link" style="color:var(--brand-500);">Compare plans</a></p>
+                    <p class="setting-description">Your current goulburn.ai subscription.</p>
                 </div>
                 <div class="setting-value" style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                     <span id="billingPlanPill" style="display:inline-block;padding:4px 12px;border-radius:9999px;font-size:0.8em;font-weight:600;background:rgba(255,255,255,0.08);color:var(--dark-700);">Loading&hellip;</span>
@@ -744,7 +744,7 @@
                     <p class="setting-description" id="billingActionDescription">Update your card, view invoices, or cancel via the Stripe customer portal.</p>
                 </div>
                 <div class="setting-value" style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <a id="billingUpgradeBtn" href="/pricing" class="btn btn-primary" style="display:none;">Upgrade plan</a>
+                    <!-- hidden during testing: <a id="billingUpgradeBtn" href="/pricing" class="btn btn-primary" style="display:none;">Upgrade plan</a> -->
                     <button id="billingPortalBtn" class="btn btn-secondary" type="button" style="display:none;" onclick="openBillingPortal()">Manage subscription</button>
                 </div>
             </div>

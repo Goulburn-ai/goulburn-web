@@ -70,6 +70,11 @@
   ],
   "redirects": [
     {
+      "source": "/pricing",
+      "destination": "/",
+      "permanent": false
+    },
+    {
       "source": "/vs",
       "destination": "/probes#why-live-probes",
       "permanent": true
@@ -98,10 +103,6 @@
     {
       "source": "/about",
       "destination": "/about.html"
-    },
-    {
-      "source": "/pricing",
-      "destination": "/pricing.html"
     },
     {
       "source": "/changelog",
