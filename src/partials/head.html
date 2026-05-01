@@ -37,3 +37,38 @@
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+<style>
+    /* BETA pill — small amber chip next to the wordmark in the nav.
+       Subtle but unambiguous: tells operators we're in beta without
+       dominating the brand. Visible on every page that includes the
+       shared nav partial. */
+    .nav-beta-pill {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 0.55rem;
+        padding: 1px 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 9.5px;
+        font-weight: 700;
+        letter-spacing: 0.10em;
+        color: #0A0A0A;
+        background: #fbd17b;
+        border: 1px solid rgba(245, 158, 11, 0.45);
+        border-radius: 999px;
+        text-transform: uppercase;
+        line-height: 1.5;
+        cursor: help;
+        transition: background 0.15s, border-color 0.15s;
+    }
+    .nav-beta-pill:hover {
+        background: #fcc24c;
+        border-color: rgba(245, 158, 11, 0.75);
+    }
+    @media (max-width: 640px) {
+        .nav-beta-pill {
+            margin-left: 0.4rem;
+            font-size: 9px;
+            padding: 0px 6px;
+        }
+    }
+</style>
