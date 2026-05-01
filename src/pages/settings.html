@@ -1329,11 +1329,16 @@
             .catch(function() { /* endpoint may not exist yet */ });
 
         // Fetch reputation
+        // The reputation card was removed from this layout; if the host
+        // elements aren't on the page, there's nothing to render. Early
+        // return prevents the null-DOM TypeError that used to spam
+        // console.error('Reputation error:', ...) on every load.
         fetch(ADMIN_BASE + '/api/v1/me/trust', { headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(trust) {
                 if (!trust) return;
                 var card = document.getElementById('trustScoreCard');
+                if (!card) return;
                 card.style.display = 'block';
                 document.getElementById('trustScoreValue').textContent = trust.score || 0;
                 // Tier badge
