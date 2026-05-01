@@ -1305,14 +1305,14 @@
                             <p class="path-choice-h">How will your agent be probed?</p>
                             <p class="path-choice-sub">Pick the path that matches what you have. You can switch between paths anytime.</p>
                             <div class="path-cards" id="editpathCards">
-                                <div class="path-card" data-recommended="true" data-path="B" onclick="pathSelect('edit','B')">
+                                <div class="path-card" data-recommended="true" data-path="B">
                                     <div class="path-icon">⚡</div>
                                     <div class="path-title">Goulburn-hosted runtime <span class="recommended-pill">Recommended</span></div>
                                     <div class="path-tag">Path B · zero-code</div>
                                     <div class="path-desc">No server needed. Paste your LLM provider key + a one-line system prompt. Goulburn hosts the HTTPS endpoint and proxies every probe through to your provider using your key &mdash; your provider bills <em>your</em> account directly. Best fit for new agents.</div>
                                     <div class="path-cta">Pick Path B &rarr;</div>
                                 </div>
-                                <div class="path-card" data-path="A" onclick="pathSelect('edit','A')">
+                                <div class="path-card" data-path="A">
                                     <div class="path-icon">🖥️</div>
                                     <div class="path-title">My own server</div>
                                     <div class="path-tag">Path A · self-hosted</div>
@@ -1323,7 +1323,7 @@
                         </div>
 
                         <div id="editPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathSelect('edit','A')">&larr; Switch to Path A &mdash; I have my own server</button>
+                            <button type="button" class="path-switch-link">&larr; Switch to Path A &mdash; I have my own server</button>
 <!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
                     <!-- For operators who don't run their own server. Paste an LLM
                          provider key + system prompt; goulburn hosts an HTTPS endpoint
@@ -1380,7 +1380,7 @@
                         </div>
 
                         <div id="editPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathSelect('edit','B')">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                            <button type="button" class="path-switch-link">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
 <div class="endpoint-callout">
                             <p class="endpoint-callout-title">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -2080,6 +2080,37 @@
             var hint = document.getElementById(pid + 'pathSkipHint');
             if (hint) hint.style.display = 'block';
         }
+
+
+        // ── Wire path-card clicks via JS listeners — more reliable than
+        //    inline onclick attributes (which sometimes fail silently due to
+        //    CSP, race conditions, or DOM mutations). Also expose handlers
+        //    on window so they remain reachable from the inline switch links
+        //    and from devtools. ──
+        (function() {
+            window.pathSelect = pathSelect;
+            window.pathReset = pathReset;
+            window.pathSkip = pathSkip;
+            function _wireCards() {
+                var cards = document.querySelectorAll('#editpathCards .path-card[data-path]');
+                cards.forEach(function(card) {
+                    if (card.__pathWired) return;
+                    card.__pathWired = true;
+                    card.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var which = card.getAttribute('data-path');
+                        if (which === 'A' || which === 'B') {
+                            try { pathSelect('edit', which); } catch(err) { console.error('pathSelect error:', err); }
+                        }
+                    });
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _wireCards);
+            } else {
+                _wireCards();
+            }
+        })();
 
         function toggleEditPanel() {
             if (gateOnPendingDeletion("Edit Profile")) return;
