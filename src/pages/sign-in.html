@@ -115,7 +115,7 @@
                     <div class="flex items-center justify-between pt-2">
                         <label class="flex items-center gap-2">
                             <input type="checkbox" id="remember" name="remember" checked class="w-4 h-4 rounded border-dark-300">
-                            <span class="text-sm text-dark-600">Remember me</span>
+                            <span class="text-sm text-dark-600">Remain Logged In <span class="text-xs text-dark-400" title="When ticked, your session stays active until you explicitly log out. When unticked, it expires after 30 minutes of inactivity.">(stays signed in until you log out)</span></span>
                         </label>
                         <a href="#" onclick="window.authUI.showView('forgot')" class="text-sm font-semibold text-brand-600 hover:text-brand-700">Forgot password?</a>
                     </div>
@@ -447,7 +447,7 @@
             fetch(`${API_BASE}/api/v1/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: username, password })
+                body: JSON.stringify({ email: username, password, remember: !!(document.getElementById('remember') && document.getElementById('remember').checked) })
             })
                 .then(r => r.json().then(d => ({ ok: r.ok, status: r.status, data: d })))
                 .then(res => {
@@ -482,7 +482,7 @@
                     return fetch(`${API_BASE}/api/v1/auth/login`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: username, password })
+                        body: JSON.stringify({ email: username, password, remember: !!(document.getElementById('remember') && document.getElementById('remember').checked) })
                     }).then(r => r.json());
                 })
                 .then(data => {
