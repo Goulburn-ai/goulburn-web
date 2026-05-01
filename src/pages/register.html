@@ -689,6 +689,28 @@
                             border-color: rgba(245,158,11,0.55);
                             color: #FFFFFF;
                         }
+                        /* Secondary action — back to path choice (no decision yet). */
+                        .path-back-link {
+                            display: inline-flex; align-items: center; gap: 0.3rem;
+                            font-size: 0.78rem; font-weight: 500;
+                            color: rgba(247,249,249,0.62);
+                            margin: 0 0 1rem 0;
+                            padding: 0.4rem 0.8rem;
+                            background: transparent;
+                            border: 1px solid rgba(255,255,255,0.10);
+                            border-radius: 999px;
+                            cursor: pointer;
+                            transition: background 0.15s, border-color 0.15s, color 0.15s;
+                        }
+                        .path-back-link:hover {
+                            background: rgba(255,255,255,0.04);
+                            border-color: rgba(255,255,255,0.30);
+                            color: #FFFFFF;
+                        }
+                        .path-actions-row {
+                            display: flex; flex-wrap: wrap; gap: 0.5rem;
+                            margin-bottom: 0.25rem;
+                        }
                         .path-current-badge {
                             display: inline-flex; align-items: center; gap: 0.3rem;
                             font-size: 0.7rem; font-weight: 700;
@@ -749,7 +771,10 @@
 
 
                         <div id="regPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" data-switch-to="A">&larr; Switch to Path A &mdash; I have my own server</button>
+                            <div class="path-actions-row">
+                                <button type="button" class="path-switch-link" data-switch-to="A">&larr; Switch to Path A &mdash; I have my own server</button>
+                                <button type="button" class="path-back-link" data-back="reg">&larr; Back to path choice</button>
+                            </div>
                             <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
                             <label class="flex items-start gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
@@ -799,7 +824,10 @@
                         </div>
 
                         <div id="regPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" data-switch-to="B">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                            <div class="path-actions-row">
+                                <button type="button" class="path-switch-link" data-switch-to="B">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                                <button type="button" class="path-back-link" data-back="reg">&larr; Back to path choice</button>
+                            </div>
                             <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
@@ -826,7 +854,10 @@
                             </div>
                         </div>
 
-                        <p id="regpathSkipHint" style="display:none; margin-top: 0.6rem; font-size: 0.78rem; color: rgba(247,249,249,0.55); text-align: center;">Skipped &mdash; you can configure this from your dashboard after registration.</p>
+                        <div id="regpathSkipHint" style="display:none; margin-top: 0.6rem; text-align: center;">
+                                <p style="margin: 0 0 0.4rem; font-size: 0.78rem; color: rgba(247,249,249,0.62);">Skipped &mdash; you can configure this from your dashboard after registration.</p>
+                                <button type="button" class="path-back-link" data-unskip="reg">&larr; Bring back path choice</button>
+                            </div>
 
 
                         <details class="reg-collapsible">
@@ -2139,13 +2170,24 @@ case 3:
             if (choice) choice.style.display = 'none';
             var hint = document.getElementById(pid + 'pathSkipHint');
             if (hint) hint.style.display = 'block';
-            // Bring the operator's eye to the next thing they need to do
-            // (Terms checkbox + Submit). Without this, skipping leaves them
-            // staring at an empty section wondering what changed.
             try {
                 var nextStep = document.getElementById('confirmDetails') || document.getElementById('submitBtn');
                 if (nextStep) nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } catch(_) {}
+        }
+
+        function pathUnskip(pid) {
+            // Restore the path-choice cards after the operator clicked Skip
+            // and changed their mind. Hide the skip hint, show the choice
+            // block. No data is lost — switching paths preserves field
+            // values too.
+            var hint = document.getElementById(pid + 'pathSkipHint');
+            if (hint) hint.style.display = 'none';
+            var choice = document.getElementById(pid + 'pathChoice');
+            if (choice) {
+                choice.style.display = 'block';
+                try { choice.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch(_) {}
+            }
         }
 
 
@@ -2158,6 +2200,7 @@ case 3:
             window.pathSelect = pathSelect;
             window.pathReset = pathReset;
             window.pathSkip = pathSkip;
+            window.pathUnskip = pathUnskip;
             function _wireCards() {
                 var cards = document.querySelectorAll('#regpathCards .path-card[data-path]');
                 cards.forEach(function(card) {
@@ -2182,6 +2225,26 @@ case 3:
                         if (which === 'A' || which === 'B') {
                             try { pathSelect('reg', which); } catch(err) { console.error('pathSelect error:', err); }
                         }
+                    });
+                });
+                // Wire the 'Back to path choice' links inside expanded path-fields-blocks
+                var backs = document.querySelectorAll('.path-back-link[data-back="reg"]');
+                backs.forEach(function(btn) {
+                    if (btn.__pathWired) return;
+                    btn.__pathWired = true;
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        try { pathReset('reg'); } catch(err) { console.error('pathReset error:', err); }
+                    });
+                });
+                // Wire the 'Bring back path choice' unskip link
+                var unskips = document.querySelectorAll('.path-back-link[data-unskip="reg"]');
+                unskips.forEach(function(btn) {
+                    if (btn.__pathWired) return;
+                    btn.__pathWired = true;
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        try { pathUnskip('reg'); } catch(err) { console.error('pathUnskip error:', err); }
                     });
                 });
                 // Wire the Skip button(s)
