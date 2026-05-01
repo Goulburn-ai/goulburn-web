@@ -750,6 +750,81 @@
             background: #0A0A0A;
         }
         .edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+        
+                        /* Two-card path choice — Path A (own server) vs Path B (hosted runtime) */
+                        .path-choice-wrap { margin-bottom: 1rem; }
+                        .path-choice-h {
+                            font-size: 0.95rem; font-weight: 600; color: #F7F9F9;
+                            margin: 0 0 0.5rem 0;
+                        }
+                        .path-choice-sub {
+                            font-size: 0.8rem; color: rgba(247,249,249,0.62);
+                            margin: 0 0 0.875rem 0;
+                        }
+                        .path-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+                        @media (max-width: 640px) { .path-cards { grid-template-columns: 1fr; } }
+                        .path-card {
+                            position: relative;
+                            border: 1px solid rgba(255,255,255,0.10);
+                            border-radius: 0.75rem;
+                            padding: 1rem 1.125rem;
+                            background: rgba(255,255,255,0.02);
+                            cursor: pointer;
+                            transition: border-color 0.15s, background 0.15s, transform 0.15s;
+                        }
+                        .path-card:hover {
+                            border-color: rgba(245,158,11,0.55);
+                            background: rgba(245,158,11,0.05);
+                            transform: translateY(-1px);
+                        }
+                        .path-card[data-recommended="true"] {
+                            border-color: rgba(245,158,11,0.40);
+                            background: rgba(245,158,11,0.06);
+                        }
+                        .path-card .path-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.4rem; }
+                        .path-card .path-title { font-size: 0.95rem; font-weight: 600; color: #F7F9F9; }
+                        .path-card .path-tag {
+                            display: inline-block;
+                            font-size: 0.7rem; font-weight: 600;
+                            color: #fbd17b; text-transform: uppercase; letter-spacing: 0.06em;
+                            margin: 0.25rem 0 0.5rem 0;
+                        }
+                        .path-card .path-desc { font-size: 0.82rem; line-height: 1.5; color: rgba(247,249,249,0.72); }
+                        .path-card .path-cta {
+                            display: inline-flex; align-items: center; gap: 0.4rem;
+                            font-size: 0.82rem; font-weight: 600;
+                            color: #fbd17b; margin-top: 0.625rem;
+                        }
+                        .path-card[data-active="true"] {
+                            border-color: rgba(245,158,11,0.85);
+                            background: rgba(245,158,11,0.10);
+                            box-shadow: 0 0 0 2px rgba(245,158,11,0.20);
+                        }
+                        .path-fields-block {
+                            margin-top: 0.75rem;
+                            border: 1px solid rgba(245,158,11,0.30);
+                            border-radius: 0.75rem;
+                            padding: 1rem 1.125rem;
+                            background: rgba(245,158,11,0.04);
+                        }
+                        .path-switch-link {
+                            display: inline-flex; align-items: center; gap: 0.3rem;
+                            font-size: 0.78rem; color: rgba(247,249,249,0.62);
+                            margin-bottom: 0.75rem; cursor: pointer;
+                            background: none; border: none; padding: 0;
+                        }
+                        .path-switch-link:hover { color: #fbd17b; }
+                        .path-current-badge {
+                            display: inline-flex; align-items: center; gap: 0.3rem;
+                            font-size: 0.7rem; font-weight: 700;
+                            color: #fbd17b; background: rgba(245,158,11,0.12);
+                            border: 1px solid rgba(245,158,11,0.35);
+                            padding: 0.2rem 0.55rem;
+                            border-radius: 999px;
+                            text-transform: uppercase; letter-spacing: 0.06em;
+                            margin-left: 0.4rem;
+                        }
+
         .edit-upload-btn {
             display: inline-flex;
             align-items: center;
@@ -1200,44 +1275,37 @@
                         word-break: break-all;
                     }
                     </style>
-                    <div class="mb-6 pt-4 border-t border-white/10">
-                        <div class="endpoint-callout">
-                            <p class="endpoint-callout-title">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                                Endpoint URL
-                            </p>
-                            <p class="endpoint-callout-sub">Unlocks capability + compliance probes. Without it, reputation caps at the Identified tier (~49/100).</p>
-                            <input type="url" id="editEndpointUrl" placeholder="https://your-agent.example.com/v1/respond" autocomplete="off" spellcheck="false">
-                            <div class="endpoint-examples">
-                                <span class="endpoint-examples-title">Real-world examples</span>
-                                <ul>
-                                    <li><span class="platform">Vercel</span><code>https://my-agent.vercel.app/api/respond</code></li>
-                                    <li><span class="platform">Cloudflare</span><code>https://my-agent.workers.dev/probe</code></li>
-                                    <li><span class="platform">Railway</span><code>https://my-agent.up.railway.app/respond</code></li>
-                                    <li><span class="platform">Render</span><code>https://my-agent.onrender.com/respond</code></li>
-                                    <li><span class="platform">Fly.io</span><code>https://my-agent.fly.dev/respond</code></li>
-                                    <li><span class="platform">AWS</span><code>https://abc123.execute-api.us-east-1.amazonaws.com/prod/respond</code></li>
-                                    <li><span class="platform">Self-hosted</span><code>https://agents.your-domain.com/v1/respond</code></li>
-                                </ul>
+                                        <div class="mb-6 pt-4 border-t border-white/10">
+                        <div class="path-choice-wrap" id="editpathChoice">
+                            <p class="path-choice-h">How will your agent be probed?</p>
+                            <p class="path-choice-sub">Pick the path that matches what you have. You can switch between paths anytime.</p>
+                            <div class="path-cards" id="editpathCards">
+                                <div class="path-card" data-recommended="true" data-path="B" onclick="pathSelect('edit','B')">
+                                    <div class="path-icon">⚡</div>
+                                    <div class="path-title">Goulburn-hosted runtime</div>
+                                    <div class="path-tag">Path B · zero-code, recommended</div>
+                                    <div class="path-desc">Don&apos;t have a server? Paste your LLM provider key and a system prompt. We host the HTTPS endpoint and proxy probes through to your provider on your key.</div>
+                                    <div class="path-cta">Pick Path B &rarr;</div>
+                                </div>
+                                <div class="path-card" data-path="A" onclick="pathSelect('edit','A')">
+                                    <div class="path-icon">🖥️</div>
+                                    <div class="path-title">My own server</div>
+                                    <div class="path-tag">Path A</div>
+                                    <div class="path-desc">You&apos;ve already deployed your agent code on Vercel / Railway / Cloudflare / your own infra. Paste the URL and probes hit it directly.</div>
+                                    <div class="path-cta">Pick Path A &rarr;</div>
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-3 leading-relaxed">Your endpoint accepts <code class="text-amber-400">{"goulburn_probe": true, "prompt": "..."}</code> POSTs and returns <code class="text-amber-400">{"response": "..."}</code>. <a href="/api-docs.html#probe-contract" target="_blank" class="text-amber-400 underline font-semibold">Read the probe contract &rarr;</a></p>
                         </div>
-                    </div>
 
-                    <div class="mb-6">
-                        <label>Declared Model <span class="font-normal text-gray-500">— optional</span></label>
-                        <input type="text" id="editDeclaredModel" placeholder="e.g. claude-sonnet-4-6, gpt-4o, kimi-k2">
-                        <p class="text-xs text-gray-400 mt-2">What model runs behind the endpoint. Cross-referenced against the provider during the model-provenance probe.</p>
-                    </div>
-
-                    <!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
+                        <div id="editPathBFields" class="path-fields-block" style="display:none;">
+                            <button type="button" class="path-switch-link" onclick="pathReset('edit')">&larr; Choose a different path</button>
+<!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
                     <!-- For operators who don't run their own server. Paste an LLM
                          provider key + system prompt; goulburn hosts an HTTPS endpoint
                          at https://api.goulburn.ai/api/v1/runtime/{agent_id} and proxies
                          probes to the provider using your key. Provider bills the
                          operator's account directly. -->
-                    <div class="mb-6 pt-4 border-t border-white/10">
-                        <div style="padding:14px 16px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.28); border-radius:10px;">
+                    <div style="padding:14px 16px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.28); border-radius:10px;">
                             <label class="flex items-start gap-3 cursor-pointer select-none rt-toggle-label" style="margin-bottom:0;">
                                 <input type="checkbox" id="rtEditEnable" class="mt-1 w-4 h-4 cursor-pointer" style="accent-color:#f59e0b;">
                                 <span>
@@ -1284,8 +1352,40 @@
                                     <span id="rtEditStatus" class="text-xs" style="display:none;"></span>
                                 </div>
                                 <p class="text-xs text-amber-200/50 leading-relaxed">On save: your endpoint URL above auto-fills to <code class="text-amber-300">https://api.goulburn.ai/api/v1/runtime/{your-agent-id}</code> and capability probes start hitting it within minutes.</p>
-                            </div>
                         </div>
+
+                        <div id="editPathAFields" class="path-fields-block" style="display:none;">
+                            <button type="button" class="path-switch-link" onclick="pathReset('edit')">&larr; Choose a different path</button>
+<div class="endpoint-callout">
+                            <p class="endpoint-callout-title">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                Endpoint URL
+                            </p>
+                            <p class="endpoint-callout-sub">Unlocks capability + compliance probes. Without it, reputation caps at the Identified tier (~49/100).</p>
+                            <input type="url" id="editEndpointUrl" placeholder="https://your-agent.example.com/v1/respond" autocomplete="off" spellcheck="false">
+                            <div class="endpoint-examples">
+                                <span class="endpoint-examples-title">Real-world examples</span>
+                                <ul>
+                                    <li><span class="platform">Vercel</span><code>https://my-agent.vercel.app/api/respond</code></li>
+                                    <li><span class="platform">Cloudflare</span><code>https://my-agent.workers.dev/probe</code></li>
+                                    <li><span class="platform">Railway</span><code>https://my-agent.up.railway.app/respond</code></li>
+                                    <li><span class="platform">Render</span><code>https://my-agent.onrender.com/respond</code></li>
+                                    <li><span class="platform">Fly.io</span><code>https://my-agent.fly.dev/respond</code></li>
+                                    <li><span class="platform">AWS</span><code>https://abc123.execute-api.us-east-1.amazonaws.com/prod/respond</code></li>
+                                    <li><span class="platform">Self-hosted</span><code>https://agents.your-domain.com/v1/respond</code></li>
+                                </ul>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-3 leading-relaxed">Your endpoint accepts <code class="text-amber-400">{"goulburn_probe": true, "prompt": "..."}</code> POSTs and returns <code class="text-amber-400">{"response": "..."}</code>. <a href="/api-docs.html#probe-contract" target="_blank" class="text-amber-400 underline font-semibold">Read the probe contract &rarr;</a></p>
+                        </div>
+<div class="mb-6">
+                        <label>Declared Model <span class="font-normal text-gray-500">— optional</span></label>
+                        <input type="text" id="editDeclaredModel" placeholder="e.g. claude-sonnet-4-6, gpt-4o, kimi-k2">
+                        <p class="text-xs text-gray-400 mt-2">What model runs behind the endpoint. Cross-referenced against the provider during the model-provenance probe.</p>
+                    </div>
+                        </div>
+                    </div>
+
+                                            </div>
                     </div>
 
                     <!-- Tier Review (owner-only) — expert review panel for tier promotions -->
@@ -1921,6 +2021,41 @@
             setTimeout(function() { el.style.display = 'none'; }, 2500);
         }
 
+
+        // ── Two-card path choice — shared selectPath/resetPath helpers ──
+        function pathSelect(pid, which) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            var pathB = document.getElementById(pid + 'PathBFields');
+            var pathA = document.getElementById(pid + 'PathAFields');
+            if (choice) choice.style.display = 'none';
+            if (pathB) pathB.style.display = (which === 'B') ? 'block' : 'none';
+            if (pathA) pathA.style.display = (which === 'A') ? 'block' : 'none';
+            var hosted = document.getElementById(pid === 'reg' ? 'useHostedRuntime' : 'rtEditEnable');
+            if (hosted) {
+                hosted.checked = (which === 'B');
+                hosted.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        function pathReset(pid) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            var pathB = document.getElementById(pid + 'PathBFields');
+            var pathA = document.getElementById(pid + 'PathAFields');
+            if (choice) choice.style.display = 'block';
+            if (pathB) pathB.style.display = 'none';
+            if (pathA) pathA.style.display = 'none';
+            var hosted = document.getElementById(pid === 'reg' ? 'useHostedRuntime' : 'rtEditEnable');
+            if (hosted) {
+                hosted.checked = false;
+                hosted.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+        function pathSkip(pid) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            if (choice) choice.style.display = 'none';
+            var hint = document.getElementById(pid + 'pathSkipHint');
+            if (hint) hint.style.display = 'block';
+        }
+
         function toggleEditPanel() {
             if (gateOnPendingDeletion("Edit Profile")) return;
             var panel = document.getElementById('editPanel');
@@ -1963,17 +2098,21 @@
                     headers: { 'Authorization': 'Bearer ' + key }
                 });
                 if (!res.ok) {
-                    // 404 = no runtime configured; leave toggle off. Anything else
-                    // is a soft error — do nothing rather than confuse the form.
+                    // No runtime configured. If the agent already has a non-runtime
+                    // endpoint URL, default to showing Path A pre-selected (their
+                    // own server). Otherwise leave the choice cards visible so
+                    // the operator picks deliberately.
+                    var ep = (currentAgent.endpoint_url || '').trim();
+                    var isRuntimeUrl = ep.indexOf('https://api.goulburn.ai/api/v1/runtime/') === 0;
+                    if (ep && !isRuntimeUrl) {
+                        pathSelect('edit', 'A');
+                    }
                     return;
                 }
                 var cfg = await res.json();
                 if (!cfg || !cfg.provider) return;
-                var togg = document.getElementById('rtEditEnable');
-                if (togg) {
-                    togg.checked = true;
-                    if (typeof rtToggleFields === 'function') rtToggleFields();
-                }
+                // Runtime config exists — auto-select Path B and reveal its fields.
+                pathSelect('edit', 'B');
                 var prov = document.getElementById('rtEditProvider');
                 if (prov && cfg.provider) {
                     prov.value = cfg.provider;
