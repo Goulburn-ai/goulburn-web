@@ -1323,7 +1323,7 @@
                         </div>
 
                         <div id="editPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link">&larr; Switch to Path A &mdash; I have my own server</button>
+                            <button type="button" class="path-switch-link" data-switch-to="A">&larr; Switch to Path A &mdash; I have my own server</button>
 <!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
                     <!-- For operators who don't run their own server. Paste an LLM
                          provider key + system prompt; goulburn hosts an HTTPS endpoint
@@ -1380,7 +1380,7 @@
                         </div>
 
                         <div id="editPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                            <button type="button" class="path-switch-link" data-switch-to="B">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
 <div class="endpoint-callout">
                             <p class="endpoint-callout-title">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
@@ -2099,6 +2099,19 @@
                     card.addEventListener('click', function(e) {
                         e.preventDefault();
                         var which = card.getAttribute('data-path');
+                        if (which === 'A' || which === 'B') {
+                            try { pathSelect('edit', which); } catch(err) { console.error('pathSelect error:', err); }
+                        }
+                    });
+                });
+                // Wire the 'Switch to Path X' links inside each path-fields-block
+                var switches = document.querySelectorAll('#editPathBFields .path-switch-link[data-switch-to], #editPathAFields .path-switch-link[data-switch-to]');
+                switches.forEach(function(btn) {
+                    if (btn.__pathWired) return;
+                    btn.__pathWired = true;
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var which = btn.getAttribute('data-switch-to');
                         if (which === 'A' || which === 'B') {
                             try { pathSelect('edit', which); } catch(err) { console.error('pathSelect error:', err); }
                         }

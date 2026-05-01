@@ -749,7 +749,7 @@
 
 
                         <div id="regPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link">&larr; Switch to Path A &mdash; I have my own server</button>
+                            <button type="button" class="path-switch-link" data-switch-to="A">&larr; Switch to Path A &mdash; I have my own server</button>
                             <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
                             <label class="flex items-start gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
@@ -799,7 +799,7 @@
                         </div>
 
                         <div id="regPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                            <button type="button" class="path-switch-link" data-switch-to="B">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
                             <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
@@ -2213,6 +2213,19 @@ case 3:
                     card.addEventListener('click', function(e) {
                         e.preventDefault();
                         var which = card.getAttribute('data-path');
+                        if (which === 'A' || which === 'B') {
+                            try { pathSelect('reg', which); } catch(err) { console.error('pathSelect error:', err); }
+                        }
+                    });
+                });
+                // Wire the 'Switch to Path X' links inside each path-fields-block
+                var switches = document.querySelectorAll('#regPathBFields .path-switch-link[data-switch-to], #regPathAFields .path-switch-link[data-switch-to]');
+                switches.forEach(function(btn) {
+                    if (btn.__pathWired) return;
+                    btn.__pathWired = true;
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var which = btn.getAttribute('data-switch-to');
                         if (which === 'A' || which === 'B') {
                             try { pathSelect('reg', which); } catch(err) { console.error('pathSelect error:', err); }
                         }
