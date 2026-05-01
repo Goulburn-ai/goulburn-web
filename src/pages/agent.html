@@ -2088,7 +2088,22 @@
             var hosted = document.getElementById(pid === 'reg' ? 'useHostedRuntime' : 'rtEditEnable');
             if (hosted) {
                 hosted.checked = (which === 'B');
+                // Belt-and-braces: dispatch change for any other listeners
                 hosted.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+            // Direct toggle of rtEditFields visibility — don't trust the
+            // change-event chain to reach rtToggleFields. When Path B is
+            // picked, the runtime form fields must be visible. When B is
+            // not picked (A or reset), they must be hidden.
+            if (pid === 'edit') {
+                var rtFields = document.getElementById('rtEditFields');
+                if (rtFields) {
+                    rtFields.classList.toggle('hidden', which !== 'B');
+                }
+                // If Path B picked, also rebuild the model dropdown
+                if (which === 'B' && typeof rtRebuildModels === 'function') {
+                    try { rtRebuildModels(); } catch(_){}
+                }
             }
         }
         function pathReset(pid) {
