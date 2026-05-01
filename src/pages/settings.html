@@ -1206,22 +1206,26 @@
                 var actionDesc = document.getElementById('billingActionDescription');
 
                 if (d.is_paid && d.stripe_customer_id_present) {
-                    portalBtn.style.display = 'inline-block';
-                    upgradeBtn.style.display = 'inline-block';
-                    upgradeBtn.textContent = (d.paid_tier === 'proplus' || d.paid_tier === 'enterprise') ? 'Change plan' : 'Upgrade plan';
-                    actionLabel.textContent = 'Manage subscription';
-                    actionDesc.textContent = 'Update your card, view invoices, or cancel via the Stripe customer portal.';
+                    if (portalBtn) portalBtn.style.display = 'inline-block';
+                    if (upgradeBtn) {
+                        upgradeBtn.style.display = 'inline-block';
+                        upgradeBtn.textContent = (d.paid_tier === 'proplus' || d.paid_tier === 'enterprise') ? 'Change plan' : 'Upgrade plan';
+                    }
+                    if (actionLabel) actionLabel.textContent = 'Manage subscription';
+                    if (actionDesc) actionDesc.textContent = 'Update your card, view invoices, or cancel via the Stripe customer portal.';
                 } else if (d.is_internal) {
-                    portalBtn.style.display = 'none';
-                    upgradeBtn.style.display = 'none';
-                    actionLabel.textContent = 'Internal account';
-                    actionDesc.textContent = 'You are flagged as an internal Goulburn/Anthropic account. Tier caps do not apply.';
+                    if (portalBtn) portalBtn.style.display = 'none';
+                    if (upgradeBtn) upgradeBtn.style.display = 'none';
+                    if (actionLabel) actionLabel.textContent = 'Internal account';
+                    if (actionDesc) actionDesc.textContent = 'You are flagged as an internal Goulburn/Anthropic account. Tier caps do not apply.';
                 } else {
-                    portalBtn.style.display = 'none';
-                    upgradeBtn.style.display = 'inline-block';
-                    upgradeBtn.textContent = 'Upgrade plan';
-                    actionLabel.textContent = 'Upgrade your plan';
-                    actionDesc.textContent = d.upgrade_pitch || 'Move to Builder for 5 agents, 300 probes/day, priority probe queue, and more.';
+                    if (portalBtn) portalBtn.style.display = 'none';
+                    if (upgradeBtn) {
+                        upgradeBtn.style.display = 'inline-block';
+                        upgradeBtn.textContent = 'Upgrade plan';
+                    }
+                    if (actionLabel) actionLabel.textContent = 'Upgrade your plan';
+                    if (actionDesc) actionDesc.textContent = d.upgrade_pitch || 'Move to Builder for 5 agents, 300 probes/day, priority probe queue, and more.';
                 }
             })
             .catch(function(err) {
