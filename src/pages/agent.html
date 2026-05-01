@@ -3071,14 +3071,41 @@
                             if (typeof toggleEditPanel === 'function') {
                                 var panel = document.getElementById('editPanel');
                                 if (panel && panel.style.display === 'none') toggleEditPanel();
-                                // Wait a tick for the panel to render, then focus + scroll
+                                // After panel renders, scroll to the right place. The
+                                // endpoint URL field lives INSIDE editPathAFields (which
+                                // is hidden until a path is picked). So we have three
+                                // possible scroll targets in priority order:
+                                //   1. editPathBFields (visible) — runtime config already
+                                //      configured, scroll there.
+                                //   2. editPathAFields (visible) — own-server path active,
+                                //      scroll to the endpoint URL input and focus it.
+                                //   3. editpathChoice (the two cards) — neither path
+                                //      picked yet, let the operator choose.
                                 setTimeout(function() {
-                                    var ep = document.getElementById('editEndpointUrl');
-                                    if (ep) {
-                                        ep.scrollIntoView({behavior: 'smooth', block: 'center'});
-                                        ep.focus();
+                                    function isVisible(el) {
+                                        return el && el.offsetParent !== null;
                                     }
-                                }, 50);
+                                    var pathB = document.getElementById('editPathBFields');
+                                    var pathA = document.getElementById('editPathAFields');
+                                    var choice = document.getElementById('editpathChoice');
+                                    var target = null;
+                                    var focusEp = false;
+                                    if (isVisible(pathB)) {
+                                        target = pathB;
+                                    } else if (isVisible(pathA)) {
+                                        target = pathA;
+                                        focusEp = true;
+                                    } else if (isVisible(choice)) {
+                                        target = choice;
+                                    }
+                                    if (target) {
+                                        target.scrollIntoView({behavior: 'smooth', block: 'center'});
+                                    }
+                                    if (focusEp) {
+                                        var ep = document.getElementById('editEndpointUrl');
+                                        if (ep) ep.focus();
+                                    }
+                                }, 100);
                             }
                         } catch (_e) {}
                     });
