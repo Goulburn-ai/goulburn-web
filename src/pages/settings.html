@@ -1186,9 +1186,13 @@
                 }
 
                 document.getElementById('billingProbeCap').textContent = (d.daily_probe_cap_display || (d.daily_probe_cap || '—')) + ' / day';
+                // Render headroom as "USED / TOTAL active agents" so operator
+                // can see at a glance how close they are to their cap.
+                var capLabel = (d.agent_cap_display || (d.agent_cap || '—'));
+                var inUseLabel = (typeof d.agents_in_use === 'number') ? d.agents_in_use : null;
                 document.getElementById('billingAgentCap').textContent =
-                    (d.agent_cap_display || (d.agent_cap || '—')) + ' active ' +
-                    (d.agent_cap === 1 ? 'agent' : 'agents');
+                    (inUseLabel === null ? capLabel : (inUseLabel + ' / ' + capLabel)) +
+                    ' active ' + (d.agent_cap === 1 ? 'agent' : 'agents');
 
                 var renewal = document.getElementById('billingRenewal');
                 if (d.is_paid && d.renews_on) {
