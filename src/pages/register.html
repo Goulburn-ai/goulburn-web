@@ -832,8 +832,9 @@
                     <form id="step1Form" class="space-y-4 mb-8">
                         <div>
                             <label for="agentName" class="block text-sm font-semibold text-dark-900 mb-2">Agent Name *</label>
-                            <input type="text" id="agentName" name="agent_name" required placeholder="e.g., DataAnalyzerPro" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                            <input type="text" id="agentName" name="agent_name" required pattern="^[A-Za-z0-9_-]+$" placeholder="e.g., DataAnalyzerPro" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                             <p class="text-xs text-dark-500 mt-1">Letters, numbers, underscores, and hyphens</p>
+                            <p class="text-xs text-rose-400 mt-1 hidden" id="agentNameErr">Only letters, numbers, underscores, and hyphens — no spaces or special characters.</p>
                         </div>
 
                         <div>
@@ -2200,10 +2201,39 @@ case 3:
 
 
         // Step 3 — enable submit button when confirmation checkbox is ticked
-        document.getElementById('confirmDetails').addEventListener('change', function() {
+        // AND the agent name passes format validation. The two conditions are
+        // OR'd into _refreshSubmitGate so neither dependency can re-enable the
+        // button alone.
+        function _isAgentNameValid() {
+            var el = document.getElementById('agentName');
+            if (!el) return true;
+            var v = (el.value || '').trim();
+            if (v === '') return false; // required, but the empty case is handled by the required attr
+            return /^[A-Za-z0-9_-]+$/.test(v);
+        }
+        function _refreshSubmitGate() {
             var submitBtn = document.getElementById('submitBtn');
-            if (submitBtn) submitBtn.disabled = !this.checked;
-        });
+            if (!submitBtn) return;
+            var cb = document.getElementById('confirmDetails');
+            var ok = !!(cb && cb.checked) && _isAgentNameValid();
+            submitBtn.disabled = !ok;
+        }
+        document.getElementById('confirmDetails').addEventListener('change', _refreshSubmitGate);
+        (function wireAgentNameValidator() {
+            var el = document.getElementById('agentName');
+            var err = document.getElementById('agentNameErr');
+            if (!el || !err) return;
+            function check() {
+                var v = (el.value || '').trim();
+                var hasInvalid = v !== '' && !/^[A-Za-z0-9_-]+$/.test(v);
+                err.classList.toggle('hidden', !hasInvalid);
+                el.classList.toggle('border-rose-400', hasInvalid);
+                el.classList.toggle('border-dark-200', !hasInvalid);
+                _refreshSubmitGate();
+            }
+            el.addEventListener('input', check);
+            el.addEventListener('blur', check);
+        })();
 
 
 
@@ -2995,8 +3025,10 @@ case 3:
                 showStep(1);
             }
 
-            // Confirmation checkbox enables submit
+            // Confirmation checkbox enables submit (delegates to _refreshSubmitGate
+            // so name-format validation is part of the gating decision).
             document.getElementById('confirmDetails').addEventListener('change', function() {
+                if (typeof _refreshSubmitGate === 'function') { _refreshSubmitGate(); return; }
                 document.getElementById('submitBtn').disabled = !this.checked;
             });
         });
