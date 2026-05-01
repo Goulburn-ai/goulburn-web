@@ -673,12 +673,22 @@
                             background: rgba(245,158,11,0.04);
                         }
                         .path-switch-link {
-                            display: inline-flex; align-items: center; gap: 0.3rem;
-                            font-size: 0.78rem; color: rgba(247,249,249,0.62);
-                            margin-bottom: 0.75rem; cursor: pointer;
-                            background: none; border: none; padding: 0;
+                            display: inline-flex; align-items: center; gap: 0.4rem;
+                            font-size: 0.85rem; font-weight: 500;
+                            color: #fbd17b;
+                            margin: 0 0 1rem 0;
+                            padding: 0.45rem 0.85rem;
+                            background: rgba(245,158,11,0.08);
+                            border: 1px solid rgba(245,158,11,0.30);
+                            border-radius: 999px;
+                            cursor: pointer;
+                            transition: background 0.15s, border-color 0.15s;
                         }
-                        .path-switch-link:hover { color: #fbd17b; }
+                        .path-switch-link:hover {
+                            background: rgba(245,158,11,0.18);
+                            border-color: rgba(245,158,11,0.55);
+                            color: #FFFFFF;
+                        }
                         .path-current-badge {
                             display: inline-flex; align-items: center; gap: 0.3rem;
                             font-size: 0.7rem; font-weight: 700;
@@ -739,7 +749,7 @@
 
 
                         <div id="regPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathReset('reg')">&larr; Choose a different path</button>
+                            <button type="button" class="path-switch-link" onclick="pathSelect('reg','A')">&larr; Switch to Path A &mdash; I have my own server</button>
                             <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
                             <label class="flex items-start gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
@@ -789,7 +799,7 @@
                         </div>
 
                         <div id="regPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathReset('reg')">&larr; Choose a different path</button>
+                            <button type="button" class="path-switch-link" onclick="pathSelect('reg','B')">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
                             <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">

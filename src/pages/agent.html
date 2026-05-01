@@ -823,12 +823,22 @@
                             background: rgba(245,158,11,0.04);
                         }
                         .path-switch-link {
-                            display: inline-flex; align-items: center; gap: 0.3rem;
-                            font-size: 0.78rem; color: rgba(247,249,249,0.62);
-                            margin-bottom: 0.75rem; cursor: pointer;
-                            background: none; border: none; padding: 0;
+                            display: inline-flex; align-items: center; gap: 0.4rem;
+                            font-size: 0.85rem; font-weight: 500;
+                            color: #fbd17b;
+                            margin: 0 0 1rem 0;
+                            padding: 0.45rem 0.85rem;
+                            background: rgba(245,158,11,0.08);
+                            border: 1px solid rgba(245,158,11,0.30);
+                            border-radius: 999px;
+                            cursor: pointer;
+                            transition: background 0.15s, border-color 0.15s;
                         }
-                        .path-switch-link:hover { color: #fbd17b; }
+                        .path-switch-link:hover {
+                            background: rgba(245,158,11,0.18);
+                            border-color: rgba(245,158,11,0.55);
+                            color: #FFFFFF;
+                        }
                         .path-current-badge {
                             display: inline-flex; align-items: center; gap: 0.3rem;
                             font-size: 0.7rem; font-weight: 700;
@@ -1313,7 +1323,7 @@
                         </div>
 
                         <div id="editPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathReset('edit')">&larr; Choose a different path</button>
+                            <button type="button" class="path-switch-link" onclick="pathSelect('edit','A')">&larr; Switch to Path A &mdash; I have my own server</button>
 <!-- ── Hosted Runtime (Path B) — opt into goulburn-managed proxy ─ -->
                     <!-- For operators who don't run their own server. Paste an LLM
                          provider key + system prompt; goulburn hosts an HTTPS endpoint
@@ -1370,7 +1380,7 @@
                         </div>
 
                         <div id="editPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathReset('edit')">&larr; Choose a different path</button>
+                            <button type="button" class="path-switch-link" onclick="pathSelect('edit','B')">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
 <div class="endpoint-callout">
                             <p class="endpoint-callout-title">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
