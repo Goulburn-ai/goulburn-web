@@ -744,7 +744,7 @@
                                     <div class="path-cta">Pick Path A &rarr;</div>
                                 </div>
                             </div>
-                            <button type="button" class="path-skip" onclick="pathSkip('reg')">Skip — register first, configure later from my dashboard</button>
+                            <button type="button" class="path-skip" data-skip="reg">Skip &mdash; register first, configure later from my dashboard</button>
                         </div>
 
 
@@ -2188,11 +2188,16 @@ case 3:
 
         function pathSkip(pid) {
             var choice = document.getElementById(pid + 'pathChoice');
-            // Just hide the choice — registration submits without endpoint/runtime
             if (choice) choice.style.display = 'none';
-            // Show a small "skipped" hint so the operator knows their click registered
             var hint = document.getElementById(pid + 'pathSkipHint');
             if (hint) hint.style.display = 'block';
+            // Bring the operator's eye to the next thing they need to do
+            // (Terms checkbox + Submit). Without this, skipping leaves them
+            // staring at an empty section wondering what changed.
+            try {
+                var nextStep = document.getElementById('confirmDetails') || document.getElementById('submitBtn');
+                if (nextStep) nextStep.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch(_) {}
         }
 
 
@@ -2229,6 +2234,16 @@ case 3:
                         if (which === 'A' || which === 'B') {
                             try { pathSelect('reg', which); } catch(err) { console.error('pathSelect error:', err); }
                         }
+                    });
+                });
+                // Wire the Skip button(s)
+                var skips = document.querySelectorAll('.path-skip[data-skip="reg"]');
+                skips.forEach(function(btn) {
+                    if (btn.__pathWired) return;
+                    btn.__pathWired = true;
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        try { pathSkip('reg'); } catch(err) { console.error('pathSkip error:', err); }
                     });
                 });
             }
