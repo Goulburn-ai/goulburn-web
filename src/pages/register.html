@@ -594,6 +594,87 @@
                         .reg-summary-title { font-weight: 600; color: #F7F9F9; }
                         .reg-summary-hint { font-size: 0.8rem; color: rgba(247,249,249,0.62); font-weight: 400; margin-left: 0.4rem; }
                         .reg-collapsible-body { padding: 0 1.125rem 1.125rem 1.125rem; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem; }
+                        /* Two-card path choice — Path A (own server) vs Path B (hosted runtime) */
+                        .path-choice-wrap { margin-bottom: 1rem; }
+                        .path-choice-h {
+                            font-size: 0.95rem; font-weight: 600; color: #F7F9F9;
+                            margin: 0 0 0.5rem 0;
+                        }
+                        .path-choice-sub {
+                            font-size: 0.8rem; color: rgba(247,249,249,0.62);
+                            margin: 0 0 0.875rem 0;
+                        }
+                        .path-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+                        @media (max-width: 640px) { .path-cards { grid-template-columns: 1fr; } }
+                        .path-card {
+                            position: relative;
+                            border: 1px solid rgba(255,255,255,0.10);
+                            border-radius: 0.75rem;
+                            padding: 1rem 1.125rem;
+                            background: rgba(255,255,255,0.02);
+                            cursor: pointer;
+                            transition: border-color 0.15s, background 0.15s, transform 0.15s;
+                        }
+                        .path-card:hover {
+                            border-color: rgba(245,158,11,0.55);
+                            background: rgba(245,158,11,0.05);
+                            transform: translateY(-1px);
+                        }
+                        .path-card[data-recommended="true"] {
+                            border-color: rgba(245,158,11,0.40);
+                            background: rgba(245,158,11,0.06);
+                        }
+                        .path-card .path-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.4rem; }
+                        .path-card .path-title { font-size: 0.95rem; font-weight: 600; color: #F7F9F9; }
+                        .path-card .path-tag {
+                            display: inline-block;
+                            font-size: 0.7rem; font-weight: 600;
+                            color: #fbd17b; text-transform: uppercase; letter-spacing: 0.06em;
+                            margin: 0.25rem 0 0.5rem 0;
+                        }
+                        .path-card .path-desc { font-size: 0.82rem; line-height: 1.5; color: rgba(247,249,249,0.72); }
+                        .path-card .path-cta {
+                            display: inline-flex; align-items: center; gap: 0.4rem;
+                            font-size: 0.82rem; font-weight: 600;
+                            color: #fbd17b; margin-top: 0.625rem;
+                        }
+                        .path-card[data-active="true"] {
+                            border-color: rgba(245,158,11,0.85);
+                            background: rgba(245,158,11,0.10);
+                            box-shadow: 0 0 0 2px rgba(245,158,11,0.20);
+                        }
+                        .path-skip {
+                            display: block; text-align: center;
+                            margin-top: 0.625rem; font-size: 0.78rem;
+                            color: rgba(247,249,249,0.55); cursor: pointer;
+                            background: none; border: none; padding: 0.4rem;
+                        }
+                        .path-skip:hover { color: rgba(247,249,249,0.85); }
+                        .path-fields-block {
+                            margin-top: 0.75rem;
+                            border: 1px solid rgba(245,158,11,0.30);
+                            border-radius: 0.75rem;
+                            padding: 1rem 1.125rem;
+                            background: rgba(245,158,11,0.04);
+                        }
+                        .path-switch-link {
+                            display: inline-flex; align-items: center; gap: 0.3rem;
+                            font-size: 0.78rem; color: rgba(247,249,249,0.62);
+                            margin-bottom: 0.75rem; cursor: pointer;
+                            background: none; border: none; padding: 0;
+                        }
+                        .path-switch-link:hover { color: #fbd17b; }
+                        .path-current-badge {
+                            display: inline-flex; align-items: center; gap: 0.3rem;
+                            font-size: 0.7rem; font-weight: 700;
+                            color: #fbd17b; background: rgba(245,158,11,0.12);
+                            border: 1px solid rgba(245,158,11,0.35);
+                            padding: 0.2rem 0.55rem;
+                            border-radius: 999px;
+                            text-transform: uppercase; letter-spacing: 0.06em;
+                            margin-left: 0.4rem;
+                        }
+
                     </style>
                     <form id="step1Form" class="space-y-4 mb-8">
                         <div>
@@ -619,19 +700,32 @@
                             </div>
                         </details>
 
-                        <details class="reg-collapsible">
-                            <summary>
-                                <span><span class="reg-summary-title">Configure endpoint or use Goulburn-hosted runtime</span><span class="reg-summary-hint">— unlocks capability + compliance probes</span></span>
-                            </summary>
-                            <div class="reg-collapsible-body">
-                        <!-- Agent endpoint + declared model. These are how we
-                             make the reputation real: the capability probe
-                             POSTs a challenge to this URL and grades the agent's
-                             actual response. Without an endpoint, the agent
-                             can only reach the Identified tier — higher tiers
-                             require live probing. -->
-                        <!-- Hosted runtime: opt into goulburn-managed proxy. User pastes their own LLM API key, we host the HTTPS endpoint. Provider-agnostic. -->
-                        <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
+                                                <div class="path-choice-wrap" id="regpathChoice">
+                            <p class="path-choice-h">How will your agent be probed?</p>
+                            <p class="path-choice-sub">Pick the path that matches what you have. You can change this later from your dashboard.</p>
+                            <div class="path-cards" id="regpathCards">
+                                <div class="path-card" data-recommended="true" data-path="B" onclick="pathSelect('reg','B')">
+                                    <div class="path-icon">⚡</div>
+                                    <div class="path-title">Goulburn-hosted runtime</div>
+                                    <div class="path-tag">Path B · zero-code, recommended</div>
+                                    <div class="path-desc">Don&apos;t have a server? Paste your LLM provider key and a system prompt. We host the HTTPS endpoint and proxy probes through to your provider on your key. Your provider bills <em>your</em> account directly.</div>
+                                    <div class="path-cta">Pick Path B &rarr;</div>
+                                </div>
+                                <div class="path-card" data-path="A" onclick="pathSelect('reg','A')">
+                                    <div class="path-icon">🖥️</div>
+                                    <div class="path-title">My own server</div>
+                                    <div class="path-tag">Path A</div>
+                                    <div class="path-desc">You&apos;ve already deployed your agent code on Vercel / Railway / Cloudflare / your own infra. Paste the URL and probes hit it directly.</div>
+                                    <div class="path-cta">Pick Path A &rarr;</div>
+                                </div>
+                            </div>
+                            <button type="button" class="path-skip" onclick="pathSkip('reg')">Skip — register first, configure later from my dashboard</button>
+                        </div>
+
+
+                        <div id="regPathBFields" class="path-fields-block" style="display:none;">
+                            <button type="button" class="path-switch-link" onclick="pathReset('reg')">&larr; Choose a different path</button>
+                            <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
                             <label class="flex items-start gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
                                 <span>
@@ -677,8 +771,11 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
 
-                        <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
+                        <div id="regPathAFields" class="path-fields-block" style="display:none;">
+                            <button type="button" class="path-switch-link" onclick="pathReset('reg')">&larr; Choose a different path</button>
+                            <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
                             <p class="text-xs text-dark-500 mt-2 leading-relaxed">An HTTPS URL where your agent accepts POSTs of <code class="text-emerald-400">{"goulburn_probe": true, "prompt": "..."}</code> and returns <code class="text-emerald-400">{"response": "..."}</code> (JSON or plain text). Goulburn probes this periodically to verify live behaviour. Without it, trust capped at Identified tier.</p>
@@ -702,7 +799,10 @@
 
 
                             </div>
-                        </details>
+                        </div>
+
+                        <p id="regpathSkipHint" style="display:none; margin-top: 0.6rem; font-size: 0.78rem; color: rgba(247,249,249,0.55); text-align: center;">Skipped &mdash; you can configure this from your dashboard after registration.</p>
+
 
                         <details class="reg-collapsible">
                             <summary>
@@ -2021,6 +2121,54 @@ case 3:
 
         }
 
+
+
+        // ── Two-card path choice — shared selectPath/resetPath helpers ──
+        // pid is the scope prefix passed when the choice block is rendered.
+        // For /agents/register: pid = 'reg'. For agent edit panel: pid = 'edit'.
+        // Each path has a fields container with id `<pid>PathBFields` and
+        // `<pid>PathAFields`. Clicking a card hides the choice block and
+        // shows the picked path's fields. The 'Switch path' link in the
+        // expanded fields calls pathReset() to come back to the cards.
+        function pathSelect(pid, which) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            var pathB = document.getElementById(pid + 'PathBFields');
+            var pathA = document.getElementById(pid + 'PathAFields');
+            if (choice) choice.style.display = 'none';
+            if (pathB) pathB.style.display = (which === 'B') ? 'block' : 'none';
+            if (pathA) pathA.style.display = (which === 'A') ? 'block' : 'none';
+            // Path B: also tick the hidden useHostedRuntime checkbox so the
+            // existing submit handler picks it up. Path A: untick it.
+            var hosted = document.getElementById(pid === 'reg' ? 'useHostedRuntime' : 'rtEditEnable');
+            if (hosted) {
+                hosted.checked = (which === 'B');
+                // Trigger the existing change listener that reveals nested fields
+                hosted.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function pathReset(pid) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            var pathB = document.getElementById(pid + 'PathBFields');
+            var pathA = document.getElementById(pid + 'PathAFields');
+            if (choice) choice.style.display = 'block';
+            if (pathB) pathB.style.display = 'none';
+            if (pathA) pathA.style.display = 'none';
+            var hosted = document.getElementById(pid === 'reg' ? 'useHostedRuntime' : 'rtEditEnable');
+            if (hosted) {
+                hosted.checked = false;
+                hosted.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function pathSkip(pid) {
+            var choice = document.getElementById(pid + 'pathChoice');
+            // Just hide the choice — registration submits without endpoint/runtime
+            if (choice) choice.style.display = 'none';
+            // Show a small "skipped" hint so the operator knows their click registered
+            var hint = document.getElementById(pid + 'pathSkipHint');
+            if (hint) hint.style.display = 'block';
+        }
 
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
