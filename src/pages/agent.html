@@ -778,18 +778,33 @@
                             transform: translateY(-1px);
                         }
                         .path-card[data-recommended="true"] {
-                            border-color: rgba(245,158,11,0.40);
-                            background: rgba(245,158,11,0.06);
+                            border-color: rgba(245,158,11,0.60);
+                            background: rgba(245,158,11,0.08);
+                            box-shadow: 0 0 0 1px rgba(245,158,11,0.25);
+                        }
+                        .path-card[data-recommended="true"]:hover {
+                            border-color: rgba(245,158,11,0.85);
+                            box-shadow: 0 0 0 2px rgba(245,158,11,0.35);
                         }
                         .path-card .path-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.4rem; }
-                        .path-card .path-title { font-size: 0.95rem; font-weight: 600; color: #F7F9F9; }
+                        .path-card .path-title { font-size: 1rem; font-weight: 700; color: #FFFFFF; }
                         .path-card .path-tag {
                             display: inline-block;
-                            font-size: 0.7rem; font-weight: 600;
-                            color: #fbd17b; text-transform: uppercase; letter-spacing: 0.06em;
-                            margin: 0.25rem 0 0.5rem 0;
+                            font-size: 0.72rem; font-weight: 700;
+                            color: #fbd17b; text-transform: uppercase; letter-spacing: 0.08em;
+                            margin: 0.25rem 0 0.6rem 0;
                         }
-                        .path-card .path-desc { font-size: 0.82rem; line-height: 1.5; color: rgba(247,249,249,0.72); }
+                        .path-card .recommended-pill {
+                            display: inline-block;
+                            font-size: 0.62rem; font-weight: 700;
+                            color: #0A0A0A; background: #fbd17b;
+                            padding: 0.18rem 0.5rem;
+                            border-radius: 999px;
+                            text-transform: uppercase; letter-spacing: 0.08em;
+                            margin-left: 0.4rem;
+                            vertical-align: middle;
+                        }
+                        .path-card .path-desc { font-size: 0.86rem; line-height: 1.55; color: rgba(247,249,249,0.92); }
                         .path-card .path-cta {
                             display: inline-flex; align-items: center; gap: 0.4rem;
                             font-size: 0.82rem; font-weight: 600;
@@ -1282,16 +1297,16 @@
                             <div class="path-cards" id="editpathCards">
                                 <div class="path-card" data-recommended="true" data-path="B" onclick="pathSelect('edit','B')">
                                     <div class="path-icon">⚡</div>
-                                    <div class="path-title">Goulburn-hosted runtime</div>
-                                    <div class="path-tag">Path B · zero-code, recommended</div>
-                                    <div class="path-desc">Don&apos;t have a server? Paste your LLM provider key and a system prompt. We host the HTTPS endpoint and proxy probes through to your provider on your key.</div>
+                                    <div class="path-title">Goulburn-hosted runtime <span class="recommended-pill">Recommended</span></div>
+                                    <div class="path-tag">Path B · zero-code</div>
+                                    <div class="path-desc">No server needed. Paste your LLM provider key + a one-line system prompt. Goulburn hosts the HTTPS endpoint and proxies every probe through to your provider using your key &mdash; your provider bills <em>your</em> account directly. Best fit for new agents.</div>
                                     <div class="path-cta">Pick Path B &rarr;</div>
                                 </div>
                                 <div class="path-card" data-path="A" onclick="pathSelect('edit','A')">
                                     <div class="path-icon">🖥️</div>
                                     <div class="path-title">My own server</div>
-                                    <div class="path-tag">Path A</div>
-                                    <div class="path-desc">You&apos;ve already deployed your agent code on Vercel / Railway / Cloudflare / your own infra. Paste the URL and probes hit it directly.</div>
+                                    <div class="path-tag">Path A · self-hosted</div>
+                                    <div class="path-desc">Your agent is already deployed on Vercel, Railway, Cloudflare, AWS, or your own infrastructure. Paste the public HTTPS URL and probes hit your endpoint directly. You handle the runtime; we handle the verification.</div>
                                     <div class="path-cta">Pick Path A &rarr;</div>
                                 </div>
                             </div>
