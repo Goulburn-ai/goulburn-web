@@ -729,14 +729,14 @@
                             <p class="path-choice-h">How will your agent be probed?</p>
                             <p class="path-choice-sub">Pick the path that matches what you have. You can change this later from your dashboard.</p>
                             <div class="path-cards" id="regpathCards">
-                                <div class="path-card" data-recommended="true" data-path="B" onclick="pathSelect('reg','B')">
+                                <div class="path-card" data-recommended="true" data-path="B">
                                     <div class="path-icon">⚡</div>
                                     <div class="path-title">Goulburn-hosted runtime <span class="recommended-pill">Recommended</span></div>
                                     <div class="path-tag">Path B · zero-code</div>
                                     <div class="path-desc">No server needed. Paste your LLM provider key + a one-line system prompt. Goulburn hosts the HTTPS endpoint and proxies every probe through to your provider using your key &mdash; your provider bills <em>your</em> account directly. Best fit for new agents.</div>
                                     <div class="path-cta">Pick Path B &rarr;</div>
                                 </div>
-                                <div class="path-card" data-path="A" onclick="pathSelect('reg','A')">
+                                <div class="path-card" data-path="A">
                                     <div class="path-icon">🖥️</div>
                                     <div class="path-title">My own server</div>
                                     <div class="path-tag">Path A · self-hosted</div>
@@ -749,7 +749,7 @@
 
 
                         <div id="regPathBFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathSelect('reg','A')">&larr; Switch to Path A &mdash; I have my own server</button>
+                            <button type="button" class="path-switch-link">&larr; Switch to Path A &mdash; I have my own server</button>
                             <div class="mb-4 p-4 rounded-lg border border-amber-500/40 bg-amber-500/5">
                             <label class="flex items-start gap-3 cursor-pointer select-none">
                                 <input type="checkbox" id="useHostedRuntime" class="mt-1 w-4 h-4 accent-amber-500 cursor-pointer">
@@ -799,7 +799,7 @@
                         </div>
 
                         <div id="regPathAFields" class="path-fields-block" style="display:none;">
-                            <button type="button" class="path-switch-link" onclick="pathSelect('reg','B')">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
+                            <button type="button" class="path-switch-link">&larr; Switch to Path B &mdash; use Goulburn-hosted runtime (recommended)</button>
                             <div id="manualEndpointBlock" class="p-4 rounded-lg border border-emerald-500/25 bg-emerald-500/5">
                             <label for="agentEndpointUrl" class="block text-sm font-semibold text-dark-900 mb-2">Agent Endpoint URL <span class="text-xs font-normal text-emerald-400">&middot; Strongly recommended</span></label>
                             <input type="url" id="agentEndpointUrl" name="endpoint_url" placeholder="https://your-agent.example.com/v1/respond" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
@@ -2194,6 +2194,37 @@ case 3:
             var hint = document.getElementById(pid + 'pathSkipHint');
             if (hint) hint.style.display = 'block';
         }
+
+
+        // ── Wire path-card clicks via JS listeners — more reliable than
+        //    inline onclick attributes (which sometimes fail silently due to
+        //    CSP, race conditions, or DOM mutations). Also expose handlers
+        //    on window so they remain reachable from the inline switch links
+        //    and from devtools. ──
+        (function() {
+            window.pathSelect = pathSelect;
+            window.pathReset = pathReset;
+            window.pathSkip = pathSkip;
+            function _wireCards() {
+                var cards = document.querySelectorAll('#regpathCards .path-card[data-path]');
+                cards.forEach(function(card) {
+                    if (card.__pathWired) return;
+                    card.__pathWired = true;
+                    card.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var which = card.getAttribute('data-path');
+                        if (which === 'A' || which === 'B') {
+                            try { pathSelect('reg', which); } catch(err) { console.error('pathSelect error:', err); }
+                        }
+                    });
+                });
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _wireCards);
+            } else {
+                _wireCards();
+            }
+        })();
 
         // ── Submit Registration ──
         document.getElementById('submitBtn').addEventListener('click', function() {
