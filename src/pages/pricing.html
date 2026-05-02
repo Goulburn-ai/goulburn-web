@@ -493,7 +493,7 @@
             wlSubmit.disabled = true;
             wlSubmit.textContent = "Sending...";
             try {
-                const resp = await fetch(ADMIN_BASE + "/api/v1/admin/waitlist", {
+                const resp = await fetch(ADMIN_BASE + "/api/v1/admin/waitlist", { credentials: 'include',
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email: email, tier: wlCurrentTier }),

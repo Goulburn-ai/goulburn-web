@@ -1761,7 +1761,7 @@
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
+            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
             })
             .then(function(r) {
@@ -3228,7 +3228,7 @@
 
             // Fetch /me + /agents/mine in parallel. Either failing independently
             // falls back to sensible defaults so the card always renders.
-            var profilePromise = fetch('https://admin.goulburn.ai/api/v1/admin/me', { headers: headers })
+            var profilePromise = fetch('https://admin.goulburn.ai/api/v1/admin/me', { credentials: 'include', headers: headers })
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .catch(function() { return null; });
             var agentsPromise = fetch(API + '/agents/mine', { headers: headers })
@@ -3974,7 +3974,7 @@
             var session = goulburnAuth.getSession();
             var btn = document.getElementById('opAvatarSaveBtn');
             if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
-            fetch((window.ADMIN_BASE || 'https://admin.goulburn.ai') + '/api/v1/admin/me/avatar', {
+            fetch((window.ADMIN_BASE || 'https://admin.goulburn.ai') + '/api/v1/admin/me/avatar', { credentials: 'include',
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
                 body: JSON.stringify({ avatar: _opAvatarModalState.selected })

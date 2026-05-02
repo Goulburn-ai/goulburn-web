@@ -694,7 +694,7 @@
                     var email = (emailEl && emailEl.value || '').trim().toLowerCase() || null;
 
                     // 1. /authenticate/begin
-                    var beginRes = await fetch(goulburnAuth.ADMIN_BASE + '/api/v1/webauthn/authenticate/begin', {
+                    var beginRes = await fetch(goulburnAuth.ADMIN_BASE + '/api/v1/webauthn/authenticate/begin', { credentials: 'include',
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: email })
@@ -730,7 +730,7 @@
                     };
 
                     // 5. /authenticate/complete
-                    var completeRes = await fetch(goulburnAuth.ADMIN_BASE + '/api/v1/webauthn/authenticate/complete?challenge_id=' + encodeURIComponent(challengeId), {
+                    var completeRes = await fetch(goulburnAuth.ADMIN_BASE + '/api/v1/webauthn/authenticate/complete?challenge_id=' + encodeURIComponent(challengeId), { credentials: 'include',
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(body)

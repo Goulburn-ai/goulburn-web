@@ -2860,7 +2860,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
+            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
             })
             .then(function(r) {
@@ -3296,7 +3296,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         };
 
         // Step 1: Fetch user profile to get owner_id
-        fetch(ADMIN_BASE + '/api/v1/admin/me', { headers: headers })
+        fetch(ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(profile) {
@@ -3977,7 +3977,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         if (btn) { btn.disabled = true; btn.textContent = 'Reactivating...'; }
 
         // Step 1: clear deleted_at on the admin side
-        fetch(ADMIN_BASE + '/api/v1/admin/reactivate', {
+        fetch(ADMIN_BASE + '/api/v1/admin/reactivate', { credentials: 'include',
             method: 'POST',
             headers: { 'Authorization': 'Bearer ' + session }
         })
@@ -4057,7 +4057,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var tbody = document.getElementById('recentLoginsBody');
             if (!session || !tbody) return;
             var ADMIN_BASE = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE) || 'https://admin.goulburn.ai';
-            fetch(ADMIN_BASE + '/api/v1/me/recent-logins', {
+            fetch(ADMIN_BASE + '/api/v1/me/recent-logins', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + session }
             }).then(function(r) {
                 if (!r.ok) return null;

@@ -1101,7 +1101,7 @@
 
         // Exchange code for connection
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/callback', {
+        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/callback', { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1277,7 +1277,7 @@
         };
 
         // Fetch user profile from admin backend
-        fetch(ADMIN_BASE + '/api/v1/admin/me', { headers: headers })
+        fetch(ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(profile) {
                 if (profile) {
@@ -1315,7 +1315,7 @@
             });
 
         // Also try dedicated API key endpoint (returns prefix only, not full key)
-        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { headers: headers })
+        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(data) {
                 if (data && data.has_key) {
@@ -1337,7 +1337,7 @@
         // elements aren't on the page, there's nothing to render. Early
         // return prevents the null-DOM TypeError that used to spam
         // console.error('Reputation error:', ...) on every load.
-        fetch(ADMIN_BASE + '/api/v1/me/trust', { headers: headers })
+        fetch(ADMIN_BASE + '/api/v1/me/trust', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(trust) {
                 if (!trust) return;
@@ -1375,7 +1375,7 @@
             .catch(function(err) { console.error('Reputation error:', err); });
 
         // Fetch API key stats
-        fetch(ADMIN_BASE + '/api/v1/me/api-key/stats', { headers: headers })
+        fetch(ADMIN_BASE + '/api/v1/me/api-key/stats', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(stats) {
                 if (!stats || !stats.has_key) return;
@@ -1456,7 +1456,7 @@
         if (!window.confirm('Disconnect ' + platform + '? This will remove the platform verification from your profile.')) return;
 
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/disconnect', {
+        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/disconnect', { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1509,7 +1509,7 @@
         }
 
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/admin/me/password', {
+        fetch(ADMIN_BASE + '/api/v1/admin/me/password', { credentials: 'include',
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -1581,7 +1581,7 @@
         if (!window.confirm('Generating a new API key will invalidate the current one.\n\nAny active sessions using the old key will be disconnected.\n\nContinue?')) return;
 
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', {
+        fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -1635,7 +1635,7 @@
         }
 
         // Step 1: soft-delete the admin account (sets deleted_at, keeps session)
-        fetch(ADMIN_BASE + '/api/v1/admin/me', {
+        fetch(ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -1699,7 +1699,7 @@
     }
 
     function load2FAStatus() {
-        return fetch(ADMIN_BASE + '/api/v1/auth/2fa/status', { headers: tfaAuthHeaders() })
+        return fetch(ADMIN_BASE + '/api/v1/auth/2fa/status', { credentials: 'include', headers: tfaAuthHeaders() })
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 twoFactorState.enabled = !!data.enabled;
@@ -1735,7 +1735,7 @@
     function start2FAEnable() {
         var pwd = prompt('Confirm your account password to enable 2FA:');
         if (!pwd) return;
-        fetch(ADMIN_BASE + '/api/v1/auth/2fa/enable', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/enable', { credentials: 'include',
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ password: pwd })
@@ -1762,7 +1762,7 @@
     function confirm2FAEnable() {
         var code = document.getElementById('twoFactorConfirmCode').value.trim();
         if (!/^[0-9]{6}$/.test(code)) { showToast('Enter the 6-digit code from your app', 'error'); return; }
-        fetch(ADMIN_BASE + '/api/v1/auth/2fa/confirm', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/confirm', { credentials: 'include',
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ code: code })
@@ -1799,7 +1799,7 @@
         var pwd = document.getElementById('twoFactorDisablePassword').value;
         var code = document.getElementById('twoFactorDisableCode').value.trim();
         if (!pwd || !code) { showToast('Password and code required', 'error'); return; }
-        fetch(ADMIN_BASE + '/api/v1/auth/2fa/disable', {
+        fetch(ADMIN_BASE + '/api/v1/auth/2fa/disable', { credentials: 'include',
             method: 'POST',
             headers: tfaAuthHeaders(),
             body: JSON.stringify({ password: pwd, code: code })
@@ -1871,7 +1871,7 @@
         if (toggle) toggle.disabled = true;
         if (status) status.textContent = 'Saving…';
 
-        fetch(ADMIN_BASE + '/api/v1/admin/me/notification-prefs', {
+        fetch(ADMIN_BASE + '/api/v1/admin/me/notification-prefs', { credentials: 'include',
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -1914,7 +1914,7 @@
         if (!session) return;
         var path = window.location.pathname;
         if (path !== '/settings' && path !== '/settings/') return;  // already stamped or other page
-        fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://admin.goulburn.ai') + '/api/v1/admin/me', {
+        fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://admin.goulburn.ai') + '/api/v1/admin/me', { credentials: 'include',
             headers: { 'Authorization': 'Bearer ' + session }
         })
         .then(function(r) { return r.ok ? r.json() : null; })
@@ -2030,7 +2030,7 @@
                 var deviceLabel = navigator.userAgentData && navigator.userAgentData.platform
                     ? (navigator.userAgentData.platform + ' ' + (navigator.userAgentData.brands?.[0]?.brand || ''))
                     : (navigator.platform || 'this device');
-                var beginRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/begin', {
+                var beginRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/begin', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify({ device_label: deviceLabel })
@@ -2062,7 +2062,7 @@
                     }
                 };
 
-                var completeRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/complete?challenge_id=' + encodeURIComponent(challengeId), {
+                var completeRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/complete?challenge_id=' + encodeURIComponent(challengeId), { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify(body)
@@ -2153,7 +2153,7 @@
                     keys: subJson.keys,
                     user_agent: navigator.userAgent
                 };
-                var res = await fetch(ADMIN_BASE + '/api/v1/push/subscribe', {
+                var res = await fetch(ADMIN_BASE + '/api/v1/push/subscribe', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                     body: JSON.stringify(body)
@@ -2172,7 +2172,7 @@
                 var reg = await navigator.serviceWorker.ready;
                 var sub = await reg.pushManager.getSubscription();
                 if (sub) {
-                    await fetch(ADMIN_BASE + '/api/v1/push/unsubscribe', {
+                    await fetch(ADMIN_BASE + '/api/v1/push/unsubscribe', { credentials: 'include',
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
                         body: JSON.stringify({ endpoint: sub.endpoint })
@@ -2189,7 +2189,7 @@
         async function pushTest() {
             _pushStatus('Sending test...');
             try {
-                var res = await fetch(ADMIN_BASE + '/api/v1/push/test-send', {
+                var res = await fetch(ADMIN_BASE + '/api/v1/push/test-send', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
                 });
