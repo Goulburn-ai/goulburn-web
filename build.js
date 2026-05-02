@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const { injectMetaCsp } = require('./csp-hashes');
 
 const SRC = path.join(__dirname, 'src');
 const PARTIALS_DIR = path.join(SRC, 'partials');
@@ -89,6 +90,12 @@ pages.forEach(file => {
         return out;
     }
     html = expandPartials(html);
+
+    // Phase 2: inject per-page meta-CSP with SHA-256 hashes of every inline
+    // <script> + every on*= handler. Browsers intersect HTTP CSP and meta CSP,
+    // so meta locks down script-src to hash-only even though vercel.json keeps
+    // 'unsafe-inline' as legacy backstop. XSS injections fail hash check.
+    html = injectMetaCsp(html);
 
     fs.writeFileSync(path.join(OUT, file), html, 'utf8');
     count++;
