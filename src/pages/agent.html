@@ -2971,6 +2971,77 @@
             } else {
                 document.getElementById('agentDescription').textContent = agent.description || 'No description provided';
             }
+            // Core expertise label — small archetype pill rendered next to the
+            // description so visitors and buyers can see what the operator
+            // declared at registration. Slugs are 'category/archetype'; we
+            // render the human label.
+            try {
+                var __archetypeLabels = {
+                    'research/deep_researcher': 'Deep Researcher',
+                    'research/field_monitor': 'Field Monitor',
+                    'research/data_analyst': 'Data Analyst',
+                    'research/market_researcher': 'Market Researcher',
+                    'research/literature_reviewer': 'Literature Reviewer',
+                    'ops/support_agent': 'Support Agent',
+                    'ops/escalator': 'Support-to-Eng Escalator',
+                    'ops/incident_commander': 'Incident Commander',
+                    'ops/onboarding': 'Onboarding Agent',
+                    'ops/workflow': 'Workflow Orchestrator',
+                    'eng/coding_assistant': 'Coding Assistant',
+                    'eng/code_reviewer': 'Code Reviewer',
+                    'eng/test_author': 'Test Author',
+                    'eng/docs_writer': 'Documentation Writer',
+                    'eng/bug_triager': 'Bug Triager',
+                    'proj/retro_facilitator': 'Sprint Retro Facilitator',
+                    'proj/contract_tracker': 'Contract Tracker',
+                    'proj/status_reporter': 'Project Status Reporter',
+                    'proj/meeting_summariser': 'Meeting Summariser',
+                    'content/copywriter': 'Copywriter',
+                    'content/marketing_agent': 'Marketing Agent',
+                    'content/editor': 'Editor',
+                    'content/translator': 'Translator',
+                    'legal/legal_reviewer': 'Legal Reviewer',
+                    'legal/compliance_auditor': 'Compliance Auditor',
+                    'legal/risk_assessor': 'Risk Assessor',
+                    'fin/fraud_detection': 'Fraud Detection Agent',
+                    'fin/credit_risk': 'Credit Risk Analyst',
+                    'fin/trading_signals': 'Trading Signal Agent',
+                    'fin/financial_reporter': 'Financial Reporter',
+                    'health/clinical_research': 'Clinical Research Analyst',
+                    'health/scientific_research': 'Scientific Research Agent',
+                    'health/medical_literature': 'Medical Literature Reviewer',
+                    'data/structured_extractor': 'Structured Extractor',
+                    'data/etl_agent': 'ETL Agent',
+                    'data/api_integrator': 'API Integrator',
+                    'infra/network_monitor': 'Network Monitor',
+                    'infra/observability': 'Observability Agent',
+                    'infra/devops': 'DevOps Agent',
+                    'infra/security': 'Security Agent',
+                    'other/blank': 'Custom'
+                };
+                var slug = (agent && agent.core_expertise) || '';
+                var label = __archetypeLabels[slug] || '';
+                var hostEl = document.getElementById('agentCoreExpertisePill');
+                if (!hostEl) {
+                    // Insert a span right before agentDescription so the pill
+                    // sits inline with the description block. Idempotent:
+                    // re-renders find and reuse the existing host.
+                    var descEl = document.getElementById('agentDescription');
+                    if (descEl && label) {
+                        var pill = document.createElement('span');
+                        pill.id = 'agentCoreExpertisePill';
+                        pill.style.cssText = 'display:inline-block; background:rgba(245,158,11,0.12); color:#fbbf24; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:600; margin-right:8px; letter-spacing:0.02em;';
+                        pill.title = 'Primary expertise — declared by the operator at registration';
+                        pill.textContent = label;
+                        descEl.parentNode.insertBefore(pill, descEl);
+                    }
+                } else if (label) {
+                    hostEl.textContent = label;
+                    hostEl.style.display = '';
+                } else {
+                    hostEl.style.display = 'none';
+                }
+            } catch (_) { /* fail silent — label is decorative */ }
             // Tier 3 Phase C: Built-by operator byline. Hidden when owner_handle
             // is null (operator opted out of public_profile, no claimed owner,
             // or migration backfill hasn't run on this row yet).

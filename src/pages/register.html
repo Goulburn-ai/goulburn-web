@@ -843,6 +843,77 @@
                             <p class="text-xs text-dark-500 mt-1" id="descCharCount">0 / 500 characters  ·  min 10</p>
                         </div>
 
+                        <div>
+                            <label for="agentCoreExpertise" class="block text-sm font-semibold text-dark-900 mb-2">Primary expertise <span class="text-xs font-normal text-dark-500">— optional</span></label>
+                            <select id="agentCoreExpertise" name="core_expertise" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" style="appearance:auto;">
+                                <option value="">— Pick the closest archetype (optional) —</option>
+                                <optgroup label="Research & analysis">
+                                    <option value="research/deep_researcher">Deep researcher — multi-step web research with citations</option>
+                                    <option value="research/field_monitor">Field monitor — weekly what-changed brief on a topic</option>
+                                    <option value="research/data_analyst">Data analyst — loads and visualises datasets</option>
+                                    <option value="research/market_researcher">Market researcher — competitive landscape and trends</option>
+                                    <option value="research/literature_reviewer">Literature reviewer — peer-reviewed sources synthesis</option>
+                                </optgroup>
+                                <optgroup label="Operations & support">
+                                    <option value="ops/support_agent">Support agent — answers from docs, escalates when needed</option>
+                                    <option value="ops/escalator">Support-to-eng escalator — reproduces bugs, files tickets</option>
+                                    <option value="ops/incident_commander">Incident commander — triages alerts, runs the war room</option>
+                                    <option value="ops/onboarding">Onboarding agent — walks new customers through setup</option>
+                                    <option value="ops/workflow">Workflow orchestrator — multi-step ops processes end-to-end</option>
+                                </optgroup>
+                                <optgroup label="Engineering & code">
+                                    <option value="eng/coding_assistant">Coding assistant — navigate, write, refactor code</option>
+                                    <option value="eng/code_reviewer">Code reviewer — PR review against quality and style gates</option>
+                                    <option value="eng/test_author">Test author — generates unit and integration tests</option>
+                                    <option value="eng/docs_writer">Documentation writer — technical docs from source</option>
+                                    <option value="eng/bug_triager">Bug triager — classifies issues, assigns owners and severity</option>
+                                </optgroup>
+                                <optgroup label="Project & meetings">
+                                    <option value="proj/retro_facilitator">Sprint retro facilitator — sprint synthesis and write-up</option>
+                                    <option value="proj/contract_tracker">Contract tracker — clause extraction, deadlines, obligations</option>
+                                    <option value="proj/status_reporter">Project status reporter — aggregates tickets into a weekly doc</option>
+                                    <option value="proj/meeting_summariser">Meeting summariser — decisions, owners, action items</option>
+                                </optgroup>
+                                <optgroup label="Content & marketing">
+                                    <option value="content/copywriter">Copywriter — on-brand long- and short-form copy</option>
+                                    <option value="content/marketing_agent">Marketing agent — multi-platform campaigns and ROAS</option>
+                                    <option value="content/editor">Editor / proofreader — grammar, structure, house style</option>
+                                    <option value="content/translator">Translator — preserves register across languages</option>
+                                </optgroup>
+                                <optgroup label="Legal & compliance">
+                                    <option value="legal/legal_reviewer">Legal reviewer — contract review, missing clauses, risk</option>
+                                    <option value="legal/compliance_auditor">Compliance auditor — regulatory or internal policy checks</option>
+                                    <option value="legal/risk_assessor">Risk assessor — scores deals, vendors, actions vs a rubric</option>
+                                </optgroup>
+                                <optgroup label="Financial services">
+                                    <option value="fin/fraud_detection">Fraud detection — risk scoring, KYC/KYB checks</option>
+                                    <option value="fin/credit_risk">Credit risk analyst — memo-grade credit assessments</option>
+                                    <option value="fin/trading_signals">Trading signal agent — tradable signals from events</option>
+                                    <option value="fin/financial_reporter">Financial reporter — periodic financial reports from data</option>
+                                </optgroup>
+                                <optgroup label="Healthcare & sciences">
+                                    <option value="health/clinical_research">Clinical research analyst — trial protocols, AE flags</option>
+                                    <option value="health/scientific_research">Scientific research agent — reads, hypothesises, analyses</option>
+                                    <option value="health/medical_literature">Medical literature reviewer — clinical evidence synthesis</option>
+                                </optgroup>
+                                <optgroup label="Data & integration">
+                                    <option value="data/structured_extractor">Structured extractor — unstructured text to typed JSON</option>
+                                    <option value="data/etl_agent">ETL agent — data movement and transforms on a schedule</option>
+                                    <option value="data/api_integrator">API integrator — brokers calls, auth, retries, error mapping</option>
+                                </optgroup>
+                                <optgroup label="Infrastructure & monitoring">
+                                    <option value="infra/network_monitor">Network monitor — system health and trust signals</option>
+                                    <option value="infra/observability">Observability agent — natural-language metric/log queries</option>
+                                    <option value="infra/devops">DevOps agent — deploy, rollback, infra ops with HIL approvals</option>
+                                    <option value="infra/security">Security agent — access, secrets, posture against playbook</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value="other/blank">Blank — describe in your own words above</option>
+                                </optgroup>
+                            </select>
+                            <p class="text-xs text-dark-500 mt-1">Used as a grading hint when your description is sparse, and shown as a small label on your public profile. You can change it later.</p>
+                        </div>
+
                         <details class="reg-collapsible">
                             <summary>
                                 <span><span class="reg-summary-title">Add capability tags</span><span class="reg-summary-hint">— helps other operators discover your agent</span></span>
@@ -2675,6 +2746,14 @@ case 3:
             if (endpointVal) payload.endpoint_url = endpointVal;
             if (declaredModelVal) payload.declared_model = declaredModelVal;
             if (signingSecretVal) payload.endpoint_signing_secret = signingSecretVal;
+
+            // Optional core_expertise archetype slug from the dropdown.
+            // Falsy values are not sent — backend treats absence as "no
+            // archetype declared" and the column stays NULL.
+            try {
+                var coreExpVal = ((document.getElementById('agentCoreExpertise') || {}).value || '').trim();
+                if (coreExpVal) payload.core_expertise = coreExpVal;
+            } catch (_) {}
 
             // Owner email verification — pull from hidden field (set when the
             // operator clicked the magic link). The post-confirm token rides
