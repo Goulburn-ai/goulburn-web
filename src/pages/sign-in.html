@@ -272,7 +272,7 @@
                     const period = params.get('period') || 'monthly';
                     if (tier) {
                         try {
-                            const resp = await fetch(`${API_BASE}/api/v1/billing/owner-checkout`, {
+                            const resp = await fetch(`${API_BASE}/api/v1/billing/owner-checkout`, { credentials: 'include',
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
                                 body: JSON.stringify({ tier: tier, period: period }),
@@ -407,7 +407,7 @@
             }
 
             authUI.showStatus('Completing sign-in...', false);
-            fetch(`${API_BASE}/api/v1/auth/oauth/callback-exchange`, {
+            fetch(`${API_BASE}/api/v1/auth/oauth/callback-exchange`, { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ provider: platform, code, state })
@@ -453,7 +453,7 @@
             }
 
             // Try regular user login first
-            fetch(`${API_BASE}/api/v1/auth/login`, {
+            fetch(`${API_BASE}/api/v1/auth/login`, { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: username, password, remember: !!(document.getElementById('remember') && document.getElementById('remember').checked) })
@@ -488,7 +488,7 @@
                         return;
                     }
                     // User login failed &mdash; fall back to admin login
-                    return fetch(`${API_BASE}/api/v1/auth/login`, {
+                    return fetch(`${API_BASE}/api/v1/auth/login`, { credentials: 'include',
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: username, password, remember: !!(document.getElementById('remember') && document.getElementById('remember').checked) })

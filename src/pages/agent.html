@@ -988,7 +988,7 @@
             if (useOwnerAuth) body.agent_name = getAgentName();
 
             try {
-                var res = await fetch(API_BASE + '/api/v1/tier-reviews/request', {
+                var res = await fetch(API_BASE + '/api/v1/tier-reviews/request', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
                     body: JSON.stringify(body)
@@ -1868,7 +1868,7 @@
             var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
             if (!session) return;
             try {
-                var res = await fetch(API_BASE + '/api/v1/agents/mine', {
+                var res = await fetch(API_BASE + '/api/v1/agents/mine', { credentials: 'include',
                     headers: { 'Authorization': 'Bearer ' + session }
                 });
                 if (!res.ok) return;
@@ -1938,7 +1938,7 @@
             var path = isSuspended ? '/resume' : '/suspend';
             var session = goulburnAuth.getSession();
             try {
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + path, {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + path, { credentials: 'include',
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + session }
                 });
@@ -2063,7 +2063,7 @@
             if (!_ownedAgent) return;
             var session = goulburnAuth.getSession();
             try {
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/reactivate', {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/reactivate', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + session }
                 });
@@ -2115,7 +2115,7 @@
             if (!_ownedAgent) return;
             var session = goulburnAuth.getSession();
             try {
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()), {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()), { credentials: 'include',
                     method: 'DELETE',
                     headers: { 'Authorization': 'Bearer ' + session }
                 });
@@ -2289,7 +2289,7 @@
                 var key = sessionStorage.getItem('goulburn_session') ||
                           localStorage.getItem('goulburn_session') || '';
                 if (!key) return;
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
                     method: 'GET',
                     headers: { 'Authorization': 'Bearer ' + key }
                 });
@@ -2550,7 +2550,7 @@
                 };
                 if (prov === 'custom') payload.custom_base_url = custBase;
 
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
                     body: JSON.stringify(payload)
@@ -2627,7 +2627,7 @@
             }
 
             try {
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name), {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name), { credentials: 'include',
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -4409,7 +4409,7 @@
             btn.textContent = 'Claiming…';
             document.getElementById('claimStatus').textContent = '';
             try {
-                var resp = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/claim', {
+                var resp = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/claim', { credentials: 'include',
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
                     body: JSON.stringify({ agent_api_key: key })

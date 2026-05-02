@@ -3180,7 +3180,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         try {
             var _opSession = goulburnAuth.getSession();
             if (_opSession) {
-                fetch(API_BASE + '/api/v1/operators/me/settings', {
+                fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
                     headers: { 'Authorization': 'Bearer ' + _opSession }
                 }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                     if (!me) return;
@@ -3840,7 +3840,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         status.textContent = 'Verifying ownership...';
 
         var session = goulburnAuth.getSession();
-        fetch(API_BASE + '/api/v1/owners/claim-agent', {
+        fetch(API_BASE + '/api/v1/owners/claim-agent', { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -3905,7 +3905,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var session = goulburnAuth.getSession();
         // Backend route is /api/v1/agents/{name}, not /{id}. The delete
         // handler on the server does name-based lookup + owner check.
-        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName), {
+        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName), { credentials: 'include',
             method: 'DELETE',
             headers: { 'Authorization': 'Bearer ' + session }
         })
@@ -3991,7 +3991,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 return;
             }
             // Step 2: cascade on goulburn-api — restore agents to ACTIVE
-            return fetch(API_BASE + '/api/v1/owners/me/reactivate-account', {
+            return fetch(API_BASE + '/api/v1/owners/me/reactivate-account', { credentials: 'include',
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + session }
             })

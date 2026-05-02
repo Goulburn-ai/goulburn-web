@@ -2585,7 +2585,7 @@ case 3:
                     sendBtn.disabled = true;
                     sendBtn.textContent = 'Sending...';
                     try {
-                        var res = await fetch(API_BASE + '/api/v1/owner-email/verify/start', {
+                        var res = await fetch(API_BASE + '/api/v1/owner-email/verify/start', { credentials: 'include',
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ email: email, agent_name: agentName })
@@ -2769,7 +2769,7 @@ case 3:
                 }
             } catch(_){}
 
-            fetch(API_BASE + '/api/v1/agents/register', {
+            fetch(API_BASE + '/api/v1/agents/register', { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -2817,7 +2817,7 @@ case 3:
                         // pending_claim — no user-facing retry anymore (capabilities page retired).
                         var proveChain;
                         if (data.custody_nonce && regName && data.api_key) {
-                            proveChain = fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/prove-custody', {
+                            proveChain = fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/prove-custody', { credentials: 'include',
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -2878,7 +2878,7 @@ case 3:
                                     var rtPayload = { provider: rtP, model: rtM, api_key: rtK, system_prompt: rtSP, custom_base_url: rtP === 'custom' ? rtCB : null };
                                     if (rtK && rtM && rtSP) {
                                         statusDiv.textContent = 'Configuring hosted runtime...';
-                                        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/runtime', {
+                                        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/runtime', { credentials: 'include',
                                             method: 'POST',
                                             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (data.api_key || '') },
                                             body: JSON.stringify(rtPayload)

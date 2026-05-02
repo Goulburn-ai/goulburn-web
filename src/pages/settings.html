@@ -1157,7 +1157,7 @@
         function loadBillingStatus() {
             var token = goulburnAuth.getSession();
             if (!token) return;
-            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-status', {
+            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-status', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
             })
             .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, status: r.status, data: j }; }); })
@@ -1245,7 +1245,7 @@
             btn.disabled = true;
             var original = btn.textContent;
             btn.textContent = 'Opening Stripe…';
-            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-portal', {
+            fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-portal', { credentials: 'include',
                 method: 'POST',
                 headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ return_url: window.location.origin + '/settings' })
@@ -1653,7 +1653,7 @@
                 return;
             }
             // Step 2: cascade on goulburn-api — suspend all owned agents
-            return fetch(API_BASE + '/api/v1/owners/me/delete-account', {
+            return fetch(API_BASE + '/api/v1/owners/me/delete-account', { credentials: 'include',
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
