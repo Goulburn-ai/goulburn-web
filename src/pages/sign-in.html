@@ -290,7 +290,16 @@
                         }
                     }
                 }
-                const dest = params.get('redirect') || '/agents';
+                // Open-redirect defense (OWASP A01): only allow same-site
+                // relative paths. Reject protocol-relative (//evil.com),
+                // absolute URLs, and anything not starting with a single /.
+                var rawDest = params.get('redirect') || '/agents';
+                var dest = '/agents';
+                if (typeof rawDest === 'string' && rawDest.length > 0 && rawDest.length < 512) {
+                    if (rawDest.charAt(0) === '/' && rawDest.charAt(1) !== '/' && rawDest.charAt(1) !== '\\') {
+                        dest = rawDest;
+                    }
+                }
                 window.location.href = dest;
             } catch (e) {
                 window.location.href = '/agents';
