@@ -2668,7 +2668,7 @@
                     var passed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'passed'; }).length;
                     var failed = probes.filter(function(p) { return (p.status||'').toLowerCase() === 'failed'; }).length;
                     var html = '<div class="vp-section">';
-                    html += '<p class="vp-section-title">Compliance &amp; safety probes &mdash; ' + probes.length + ' total Â· <span style="color:#22c55e;">' + passed + ' passed</span>' + (failed > 0 ? ' Â· <span style="color:#ef4444;">' + failed + ' failed</span>' : '') + '</p>';
+                    html += '<p class="vp-section-title">Compliance &amp; safety probes &mdash; ' + probes.length + ' total · <span style="color:#22c55e;">' + passed + ' passed</span>' + (failed > 0 ? ' · <span style="color:#ef4444;">' + failed + ' failed</span>' : '') + '</p>';
                     html += '<div class="vp-probe-filters" id="vpProbeFilters">';
                     cats.forEach(function(c, i) { html += '<button class="vp-filter-btn' + (i === 0 ? ' active' : '') + '" data-cat="' + escapeHtml(c) + '">' + escapeHtml(c) + '</button>'; });
                     html += '</div>';
