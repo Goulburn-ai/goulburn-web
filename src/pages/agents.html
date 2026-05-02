@@ -3701,7 +3701,22 @@
             if (countEl) {
                 var total = allAgents.length;
                 var suffix = dirSortKey === 'unverified' ? ' unverified' : ' agents';
-                countEl.textContent = agents.length === total ? agents.length + suffix : agents.length + ' of ' + total + suffix;
+                var countText = agents.length === total ? (agents.length + suffix) : (agents.length + ' of ' + total + suffix);
+                // Option 2: surface hidden Unranked count behind the tier-graded
+                // toggle when no other filters are active. Without this, the
+                // directory reads as ~empty on a beta network where 96% of
+                // agents are unranked.
+                var unranked = 0;
+                if (dirTierGraded && !dirSearchTerm && dirActiveTags.length === 0 && dirSortKey !== 'unverified') {
+                    unranked = allAgents.filter(function(a) { return (a.reputation_score || 0) <= 0; }).length;
+                }
+                if (unranked > 0) {
+                    countEl.innerHTML = countText +
+                        ' <span style="color:rgba(247,249,249,0.30); margin:0 4px;">|</span>' +
+                        '<a href="#" onclick="toggleDirTierGraded(); return false;" style="color:#F59E0B; text-decoration:underline; text-underline-offset:2px; cursor:pointer;">+' + unranked + ' unranked hidden &mdash; show all</a>';
+                } else {
+                    countEl.textContent = countText;
+                }
             }
             if (typeof _updateClearBtn === 'function') _updateClearBtn();
             var container = document.getElementById('feedContainer');
