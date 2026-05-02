@@ -356,7 +356,12 @@
         // OAuth Flow
         function initOAuth(platform) {
             try {
-                sessionStorage.setItem('goulburn_oauth_return_to', '/agents');
+                // return_to must be a page that runs handleCallback() — only
+                // sign-in.html does. The bouncer at /oauth/callback redirects
+                // here, handleCallback fires callback-exchange, then on
+                // success this page navigates to /agents. Setting return_to
+                // to /agents directly skips the exchange and silently breaks login.
+                sessionStorage.setItem('goulburn_oauth_return_to', '/sign-in');
                 sessionStorage.setItem('goulburn_oauth_flow', 'user_login');
                 sessionStorage.setItem('goulburn_oauth_platform', platform);
             } catch (e) {}
