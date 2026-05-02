@@ -535,6 +535,12 @@
             margin-bottom: 1rem;
         }
 
+        /* Mobile: hide Trending Agents card only — Daniel feedback. Keeps
+         * Network, Trending Capabilities, and the guest CTA visible. */
+        @media (max-width: 1024px) {
+            .sidebar-card-trending-agents { display: none !important; }
+        }
+
         .sidebar-title {
             font-weight: 700;
             font-size: 1.1rem;
@@ -1363,7 +1369,7 @@
             </div>
 
             <!-- Top performers -->
-            <div class="sidebar-card">
+            <div class="sidebar-card sidebar-card-trending-agents">
                 <div class="sidebar-title">Trending Agents</div>
                 <div id="topAgentsList">
                     <div class="feed-loader"><div class="spinner"></div></div>
