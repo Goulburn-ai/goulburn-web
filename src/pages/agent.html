@@ -944,8 +944,17 @@
             if (gateOnPendingDeletion("Expert Review")) return;
             var btn = document.getElementById('tierReviewBtn');
             var statusEl = document.getElementById('tierReviewStatus');
-            var tier = document.getElementById('tierReviewTarget').value;
-            var statement = document.getElementById('tierReviewStatement').value.trim();
+            // Phase 1: archetype dropdown replaces tier picker. We still send
+            // requested_tier="verified" as a no-op default until Phase 2 reworks
+            // the backend council to recommend tiers itself. The archetype is
+            // prepended to the self_statement as a structured tag the council
+            // reads as context.
+            var archetype = document.getElementById('tierReviewArchetype').value.trim();
+            var tier = 'verified';  // default — backend still requires this; council Phase 2 will derive it
+            var rawStatement = document.getElementById('tierReviewStatement').value.trim();
+            var statement = archetype
+                ? '[Archetype: ' + archetype + ']\n' + rawStatement
+                : rawStatement;
             var session = goulburnAuth.getSession();
             if (!session) { setTierStatus('Not signed in', '#f87171'); return; }
             if (!currentAgent || !_isOwner) { setTierStatus('Owner only', '#f87171'); return; }
@@ -1464,17 +1473,78 @@
                             </p>
                         </div>
 
-                        <label class="block text-xs font-semibold text-gray-300 mb-1 mt-4">Tier you&apos;re asking the panel to consider</label>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1 mt-4">What is this agent supposed to be? <span class="font-normal text-gray-500">— optional, prefilled from registration</span></label>
                         <div class="flex gap-2 items-center flex-wrap">
-                            <select id="tierReviewTarget" class="px-3 py-2 rounded-lg bg-dark-200/20 border border-white/15 text-sm text-white">
-                                <option value="identified">Identified</option>
-                                <option value="verified" selected>Verified</option>
-                                <option value="established">Established</option>
-                                <option value="trusted">Trusted</option>
+                            <select id="tierReviewArchetype" class="px-3 py-2 rounded-lg bg-dark-200/20 border border-white/15 text-sm text-white" style="appearance:auto; min-width:280px;">
+                                <option value="">— No archetype declared —</option>
+                                <optgroup label="Research &amp; analysis">
+                                    <option value="research/deep_researcher">Deep researcher</option>
+                                    <option value="research/field_monitor">Field monitor</option>
+                                    <option value="research/data_analyst">Data analyst</option>
+                                    <option value="research/market_researcher">Market researcher</option>
+                                    <option value="research/literature_reviewer">Literature reviewer</option>
+                                </optgroup>
+                                <optgroup label="Operations &amp; support">
+                                    <option value="ops/support_agent">Support agent</option>
+                                    <option value="ops/escalator">Support-to-eng escalator</option>
+                                    <option value="ops/incident_commander">Incident commander</option>
+                                    <option value="ops/onboarding">Onboarding agent</option>
+                                    <option value="ops/workflow">Workflow orchestrator</option>
+                                </optgroup>
+                                <optgroup label="Engineering &amp; code">
+                                    <option value="eng/coding_assistant">Coding assistant</option>
+                                    <option value="eng/code_reviewer">Code reviewer</option>
+                                    <option value="eng/test_author">Test author</option>
+                                    <option value="eng/docs_writer">Documentation writer</option>
+                                    <option value="eng/bug_triager">Bug triager</option>
+                                </optgroup>
+                                <optgroup label="Project &amp; meetings">
+                                    <option value="proj/retro_facilitator">Sprint retro facilitator</option>
+                                    <option value="proj/contract_tracker">Contract tracker</option>
+                                    <option value="proj/status_reporter">Project status reporter</option>
+                                    <option value="proj/meeting_summariser">Meeting summariser</option>
+                                </optgroup>
+                                <optgroup label="Content &amp; marketing">
+                                    <option value="content/copywriter">Copywriter</option>
+                                    <option value="content/marketing_agent">Marketing agent</option>
+                                    <option value="content/editor">Editor / proofreader</option>
+                                    <option value="content/translator">Translator</option>
+                                </optgroup>
+                                <optgroup label="Legal &amp; compliance">
+                                    <option value="legal/legal_reviewer">Legal reviewer</option>
+                                    <option value="legal/compliance_auditor">Compliance auditor</option>
+                                    <option value="legal/risk_assessor">Risk assessor</option>
+                                </optgroup>
+                                <optgroup label="Financial services">
+                                    <option value="fin/fraud_detection">Fraud detection</option>
+                                    <option value="fin/credit_risk">Credit risk analyst</option>
+                                    <option value="fin/trading_signals">Trading signal agent</option>
+                                    <option value="fin/financial_reporter">Financial reporter</option>
+                                </optgroup>
+                                <optgroup label="Healthcare &amp; sciences">
+                                    <option value="health/clinical_research">Clinical research analyst</option>
+                                    <option value="health/scientific_research">Scientific research agent</option>
+                                    <option value="health/medical_literature">Medical literature reviewer</option>
+                                </optgroup>
+                                <optgroup label="Data &amp; integration">
+                                    <option value="data/structured_extractor">Structured extractor</option>
+                                    <option value="data/etl_agent">ETL agent</option>
+                                    <option value="data/api_integrator">API integrator</option>
+                                </optgroup>
+                                <optgroup label="Infrastructure &amp; monitoring">
+                                    <option value="infra/network_monitor">Network monitor</option>
+                                    <option value="infra/observability">Observability agent</option>
+                                    <option value="infra/devops">DevOps agent</option>
+                                    <option value="infra/security">Security agent</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value="other/blank">Custom — describe in your own words below</option>
+                                </optgroup>
                             </select>
                             <button onclick="requestTierReview()" class="edit-upload-btn" id="tierReviewBtn">Request Review</button>
                             <span id="tierReviewStatus" class="text-xs" style="display:none;"></span>
                         </div>
+                        <p class="text-xs text-gray-500 mt-1">The panel decides which tier you&apos;ve earned, based on this archetype + the evidence on your profile.</p>
                         <label class="block text-xs font-semibold text-gray-300 mb-1 mt-3">Your case <span class="font-normal text-gray-500">— optional, but read by every advisor</span></label>
                         <textarea id="tierReviewStatement" rows="3" maxlength="1000" placeholder="Tell the panel what your agent does, who it serves, and the strongest evidence they should weigh. (Max 1000 chars.)"></textarea>
                     </div>
@@ -2187,6 +2257,14 @@
                 _editAvatar = currentAgent.avatar || '';
                 document.getElementById('editDescription').value = currentAgent.description || '';
                 document.getElementById('editTags').value = (currentAgent.capability_tags || []).join(', ');
+                // Auto-populate the Expert Review archetype dropdown from the
+                // agent's stored core_expertise so the operator doesn't pick twice.
+                try {
+                    var areEl = document.getElementById('tierReviewArchetype');
+                    if (areEl && currentAgent.core_expertise) {
+                        areEl.value = currentAgent.core_expertise;
+                    }
+                } catch (_) {}
                 var epEl = document.getElementById('editEndpointUrl');
                 if (epEl) epEl.value = currentAgent.endpoint_url || '';
                 var dmEl = document.getElementById('editDeclaredModel');
