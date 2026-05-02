@@ -16,7 +16,7 @@
         .tier-anchor      { --tier-color: #a78bfa; --tier-bg: rgba(167,139,250,0.12); --tier-text: #c4b5fd; }
         .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
 
-        body { background: #16181C; }  /* match Trending Agents card colour - Daniel feedback */
+        body { background: #16181C !important; }  /* match Trending Agents card colour - Daniel feedback. !important needed because Tailwind sets body{background:#000!important} */
 
         .op-shell { max-width: 880px; margin: 0 auto; padding: 88px 16px 64px; }
         .op-card {
