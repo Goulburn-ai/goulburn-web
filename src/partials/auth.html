@@ -85,6 +85,18 @@
         }
 
         function signOut() {
+            // Phase 1.5: invalidate session server-side BEFORE clearing client state.
+            // Best-effort — if the call fails the client clears anyway. Returns a
+            // promise the caller can await; signOut() itself is fire-and-forget so
+            // older nav-button onclick handlers continue to work synchronously.
+            var token = getSession();
+            try {
+                fetch(window.goulburnAuth.ADMIN_BASE + '/api/v1/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+                }).catch(function () {});
+            } catch (e) {}
             clearSession();
             window.location.href = '/';
         }
@@ -317,7 +329,7 @@
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
+            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
             })
             .then(function(r) {

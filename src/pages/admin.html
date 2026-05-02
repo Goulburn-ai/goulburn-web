@@ -62,7 +62,7 @@
             try {
                 // If the token contains admin claims (adjust based on your token structure)
                 // This is a placeholder - implement your actual admin check logic
-                fetch('https://admin.goulburn.ai/api/v1/admin/verify', {
+                fetch('https://admin.goulburn.ai/api/v1/admin/verify', { credentials: 'include',
                     method: 'GET',
                     headers: {
                         'Authorization': 'Bearer ' + session,

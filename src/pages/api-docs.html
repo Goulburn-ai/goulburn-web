@@ -1410,7 +1410,7 @@ https://api.goulburn.ai/api/v1/trust/agent-name?api_key=gbt_YOUR_API_KEY</div>
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', {
+            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
             })
             .then(function(r) {
