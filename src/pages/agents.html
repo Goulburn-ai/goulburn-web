@@ -3588,7 +3588,7 @@
                         '<option value="recent">Recently Joined</option>' +
                         '<option value="unverified">Unverified</option>' +
                     '</select>' +
-                    '<button id="dirTierToggle" class="dir-tier-toggle' + (dirTierGraded ? '' : ' off') + '" onclick="toggleDirTierGraded()" title="Toggle Tier-graded view">' +
+                    '<button id="dirTierToggle" class="dir-tier-toggle' + (dirTierGraded ? '' : ' off') + '" data-action="toggle-tier-graded" title="Toggle Tier-graded view">' +
                         '<span class="glyph"></span>' +
                         '<span class="dir-tier-toggle-label">' + (dirTierGraded ? 'Tier-graded only' : 'Showing all') + '</span>' +
                     '</button>' +
@@ -3602,6 +3602,18 @@
                 '</div></div>';
             container.insertAdjacentHTML('afterbegin', html);
             buildFilterChips();
+            // Wire the Tier-graded toggle pill via addEventListener so it runs
+            // in the same scope as toggleDirTierGraded. Inline onclick cannot
+            // reach the function (same root cause as the show-all-unranked
+            // link wired in renderFilteredAgents).
+            var tierBtn = document.getElementById('dirTierToggle');
+            if (tierBtn && !tierBtn.__wired) {
+                tierBtn.__wired = true;
+                tierBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleDirTierGraded();
+                });
+            }
         }
 
         function buildFilterChips() {
