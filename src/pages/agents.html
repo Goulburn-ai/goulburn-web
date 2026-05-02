@@ -3713,7 +3713,17 @@
                 if (unranked > 0) {
                     countEl.innerHTML = countText +
                         ' <span style="color:rgba(247,249,249,0.30); margin:0 4px;">|</span>' +
-                        '<a href="#" onclick="toggleDirTierGraded(); return false;" style="color:#F59E0B; text-decoration:underline; text-underline-offset:2px; cursor:pointer;">+' + unranked + ' unranked hidden &mdash; show all</a>';
+                        '<a href="#" data-action="show-all-unranked" style="color:#F59E0B; text-decoration:underline; text-underline-offset:2px; cursor:pointer;">+' + unranked + ' unranked hidden &mdash; show all</a>';
+                    // Wire the link via addEventListener so it runs in the same
+                    // scope as toggleDirTierGraded (the function is not exposed
+                    // on window, so inline onclick handlers can't reach it).
+                    var showAllLink = countEl.querySelector('a[data-action="show-all-unranked"]');
+                    if (showAllLink) {
+                        showAllLink.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            toggleDirTierGraded();
+                        });
+                    }
                 } else {
                     countEl.textContent = countText;
                 }
