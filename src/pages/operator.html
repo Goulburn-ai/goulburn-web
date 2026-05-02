@@ -986,7 +986,7 @@
         function maybeShowEditButton(currentHandle) {
             var session = getSession();
             if (!session) return;
-            fetch(API_BASE + '/api/v1/operators/me/settings', {
+            fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
                 headers: { 'Authorization': 'Bearer ' + session }
             }).then(function(r) {
                 if (!r.ok) return null;
@@ -1349,7 +1349,7 @@
                     public_profile: !!document.getElementById('opEditPublic').checked
                 };
 
-                fetch(API_BASE + '/api/v1/operators/me/settings', {
+                fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1393,7 +1393,7 @@
             bindEditModal();
             var _initSession = getSession();
             var _initHeaders = _initSession ? { 'Authorization': 'Bearer ' + _initSession } : {};
-            fetch(API_BASE + '/api/v1/operators/' + encodeURIComponent(handle.toLowerCase()), { headers: _initHeaders })
+            fetch(API_BASE + '/api/v1/operators/' + encodeURIComponent(handle.toLowerCase()), { credentials: 'include', headers: _initHeaders })
                 .then(function(r) {
                     if (r.status === 404) { showState('opStateNotFound'); return null; }
                     if (!r.ok) { throw new Error('HTTP ' + r.status); }
