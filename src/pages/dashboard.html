@@ -3374,6 +3374,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             .then(function(agentData) {
                 var agents = agentData.agents || agentData.data || agentData || [];
                 if (!Array.isArray(agents)) agents = [];
+                // Filter soft-deleted (Postgres rename pattern: __deleted_<ts>_<hash>_<orig>)
+                // and any agent with a deleted_at timestamp set. Same filter applied
+                // in the first /agents/mine fetch in this file; keep them in sync.
+                agents = agents.filter(function(a) {
+                    return !(a && a.name && a.name.startsWith('__deleted_')) && !(a && a.deleted_at);
+                });
                 dashboardAgents = agents;
 
                 renderAgents(agents);
