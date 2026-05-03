@@ -1099,15 +1099,18 @@
             return;
         }
 
-        // Exchange code for connection
+        // Exchange code via OPERATOR-level callback-exchange. This appends
+        // the provider to user.oauth_providers in admin Redis, which the
+        // identity-layer scorer reads as a 50%-credit cascade for every
+        // agent owned by this operator.
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/callback', { credentials: 'include',
+        fetch(ADMIN_BASE + '/api/v1/auth/oauth/callback-exchange', { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': session ? 'Bearer ' + session : ''
             },
-            body: JSON.stringify({ code: code, state: state })
+            body: JSON.stringify({ provider: platform, code: code, state: state })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
@@ -1426,37 +1429,40 @@
 
     // ── Platform OAuth Connect ──
     function connectPlatform(platform) {
-        var session = goulburnAuth.getSession();
-        sessionStorage.setItem('goulburn_settings_oauth_platform', platform);
-        sessionStorage.setItem('goulburn_oauth_return_to', window.location.pathname);
-
-        var redirectUri = window.location.origin + '/settings';
-        var authorizeUrl = ADMIN_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=user_' + encodeURIComponent(goulburnAuth.getSession().substring(0, 8)) + '&redirect_uri=' + encodeURIComponent(redirectUri);
-
-        fetch(authorizeUrl, {
-            headers: { 'Authorization': 'Bearer ' + session }
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            if (data.auth_url) {
-                window.location.href = data.auth_url;
-            } else {
-                showToast('Unable to start ' + platform + ' connection', 'error');
+        // Use the OPERATOR-level OAuth flow (same as /sign-in). The legacy
+        // path called /api/v1/oauth/<p>/authorize?agent_id=user_<token-prefix>
+        // which never matched a real agent row, so the callback returned
+        // verified=true but never persisted anything. This now hits
+        // /api/v1/auth/oauth/<p>/start which appends to user.oauth_providers
+        // and feeds the identity-layer cascade in the api scorer.
+        try {
+            sessionStorage.setItem('goulburn_oauth_return_to', '/settings');
+            sessionStorage.setItem('goulburn_oauth_flow', 'user_login');
+            sessionStorage.setItem('goulburn_oauth_platform', platform);
+            sessionStorage.setItem('goulburn_settings_oauth_platform', platform);
+        } catch (e) {}
+        fetch(ADMIN_BASE + '/api/v1/auth/oauth/' + platform + '/start?return_to=/settings')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.auth_url) {
+                    window.location.href = data.auth_url;
+                } else {
+                    showToast('Unable to start ' + platform + ' connection', 'error');
+                    sessionStorage.removeItem('goulburn_settings_oauth_platform');
+                }
+            })
+            .catch(function(err) {
+                console.error('OAuth init error:', err);
+                showToast('Connection error. Please try again.', 'error');
                 sessionStorage.removeItem('goulburn_settings_oauth_platform');
-            }
-        })
-        .catch(function(err) {
-            console.error('OAuth init error:', err);
-            showToast('Connection error. Please try again.', 'error');
-            sessionStorage.removeItem('goulburn_settings_oauth_platform');
-        });
+            });
     }
 
     function disconnectPlatform(platform) {
         if (!window.confirm('Disconnect ' + platform + '? This will remove the platform verification from your profile.')) return;
 
         var session = goulburnAuth.getSession();
-        fetch(ADMIN_BASE + '/api/v1/oauth/' + platform + '/disconnect', { credentials: 'include',
+        fetch(ADMIN_BASE + '/api/v1/auth/oauth/unlink/' + platform, { credentials: 'include',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
