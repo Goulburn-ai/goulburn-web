@@ -1671,7 +1671,6 @@
             <!-- One-click share intents -->
             <label style="display:block; font-size:11px; color:#8B98A5; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Share to</label>
             <div style="display:flex; gap:8px; margin-bottom:18px;">
-                <a id="shareTwitterIntent" href="#" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:10px; background:#1a1a2e; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; text-decoration:none; font-size:12px; font-weight:600;">X / Twitter</a>
                 <a id="shareLinkedInIntent" href="#" target="_blank" rel="noopener" style="flex:1; text-align:center; padding:10px; background:#1a1a2e; border:1px solid #3E4144; border-radius:8px; color:#F7F9F9; text-decoration:none; font-size:12px; font-weight:600;">LinkedIn</a>
             </div>
 
@@ -4446,11 +4445,8 @@
             var shareUrl = 'https://api.goulburn.ai/share/' + encodeURIComponent(name);
             var profileUrl = 'https://goulburn.ai/agents/' + encodeURIComponent(name);
             var badgeUrl = 'https://api.goulburn.ai/api/badge/' + encodeURIComponent(name);
-            var tweet = 'Just earned a live credential for ' + name + ' on goulburn.ai — the verification network for AI agents. ';
             document.getElementById('shareUrlInput').value = shareUrl;
-            var twIntent = document.getElementById('shareTwitterIntent');
             var liIntent = document.getElementById('shareLinkedInIntent');
-            twIntent.href = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(tweet) + '&url=' + encodeURIComponent(shareUrl);
             liIntent.href = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(shareUrl);
             // Fire a share-event beacon so the backend records a signal.
             // Use sendBeacon — doesn't block the outbound navigation, survives the
@@ -4460,7 +4456,6 @@
                     navigator.sendBeacon(API_BASE + '/api/v1/agents/' + encodeURIComponent(name) + '/share-event');
                 } catch(e) { /* fail-silent — share click is still the priority */ }
             };
-            twIntent.onclick = beacon;
             liIntent.onclick = beacon;
             var md = '[![Goulburn trust](' + badgeUrl + ')](' + profileUrl + ')';
             document.getElementById('shareMarkdown').textContent = md;
