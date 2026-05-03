@@ -1641,7 +1641,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var html='';
         agents.forEach(function(a){
             var active=a.id===selId, initial=(a.name||'?').charAt(0).toUpperCase();
-            html += '<div class="td-tab '+(active?'td-active':'')+'" data-agent-id="'+esc(a.id)+'" onclick="window.__tdSelect(\''+esc(a.id)+'\')">'+
+            html += '<div class="td-tab '+(active?'td-active':'')+'" data-agent-id="'+esc(a.id)+'">'+
                 '<div class="td-tab-avatar">'+avatarHtml(a.avatar,initial)+'</div>'+
                 '<div class="td-tab-name">'+esc(a.name||'Agent')+'</div>'+
                 '<div class="td-tab-score">'+Math.round(a.reputation_score||0)+'</div>'+
@@ -1701,7 +1701,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             if (L.gaps.length)
                 html+='<div class="td-gaps">'+L.gaps.map(function(g){return '<div class="td-gap-item"><span class="td-ev-sym">!</span><span>'+esc(g)+'</span></div>';}).join('')+'</div>';
             if (L.action)
-                html+='<button class="td-layer-action" onclick="window.__tdAction(\''+esc(L.key)+'\', event)">'+esc(L.action)+' &rsaquo;</button>';
+                html+='<button class="td-layer-action" data-td-action="'+esc(L.key)+'">'+esc(L.action)+' &rsaquo;</button>';
             html+='</div>';
         });
         html+='</div>';
@@ -1856,12 +1856,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 try { renderTimeline(getFilteredEvents(), null); }
                 catch (e) {
                     console.error('renderTimeline error:', e);
-                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Timeline rendered with errors. <button class="td-timeline-refresh" onclick="window.__tdLoadTimeline && window.__tdLoadTimeline()">Retry</button></div>';
+                    if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Timeline rendered with errors. <button class="td-timeline-refresh" data-td-retry="timeline">Retry</button></div>';
                 }
             })
             .catch(function(err) {
                 console.error('trust-events fetch error:', err);
-                if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn’t load timeline (' + (err && err.message ? err.message : 'network error') + '). <button class="td-timeline-refresh" onclick="window.__tdLoadTimeline && window.__tdLoadTimeline()">Retry</button></div>';
+                if (timeline) timeline.innerHTML = '<div class="td-timeline-empty">Couldn’t load timeline (' + (err && err.message ? err.message : 'network error') + '). <button class="td-timeline-refresh" data-td-retry="timeline">Retry</button></div>';
             });
     }
 
@@ -2074,7 +2074,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                                 '</button>';
                         } else {
                             // Available: filled amber CTA
-                            cta = '<button id="' + btnId + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '" onclick="window.__tdActionProbe(\'' + pk + '\', event)">' +
+                            cta = '<button id="' + btnId + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '">' +
                                 '<span>Run probe</span>' +
                                 '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
                                 '</button>';
@@ -2106,7 +2106,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                         if (remaining <= 0) {
                             // Cooldown done - swap to available state
                             var pk = btn.dataset.probeKind || '';
-                            btn.outerHTML = '<button id="' + btn.id + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '" onclick="window.__tdActionProbe(\'' + pk + '\', event)">' +
+                            btn.outerHTML = '<button id="' + btn.id + '" class="td-action-cta td-action-probe-btn" data-probe-kind="' + pk + '">' +
                                 '<span>Run probe</span>' +
                                 '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>' +
                                 '</button>';
@@ -2185,6 +2185,41 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 }).join('');
             });
     }
+
+
+    // ── Delegated click listener (CSP-safe replacement for inline onclick handlers) ──
+    // Phase 2 CSP doesn't whitelist DYNAMICALLY-injected onclick handlers
+    // (each agent UUID generates a different hash; build-time hashing only
+    // covers static HTML). So agent-tab switching, layer CTAs, and probe
+    // buttons that were injected via innerHTML with onclick="..." attributes
+    // were silently no-op'd by the browser. This single delegated listener is
+    // STATIC (one hash, computed at build time, in CSP allowlist) and dispatches
+    // to the right window.__td* function based on data-attributes.
+    document.addEventListener('click', function(ev) {
+        var t = ev.target;
+        if (!t) return;
+        // Walk up to find a relevant ancestor
+        var tab = t.closest && t.closest('.td-tab');
+        if (tab && tab.dataset && tab.dataset.agentId && typeof window.__tdSelect === 'function') {
+            window.__tdSelect(tab.dataset.agentId);
+            return;
+        }
+        var layerBtn = t.closest && t.closest('.td-layer-action');
+        if (layerBtn && layerBtn.dataset && layerBtn.dataset.tdAction && typeof window.__tdAction === 'function') {
+            window.__tdAction(layerBtn.dataset.tdAction, ev);
+            return;
+        }
+        var probeBtn = t.closest && t.closest('.td-action-probe-btn');
+        if (probeBtn && probeBtn.dataset && probeBtn.dataset.probeKind && typeof window.__tdActionProbe === 'function') {
+            window.__tdActionProbe(probeBtn.dataset.probeKind, ev);
+            return;
+        }
+        var retryBtn = t.closest && t.closest('[data-td-retry]');
+        if (retryBtn && retryBtn.dataset.tdRetry === 'timeline' && typeof window.__tdLoadTimeline === 'function') {
+            window.__tdLoadTimeline();
+            return;
+        }
+    });
 
     window.__tdSelect=selectAgent;
 
