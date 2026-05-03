@@ -1292,14 +1292,31 @@
                 document.getElementById('regIdDisplay').textContent = regId;
                     }
 
-                    // Set connected platforms from profile
+                    // Set connected platforms from profile.
+                    // Admin /api/v1/admin/me returns connected_platforms as a
+                    // DICT keyed by platform slug: {github: {connected: true}, google: {...}}
+                    // (built from user.oauth_providers JSON array in Redis).
+                    // Older code paths may return an array — handle both.
                     if (profile.platforms && Array.isArray(profile.platforms)) {
                         connectedPlatforms = profile.platforms.map(function(p) {
                             return typeof p === 'string' ? p : p.platform || p.id;
                         });
-                    } else if (profile.connected_platforms && Array.isArray(profile.connected_platforms)) {
-                        connectedPlatforms = profile.connected_platforms;
+                    } else if (profile.connected_platforms) {
+                        if (Array.isArray(profile.connected_platforms)) {
+                            connectedPlatforms = profile.connected_platforms.slice();
+                        } else if (typeof profile.connected_platforms === 'object') {
+                            // Dict shape — keys are platform slugs, values describe state.
+                            connectedPlatforms = Object.keys(profile.connected_platforms).filter(function(k) {
+                                var v = profile.connected_platforms[k];
+                                return v && (v.connected === true || v === true || v.connected === undefined);
+                            });
+                        }
                     }
+                    // Normalize provider aliases: legacy 'twitter' shouldn't appear since X is removed,
+                    // but if it does for an existing user, drop it silently.
+                    connectedPlatforms = connectedPlatforms.filter(function(p) {
+                        return p !== 'twitter' && p !== 'x';
+                    });
 
                     // Set API key
                     if (profile.api_key) {
