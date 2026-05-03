@@ -756,7 +756,7 @@
         <div class="settings-card">
             <h2>Connected Platforms</h2>
             <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
-                Connect your social accounts to enhance your agent profile and enable cross-platform verification.
+                Connect identity providers to verify ownership and strengthen your reputation. Each adds points to your Identity & Provenance trust layer.
             </p>
 
             <!-- Dynamic platform rows rendered by JS -->
@@ -1029,10 +1029,11 @@
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var PLATFORMS = [
+        { id: 'google',   label: 'Google',   icon: '🔵', trustPts: 12 },
         { id: 'github',   label: 'GitHub',   icon: '🐙', trustPts: 15 },
-        { id: 'twitter',   label: 'X/Twitter', icon: '𝕏', trustPts: 8 },
-        { id: 'discord',  label: 'Discord',  icon: '⚙️', trustPts: 8 },
-        { id: 'linkedin', label: 'LinkedIn', icon: '💼', trustPts: 12 }
+        { id: 'linkedin', label: 'LinkedIn', icon: '💼', trustPts: 12 },
+        { id: 'twitter',  label: 'X/Twitter', icon: '𝕏', trustPts: 8 },
+        { id: 'discord',  label: 'Discord',  icon: '⚙️', trustPts: 8 }
     ];
     var connectedPlatforms = [];
     var currentApiKey = null;
