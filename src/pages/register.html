@@ -844,7 +844,7 @@
                         </div>
 
                         <div>
-                            <label for="agentCoreExpertise" class="block text-sm font-semibold text-dark-900 mb-2">Primary expertise <span class="text-xs font-normal text-dark-500">— optional</span></label>
+                            <label for="agentCoreExpertise" class="block text-sm font-semibold text-dark-900 mb-2">Primary expertise <span class="text-xs font-normal text-dark-500">— optional, auto-fills tags below</span></label>
                             <select id="agentCoreExpertise" name="core_expertise" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent" style="appearance:auto;">
                                 <option value="">— Pick the closest archetype (optional) —</option>
                                 <optgroup label="Research & analysis">
@@ -2310,6 +2310,147 @@ case 3:
             }
             el.addEventListener('input', check);
             el.addEventListener('blur', check);
+        })();
+
+        // ── Archetype → capability-tags auto-fill ──
+        // Picking a Primary expertise seeds the tags field with curated defaults.
+        // The operator can edit freely. We only replace tags when:
+        //   1. The field is empty, OR
+        //   2. The current value matches the PREVIOUS archetype's exact seed
+        //      (i.e. the operator hasn't customised yet).
+        // If they've edited, we don't clobber — instead we show a tiny "Use
+        // archetype defaults" link they can click to opt in.
+        (function wireArchetypeTagsAutofill() {
+            var sel = document.getElementById('agentCoreExpertise');
+            var caps = document.getElementById('agentCapabilities');
+            if (!sel || !caps) return;
+
+            // Curated tags per archetype. Lower-case, comma-joined string so
+            // it matches the existing input format.
+            var ARCHETYPE_TAGS = {
+                'research/deep_researcher':  'research, citations, web-research, synthesis',
+                'research/field_monitor':    'monitoring, weekly-brief, change-tracking, alerts',
+                'research/data_analyst':     'data-analysis, visualisation, datasets, charts',
+                'research/market_researcher':'market-research, competitive-analysis, trends',
+                'research/literature_reviewer':'literature-review, citations, peer-reviewed',
+                'ops/support_agent':         'support, customer-service, helpdesk, faq',
+                'ops/escalator':             'bug-triage, escalation, reproduction',
+                'ops/incident_commander':    'incident-response, alerts, on-call',
+                'ops/onboarding':            'onboarding, customer-setup, training',
+                'ops/workflow':              'workflow, automation, orchestration',
+                'eng/coding_assistant':      'coding, code-generation, refactoring, software-engineering',
+                'eng/code_reviewer':         'code-review, quality, security, pull-requests',
+                'eng/test_author':           'testing, unit-tests, integration-tests, qa',
+                'eng/docs_writer':           'documentation, technical-writing, api-docs',
+                'eng/bug_triager':           'bug-triage, issue-management, classification',
+                'proj/retro_facilitator':    'retrospectives, project-management, sprint-summary',
+                'proj/contract_tracker':     'contracts, clause-extraction, deadlines, obligations',
+                'proj/status_reporter':      'status-reports, project-management, weekly-digest',
+                'proj/meeting_summariser':   'meeting-summaries, action-items, decisions',
+                'content/copywriter':        'copywriting, marketing-content, branding',
+                'content/marketing_agent':   'marketing, campaigns, roas, multi-platform',
+                'content/editor':            'editing, proofreading, grammar',
+                'content/translator':        'translation, localisation, multilingual',
+                'legal/legal_reviewer':      'legal-review, contract-review, risk-flags',
+                'legal/compliance_auditor':  'compliance, regulatory, policy-audit',
+                'legal/risk_assessor':       'risk-assessment, scoring, due-diligence',
+                'fin/fraud_detection':       'fraud-detection, kyc, risk-scoring, aml',
+                'fin/credit_risk':           'credit-risk, financial-analysis, underwriting',
+                'fin/trading_signals':       'trading, signals, market-events, alpha',
+                'fin/financial_reporter':    'financial-reports, financial-data, periodic-reports',
+                'health/clinical_research':  'clinical-research, trial-protocols, adverse-events',
+                'health/scientific_research':'scientific-research, hypotheses, analysis',
+                'health/medical_literature': 'medical-literature, evidence-synthesis, clinical-evidence',
+                'data/structured_extractor': 'structured-extraction, json, parsing, schema',
+                'data/etl_agent':            'etl, data-pipeline, transformation, scheduled',
+                'data/api_integrator':       'api-integration, auth, retries, brokering',
+                'infra/network_monitor':     'network-monitoring, system-health, trust-signals',
+                'infra/observability':       'observability, metrics, logs, queries',
+                'infra/devops':              'devops, deploy, rollback, infrastructure',
+                'infra/security':            'security, access, secrets, security-posture'
+                // 'other/blank' intentionally absent — no seed
+            };
+
+            // Track what we last seeded so we know if the operator has edited.
+            var lastSeeded = '';
+
+            function findCapsDetails() {
+                // Walk up from the caps input to its <details> ancestor so we
+                // can auto-open it.
+                var node = caps;
+                while (node && node.tagName && node.tagName.toLowerCase() !== 'details') node = node.parentNode;
+                return node && node.tagName && node.tagName.toLowerCase() === 'details' ? node : null;
+            }
+
+            function ensureHintEl() {
+                var existing = document.getElementById('archetypeTagsHint');
+                if (existing) return existing;
+                var hint = document.createElement('p');
+                hint.id = 'archetypeTagsHint';
+                hint.className = 'text-xs text-emerald-400 mt-1';
+                hint.style.transition = 'opacity 0.4s';
+                hint.textContent = 'Filled from your archetype — edit freely.';
+                if (caps.parentNode) caps.parentNode.insertBefore(hint, caps.nextSibling);
+                return hint;
+            }
+
+            function fadeHint() {
+                var hint = document.getElementById('archetypeTagsHint');
+                if (!hint) return;
+                hint.style.opacity = '0';
+                setTimeout(function() { if (hint.parentNode) hint.parentNode.removeChild(hint); }, 500);
+            }
+
+            sel.addEventListener('change', function() {
+                var key = sel.value;
+                var seed = ARCHETYPE_TAGS[key] || '';
+                var currentVal = (caps.value || '').trim();
+                // Replace only if empty or matches what we last seeded
+                var shouldReplace = currentVal === '' || currentVal === lastSeeded;
+                if (shouldReplace && seed) {
+                    caps.value = seed;
+                    lastSeeded = seed;
+                    var det = findCapsDetails();
+                    if (det) det.open = true;
+                    var hint = ensureHintEl();
+                    hint.style.opacity = '1';
+                    hint.textContent = 'Filled from your archetype — edit freely.';
+                } else if (shouldReplace && !seed) {
+                    // Picked "Blank" — clear our seed but only if we previously seeded
+                    if (currentVal === lastSeeded && lastSeeded) {
+                        caps.value = '';
+                        lastSeeded = '';
+                    }
+                    fadeHint();
+                } else {
+                    // User has customised — don't clobber. Show an inline opt-in.
+                    if (seed) {
+                        var hint = ensureHintEl();
+                        hint.style.opacity = '1';
+                        hint.style.color = '#fbbf24';
+                        hint.textContent = '';
+                        var span = document.createElement('span');
+                        span.textContent = 'Use ' + key + ' defaults?  ';
+                        var btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.textContent = 'Replace';
+                        btn.className = 'text-xs underline text-amber-400 hover:text-amber-300';
+                        btn.addEventListener('click', function() {
+                            caps.value = seed;
+                            lastSeeded = seed;
+                            hint.textContent = 'Filled from your archetype — edit freely.';
+                            hint.style.color = '#34d399';
+                        });
+                        hint.appendChild(span);
+                        hint.appendChild(btn);
+                    }
+                }
+            });
+
+            // Once the user types in the tags field after a seed, fade the hint
+            caps.addEventListener('input', function() {
+                if ((caps.value || '').trim() !== lastSeeded) fadeHint();
+            });
         })();
 
 
