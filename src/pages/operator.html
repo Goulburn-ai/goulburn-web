@@ -796,9 +796,15 @@
             if (joinedDays == null) joinedStr = 'Joined recently';
             else if (joinedDays === 0) joinedStr = 'Joined today';
             else if (joinedDays === 1) joinedStr = 'Joined yesterday';
-            else if (joinedDays < 30) joinedStr = 'Joined ' + joinedDays + ' days ago';
-            else if (joinedDays < 365) joinedStr = 'Joined ' + Math.round(joinedDays/30) + ' months ago';
-            else joinedStr = 'Joined ' + Math.round(joinedDays/365) + ' year' + (joinedDays >= 730 ? 's' : '') + ' ago';
+            else if (joinedDays < 30) joinedStr = 'Joined ' + joinedDays + ' day' + (joinedDays === 1 ? '' : 's') + ' ago';
+            else if (joinedDays < 365) {
+                var m = Math.round(joinedDays/30);
+                joinedStr = 'Joined ' + m + ' month' + (m === 1 ? '' : 's') + ' ago';
+            }
+            else {
+                var y = Math.round(joinedDays/365);
+                joinedStr = 'Joined ' + y + ' year' + (y === 1 ? '' : 's') + ' ago';
+            }
             document.getElementById('opJoined').textContent = joinedStr;
 
             // Share — use Web Share API on supported clients (mobile mostly),
@@ -1291,6 +1297,21 @@
                 _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', _resizeAvatar, applyAvatarSelection);
                 _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', _resizeBanner, applyBannerSelection);
             });
+
+            // Auto-open the edit modal when the page is loaded with ?edit=1
+            // (used by /settings → Edit profile to deep-link directly into the
+            // editor instead of forcing a second click). Only fires for the
+            // operator who owns this profile — non-owners can't see the button
+            // anyway since opEditBtn is hidden by default.
+            try {
+                var qs = new URLSearchParams(window.location.search);
+                if (qs.get('edit') === '1' && btn && btn.style.display !== 'none') {
+                    setTimeout(function() { btn.click(); }, 250);
+                    // Strip the param so reloads/share-URLs don't keep auto-opening
+                    var clean = window.location.pathname;
+                    window.history.replaceState({}, '', clean);
+                }
+            } catch (e) { /* URLSearchParams polyfill issue — silent fail */ }
             bindPickerTabs();
             if (cancelBtn) cancelBtn.addEventListener('click', function() {
                 modal.classList.remove('show');
