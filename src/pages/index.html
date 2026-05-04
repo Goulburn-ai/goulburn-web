@@ -54,14 +54,20 @@
         }
         .lp-hero-left { text-align: left; }
         .lp-hero-right { position: relative; perspective: 1600px; perspective-origin: 50% 50%; }
+        /* Hero glow — soft white, not brand orange. Reasoning: on mobile the
+           hero column stacks above the orange logo, orange CTAs, and the
+           orange-tinted browser screenshot, which compounds into orange
+           overload. A neutral white glow keeps the depth/lift effect while
+           reserving brand orange for the CTAs and logo. (Linear / Vercel /
+           Stripe pattern.) */
         .lp-hero-right::before {
             content: ''; position: absolute;
             inset: -90px -70px -110px -70px;
             background:
                 radial-gradient(ellipse at 50% 50%,
-                    rgba(245,158,11,0.45) 0%,
-                    rgba(245,158,11,0.25) 22%,
-                    rgba(245,158,11,0.10) 50%,
+                    rgba(255,255,255,0.20) 0%,
+                    rgba(255,255,255,0.10) 22%,
+                    rgba(255,255,255,0.04) 50%,
                     transparent 80%);
             filter: blur(60px);
             z-index: -1;
@@ -72,8 +78,8 @@
             content: ''; position: absolute;
             inset: -30px;
             background: radial-gradient(ellipse at 50% 50%,
-                rgba(245,158,11,0.18) 0%,
-                rgba(245,158,11,0.08) 40%,
+                rgba(255,255,255,0.10) 0%,
+                rgba(255,255,255,0.04) 40%,
                 transparent 80%);
             filter: blur(28px);
             z-index: -1;
