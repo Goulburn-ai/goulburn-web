@@ -1329,6 +1329,63 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-action-effort.td-effort-low { color: #22C55E; }
     .td-action-effort.td-effort-medium { color: #F59E0B; }
     .td-action-effort.td-effort-high { color: #EF4444; }
+
+    /* ── Variant 3D · Tier ladder climb ───────────────────────────
+       Shows the agent's current tier band and the projected band
+       after the action's reward is applied. Current step lit, target
+       step pulses green. */
+    .td-action-ladder{
+        display:flex;flex-direction:column;gap:0;padding:8px 12px;margin:6px 0 4px;
+        background:#13151A;border:1px solid #2A2E34;border-radius:10px;
+    }
+    .td-action-step{
+        display:flex;align-items:center;gap:10px;padding:7px 6px;
+        border-bottom:1px dashed #3A3F4A;position:relative;
+    }
+    .td-action-step:last-child{border-bottom:0}
+    .td-action-step-rank{
+        font-size:8px;color:#6B7280;letter-spacing:1.2px;
+        text-transform:uppercase;width:14px;font-family:'SF Mono','Menlo','Consolas',monospace;
+    }
+    .td-action-step-name{flex:1;font-size:12px;color:#9AA5B0}
+    .td-action-step-range{
+        font-family:'SF Mono','Menlo','Consolas',monospace;
+        font-size:10px;color:#6B7280;
+    }
+    .td-action-step.is-current{
+        background:rgba(155,165,176,0.05);border-radius:6px;
+    }
+    .td-action-step.is-current .td-action-step-name{color:#F7F9F9;font-weight:700}
+    .td-action-step.is-current .td-action-step-name::before{
+        content:"\25CF\00a0";color:#9AA5B0;
+    }
+    .td-action-step.is-target{
+        background:rgba(34,197,94,0.08);border-radius:6px;
+        border:1px solid rgba(34,197,94,0.30);
+        box-shadow:0 0 12px rgba(34,197,94,0.15);
+        animation:tdLadderPulse 2.5s ease-in-out infinite;
+    }
+    @keyframes tdLadderPulse{
+        0%,100%{box-shadow:0 0 8px rgba(34,197,94,0.12)}
+        50%{box-shadow:0 0 16px rgba(34,197,94,0.30)}
+    }
+    .td-action-step.is-target .td-action-step-name{color:#5BD681;font-weight:700}
+    .td-action-step.is-target .td-action-step-name::before{
+        content:"\25B2\00a0";color:#5BD681;
+    }
+    /* Both current AND target = same row (action keeps you in band, but
+       solidifies your standing). Show with combined visual weight. */
+    .td-action-step.is-current.is-target{background:rgba(34,197,94,0.10)}
+    .td-action-step.is-current.is-target .td-action-step-name::before{
+        content:"\25B2\00a0";
+    }
+    .td-action-foot{
+        display:flex;justify-content:space-between;align-items:center;
+        font-size:11px;margin-top:6px;padding:0 6px;
+    }
+    .td-action-foot-now{color:#9AA5B0;font-family:'SF Mono','Menlo','Consolas',monospace}
+    .td-action-foot-after{color:#5BD681;font-family:'SF Mono','Menlo','Consolas',monospace;font-weight:700}
+
     .td-action a {
         color: #F59E0B; text-decoration: none;
         font-size: 0.8125rem; font-weight: 600;
@@ -2208,6 +2265,54 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     });
 
 
+
+    // Trust-tier bands. Score ranges are kept in sync with the trust
+    // scorer (see services/trust_scoring.py classify_agent). Order is
+    // top→bottom so direct iteration renders the ladder visually.
+    var TD_TIER_LADDER = [
+        { rank:'L4', label:'Elite',      min:85, max:Infinity },
+        { rank:'L3', label:'Verified',   min:55, max:84        },
+        { rank:'L2', label:'Identified', min:40, max:54        },
+        { rank:'L1', label:'Unverified', min:0,  max:39        }
+    ];
+    function _tdTierIndex(score) {
+        var s = Math.max(0, Math.round(Number(score)||0));
+        for (var i=0; i<TD_TIER_LADDER.length; i++) {
+            var b = TD_TIER_LADDER[i];
+            if (s >= b.min && s <= b.max) return i;
+        }
+        return TD_TIER_LADDER.length - 1;
+    }
+
+    // Render the tier-ladder block for one action. currentScore is the
+    // agent's current reputation; impact is +N points the action grants.
+    function _tdLadderHtml(currentScore, impact) {
+        var cs = Math.max(0, Math.round(Number(currentScore)||0));
+        var ds = Math.max(0, Math.round(Number(impact)||0));
+        var ps = Math.min(100, cs + ds);  // projected
+        var curIdx = _tdTierIndex(cs);
+        var tgtIdx = _tdTierIndex(ps);
+        var rows = TD_TIER_LADDER.map(function(b, i){
+            var cls = 'td-action-step';
+            if (i === curIdx) cls += ' is-current';
+            if (i === tgtIdx) cls += ' is-target';
+            var range = b.max === Infinity ? (b.min + '+') : (b.min + '-' + b.max);
+            return '<div class="' + cls + '">' +
+                '<span class="td-action-step-rank">' + b.rank + '</span>' +
+                '<span class="td-action-step-name">' + b.label + '</span>' +
+                '<span class="td-action-step-range">' + range + '</span>' +
+            '</div>';
+        }).join('');
+        var afterTxt = ps + (curIdx === tgtIdx
+            ? ' (' + TD_TIER_LADDER[tgtIdx].label + ')'
+            : ' (' + TD_TIER_LADDER[tgtIdx].label + ')');
+        return '<div class="td-action-ladder">' + rows + '</div>' +
+            '<div class="td-action-foot">' +
+                '<span class="td-action-foot-now">now: ' + cs + '</span>' +
+                '<span class="td-action-foot-after">+' + ds + ' \u2192 ' + afterTxt + '</span>' +
+            '</div>';
+    }
+
     function loadActions(agentName) {
         var wrap = document.getElementById('tdActionsWrap');
         var grid = document.getElementById('tdActionsGrid');
@@ -2248,12 +2353,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     } else if (a.link) {
                         cta = '<a class="td-action-cta" href="' + esc(a.link) + '">Start &rsaquo;</a>';
                     }
+                    // Look up the agent's current score for the ladder.
+                    // state.selectedId is set by selectAgent; falls back to
+                    // first agent if state isn't ready (defensive).
+                    var _agent = (state.agents||[]).find(function(x){return x.id===state.selectedId;}) || (state.agents||[])[0];
+                    var _curScore = _agent ? (_agent.reputation_score||0) : 0;
                     return '<div class="td-action">' +
                         '<div class="td-action-head">' +
                             '<div class="td-action-title">' + esc(a.title || '') + '</div>' +
                             '<div class="td-action-impact">+' + (a.impact_estimate || 0) + '</div>' +
                         '</div>' +
                         '<p class="td-action-desc">' + esc(a.description || '') + '</p>' +
+                        _tdLadderHtml(_curScore, a.impact_estimate || 0) +
                         '<div class="td-action-meta">' +
                             '<span class="td-action-layer">' + esc(a.layer || '') + '</span>' +
                             '<span class="td-action-effort ' + effortCls + '">' + esc(a.effort || 'medium') + ' effort</span>' +
