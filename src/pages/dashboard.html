@@ -1119,6 +1119,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         font-size: 1.875rem; font-weight: 400; color: #F7F9F9;
         line-height: 1; letter-spacing: -0.5px;
     }
+    .td-layer-score-of {
+        font-family: 'SF Mono','Menlo','Consolas',monospace;
+        font-size: 0.85rem; color: #6B7280; font-weight: 300;
+        margin-left: 2px; letter-spacing: 0;
+    }
     .td-layer-bar {
         width: 100%; height: 4px; background: #2A2E34;
         border-radius: 2px; overflow: hidden;
@@ -2061,7 +2066,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                                 '<span class="td-layer-name">'+esc(L.name)+'</span>'+
                                 (state.eventsByLayer ? renderSparkline(L.key) : '')+
                             '</div>'+
-                            '<span class="td-layer-score '+scoreCls+'">'+L.score+'</span>'+
+                            '<span class="td-layer-score '+scoreCls+'">'+L.score+'<span class="td-layer-score-of">/ 100</span></span>'+
                         '</div>'+
                         '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>'+
                         (chips ? '<div class="td-chips">'+chips+'</div>' : '')+
