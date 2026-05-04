@@ -2301,7 +2301,8 @@
                 headers: { 'Authorization': 'Bearer ' + session }
             }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                 if (!me || !me.handle) return;
-                var url = '/operator/' + encodeURIComponent(me.handle);
+                // Append ?edit=1 so operator.html auto-opens the edit modal — single click flow.
+                var url = '/operator/' + encodeURIComponent(me.handle) + '?edit=1';
                 var edit = document.getElementById('operatorEditBtn');
                 var hint = document.getElementById('operatorHandleHint');
                 if (edit) { edit.href = url; edit.style.display = 'inline-block'; }
