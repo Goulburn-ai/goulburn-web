@@ -1348,6 +1348,12 @@
 
     </script>
     <script src="/avatar-icons.js"></script>
+    <!-- agent-visuals.js: shared library that decides every agent visual
+         (tier label/colour, avatar render, score format, layer colours,
+         freshness pills). All consumers should call into window.GoulburnAgent
+         rather than rolling their own logic. See file docstring for the
+         backend shape contract. -->
+    <script src="/agent-visuals.js"></script>
 </head>
 <body class="min-h-screen flex flex-col">
     <!-- @include partials/nav.html -->
@@ -2144,40 +2150,36 @@
             });
         })();
 
+        // Register this page's icon SVG table with the shared library so
+        // GoulburnAgent.renderAvatar() can resolve `icon:foo` avatars.
+        // The resolver returns the full <svg>...</svg> string; the
+        // library handles wrapping for the right size/colour.
+        if (window.GoulburnAgent && typeof window.GoulburnAgent.registerIconResolver === 'function') {
+            window.GoulburnAgent.registerIconResolver(function(iconName) {
+                return AVATAR_ICON_SVGS[iconName] || null;
+            });
+        }
 
-        function renderAgentAvatar(avatarStr, size, name) {
-            size = size || 44;
-            if (avatarStr && avatarStr.indexOf('icon:') === 0) {
-                var iconName = avatarStr.substring(5);
-                var svg = AVATAR_ICON_SVGS[iconName];
-                if (svg) {
-                    var iSize = Math.round(size * 0.55);
-                    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:2px solid #f59e0b;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-                        '<div style="width:' + iSize + 'px;height:' + iSize + 'px;color:#f59e0b;">' + svg + '</div></div>';
-                }
-            }
-            // DiceBear portrait avatars (personas / bottts / etc.)
-            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
-            if (dbMatch) {
-                var _seed = encodeURIComponent(dbMatch[2]);
-                return '<img src="https://api.dicebear.com/9.x/' + dbMatch[1] + '/svg?seed=' + _seed + '" alt="' + escapeHtml(name || '') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;flex-shrink:0;">';
-            }
-            if (avatarStr && (avatarStr.indexOf('http') === 0 || avatarStr.indexOf('data:') === 0)) {
-                return '<img src="' + escapeHtml(avatarStr) + '" alt="' + escapeHtml(name || '') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;flex-shrink:0;">';
-            }
-            // Default fallback for any agent without an explicit avatar:
-            // Personas portrait seeded by the agent name.
-            if (name) {
-                var _fallbackSeed = encodeURIComponent(name);
-                return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + _fallbackSeed + '" alt="' + escapeHtml(name) + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;flex-shrink:0;">';
-            }
-            // Fallback: coloured initial
-            var PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
-            var hash = 0;
-            for (var i = 0; i < (name||'').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
-            var col = PALETTE[Math.abs(hash) % PALETTE.length];
-            var init = (name||'?').charAt(0).toUpperCase();
-            return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:' + col + ';display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size*0.4) + 'px;font-weight:700;color:#000;flex-shrink:0;">' + init + '</div>';
+
+function renderAgentAvatar(avatarStr, size, name, tierHint) {
+            // Thin delegate to the shared agent-visuals library. The
+            // library is the single source of truth for avatar rendering
+            // across goulburn — see /public/agent-visuals.js docstring.
+            //
+            // Why we still have a wrapper: 3 call sites in this file
+            // pass (avatarStr, size, name) — keeping the wrapper means
+            // we don't have to update every caller in this commit. The
+            // 4th arg `tierHint` is optional; when omitted we fall back
+            // to the currentAgent's tier (so the hero render gets the
+            // right colour automatically) or 'unranked' (neutral grey)
+            // when no agent is loaded yet.
+            var tier = tierHint
+                || (typeof currentAgent !== 'undefined' && currentAgent && currentAgent.tier)
+                || 'unranked';
+            return window.GoulburnAgent.renderAvatar(
+                { avatar: avatarStr, name: name || '', tier: tier },
+                size
+            );
         }
 
         function showShareButtons() {
