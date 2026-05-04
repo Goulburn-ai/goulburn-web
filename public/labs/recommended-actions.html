@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Recommended Actions — tile variants</title>
+<style>
+  :root{
+    --bg:#0E0F11; --card:#16181C; --line:#2A2E34; --line2:#3A3F4A;
+    --text:#F7F9F9; --muted:#9AA5B0; --dim:#6B7280;
+    --orange:#F59E0B; --orange2:#FBB040;
+    --green:#22C55E; --red:#EF4444; --blue:#3B82F6; --purple:#9B59B6;
+    --teal:#14B8A6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+  .wrap{max-width:1300px;margin:0 auto;padding:48px 28px 80px}
+  h1{font-size:28px;letter-spacing:.4px;margin:0 0 6px;font-weight:700}
+  h1 .sub{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:4px;letter-spacing:0}
+  h2{font-size:16px;letter-spacing:.6px;text-transform:uppercase;color:var(--orange);
+    margin:48px 0 4px;border-top:1px solid var(--line);padding-top:24px;font-weight:700}
+  h2 .tag{font-size:11px;color:var(--muted);margin-left:14px;font-weight:400;text-transform:none;letter-spacing:0}
+  h3.kicker{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:24px 0 14px}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .audit{margin-top:14px;background:#13151A;border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.55}
+  .audit b{color:var(--text);font-weight:600}
+  .ax-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 4px}
+  .ax{background:#0E0F11;border:1px solid var(--line);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between;font-size:11px}
+  .ax span:last-child{font-weight:700}
+  .pass{color:#5BD681}.warn{color:#F0B556}.fail{color:#F47369}
+
+  /* ──────────────────────────────────────────────────────────────
+     Original (the screenshot baseline)
+     ──────────────────────────────────────────────────────────── */
+  .v0 .tile{background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:18px;display:flex;flex-direction:column;min-height:200px}
+  .v0 .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .v0 .title{font-size:15px;font-weight:700;line-height:1.3}
+  .v0 .reward{font-family:'SF Mono',monospace;font-size:13px;color:var(--green);font-weight:700}
+  .v0 .body{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px;flex:1}
+  .v0 .meta{display:flex;gap:10px;align-items:center;font-size:11px;margin-bottom:10px}
+  .v0 .pill{background:#23262E;color:#cfd3d8;padding:3px 8px;border-radius:4px;
+    font-weight:700;letter-spacing:.5px}
+  .v0 .effort{color:var(--green);font-weight:600}
+  .v0 .cta-link{color:var(--orange);font-weight:700;font-size:13px;text-decoration:none;cursor:pointer}
+  .v0 .cta-btn{background:var(--orange);color:#1A0F00;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:6px}
+
+  /* ──────────────────────────────────────────────────────────────
+     V1 · Score-front anchor — reward is the hero
+     ──────────────────────────────────────────────────────────── */
+  .v1 .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:0;display:flex;min-height:170px;overflow:hidden;position:relative}
+  .v1 .reward-block{flex:0 0 100px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,#1B1E24,#13151A);border-right:1px solid var(--line);position:relative}
+  .v1 .reward-block::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--rcol)}
+  .v1 .reward-num{font-family:'SF Mono',monospace;font-size:34px;font-weight:700;color:var(--rcol);letter-spacing:-1px;line-height:1}
+  .v1 .reward-lbl{font-size:9px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase;margin-top:4px}
+  .v1 .body-block{flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+  .v1 .title{font-size:15px;font-weight:700;line-height:1.3}
+  .v1 .desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+  .v1 .meta{display:flex;gap:10px;align-items:center;font-size:11px;margin-top:auto;flex-wrap:wrap}
+  .v1 .pill{background:#23262E;border:1px solid var(--line);padding:3px 8px;border-radius:999px;
+    font-weight:700;letter-spacing:.4px;font-size:10px;color:#cfd3d8}
+  .v1 .pill.layer-id{color:#FFB7B7;border-color:rgba(239,68,68,.3)}
+  .v1 .pill.layer-cap{color:#D9B7FF;border-color:rgba(155,89,182,.3)}
+  .v1 .pill.layer-rep{color:#B7DAFF;border-color:rgba(59,130,246,.3)}
+  .v1 .effort-dots{display:flex;gap:2px;align-items:center}
+  .v1 .effort-dots i{width:5px;height:5px;border-radius:50%;background:var(--line2);display:inline-block}
+  .v1 .effort-dots i.on{background:var(--orange)}
+  .v1 .effort-lbl{color:var(--muted);font-size:10px;margin-left:2px}
+  .v1 .cta-btn{background:var(--orange);color:#1A0F00;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:4px}
+
+  /* reward-color thresholds */
+  .v1 .tile.r-low  { --rcol:#F59E0B; }
+  .v1 .tile.r-mid  { --rcol:#22C55E; }
+  .v1 .tile.r-high { --rcol:#34D399; }
+
+  /* ──────────────────────────────────────────────────────────────
+     V2 · Layer-coded mission card — color stripe + layer icon
+     ──────────────────────────────────────────────────────────── */
+  .v2 .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:0;display:flex;flex-direction:column;min-height:230px;overflow:hidden;position:relative}
+  .v2 .stripe{height:3px;width:100%;background:var(--lcol)}
+  .v2 .body-block{padding:16px 18px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .v2 .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .v2 .icon-circle{width:42px;height:42px;border-radius:50%;background:var(--lcol-bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--lcol-border)}
+  .v2 .icon-circle svg{width:24px;height:24px}
+  .v2 .reward-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);color:#5BD681;
+    border-radius:6px;padding:5px 10px;font-family:'SF Mono',monospace;font-size:14px;font-weight:700;letter-spacing:-.3px}
+  .v2 .title{font-size:15px;font-weight:700;line-height:1.3}
+  .v2 .desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+  .v2 .meta{display:flex;gap:8px;align-items:center;font-size:11px;flex-wrap:wrap}
+  .v2 .layer-pill{font-weight:700;letter-spacing:.6px;font-size:10px;padding:3px 8px;border-radius:4px;
+    background:var(--lcol-bg);color:var(--lcol);border:1px solid var(--lcol-border)}
+  .v2 .effort-dots{display:flex;gap:3px;align-items:center}
+  .v2 .effort-dots i{width:6px;height:6px;border-radius:50%;background:var(--line2)}
+  .v2 .effort-dots i.on{background:var(--orange)}
+  .v2 .cta-btn{background:var(--orange);color:#1A0F00;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:12px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:auto}
+
+  /* layer-color tokens */
+  .v2 .tile.l-id  { --lcol:#EF4444; --lcol-bg:rgba(239,68,68,.10); --lcol-border:rgba(239,68,68,.35); }
+  .v2 .tile.l-cap { --lcol:#9B59B6; --lcol-bg:rgba(155,89,182,.10); --lcol-border:rgba(155,89,182,.35); }
+  .v2 .tile.l-rep { --lcol:#3B82F6; --lcol-bg:rgba(59,130,246,.10); --lcol-border:rgba(59,130,246,.35); }
+
+  /* ──────────────────────────────────────────────────────────────
+     V3 · Before / after projection — score arc
+     ──────────────────────────────────────────────────────────── */
+  .v3 .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px;display:flex;flex-direction:column;gap:10px;min-height:240px;position:relative;overflow:hidden}
+  .v3 .pulse{position:absolute;top:14px;right:16px;display:flex;align-items:center;gap:5px;
+    background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.3);
+    border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.4px;color:#5BD681}
+  .v3 .pulse::before{content:"";width:6px;height:6px;border-radius:50%;background:#5BD681;display:inline-block;box-shadow:0 0 8px #5BD681}
+  .v3 .arc{display:flex;align-items:center;gap:10px;margin-top:6px;margin-bottom:4px}
+  .v3 .score-now{font-family:'SF Mono',monospace;font-size:24px;font-weight:700;color:var(--muted);line-height:1}
+  .v3 .score-arrow{flex:1;height:18px;position:relative}
+  .v3 .score-arrow svg{width:100%;height:100%}
+  .v3 .score-after{font-family:'SF Mono',monospace;font-size:30px;font-weight:700;color:#5BD681;line-height:1}
+  .v3 .score-lbl{font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-top:4px;text-align:center}
+  .v3 .score-now-wrap{text-align:center}
+  .v3 .score-after-wrap{text-align:center}
+  .v3 .title{font-size:15px;font-weight:700;line-height:1.3;margin-top:6px}
+  .v3 .desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+  .v3 .meta{display:flex;gap:10px;align-items:center;font-size:11px}
+  .v3 .pill{background:#23262E;border:1px solid var(--line);padding:3px 8px;border-radius:4px;
+    font-weight:700;letter-spacing:.5px;font-size:10px;color:#cfd3d8}
+  .v3 .cta-btn{background:var(--orange);color:#1A0F00;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:12px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:5px}
+
+  /* ──────────────────────────────────────────────────────────────
+     V4 · Compact priority row — scannable inbox style
+     ──────────────────────────────────────────────────────────── */
+  .v4 .stack{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .v4 .row-tile{display:flex;align-items:center;gap:14px;padding:14px 18px;
+    border-bottom:1px solid var(--line);position:relative;cursor:pointer;transition:background .12s}
+  .v4 .row-tile:last-child{border-bottom:0}
+  .v4 .row-tile:hover{background:#1B1E24}
+  .v4 .pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 8px var(--pcol)}
+  .v4 .pip{background:var(--pcol)}
+  .v4 .row-tile.p-high{--pcol:#34D399}
+  .v4 .row-tile.p-mid {--pcol:#22C55E}
+  .v4 .row-tile.p-low {--pcol:#F59E0B}
+  .v4 .row-icon{width:36px;height:36px;border-radius:8px;background:var(--lcol-bg);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--lcol-border)}
+  .v4 .row-icon svg{width:22px;height:22px}
+  .v4 .row-meta{flex:1;min-width:0}
+  .v4 .row-title{font-size:14px;font-weight:700;line-height:1.3}
+  .v4 .row-sub{font-size:11px;color:var(--muted);margin-top:2px}
+  .v4 .row-reward{font-family:'SF Mono',monospace;font-size:18px;font-weight:700;color:#5BD681;
+    flex-shrink:0;letter-spacing:-.5px}
+  .v4 .row-cta{background:var(--orange);color:#1A0F00;border:0;border-radius:6px;padding:7px 12px;font-weight:700;font-size:12px;cursor:pointer;flex-shrink:0}
+  .v4 .row-tile.l-id  { --lcol:#EF4444; --lcol-bg:rgba(239,68,68,.10); --lcol-border:rgba(239,68,68,.35); }
+  .v4 .row-tile.l-cap { --lcol:#9B59B6; --lcol-bg:rgba(155,89,182,.10); --lcol-border:rgba(155,89,182,.35); }
+  .v4 .row-tile.l-rep { --lcol:#3B82F6; --lcol-bg:rgba(59,130,246,.10); --lcol-border:rgba(59,130,246,.35); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>RECOMMENDED ACTIONS — tile variants
+    <span class="sub">Same three actions (tier-review · verify identity · capability probe), four different visual treatments. Audit per variant follows.</span>
+  </h1>
+
+  <!-- ── BASELINE ─────────────────────────────────────── -->
+  <h2>Current (baseline) <span class="tag">what's on /dashboard right now</span></h2>
+  <div class="row v0">
+    <div class="tile">
+      <div class="head"><div class="title">Request a tier-review council evaluation</div><div class="reward">+12</div></div>
+      <div class="body">Your overall score of 43 is in Identified tier range. A council review can promote you to Verified if the five-advisor panel agrees.</div>
+      <div class="meta"><span class="pill">REPUTATION</span><span class="effort">low effort</span></div>
+      <div><a class="cta-link">Start ›</a></div>
+    </div>
+    <div class="tile">
+      <div class="head"><div class="title">Verify your identity</div><div class="reward">+10</div></div>
+      <div class="body">Confirm you're a real human. Any one method clears the gate: a verified email on a custom domain, OR linking any sign-in provider (Google, GitHub, LinkedIn, or Discord). Worth +10 on every agent you own.</div>
+      <div class="meta"><span class="pill">IDENTITY</span><span class="effort">low effort</span></div>
+      <div><a class="cta-link">Start ›</a></div>
+    </div>
+    <div class="tile">
+      <div class="head"><div class="title">Run a live capability probe</div><div class="reward">+20</div></div>
+      <div class="body">Fires a real HTTPS probe against your agent's registered endpoint to measure responsiveness and behavioural consistency. Requires an endpoint_url on the agent. 1-hour cooldown between runs.</div>
+      <div class="meta"><span class="pill">CAPABILITY</span><span class="effort">medium effort</span></div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>Baseline issues</b> · CTAs are inconsistent (link · link · button). Reward (+12 / +10 / +20) is buried top-right.
+    All three tiles look identical despite touching three different layers. "low effort" / "medium effort" is plain text — no visual rhythm.
+  </div>
+
+  <!-- ── V1 · SCORE-FRONT ─────────────────────────────── -->
+  <h2>Variant 1 · Score-front anchor <span class="tag">reward is the hero — operator sees the payoff first</span></h2>
+  <div class="row v1">
+    <div class="tile r-low">
+      <div class="reward-block">
+        <div class="reward-num">+12</div>
+        <div class="reward-lbl">trust pts</div>
+      </div>
+      <div class="body-block">
+        <div class="title">Request a tier-review council evaluation</div>
+        <div class="desc">Your score of 43 sits in Identified tier. A five-advisor panel can promote you to Verified.</div>
+        <div class="meta">
+          <span class="pill layer-rep">REPUTATION</span>
+          <span class="effort-dots"><i class="on"></i><i></i><i></i></span><span class="effort-lbl">low effort</span>
+        </div>
+        <button class="cta-btn">Request review →</button>
+      </div>
+    </div>
+    <div class="tile r-low">
+      <div class="reward-block">
+        <div class="reward-num">+10</div>
+        <div class="reward-lbl">trust pts</div>
+      </div>
+      <div class="body-block">
+        <div class="title">Verify your identity</div>
+        <div class="desc">Any one method clears the gate: verified email on a custom domain, or any OAuth provider.</div>
+        <div class="meta">
+          <span class="pill layer-id">IDENTITY</span>
+          <span class="effort-dots"><i class="on"></i><i></i><i></i></span><span class="effort-lbl">low effort</span>
+        </div>
+        <button class="cta-btn">Verify identity →</button>
+      </div>
+    </div>
+    <div class="tile r-mid">
+      <div class="reward-block">
+        <div class="reward-num">+20</div>
+        <div class="reward-lbl">trust pts</div>
+      </div>
+      <div class="body-block">
+        <div class="title">Run a live capability probe</div>
+        <div class="desc">Fires a real HTTPS probe against your registered endpoint. 1-hour cooldown between runs.</div>
+        <div class="meta">
+          <span class="pill layer-cap">CAPABILITY</span>
+          <span class="effort-dots"><i class="on"></i><i class="on"></i><i></i></span><span class="effort-lbl">medium effort</span>
+        </div>
+        <button class="cta-btn">Run probe →</button>
+      </div>
+    </div>
+  </div>
+  <div class="audit">
+    <b>V1 audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Reward block on the left makes the payoff impossible to miss. Color shifts with reward size (orange &lt;15, green 15+). Single CTA style for all three. Effort dots replace plain text.
+    <b>Trade-off:</b> reward steals attention from the title — operator may pick the biggest number, not the most important action.
+  </div>
+
+  <!-- ── V2 · LAYER-CODED MISSION ────────────────────── -->
+  <h2>Variant 2 · Layer-coded mission card <span class="tag">color stripe + layer icon — instant layer recognition</span></h2>
+  <div class="row v2">
+    <div class="tile l-rep">
+      <div class="stripe"></div>
+      <div class="body-block">
+        <div class="top">
+          <div class="icon-circle">
+            <svg viewBox="0 0 64 64">
+              <g stroke="#3B82F6" stroke-width="1.5" fill="none">
+                <line x1="32" y1="32" x2="14" y2="14"/><line x1="32" y1="32" x2="50" y2="14"/>
+                <line x1="32" y1="32" x2="50" y2="50"/><line x1="32" y1="32" x2="14" y2="50"/>
+              </g>
+              <g fill="#3B82F6">
+                <circle cx="32" cy="32" r="4"/>
+                <circle cx="14" cy="14" r="2.5"/><circle cx="50" cy="14" r="2.5"/>
+                <circle cx="50" cy="50" r="2.5"/><circle cx="14" cy="50" r="2.5"/>
+              </g>
+            </svg>
+          </div>
+          <div class="reward-badge">+12</div>
+        </div>
+        <div class="title">Request a tier-review council evaluation</div>
+        <div class="desc">Your score of 43 sits in Identified tier. A five-advisor panel can promote you to Verified.</div>
+        <div class="meta">
+          <span class="layer-pill">REPUTATION</span>
+          <span class="effort-dots"><i class="on"></i><i></i><i></i></span>
+        </div>
+        <button class="cta-btn">Request review →</button>
+      </div>
+    </div>
+    <div class="tile l-id">
+      <div class="stripe"></div>
+      <div class="body-block">
+        <div class="top">
+          <div class="icon-circle">
+            <svg viewBox="0 0 64 64">
+              <g fill="none" stroke="#EF4444" stroke-width="2">
+                <path d="M32 12 a20 20 0 0 1 20 20"/>
+                <path d="M32 18 a14 14 0 0 1 14 14"/>
+                <path d="M32 24 a8 8 0 0 1 8 8"/>
+              </g>
+            </svg>
+          </div>
+          <div class="reward-badge">+10</div>
+        </div>
+        <div class="title">Verify your identity</div>
+        <div class="desc">Any one method clears the gate: verified email on a custom domain, or any OAuth provider.</div>
+        <div class="meta">
+          <span class="layer-pill">IDENTITY</span>
+          <span class="effort-dots"><i class="on"></i><i></i><i></i></span>
+        </div>
+        <button class="cta-btn">Verify identity →</button>
+      </div>
+    </div>
+    <div class="tile l-cap">
+      <div class="stripe"></div>
+      <div class="body-block">
+        <div class="top">
+          <div class="icon-circle">
+            <svg viewBox="0 0 64 64">
+              <g stroke="#9B59B6" stroke-width="1.5" fill="none">
+                <circle cx="20" cy="20" r="3"/><circle cx="32" cy="20" r="3"/><circle cx="44" cy="20" r="3"/>
+                <circle cx="20" cy="32" r="3"/><circle cx="32" cy="32" r="3"/><circle cx="44" cy="32" r="3"/>
+                <circle cx="20" cy="44" r="3"/><circle cx="32" cy="44" r="3"/><circle cx="44" cy="44" r="3"/>
+              </g>
+              <circle cx="20" cy="20" r="3" fill="#9B59B6"/>
+              <circle cx="32" cy="32" r="3" fill="#9B59B6"/>
+            </svg>
+          </div>
+          <div class="reward-badge">+20</div>
+        </div>
+        <div class="title">Run a live capability probe</div>
+        <div class="desc">Fires a real HTTPS probe against your registered endpoint. 1-hour cooldown between runs.</div>
+        <div class="meta">
+          <span class="layer-pill">CAPABILITY</span>
+          <span class="effort-dots"><i class="on"></i><i class="on"></i><i></i></span>
+        </div>
+        <button class="cta-btn">Run probe →</button>
+      </div>
+    </div>
+  </div>
+  <div class="audit">
+    <b>V2 audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Each card is visually distinct by layer (red identity / blue reputation / purple capability), echoing the layer-cards above. Icon circle reuses Variant-D iconography for consistency across the dashboard.
+    Reward badge is prominent without dominating. Title is the visual anchor.
+    <b>Trade-off:</b> three accent colors stacked in one row could feel busy in a wider feed.
+  </div>
+
+  <!-- ── V3 · BEFORE/AFTER ─────────────────────────────── -->
+  <h2>Variant 3 · Before / after projection <span class="tag">show the lift — current score → projected score</span></h2>
+  <div class="row v3">
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Request a tier-review council evaluation</div>
+      <div class="desc">Five-advisor panel can promote you to Verified tier.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <svg viewBox="0 0 100 18" preserveAspectRatio="none">
+            <line x1="0" y1="9" x2="92" y2="9" stroke="#5BD681" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <polygon points="92,4 100,9 92,14" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">55</div><div class="score-lbl">after</div></div>
+      </div>
+      <div class="meta">
+        <span class="pill">REPUTATION</span><span style="color:var(--muted);font-size:11px">low effort · +12 pts</span>
+      </div>
+      <button class="cta-btn">Request review →</button>
+    </div>
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Verify your identity</div>
+      <div class="desc">Any verified email or OAuth provider clears the gate.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <svg viewBox="0 0 100 18" preserveAspectRatio="none">
+            <line x1="0" y1="9" x2="92" y2="9" stroke="#5BD681" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <polygon points="92,4 100,9 92,14" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">53</div><div class="score-lbl">after</div></div>
+      </div>
+      <div class="meta">
+        <span class="pill">IDENTITY</span><span style="color:var(--muted);font-size:11px">low effort · +10 pts</span>
+      </div>
+      <button class="cta-btn">Verify identity →</button>
+    </div>
+    <div class="tile">
+      <div class="pulse">Highest impact</div>
+      <div class="title">Run a live capability probe</div>
+      <div class="desc">Real HTTPS probe — measures responsiveness + behavior.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <svg viewBox="0 0 100 18" preserveAspectRatio="none">
+            <line x1="0" y1="9" x2="92" y2="9" stroke="#5BD681" stroke-width="1.5" stroke-dasharray="3 2"/>
+            <polygon points="92,4 100,9 92,14" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">63</div><div class="score-lbl">after</div></div>
+      </div>
+      <div class="meta">
+        <span class="pill">CAPABILITY</span><span style="color:var(--muted);font-size:11px">medium · +20 pts</span>
+      </div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>V3 audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="warn">WARN</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Tells the operator the <i>story</i>: 43 → 55. Most motivating for first-time users.
+    <b>Trade-off:</b> projected score is a forecast, not a guarantee — council review could downgrade you. Should be labeled "potential" or use a softer arrow. Risk of over-promising the lift.
+  </div>
+
+  <!-- ── V4 · COMPACT INBOX ─────────────────────────── -->
+  <h2>Variant 4 · Compact priority list <span class="tag">scannable inbox style — half the height, all visible</span></h2>
+  <div class="v4">
+    <div class="stack">
+      <div class="row-tile p-mid l-cap">
+        <span class="pip"></span>
+        <div class="row-icon">
+          <svg viewBox="0 0 64 64">
+            <g stroke="#9B59B6" stroke-width="1.5" fill="none">
+              <circle cx="20" cy="20" r="3"/><circle cx="32" cy="20" r="3"/><circle cx="44" cy="20" r="3"/>
+              <circle cx="20" cy="32" r="3"/><circle cx="32" cy="32" r="3"/><circle cx="44" cy="32" r="3"/>
+            </g>
+            <circle cx="20" cy="20" r="3" fill="#9B59B6"/>
+            <circle cx="32" cy="32" r="3" fill="#9B59B6"/>
+          </svg>
+        </div>
+        <div class="row-meta">
+          <div class="row-title">Run a live capability probe</div>
+          <div class="row-sub">CAPABILITY · medium effort · 1-hour cooldown</div>
+        </div>
+        <div class="row-reward">+20</div>
+        <button class="row-cta">Run probe →</button>
+      </div>
+      <div class="row-tile p-low l-rep">
+        <span class="pip"></span>
+        <div class="row-icon">
+          <svg viewBox="0 0 64 64">
+            <g stroke="#3B82F6" stroke-width="1.5" fill="none">
+              <line x1="32" y1="32" x2="14" y2="14"/><line x1="32" y1="32" x2="50" y2="14"/>
+              <line x1="32" y1="32" x2="50" y2="50"/><line x1="32" y1="32" x2="14" y2="50"/>
+            </g>
+            <g fill="#3B82F6">
+              <circle cx="32" cy="32" r="4"/>
+              <circle cx="14" cy="14" r="2.5"/><circle cx="50" cy="14" r="2.5"/>
+              <circle cx="50" cy="50" r="2.5"/><circle cx="14" cy="50" r="2.5"/>
+            </g>
+          </svg>
+        </div>
+        <div class="row-meta">
+          <div class="row-title">Request a tier-review council evaluation</div>
+          <div class="row-sub">REPUTATION · low effort · five-advisor panel</div>
+        </div>
+        <div class="row-reward">+12</div>
+        <button class="row-cta">Start →</button>
+      </div>
+      <div class="row-tile p-low l-id">
+        <span class="pip"></span>
+        <div class="row-icon">
+          <svg viewBox="0 0 64 64">
+            <g fill="none" stroke="#EF4444" stroke-width="2">
+              <path d="M32 12 a20 20 0 0 1 20 20"/>
+              <path d="M32 18 a14 14 0 0 1 14 14"/>
+              <path d="M32 24 a8 8 0 0 1 8 8"/>
+            </g>
+          </svg>
+        </div>
+        <div class="row-meta">
+          <div class="row-title">Verify your identity</div>
+          <div class="row-sub">IDENTITY · low effort · email or OAuth</div>
+        </div>
+        <div class="row-reward">+10</div>
+        <button class="row-cta">Verify →</button>
+      </div>
+    </div>
+  </div>
+  <div class="audit">
+    <b>V4 audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Half the vertical space; all three actions visible without scroll. Sorted by reward (highest first). Priority pip on left, layer icon, title + sub-meta, reward, CTA.
+    <b>Trade-off:</b> dense — works on desktop, may feel cramped on mobile. No room for body description.
+  </div>
+
+  <!-- ── SUMMARY ──────────────────────────────────────── -->
+  <h2>Recommendation <span class="tag">pick by priority</span></h2>
+  <div class="audit" style="font-size:13px;line-height:1.6">
+    <b>If the goal is</b> <i>"make operators take action"</i> &rarr; <b>V1 (Score-front anchor)</b> wins. The reward is impossible to miss; the orange→green color shift creates urgency.<br>
+    <b>If the goal is</b> <i>"reinforce layer identity across the dashboard"</i> &rarr; <b>V2 (Layer-coded mission)</b> wins. Color and icon match the layer cards above (which we just shipped), turning the whole dashboard into a coherent visual system.<br>
+    <b>If the goal is</b> <i>"motivate via story"</i> &rarr; <b>V3 (Before/after)</b> wins, but tone down the projection to "potential" so it doesn't over-promise.<br>
+    <b>If the goal is</b> <i>"power-user efficiency"</i> &rarr; <b>V4 (Compact list)</b> wins. Best for operators who already know what each action does.<br><br>
+    <b>My pick:</b> V2. It's the only variant that ties the Recommended Actions visually to the trust-layer cards we just shipped — same icons, same color tokens — turning the dashboard into a system rather than four separate widgets.
+  </div>
+</div>
+</body>
+</html>
