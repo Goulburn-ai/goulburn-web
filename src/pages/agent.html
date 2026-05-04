@@ -349,11 +349,14 @@
             position: relative; min-width: 80px;
         }
         .profile-trust-row-fill { display: block; height: 100%; transition: width 0.6s ease-out; }
-        .profile-trust-row-fill.identity     { background: #B4B2A9; }
-        .profile-trust-row-fill.capability   { background: #F59E0B; }
-        .profile-trust-row-fill.track_record { background: #85B7EB; }
-        .profile-trust-row-fill.social       { background: #97C459; }
-        .profile-trust-row-fill.compliance   { background: #AFA9EC; }
+        /* Per-layer colors — kept in lockstep with /dashboard tokens
+           (--td-layer-color-*) so the public profile and operator
+           dashboard tell the same visual story. */
+        .profile-trust-row-fill.identity     { background: #EF4444; }  /* red */
+        .profile-trust-row-fill.capability   { background: #9B59B6; }  /* purple */
+        .profile-trust-row-fill.track_record { background: #14B8A6; }  /* teal */
+        .profile-trust-row-fill.social       { background: #3B82F6; }  /* blue */
+        .profile-trust-row-fill.compliance   { background: #22C55E; }  /* green */
         .profile-trust-row-fill.gated        { background: linear-gradient(90deg,#F59E0B,#FBB040); filter: blur(3px); opacity: 0.65; }
         .profile-trust-row-score { width: 30px; text-align: right; font-size: 12px; font-weight: 500; color: #F7F9F9; }
         .profile-trust-row-lock { width: 14px; height: 14px; color: rgba(247,249,249,0.55); flex-shrink: 0; }
@@ -411,11 +414,11 @@
         .layer-mini-fill { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
         .layer-mini-score { font-size: 11px; width: 30px; font-weight: 600; }
  
-        .fill-identity     { background: #71767B; }
-        .fill-capability   { background: #fbbf24; }
-        .fill-track_record { background: #60a5fa; }
-        .fill-social       { background: #4ade80; }
-        .fill-compliance   { background: #a78bfa; }
+        .fill-identity     { background: #EF4444; }  /* red — matches dashboard */
+        .fill-capability   { background: #9B59B6; }  /* purple */
+        .fill-track_record { background: #14B8A6; }  /* teal */
+        .fill-social       { background: #3B82F6; }  /* blue */
+        .fill-compliance   { background: #22C55E; }  /* green */
  
         /* Score ring */
         .score-ring-circle {
@@ -3284,12 +3287,17 @@
                 var rr = r * (Math.max(0, Math.min(100, score)) / 100);
                 return { x: cx + rr * Math.cos(angle), y: cy + rr * Math.sin(angle), angle: angle };
             }
-            function colorFor(s) {
-                if (s >= 75) return '#22c55e';
-                if (s >= 50) return '#F59E0B';
-                if (s >= 25) return '#fbbf24';
-                return '#ef4444';
-            }
+            // Per-layer colors — matches dashboard tokens. Vertex dots are
+            // coloured by LAYER (not by score) so the radar reads as
+            // "this layer scored X" rather than "any high score is green".
+            var LAYER_COLORS = {
+                identity:     '#EF4444',  // red
+                capability:   '#9B59B6',  // purple
+                track_record: '#14B8A6',  // teal
+                social:       '#3B82F6',  // blue
+                compliance:   '#22C55E'   // green
+            };
+            function colorFor(layerKey) { return LAYER_COLORS[layerKey] || '#94A3B8'; }
             // Expand viewBox to fit text labels around the polygon (Track Record, Compliance, Capability)
             var svg = '<svg viewBox="-46 -8 ' + (size+92) + ' ' + (size+16) + '" role="img" aria-label="Trust radar across 5 evidence layers">';
             // grid rings 25/50/75/100
@@ -3312,11 +3320,12 @@
             // data polygon
             var dataPts = [];
             for (var i=0;i<n;i++) { var p = pt(i, scores[i]); dataPts.push(p.x + ',' + p.y); }
-            svg += '<polygon points="' + dataPts.join(' ') + '" fill="rgba(245,158,11,0.18)" stroke="#F59E0B" stroke-width="1.5" stroke-linejoin="round"/>';
-            // vertex dots
+            // Neutral polygon — dots carry the per-layer colour.
+            svg += '<polygon points="' + dataPts.join(' ') + '" fill="rgba(247,249,249,0.10)" stroke="rgba(247,249,249,0.55)" stroke-width="1.5" stroke-linejoin="round"/>';
+            // vertex dots — coloured by the LAYER, not by score
             for (var i=0;i<n;i++) {
                 var p = pt(i, scores[i]);
-                svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="3.5" fill="' + colorFor(scores[i]) + '" stroke="rgba(0,0,0,0.4)" stroke-width="1"/>';
+                svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="4" fill="' + colorFor(keys[i]) + '" stroke="rgba(0,0,0,0.45)" stroke-width="1"/>';
             }
             // labels around the outside
             for (var i=0;i<n;i++) {
