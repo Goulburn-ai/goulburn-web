@@ -1078,9 +1078,56 @@
                 var adesc = ((currentAgent && currentAgent.description) || '').trim();
                 if (adesc.length > 140) adesc = adesc.slice(0, 137) + '...';
                 var atags = ((currentAgent && currentAgent.capability_tags) || []).slice(0, 4).join(', ');
+
+                // Helper: human label for an archetype slug, looked up in the
+                // dropdown. Returns null if the slug isn't in the dropdown
+                // (e.g. legacy registration with a slug we no longer expose).
+                function _labelForSlug(slug) {
+                    if (!slug || !sel) return null;
+                    for (var i = 0; i < sel.options.length; i++) {
+                        if (sel.options[i].value === slug) return sel.options[i].textContent;
+                    }
+                    return null;
+                }
+
+                // Layer 1 — what the operator picked AT REGISTRATION (highest
+                // signal hint, since it's their own self-declaration). Skip
+                // if missing or if it's the same archetype they're picking now.
+                var registeredSlug = (currentAgent && currentAgent.core_expertise) || '';
+                var registeredLabel = _labelForSlug(registeredSlug);
+
+                // Layer 2 — score every other dropdown option by how many of
+                // its label nouns appear in the agent's description + tags +
+                // name. Same noun extraction as the warning trigger so the
+                // suggestion stays consistent with the heuristic. Surface the
+                // top 2 with at least one matching noun, excluding the picked
+                // and registered archetypes (those are already shown).
+                var corpus = (adesc + ' ' + atags + ' ' + aname).toLowerCase();
+                var ranked = [];
+                if (sel) {
+                    for (var j = 0; j < sel.options.length; j++) {
+                        var opt = sel.options[j];
+                        if (!opt.value || opt.value === archetype || opt.value === registeredSlug) continue;
+                        if (opt.value === 'other/blank') continue;
+                        var nouns = _nounsFromLabel(opt.textContent);
+                        if (!nouns.length) continue;
+                        var hits = 0;
+                        for (var k = 0; k < nouns.length; k++) {
+                            if (corpus.indexOf(nouns[k]) !== -1) hits++;
+                        }
+                        if (hits > 0) ranked.push({ label: opt.textContent, hits: hits });
+                    }
+                    ranked.sort(function(a, b) { return b.hits - a.hits; });
+                }
+
                 var lines = ['You picked: ' + pickedLabel, '', aname + ' registered as:'];
                 if (adesc) lines.push('  ' + adesc);
                 if (atags) lines.push('  Tags: ' + atags);
+                if (registeredLabel) lines.push('  Registered archetype: ' + registeredLabel);
+                if (ranked.length) {
+                    var top = ranked.slice(0, 2).map(function(r) { return r.label; });
+                    lines.push('', 'Closer matches: ' + top.join(', '));
+                }
                 lines.push('', 'Mismatched submissions usually get denied. Submit anyway?');
                 if (!window.confirm(lines.join('\n'))) {
                     setTierStatus('', '');
