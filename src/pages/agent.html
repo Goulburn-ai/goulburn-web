@@ -945,6 +945,82 @@
 
 
         // ── Tier Review (council) ─────────────────────────────
+        // ── Tier-review guards ───────────────────────────────────────
+        // (a) Pre-submit warning — if the declared archetype doesn\'t plausibly
+        //     match the agent\'s existing description / capability tags, ask
+        //     the operator to confirm before consuming their monthly slot.
+        // (b) Retry gate — after a denial, the Request Review button is
+        //     disabled until the operator changes archetype OR edits the
+        //     case statement. Stops blind retries with the same submission.
+
+        // Category → keyword map. Loose; only used to warn on clear misses.
+        var ARCHETYPE_KEYWORDS = {
+            'research': ['research', 'analy', 'data', 'market', 'literature', 'study', 'investigate', 'monitor'],
+            'ops':      ['support', 'customer', 'incident', 'escalat', 'onboard', 'workflow', 'help', 'service'],
+            'eng':      ['code', 'coding', 'engineer', 'develop', 'test', 'review', 'documentation', 'docs', 'api', 'bug', 'software'],
+            'proj':     ['project', 'meeting', 'sprint', 'retro', 'status', 'milestone', 'contract', 'team'],
+            'content':  ['content', 'copy', 'market', 'edit', 'translat', 'writ', 'proof', 'editor'],
+            'legal':    ['legal', 'contract', 'compliance', 'risk', 'regulat', 'audit', 'law'],
+            'fin':      ['fraud', 'credit', 'trading', 'financ', 'investment', 'risk', 'report'],
+            'health':   ['clinic', 'medic', 'health', 'scientific', 'research', 'patient', 'pharm'],
+            'data':     ['data', 'extract', 'etl', 'integrat', 'pipeline', 'transform', 'api'],
+            'infra':    ['network', 'monitor', 'observ', 'devops', 'security', 'infrastructure', 'uptime', 'logs', 'metrics', 'cloud'],
+            'other':    [] // no keywords — operator opted into custom description, no warning fires
+        };
+
+        function _archetypeLooksMisaligned(archetypeValue, agent) {
+            if (!archetypeValue || archetypeValue === 'other/blank') return false;
+            var category = archetypeValue.split('/')[0];
+            var keywords = ARCHETYPE_KEYWORDS[category] || [];
+            if (!keywords.length) return false;
+            var corpus = ((agent && agent.description) || '').toLowerCase() + ' ' +
+                         ((agent && agent.capability_tags) || []).join(' ').toLowerCase();
+            // Looks aligned if at least ONE category keyword appears in the
+            // agent\'s description or tags. We deliberately use a low bar to
+            // avoid false-positive warnings.
+            return !keywords.some(function(k) { return corpus.indexOf(k) !== -1; });
+        }
+
+        // Track the submission state at the moment of last verdict so we can
+        // detect whether the operator has actually changed something.
+        var _lastDeniedSnapshot = null;
+
+        function _captureSubmissionSnapshot() {
+            return JSON.stringify({
+                a: (document.getElementById('tierReviewArchetype') || {}).value || '',
+                s: ((document.getElementById('tierReviewStatement') || {}).value || '').trim()
+            });
+        }
+
+        function _applyRetryGate() {
+            var btn = document.getElementById('tierReviewBtn');
+            var sel = document.getElementById('tierReviewArchetype');
+            var ta = document.getElementById('tierReviewStatement');
+            if (!btn || !sel || !ta) return;
+            if (!_lastDeniedSnapshot) {
+                btn.disabled = false;
+                btn.title = '';
+                return;
+            }
+            var current = _captureSubmissionSnapshot();
+            var unchanged = current === _lastDeniedSnapshot;
+            btn.disabled = unchanged;
+            btn.title = unchanged ? 'Edit the archetype or case statement before resubmitting (last submission was denied with the same inputs).' : '';
+        }
+
+        function _wireRetryGateInputs() {
+            var sel = document.getElementById('tierReviewArchetype');
+            var ta = document.getElementById('tierReviewStatement');
+            if (sel && !sel.dataset.retryGateWired) {
+                sel.addEventListener('change', _applyRetryGate);
+                sel.dataset.retryGateWired = '1';
+            }
+            if (ta && !ta.dataset.retryGateWired) {
+                ta.addEventListener('input', _applyRetryGate);
+                ta.dataset.retryGateWired = '1';
+            }
+        }
+
         async function requestTierReview() {
             if (gateOnPendingDeletion("Expert Review")) return;
             var btn = document.getElementById('tierReviewBtn');
@@ -960,6 +1036,22 @@
             var statement = archetype
                 ? '[Archetype: ' + archetype + ']\n' + rawStatement
                 : rawStatement;
+
+            // (a) Pre-submit guard. If the declared archetype clearly doesn\'t
+            //     match the agent\'s existing description or tags, ask the
+            //     operator to confirm before consuming their monthly slot.
+            //     Skipped for 'other/blank' (operator opted into custom
+            //     description) and for empty archetype.
+            if (_archetypeLooksMisaligned(archetype, currentAgent)) {
+                var msg = 'Heads up — your declared archetype doesn\'t appear to match this agent\'s description or capability tags.\n\n' +
+                          'Council reviews are capped at 1 per agent per month, and submissions where the archetype contradicts the description are usually denied for "identity confusion." \n\n' +
+                          'Submit this review anyway?';
+                if (!window.confirm(msg)) {
+                    setTierStatus('', '');
+                    return;
+                }
+            }
+
             var session = goulburnAuth.getSession();
             if (!session) { setTierStatus('Not signed in', '#f87171'); return; }
             if (!currentAgent || !_isOwner) { setTierStatus('Owner only', '#f87171'); return; }
@@ -1044,25 +1136,16 @@
             var disagreement = chair.disagreement || '';
             var blindSpots = chair.blind_spots || '';
 
-            var advisorBlocks = '';
-            var advisors = data.advisor_responses || {};
-            var advisorOrder = ['executor', 'outsider', 'contrarian', 'expansionist', 'first_principles', 'contrarian'];
-            // Render whatever keys exist, in stable order
-            var seen = {};
-            Object.keys(advisors).forEach(function(k) { if (!seen[k]) { seen[k] = 1; } });
-            var keys = Object.keys(seen);
-            keys.forEach(function(k) {
-                var label = k.replace('_', ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
-                advisorBlocks += '<details style="margin-top:10px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">Advisor: ' + _esc(label) + '</summary>' +
-                    '<div style="margin-top:8px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:12px; line-height:1.55; color:var(--gray-200,#d1d5db); white-space:pre-wrap;">' + _esc(advisors[k] || '') + '</div></details>';
-            });
-
-            var peerBlocks = '';
-            (data.peer_reviews || []).forEach(function(pr) {
-                var rk = pr.reviewer_key || 'reviewer';
-                peerBlocks += '<details style="margin-top:8px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:12px;">Peer review by ' + _esc(rk) + '</summary>' +
-                    '<div style="margin-top:6px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:11.5px; line-height:1.55; color:var(--gray-300,#9ca3af); white-space:pre-wrap;">' + _esc(pr.review || '') + '</div></details>';
-            });
+            // IP-scrub: we deliberately DO NOT render per-advisor responses,
+            // peer-review verbatim, or the agreement/disagreement/blind-spots
+            // breakdown here. /how-it-works promises operators "the exact
+            // prompts and the persona that handles your specific submission
+            // are held internally so submissions can\'t be tuned to the
+            // rubric." Surfacing the persona names + their verbatim framing
+            // would directly contradict that promise and hand competitors a
+            // copy of our scoring rubric. Operators get the verdict, the
+            // synthesised reasoning, and the actionable next step — not the
+            // mechanism that produced them.
 
             var nextBlock = '';
             if (nextFix) {
@@ -1072,20 +1155,7 @@
             }
 
             var convergenceBlock = '';
-            if (agreement || disagreement || blindSpots) {
-                var rows = '';
-                if (agreement)    rows += '<div style="margin-bottom:8px;"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Where the panel agreed</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(agreement) + '</span></div>';
-                if (disagreement) rows += '<div style="margin-bottom:8px;"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Where the panel split</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(disagreement) + '</span></div>';
-                if (blindSpots)   rows += '<div><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Blind spots peer review caught</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(blindSpots) + '</span></div>';
-                convergenceBlock = '<details style="margin-top:14px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">How the panel reached this verdict</summary>' +
-                    '<div style="margin-top:8px; padding:12px; background:rgba(255,255,255,0.04); border-radius:6px;">' + rows + '</div></details>';
-            }
-
             var advisorSection = '';
-            if (advisorBlocks || peerBlocks) {
-                advisorSection = '<details style="margin-top:14px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">Read full panel reasoning (5 advisors + peer review)</summary>' +
-                    '<div style="margin-top:6px;">' + advisorBlocks + peerBlocks + '</div></details>';
-            }
 
             var publishedDate = '';
             if (data.completed_at) {
@@ -1105,11 +1175,24 @@
                     '<span style="font-size:22px; line-height:1;">' + p.icon + '</span>' +
                     '<span style="font-weight:700; font-size:14px; letter-spacing:0.04em;">Council verdict: ' + p.label + '</span>' +
                 '</div>' +
-                (reasoning ? ('<div style="margin-top:10px; font-size:13px; line-height:1.6; color:var(--gray-100,#e5e7eb);"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Chairman&apos;s reasoning</span>' + _esc(reasoning) + '</div>') : '') +
+                (reasoning ? ('<div style="margin-top:10px; font-size:13px; line-height:1.6; color:var(--gray-100,#e5e7eb);"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Verdict reasoning</span>' + _esc(reasoning) + '</div>') : '') +
                 nextBlock +
                 convergenceBlock +
                 advisorSection +
                 publicNote;
+
+            // (b) Retry gate. If the verdict was a denial, capture the current
+            //     submission inputs so we can detect when the operator changes
+            //     them. Wire input listeners that re-evaluate the gate.
+            if (rec === 'deny') {
+                _lastDeniedSnapshot = _captureSubmissionSnapshot();
+                _wireRetryGateInputs();
+                _applyRetryGate();
+            } else {
+                // Approval / unclear — clear the gate.
+                _lastDeniedSnapshot = null;
+                _applyRetryGate();
+            }
         }
 
         async function loadLatestTierReview(agentName) {
