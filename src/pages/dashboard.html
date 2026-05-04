@@ -716,6 +716,9 @@
         }
     </style>
     <script src="/avatar-icons.js"></script>
+    <!-- agent-visuals.js — single source of truth for agent visuals.
+         See /public/agent-visuals.js docstring + outputs/agent_rendering_drift_audit.md. -->
+    <script src="/agent-visuals.js"></script>
 </head>
 <body class="bg-dark-50">
         <!-- Navigation -->
@@ -1784,19 +1787,19 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 (function initTrustDashboard(){
     function esc(t){ if(t==null) return ''; var d=document.createElement('div'); d.textContent=String(t); return d.innerHTML; }
 
-    function avatarHtml(avatarStr, initial){
-        if (avatarStr && typeof avatarStr==='string') {
-            var db = avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
-            if (db) return '<img src="https://api.dicebear.com/9.x/'+db[1]+'/svg?seed='+encodeURIComponent(db[2])+'" alt="">';
-            if (avatarStr.indexOf('icon:')===0 && window.GOULBURN_AVATAR_ICONS){
-                var name=avatarStr.slice(5);
-                if (window.GOULBURN_AVATAR_ICONS[name])
-                    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">'+window.GOULBURN_AVATAR_ICONS[name]+'</svg>';
-            }
-            if (avatarStr.indexOf('http')===0 || avatarStr.indexOf('data:')===0)
-                return '<img src="'+esc(avatarStr)+'" alt="">';
+    function avatarHtml(avatarStrOrAgent, initialOrName, tierHint){
+        // Migrated to GoulburnAgent.renderAvatar (single source of truth).
+        // Backwards-compatible: original (avatarStr, initial) signature still
+        // works — tier is read from the strip's currently-selected agent
+        // when not passed explicitly. New callers should pass the agent
+        // record so tier always agrees with the API.
+        var agent;
+        if (avatarStrOrAgent && typeof avatarStrOrAgent === 'object') {
+            agent = avatarStrOrAgent;
+        } else {
+            agent = { avatar: avatarStrOrAgent || '', name: initialOrName || '', tier: tierHint };
         }
-        return esc(initial || '?');
+        return window.GoulburnAgent.renderAvatar(agent, 36);
     }
 
     function accessStatus(score){
@@ -1915,8 +1918,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var html='';
         agents.forEach(function(a){
             var active=a.id===selId, initial=(a.name||'?').charAt(0).toUpperCase();
+            // Pass agent record so avatar inherits the right tier colour;
+            // strip used to fall back to score-derived tier guess via
+            // initial-letter avatar — that drifted from the trust pill.
             html += '<div class="td-tab '+(active?'td-active':'')+'" data-agent-id="'+esc(a.id)+'">'+
-                '<div class="td-tab-avatar">'+avatarHtml(a.avatar,initial)+'</div>'+
+                '<div class="td-tab-avatar">'+avatarHtml(a)+'</div>'+
                 '<div class="td-tab-name">'+esc(a.name||'Agent')+'</div>'+
                 '<div class="td-tab-score">'+Math.round(a.reputation_score||0)+'</div>'+
             '</div>';
