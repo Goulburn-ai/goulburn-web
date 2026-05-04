@@ -953,32 +953,40 @@
         //     disabled until the operator changes archetype OR edits the
         //     case statement. Stops blind retries with the same submission.
 
-        // Category → keyword map. Loose; only used to warn on clear misses.
-        var ARCHETYPE_KEYWORDS = {
-            'research': ['research', 'analy', 'data', 'market', 'literature', 'study', 'investigate', 'monitor'],
-            'ops':      ['support', 'customer', 'incident', 'escalat', 'onboard', 'workflow', 'help', 'service'],
-            'eng':      ['code', 'coding', 'engineer', 'develop', 'test', 'review', 'documentation', 'docs', 'api', 'bug', 'software'],
-            'proj':     ['project', 'meeting', 'sprint', 'retro', 'status', 'milestone', 'contract', 'team'],
-            'content':  ['content', 'copy', 'market', 'edit', 'translat', 'writ', 'proof', 'editor'],
-            'legal':    ['legal', 'contract', 'compliance', 'risk', 'regulat', 'audit', 'law'],
-            'fin':      ['fraud', 'credit', 'trading', 'financ', 'investment', 'risk', 'report'],
-            'health':   ['clinic', 'medic', 'health', 'scientific', 'research', 'patient', 'pharm'],
-            'data':     ['data', 'extract', 'etl', 'integrat', 'pipeline', 'transform', 'api'],
-            'infra':    ['network', 'monitor', 'observ', 'devops', 'security', 'infrastructure', 'uptime', 'logs', 'metrics', 'cloud'],
-            'other':    [] // no keywords — operator opted into custom description, no warning fires
+        // Stop-words excluded from the archetype-label noun extraction.
+        // 'agent', 'review' etc. appear in nearly every label and would make
+        // every check pass trivially.
+        var _ARCHETYPE_STOPWORDS = {
+            agent:1, agents:1, ai:1, an:1, a:1, the:1, of:1, for:1, to:1, in:1, on:1, with:1, and:1, or:1, by:1,
+            review:1, reviewer:1, reviewing:1, custom:1, describe:1, your:1, own:1, words:1, below:1,
+            assistant:1, support:1, work:1, worker:1, system:1, service:1, services:1
         };
+
+        function _nounsFromLabel(label) {
+            // Tokenise on non-alphanumerics, lowercase, strip stopwords, keep
+            // tokens >= 4 chars. Returns an array of distinctive nouns.
+            return (label || '').toLowerCase().split(/[^a-z0-9]+/).filter(function(w) {
+                return w && w.length >= 4 && !_ARCHETYPE_STOPWORDS[w];
+            });
+        }
 
         function _archetypeLooksMisaligned(archetypeValue, agent) {
             if (!archetypeValue || archetypeValue === 'other/blank') return false;
-            var category = archetypeValue.split('/')[0];
-            var keywords = ARCHETYPE_KEYWORDS[category] || [];
-            if (!keywords.length) return false;
+            var sel = document.getElementById('tierReviewArchetype');
+            if (!sel) return false;
+            var opt = sel.options[sel.selectedIndex];
+            if (!opt) return false;
+            var labelNouns = _nounsFromLabel(opt.textContent || '');
+            if (!labelNouns.length) return false;
             var corpus = ((agent && agent.description) || '').toLowerCase() + ' ' +
-                         ((agent && agent.capability_tags) || []).join(' ').toLowerCase();
-            // Looks aligned if at least ONE category keyword appears in the
-            // agent\'s description or tags. We deliberately use a low bar to
-            // avoid false-positive warnings.
-            return !keywords.some(function(k) { return corpus.indexOf(k) !== -1; });
+                         ((agent && agent.capability_tags) || []).join(' ').toLowerCase() + ' ' +
+                         ((agent && agent.name) || '').toLowerCase();
+            // Aligned if any noun from the dropdown label appears anywhere in
+            // the agent\'s name / description / tags. Tighter than the previous
+            // category-keyword approach ("report" used to match "fin" because
+            // the network-monitor agent description contained "reports"; now
+            // "trading" / "signal" / "fraud" must literally appear).
+            return !labelNouns.some(function(k) { return corpus.indexOf(k) !== -1; });
         }
 
         // Track the submission state at the moment of last verdict so we can
