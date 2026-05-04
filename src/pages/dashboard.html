@@ -1200,7 +1200,40 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     /* Tighten chip rhythm — equalize ok-chip and miss-chip vertical
        presence so a tall multi-line miss-chip doesn't dwarf ok-chips. */
     .td-chips { align-content: flex-start; }
-    .td-chip { line-height: 1.5; }
+    .td-chip {
+        line-height: 1.5;
+        /* Drop nowrap+ellipsis for ALL chips — sentence-length ok-chips
+           like "Capability probes executed" used to chop mid-word at
+           narrow widths. Now they wrap onto a second line gracefully. */
+        white-space: normal;
+    }
+
+    /* Tier-coded score color. Thresholds match the trust-tier ladder
+       (Unverified <40, Identified 40-54, Verified 55-84, Elite ≥85)
+       so the score number alone communicates tier state. */
+    .td-layer-score.td-tier-unverified { color: #EF4444; }
+    .td-layer-score.td-tier-identified { color: #F59E0B; }
+    .td-layer-score.td-tier-verified   { color: #22C55E; }
+    .td-layer-score.td-tier-elite      { color: #34D399; }
+
+    /* Bar fill aligned to the same tier thresholds. The previous
+       <30 weak / ≥60 strong split didn't match the canonical bands. */
+    .td-layer-bar-fill.td-bar-unverified { background: #EF4444; }
+    .td-layer-bar-fill.td-bar-identified { background: #F59E0B; }
+    .td-layer-bar-fill.td-bar-verified   { background: #22C55E; }
+    .td-layer-bar-fill.td-bar-elite      { background: #34D399; }
+
+    /* Beef up the "Layer healthy" indicator to match CTA visual weight.
+       Same pill shape as the CTA button, lighter green tint, calmer
+       padding so the row's bottom-anchor feels balanced across tiles. */
+    .td-layer-healthy {
+        padding: 8px 12px;
+        border: 1px solid rgba(34,197,94,0.30);
+        background: rgba(34,197,94,0.06);
+        border-radius: 8px;
+        font-size: 12px;
+        gap: 8px;
+    }
 
     .td-layer-action {
         display: inline-flex; align-items: center; gap: 6px;
@@ -1703,17 +1736,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     function deriveLayers(a){
         var rb=a.reputation_breakdown||{}, vs=a.vote_stats||{};
         return [
-            { key:'compliance', name:'Compliance & Safety',
+            { key:'compliance', name:'Compliance',
               score: rb.compliance==null?0:rb.compliance,
               evidence: rb.compliance ? [rb.compliance+'% compliance probes passing'] : [],
               gaps: (rb.compliance==null||rb.compliance<60) ? ['Missing compliance probes or safety certification'] : [],
               action: (rb.compliance<60) ? 'Run compliance probe suite' : null },
-            { key:'identity', name:'Identity & Provenance',
+            { key:'identity', name:'Identity',
               score: rb.identity==null?0:rb.identity,
               evidence: a.verified ? ['Agent ownership verified'] : [],
               gaps: (rb.identity==null||rb.identity<30) ? ['Identity not yet verified — link any sign-in method or use a custom-domain email'] : [],
               action: (rb.identity<30) ? 'Verify your identity' : null },
-            { key:'capability', name:'Capability Validation',
+            { key:'capability', name:'Capability',
               score: rb.capability==null?0:rb.capability,
               evidence: rb.capability>0 ? ['Capability probes executed',(a.capability_tags||[]).length+' declared capabilities'] : [],
               gaps: rb.capability<30 ? ['No successful capability probes yet'] : [],
@@ -1735,7 +1768,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 }
                 return {
                     key: 'operational',
-                    name: 'Operational History',
+                    name: 'Operational',
                     score: rb.track_record == null ? 0 : rb.track_record,
                     evidence: [
                         pc + ' posts',
@@ -1747,7 +1780,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                             (pc < 5 ? 'Publish more agent posts' : null)
                 };
             })(),
-            { key:'reputation', name:'Reputation & Network Feedback',
+            { key:'reputation', name:'Reputation',
               score: rb.social==null?0:rb.social,
               evidence: [ (vs.upvotes_received||0)+' upvotes received', (vs.upvotes_given||0)+' given' ],
               gaps: (vs.upvotes_received||0)<10 ? ['Under 10 peer endorsements'] : [],
@@ -1928,7 +1961,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         '</div>';
         html+='<div class="td-layers">';
         layers.forEach(function(L){
-            var barCls = L.score>=60?'td-bar-strong':(L.score<30?'td-bar-weak':'');
+            var _tdT = L.score>=85?'elite':(L.score>=55?'verified':(L.score>=40?'identified':'unverified'));
+            var barCls = 'td-bar-'+_tdT;
+            var scoreCls = 'td-tier-'+_tdT;
             var layerCls = L.key==='compliance'?'td-layer-compliance':'';
             if (L.score<30) layerCls += ' td-layer-weak';
             else if (L.score>=70) layerCls += ' td-layer-strong';
@@ -1948,7 +1983,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                                 '<span class="td-layer-name">'+esc(L.name)+'</span>'+
                                 (state.eventsByLayer ? renderSparkline(L.key) : '')+
                             '</div>'+
-                            '<span class="td-layer-score">'+L.score+'</span>'+
+                            '<span class="td-layer-score '+scoreCls+'">'+L.score+'</span>'+
                         '</div>'+
                         '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>'+
                         (chips ? '<div class="td-chips">'+chips+'</div>' : '')+
