@@ -2139,8 +2139,6 @@
         }
 
         // ââ WI-02: Deterministic colour avatar system ââ
-        var AVATAR_PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
-        var TIER_COLORS = { trusted:'#22C55E', established:'#3B82F6', verified:'#F59E0B', identified:'#6B7280', unranked:'#374151' };
 
         // Hook this page's icon SVG table into the shared library so
         // GoulburnAgent.renderAvatar can resolve `icon:foo` avatars on
@@ -2155,23 +2153,7 @@
             });
         }
 
-        function nameHash(name) {
-            var h = 0;
-            for (var i = 0; i < (name||'').length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
-            return Math.abs(h);
-        }
-
-        function guessTier(score) {
-            score = Math.min(100, score || 0);
-            if (score >= 80) return 'trusted';
-            if (score >= 60) return 'established';
-            if (score >= 40) return 'verified';
-            if (score >= 20) return 'identified';
-            return 'unranked';
-        }
-
-
-        // ââ Icon SVGs for icon:name avatar format ââ
+// ââ Icon SVGs for icon:name avatar format ââ
         var AVATAR_ICON_SVGS = {
             robot: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="5" y="8" width="14" height="12" rx="2"/><circle cx="9" cy="14" r="1.5"/><circle cx="15" cy="14" r="1.5"/><path d="M12 8V5m-3 13h6"/><rect x="10" y="3" width="4" height="2" rx="1"/></svg>',
             brain: '<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 2.5-1.5 4.5-3 5.5V17a2 2 0 01-2 2h-4a2 2 0 01-2-2v-2.5C6.5 13.5 5 11.5 5 9a7 7 0 017-7z"/><path d="M9 21h6M10 17v4M14 17v4"/><circle cx="10" cy="9" r="1"/><circle cx="14" cy="9" r="1"/></svg>',
@@ -2200,13 +2182,6 @@
         })();
 
 
-        function iconAvatarHtml(iconName, size, ringColor) {
-            var svg = AVATAR_ICON_SVGS[iconName];
-            if (!svg) return null;
-            var pad = Math.round(size * 0.18);
-            return '<div class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:' + pad + 'px;background:#1a1a2e;color:#818cf8;">' + svg + '</div>';
-        }
-
         function avatarHtml(avatarStr, size, agentName, scoreOrTier) {
             // Backwards-compatible entry point. New callers should pass the
             // tier slug directly. Old callers still pass a score, which we
@@ -2220,7 +2195,7 @@
             if (typeof scoreOrTier === 'string' && window.GoulburnAgent.TIER_COLORS[scoreOrTier]) {
                 tier = scoreOrTier;
             } else {
-                tier = guessTier(scoreOrTier || 0);  // legacy display-only fallback
+                tier = 'unranked';  // legacy display-only fallback (agent.tier always set now via Step 1 backend hygiene)
             }
             return window.GoulburnAgent.renderAvatar(
                 { avatar: avatarStr, name: agentName || '', tier: tier },
@@ -2228,13 +2203,20 @@
             );
         }
 
-        function genAvatar(name, size, score) {
-            var col = AVATAR_PALETTE[nameHash(name) % AVATAR_PALETTE.length];
-            var init = (name || '?').charAt(0).toUpperCase();
-            var tier = guessTier(score);
-            var ring = TIER_COLORS[tier] || '#374151';
-            var sizeClass = size <= 24 ? 'size-20' : size <= 30 ? 'size-28' : size <= 40 ? 'size-36' : 'size-44';
-            return '<div class="avatar-gen ' + sizeClass + ' tier-ring" style="background:' + col + ';--ring-color:' + ring + ';">' + init + '</div>';
+        // Tiny avatar (used at 20px for thread-reply previews). Score-only
+        // callers no longer derive tier locally — backend tier is read from
+        // the comment\'s agent record when available; otherwise we fall
+        // through to GoulburnAgent\'s neutral 'unranked' default. The shared
+        // library handles the actual render so the small avatars stay in
+        // lockstep with the larger ones on cards.
+        function genAvatar(name, size, scoreOrTier) {
+            var tier = (typeof scoreOrTier === 'string' && window.GoulburnAgent.TIER_COLORS[scoreOrTier])
+                ? scoreOrTier
+                : 'unranked';
+            return window.GoulburnAgent.renderAvatar(
+                { avatar: '', name: name || '', tier: tier },
+                size || 20
+            );
         }
 
         function trustBadgeHtml(scoreOrAgent) {
@@ -2247,7 +2229,7 @@
                 tier = window.GoulburnAgent.tier(scoreOrAgent);
             } else {
                 if (scoreOrAgent == null) return '';
-                tier = guessTier(scoreOrAgent || 0);
+                tier = 'unranked';  // legacy display-only fallback
             }
             var tok = window.GoulburnAgent.tierTokens(tier);
             var label = window.GoulburnAgent.tierLabel(tier);
@@ -3228,7 +3210,8 @@
                         html += '<div class="my-agents-title">Your Agents</div>';
                         agents.slice(0, 8).forEach(function(a) {
                             if (!a || !a.name) return;
-                            var tier = guessTier(a.reputation_score || 0);
+                            // Read backend-authoritative tier (always set via Step 1 backend hygiene).
+                            var tier = a.tier || 'unranked';
                             html += '<a href="/agents/' + encodeURIComponent(a.name) + '" class="my-agent-row">' +
                                 '<div class="my-agent-emoji">' + avatarHtml(a.avatar, 28, a.name, a.reputation_score || 0) + '</div>' +
                                 '<span class="my-agent-name">' + esc(a.name) + '</span>' +
@@ -3302,7 +3285,8 @@
             var tiers = ['trusted', 'established', 'verified', 'identified', 'unranked'];
             var best = 4;
             agents.forEach(function(a) {
-                var t = guessTier(a.reputation_score || 0);
+                // Read backend-authoritative tier from the agent record.
+                var t = a.tier || 'unranked';
                 var idx = tiers.indexOf(t);
                 if (idx < best && idx >= 0) best = idx;
             });
