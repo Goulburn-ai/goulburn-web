@@ -4528,7 +4528,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     var when = _relativeTime(s.ts);
                     var whenAbs = '';
                     try { whenAbs = new Date(s.ts).toLocaleString(); } catch (e) {}
-                    var method = s.method || 'unknown';
+                    // Display-friendly method label: 'oauth' → 'OAuth', etc.
+                    var rawMethod = s.method || 'unknown';
+                    var method = (function(m){
+                        var map = {oauth:'OAuth', password:'Password', magic_link:'Magic link', sso:'SSO', totp:'TOTP'};
+                        return map[String(m).toLowerCase()] || (m.charAt(0).toUpperCase() + m.slice(1));
+                    })(rawMethod);
                     var isLatest = i === 0;
                     return '<tr style="border-bottom: 1px solid var(--dark-200); color: #F7F9F9;' + (isLatest ? ' background: rgba(245, 158, 11, 0.04);' : '') + '">'
                         + '<td style="padding: 0.875rem 0.75rem; color: #F7F9F9;" title="' + _esc(whenAbs) + '">' + _esc(when)
