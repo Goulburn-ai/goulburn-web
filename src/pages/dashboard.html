@@ -2896,7 +2896,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         <div class="recent-logins-section">
             <table class="recent-logins-table" style="width: 100%; border-collapse: collapse; font-size: 0.8125rem;">
                 <thead>
-                    <tr style="border-bottom: 1px solid var(--dark-200); color: var(--dark-400); text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.04em;">
+                    <tr style="border-bottom: 1px solid var(--dark-200); color: #F7F9F9; text-transform: uppercase; font-size: 0.6875rem; letter-spacing: 0.04em;">
                         <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">When</th>
                         <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">Device</th>
                         <th style="text-align: left; padding: 0.625rem 0.75rem; font-weight: 600;">IP address</th>
@@ -4530,13 +4530,13 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     try { whenAbs = new Date(s.ts).toLocaleString(); } catch (e) {}
                     var method = s.method || 'unknown';
                     var isLatest = i === 0;
-                    return '<tr style="border-bottom: 1px solid var(--dark-200);' + (isLatest ? ' background: rgba(245, 158, 11, 0.04);' : '') + '">'
-                        + '<td style="padding: 0.875rem 0.75rem;" title="' + _esc(whenAbs) + '">' + _esc(when)
+                    return '<tr style="border-bottom: 1px solid var(--dark-200); color: #F7F9F9;' + (isLatest ? ' background: rgba(245, 158, 11, 0.04);' : '') + '">'
+                        + '<td style="padding: 0.875rem 0.75rem; color: #F7F9F9;" title="' + _esc(whenAbs) + '">' + _esc(when)
                         + (isLatest ? ' <span style="margin-left: 0.375rem; padding: 0.125rem 0.5rem; background: rgba(245, 158, 11, 0.16); color: #F59E0B; border-radius: 9999px; font-size: 0.6875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Latest</span>' : '')
                         + '</td>'
-                        + '<td style="padding: 0.875rem 0.75rem; color: var(--dark-100);">' + _esc(device) + '</td>'
-                        + '<td style="padding: 0.875rem 0.75rem; font-family: ui-monospace, monospace; color: var(--dark-300); font-size: 0.75rem;">' + _esc(s.ip || '—') + '</td>'
-                        + '<td style="padding: 0.875rem 0.75rem; color: var(--dark-100);">' + _esc(method) + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; color: #F7F9F9;">' + _esc(device) + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; font-family: ui-monospace, monospace; color: #F7F9F9; font-size: 0.75rem;">' + _esc(s.ip || '—') + '</td>'
+                        + '<td style="padding: 0.875rem 0.75rem; color: #F7F9F9;">' + _esc(method) + '</td>'
                         + '</tr>';
                 }).join('');
                 tbody.innerHTML = rows;
