@@ -1172,6 +1172,36 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         .td-layer-d-icon { flex: 0 0 84px; height: 84px; }
     }
 
+    /* ── Variant D · alignment polish ────────────────────────────
+       Three things this fixes:
+       1. CTAs across the row sit at the same Y — margin-top:auto on
+          .td-layer-action when it lives inside td-layer-d-body.
+       2. Tiles WITHOUT a CTA show a "Layer healthy" indicator at the
+          same anchor so the bottom half doesn't look empty.
+       3. The chips block sits at the top, action/healthy at the bottom,
+          empty space lives in between rather than below — body still
+          looks intentional even when content is sparse. */
+    .td-layer-d-body .td-layer-action { margin-top: auto; }
+    .td-layer-healthy {
+        margin-top: auto; display: inline-flex; align-items: center;
+        gap: 6px; font-size: 11px; color: #5BD681; font-weight: 600;
+        align-self: flex-start; padding: 6px 0 0;
+        letter-spacing: 0.02em;
+    }
+    .td-layer-healthy::before {
+        content: ""; width: 14px; height: 14px;
+        border-radius: 50%; background: rgba(34,197,94,0.15);
+        border: 1px solid rgba(34,197,94,0.5);
+        display: inline-flex; align-items: center; justify-content: center;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><path d='M2.5 6.5 L5 9 L9.5 3.5' stroke='%235BD681' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+        background-size: 10px 10px;
+        background-repeat: no-repeat; background-position: center;
+    }
+    /* Tighten chip rhythm — equalize ok-chip and miss-chip vertical
+       presence so a tall multi-line miss-chip doesn't dwarf ok-chips. */
+    .td-chips { align-content: flex-start; }
+    .td-chip { line-height: 1.5; }
+
     .td-layer-action {
         display: inline-flex; align-items: center; gap: 6px;
         margin-top: 0.5rem; padding: 9px 14px;
@@ -1788,7 +1818,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             reputation: '#3B82F6'
         };
         var c = colors[key] || '#F59E0B';
-        var dim = '#3A3F4A';
+        var dim = '#4A5260';  // brighter than #3A3F4A so silhouettes show even at low scores
         if (key === 'identity') {
             // Fingerprint — lit by fraction
             var ridges = 6, on = Math.max(1, Math.round(ridges * lit));
@@ -1922,7 +1952,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                         '</div>'+
                         '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>'+
                         (chips ? '<div class="td-chips">'+chips+'</div>' : '')+
-                        (L.action ? '<button class="td-layer-action" data-td-action="'+esc(L.key)+'">'+esc(L.action)+' &rsaquo;</button>' : '')+
+                        (L.action ? '<button class="td-layer-action" data-td-action="'+esc(L.key)+'">'+esc(L.action)+' &rsaquo;</button>' : '<div class="td-layer-healthy">Layer healthy</div>')+
                     '</div>'+
                 '</div>'+
             '</div>';
