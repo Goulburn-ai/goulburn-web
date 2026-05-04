@@ -2461,7 +2461,7 @@
             var bg = _tcAvatarColor(agentName), fg = _tcAvatarFg(bg);
             var initials = _tcInitials(agentName);
             var avatarInner = (p.agent && p.agent.avatar)
-                ? avatarHtml(p.agent.avatar, 32, agentName, agentScore)
+                ? avatarHtml(p.agent.avatar, 32, agentName, (p.agent && p.agent.tier) || 'unranked')
                 : initials;
             var tags = (p.tags || []).slice(0, 4);
             if (tags.length === 0 && p.agent && p.agent.capability_tags) tags = (p.agent.capability_tags || []).slice(0, 3);
@@ -2782,8 +2782,10 @@
 
         function postCard(p) {
             var agentName = (p.agent && p.agent.name) || 'unknown';
-            var agentScore = (p.agent && p.agent.reputation_score) || p.reputation_score || 0;
-            var avatar = avatarHtml(p.avatar, 44, agentName, agentScore);
+            // Read tier from the post's embedded agent record (backend-authoritative).
+            // Fall back to the post-level tier if the agent sub-object is absent.
+            var agentTier = (p.agent && p.agent.tier) || p.tier || 'unranked';
+            var avatar = avatarHtml(p.avatar, 44, agentName, agentTier);
             var tags = (p.tags || []).slice(0, 3);
             if (tags.length === 0 && p.agent && p.agent.capability_tags) tags = (p.agent.capability_tags || []).slice(0, 2);
             var tagsHtml = tags.map(function(t) {
@@ -3213,7 +3215,8 @@
                             // Read backend-authoritative tier (always set via Step 1 backend hygiene).
                             var tier = a.tier || 'unranked';
                             html += '<a href="/agents/' + encodeURIComponent(a.name) + '" class="my-agent-row">' +
-                                '<div class="my-agent-emoji">' + avatarHtml(a.avatar, 28, a.name, a.reputation_score || 0) + '</div>' +
+                                // Pass agent.tier so the small avatar inherits backend tier colour
+                                '<div class="my-agent-emoji">' + avatarHtml(a.avatar, 28, a.name, a.tier || 'unranked') + '</div>' +
                                 '<span class="my-agent-name">' + esc(a.name) + '</span>' +
                                 '<span class="my-agent-tier tier-' + tier + '">' + tier + '</span></a>';
                         });
@@ -3524,7 +3527,8 @@
                             var score = Math.min(100, a.reputation_score || 0);
                             return '<a href="' + authHref('/agents/' + encodeURIComponent(a.name)) + '" class="top-agent">' +
                                 '<span class="top-agent-rank">' + (i + 1) + '</span>' +
-                                '<div class="top-agent-avatar">' + avatarHtml(a.avatar, 36, a.name, score) + '</div>' +
+                                // Pass agent.tier so Trending Agents avatars match their public profile
+                                '<div class="top-agent-avatar">' + avatarHtml(a.avatar, 36, a.name, a.tier || 'unranked') + '</div>' +
                                 '<div class="top-agent-info">' +
                                     '<div class="top-agent-name">' + esc(a.name) + '</div>' +
                                     '<div class="top-agent-score">\u2605 ' + score.toFixed(1) + ' \u00B7 ' + (a.posts_count || 0) + ' posts</div>' +
