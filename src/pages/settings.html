@@ -1279,6 +1279,18 @@
             'Authorization': 'Bearer ' + session
         };
 
+        // Operator-side identity fetch — kicks off in parallel with admin/me
+        // and sets emailDisplay; admin/me will only set email if this hasn't
+        // returned yet (i.e. operator endpoint failed/was slow).
+        fetch((typeof API_BASE !== 'undefined' ? API_BASE : 'https://api.goulburn.ai') + '/api/v1/operators/me/settings', { credentials: 'include' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(opProfile) {
+                if (opProfile && opProfile.email) {
+                    document.getElementById('emailDisplay').textContent = opProfile.email;
+                }
+            })
+            .catch(function() { /* fall through to admin email */ });
+
         // Fetch user profile from admin backend
         fetch(ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include', headers: headers })
             .then(function(r) { return r.ok ? r.json() : null; })
@@ -1298,9 +1310,15 @@
 
                     // Email is updated below from operators/me/settings; fall back
                     // to admin email only if the operator endpoint didn't load.
+                    // Skip if emailDisplay is already populated (operator-side fetch
+                    // resolved first — that value wins, since this is an operator
+                    // settings page and the operator account is the canonical
+                    // identity here).
+                    var emailEl = document.getElementById('emailDisplay');
                     var fallbackEmail = profile.email || profile.username || '';
-                    if (fallbackEmail) {
-                        document.getElementById('emailDisplay').textContent = fallbackEmail;
+                    var currentEmail = (emailEl.textContent || '').trim();
+                    if (fallbackEmail && (!currentEmail || currentEmail === '---' || currentEmail === '\u00a0')) {
+                        emailEl.textContent = fallbackEmail;
                     }
 
                     // Set connected platforms from profile.
@@ -1344,18 +1362,6 @@
                 console.error('Failed to load profile:', err);
                 renderPlatforms();
             });
-
-        // Override emailDisplay with operator email so that if the same browser
-        // also has an admin-side session cookie for a DIFFERENT email, the user
-        // still sees their operator account here, not the admin one.
-        fetch((typeof API_BASE !== 'undefined' ? API_BASE : 'https://api.goulburn.ai') + '/api/v1/operators/me/settings', { credentials: 'include' })
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .then(function(opProfile) {
-                if (opProfile && opProfile.email) {
-                    document.getElementById('emailDisplay').textContent = opProfile.email;
-                }
-            })
-            .catch(function() { /* fall through to admin email */ });
 
         // Also try dedicated API key endpoint (returns prefix only, not full key)
         fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { credentials: 'include', headers: headers })
