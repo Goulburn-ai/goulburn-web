@@ -1061,7 +1061,7 @@
 
         // If no ID in URL but we have one stored, redirect
         if (!settingsUrlRegId && settingsStoredRegId) {
-            window.location.replace('/dashboard/settings/' + settingsStoredRegId);
+            window.location.replace('/dashboard/settings/' + settingsStoredRegId + window.location.search + window.location.hash);
             return;
         }
         if (settingsUrlRegId && settingsUrlRegId !== settingsStoredRegId) {
@@ -1092,7 +1092,7 @@
 
         if (error) {
             showToast('Platform connection failed: ' + (params.get('error_description') || error), 'error');
-            window.history.replaceState({}, '', window.location.pathname);
+            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
             return;
         }
 
@@ -1109,7 +1109,7 @@
 
         if (!platform) {
             showToast('Unable to determine platform for callback', 'error');
-            window.history.replaceState({}, '', window.location.pathname);
+            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
             return;
         }
 
@@ -1144,7 +1144,7 @@
         })
         .finally(function() {
             sessionStorage.removeItem('goulburn_settings_oauth_platform');
-            window.history.replaceState({}, '', window.location.pathname);
+            window.history.replaceState({}, '', window.location.pathname + window.location.hash);
         });
     }
 
