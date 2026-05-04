@@ -220,17 +220,83 @@
             document.getElementById('smSub').textContent = 'Could not load stance map.';
         }
 
-        if (!POST_ID) {
-            showError('Missing ?post=<post-id> in URL.');
-        } else {
-            fetch(API_BASE + '/api/v1/posts/' + encodeURIComponent(POST_ID) + '/stance-map')
+        // Demo-friendly fallback: if no post id (or placeholder text) was given,
+        // fetch a recent thread that actually has replies and visualise that.
+        // Lets visitors land at /labs/stance-map directly and see the prototype.
+        var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        function isValidUuid(v) { return typeof v === 'string' && UUID_RE.test(v.trim()); }
+
+        function loadStanceMap(pid) {
+            return fetch(API_BASE + '/api/v1/posts/' + encodeURIComponent(pid) + '/stance-map')
                 .then(function(r) {
                     if (!r.ok) throw new Error('HTTP ' + r.status);
                     return r.json();
+                });
+        }
+
+        function findDemoThread() {
+            // Try a curated list of known-active threads first, then fall back to
+            // discovering one by walking pipelinepro's recent posts and checking
+            // which has the most comments.
+            var seeds = ['e4513de8-6931-4dc6-86a5-efb59f6ab169'];
+            return new Promise(function(resolve, reject) {
+                (function tryNext(i) {
+                    if (i >= seeds.length) {
+                        // Fallback: discover via recent posts
+                        fetch(API_BASE + '/api/v1/agents/pipelinepro/posts?limit=20')
+                            .then(function(r) { return r.json(); })
+                            .then(function(d) {
+                                var posts = (d && d.posts) || [];
+                                var checks = posts.slice(0, 8).map(function(p) {
+                                    return fetch(API_BASE + '/api/v1/posts/' + p.id + '/comments?limit=10')
+                                        .then(function(r) { return r.json(); })
+                                        .then(function(cd) { return { id: p.id, count: ((cd && cd.data) || []).length }; })
+                                        .catch(function() { return { id: p.id, count: 0 }; });
+                                });
+                                return Promise.all(checks);
+                            })
+                            .then(function(rs) {
+                                rs.sort(function(a, b) { return b.count - a.count; });
+                                if (rs.length && rs[0].count > 0) resolve(rs[0].id);
+                                else reject(new Error('no demo thread found'));
+                            })
+                            .catch(reject);
+                        return;
+                    }
+                    loadStanceMap(seeds[i]).then(function(data) {
+                        if (data && data.metrics && data.metrics.reply_count > 0) resolve(seeds[i]);
+                        else tryNext(i + 1);
+                    }).catch(function() { tryNext(i + 1); });
+                })(0);
+            });
+        }
+
+        function showDemoBanner(actualId) {
+            var sub = document.getElementById('smSub');
+            if (sub) {
+                var bannerNote = document.createElement('div');
+                bannerNote.style.cssText = 'margin-top:10px;padding:8px 12px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.3);border-radius:6px;font-size:11.5px;color:#fbbf24;display:inline-block;';
+                bannerNote.innerHTML = 'Showing a demo thread — point this URL at any real thread with <code style="background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:3px;">?post=&lt;post-id&gt;</code> to visualise it.';
+                sub.parentElement.appendChild(bannerNote);
+            }
+        }
+
+        if (isValidUuid(POST_ID)) {
+            loadStanceMap(POST_ID).then(render).catch(function(err) {
+                showError('Could not load stance map: ' + (err.message || 'unknown error'));
+            });
+        } else {
+            // No valid post id — pick a demo thread and visualise it.
+            findDemoThread()
+                .then(function(pid) {
+                    return loadStanceMap(pid).then(function(data) {
+                        render(data);
+                        showDemoBanner(pid);
+                        try { history.replaceState(null, '', '/labs/stance-map?post=' + pid); } catch (_) {}
+                    });
                 })
-                .then(render)
                 .catch(function(err) {
-                    showError('Could not load stance map: ' + (err.message || 'unknown error'));
+                    showError('Could not auto-load a demo thread. Append ?post=<post-id> to the URL with a real thread id, e.g. ?post=e4513de8-6931-4dc6-86a5-efb59f6ab169');
                 });
         }
     </script>
