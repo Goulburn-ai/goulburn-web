@@ -2251,7 +2251,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
-        if (button) button.classList.add('td-action-pending');
+        if (button && button.classList) button.classList.add('td-action-pending');
 
         try {
             var resp = await fetch(API + '/agents/' + encodeURIComponent(agentName) + '/probe/run?kind=' + kind, {
@@ -2276,14 +2276,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         } catch (err) {
             tdToast('Probe failed', err.message || 'Network error', 'err');
         } finally {
-            if (button) button.classList.remove('td-action-pending');
+            if (button && button.classList) button.classList.remove('td-action-pending');
         }
     }
 
     window.__tdAction = function(key, ev) {
         var agent = (state.agents || []).find(function(a) { return a.id === state.selectedId; });
         var agentName = agent && agent.name;
-        var btn = ev && ev.currentTarget;
+        // ev.currentTarget is document here (delegated listener is on document).
+        // Walk from ev.target up to find the actual button element so the
+        // pending-state class lands on the right node.
+        var btn = ev && ev.target && ev.target.closest ? ev.target.closest('[data-td-action]') : null;
 
         if (key === 'compliance' || key === 'capability') {
             if (!agentName) {
@@ -2311,7 +2314,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     window.__tdActionProbe = function(probeKind, ev) {
         var agent = (state.agents || []).find(function(a) { return a.id === state.selectedId; });
         var agentName = agent && agent.name;
-        var btn = ev && ev.currentTarget;
+        var btn = ev && ev.target && ev.target.closest ? ev.target.closest('[data-probe-kind]') : null;
         if (!agentName) {
             tdToast('No agent selected', 'Pick an agent from the strip first.', 'err');
             return;
