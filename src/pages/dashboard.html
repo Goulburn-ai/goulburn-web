@@ -1946,6 +1946,25 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         };
         var c = colors[key] || '#F59E0B';
         var dim = '#4A5260';  // brighter than #3A3F4A so silhouettes show even at low scores
+
+        // Progress ring shared by all 5 layer icons. Background ring is dim;
+        // foreground arc fills clockwise from 12 o’clock for `lit` of full
+        // circumference. The pie-style operational icon already carries its
+        // own wedge so we skip the ring there to avoid double-encoding.
+        var RING_CX = 32, RING_CY = 32, RING_R = 29;
+        var RING_CIRC = 2 * Math.PI * RING_R;
+        function _scoreRing() {
+            if (key === 'operational') return '';
+            var arcLen = (RING_CIRC * lit).toFixed(2);
+            var rest = (RING_CIRC - parseFloat(arcLen)).toFixed(2);
+            return ''
+                + '<circle cx="'+RING_CX+'" cy="'+RING_CY+'" r="'+RING_R+'" fill="none" stroke="'+dim+'" stroke-width="2" opacity="0.55"/>'
+                // rotate -90deg around center so arc starts at 12 o’clock
+                + '<circle cx="'+RING_CX+'" cy="'+RING_CY+'" r="'+RING_R+'" fill="none" stroke="'+c+'" stroke-width="2.5" stroke-linecap="round"'
+                + ' stroke-dasharray="'+arcLen+' '+rest+'"'
+                + ' transform="rotate(-90 '+RING_CX+' '+RING_CY+')"/>';
+        }
+        var ring = _scoreRing();
         if (key === 'identity') {
             // Fingerprint — lit by fraction
             var ridges = 6, on = Math.max(1, Math.round(ridges * lit));
@@ -1955,7 +1974,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 var col = (i<on)?c:dim;
                 paths += '<path d="M32 '+(32-rad[i])+' a'+rad[i]+' '+rad[i]+' 0 0 1 '+rad[i]+' '+rad[i]+'" stroke="'+col+'" stroke-width="2" fill="none"/>';
             }
-            return '<svg viewBox="0 0 64 64">'+paths+'</svg>';
+            return '<svg viewBox="0 0 64 64">'+ring+paths+'</svg>';
         }
         if (key === 'capability') {
             // 3x3 dot grid; light up Math.ceil(9*lit) nodes
@@ -1975,7 +1994,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 + '<line x1="50" y1="17" x2="50" y2="29"/><line x1="14" y1="35" x2="14" y2="47"/>'
                 + '<line x1="32" y1="35" x2="32" y2="47"/><line x1="50" y1="35" x2="50" y2="47"/>'
                 + '</g>';
-            return '<svg viewBox="0 0 64 64">'+lines+dots+'</svg>';
+            return '<svg viewBox="0 0 64 64">'+ring+lines+dots+'</svg>';
         }
         if (key === 'operational') {
             // Pie / dial — wedge sweeps proportional to score
@@ -2009,11 +2028,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 ndots += '<circle cx="'+nodes[m][0]+'" cy="'+nodes[m][1]+'" r="'+rN+'" fill="'+(m<on3?c:'transparent')+'" stroke="'+c+'" stroke-width="1.2" opacity="'+(m<on3?1:0.4)+'"/>';
             }
             ndots += '</g>';
-            return '<svg viewBox="0 0 64 64">'+spokes+ndots+'</svg>';
+            return '<svg viewBox="0 0 64 64">'+ring+spokes+ndots+'</svg>';
         }
         // compliance — shield + check sweep
         var checkLit = lit > 0.4;
-        return '<svg viewBox="0 0 64 64">'+
+        return '<svg viewBox="0 0 64 64">'+ring+
             '<path d="M32 6 L54 14 V32 Q54 48 32 58 Q10 48 10 32 V14 Z" fill="none" stroke="'+(checkLit?c:dim)+'" stroke-width="2"/>'+
             (checkLit ? '<path d="M22 32 L30 40 L44 24" stroke="'+c+'" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : '')+
             '</svg>';
