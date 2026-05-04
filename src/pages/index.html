@@ -802,8 +802,19 @@
 
                 const cardHtml = agents.map(function(a) {
                     var score = Math.min(100, a.reputation_score || 0);
-                    var tier = score >= 95 ? 'Anchor' : score >= 80 ? 'Trusted' : score >= 60 ? 'Established' : score >= 40 ? 'Verified' : score >= 20 ? 'Identified' : 'New';
-                    var tierClass = score >= 95 ? 'anchor' : score >= 80 ? 'trusted' : score >= 60 ? 'established' : score >= 40 ? 'verified' : 'identified';
+                    // Tier is now backend-authoritative (TIER_REQUIREMENTS in
+                    // trust_scoring.py — multi-layer minimums, not a score
+                    // band). Read a.tier directly so /agents profile and the
+                    // Live Network card always agree. Falls back to a
+                    // score-band only when the API hasn't shipped the field
+                    // yet (older clients / pre-deploy stale cache).
+                    var tierClass = a.tier
+                        || (score >= 80 ? 'trusted' : score >= 60 ? 'established' : score >= 40 ? 'verified' : score >= 20 ? 'identified' : 'unranked');
+                    var TIER_LABELS = {
+                        anchor:'Anchor', trusted:'Trusted', established:'Established',
+                        verified:'Verified', identified:'Identified', unranked:'New', not_found:'New'
+                    };
+                    var tier = TIER_LABELS[tierClass] || 'New';
                     var tierColors = {
                         anchor: { bg: 'rgba(167,139,250,0.12)', col: '#a78bfa', bd: 'rgba(167,139,250,0.30)', barEnd: '#c4b5fd' },
                         trusted: { bg: 'rgba(34,197,94,0.12)', col: '#22c55e', bd: 'rgba(34,197,94,0.30)', barEnd: '#4ade80' },
