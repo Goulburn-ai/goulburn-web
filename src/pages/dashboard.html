@@ -1134,6 +1134,35 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-evidence-item .td-ev-sym { color: #22C55E; }
     .td-gap-item .td-ev-sym { color: #F59E0B; }
+    /* ── Variant D · layered hero + stats ────────────────────────
+       Per-layer SVG icon on left; title + score + chips + CTA on right. */
+    .td-layer-d-grid { display: flex; gap: 14px; align-items: stretch; }
+    .td-layer-d-icon {
+        flex: 0 0 76px; background: #13151A; border: 1px solid #2A2E34;
+        border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        position: relative; overflow: hidden; align-self: stretch;
+    }
+    .td-layer-d-icon svg { width: 56px; height: 56px; display: block; }
+    .td-layer-d-body { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+    .td-layer-d-body .td-layer-head { margin-bottom: 0; }
+    .td-layer-d-body .td-layer-bar { margin-top: 0; }
+    .td-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+    .td-chip {
+        font-size: 11px; background: #181B21; border: 1px solid #2A2E34;
+        border-radius: 999px; padding: 4px 10px; color: #9AA5B0;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+    .td-chip b { color: #F7F9F9; font-weight: 600; margin-right: 4px; }
+    .td-chip.td-chip-ok { border-color: rgba(34,197,94,0.35); color: #A6D9B6; }
+    .td-chip.td-chip-ok b { color: #C7F0D2; }
+    .td-chip.td-chip-miss { border-color: rgba(245,158,11,0.4); color: #F4C16E; }
+    .td-chip.td-chip-miss b { color: #FFD58A; }
+    .td-layer-compliance .td-layer-d-icon { flex: 0 0 96px; }
+    .td-layer-compliance .td-layer-d-icon svg { width: 64px; height: 64px; }
+    @media (max-width: 520px) {
+        .td-layer-d-grid { flex-direction: column; }
+        .td-layer-d-icon { flex: 0 0 84px; height: 84px; }
+    }
 
     .td-layer-action {
         display: inline-flex; align-items: center; gap: 6px;
@@ -1681,6 +1710,104 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                      : '<span>Riskiest <strong>'+esc(riskiest.name||'')+'</strong> ('+(riskiest.reputation_score||0)+')</span>');
     }
 
+
+    // Variant D · per-layer SVG icon. Returns an inline SVG string.
+    // Lit fraction (0..1) drives how much of the glyph is colored.
+    function _layerIcon(key, score) {
+        var lit = Math.max(0, Math.min(1, (Number(score)||0)/100));
+        var colors = {
+            compliance: '#22C55E',
+            identity:   '#EF4444',
+            capability: '#9B59B6',
+            operational:'#22C55E',
+            reputation: '#3B82F6'
+        };
+        var c = colors[key] || '#F59E0B';
+        var dim = '#3A3F4A';
+        if (key === 'identity') {
+            // Fingerprint — lit by fraction
+            var ridges = 6, on = Math.max(1, Math.round(ridges * lit));
+            var rad = [22,18,14,11,8,5];
+            var paths = '';
+            for (var i=0;i<ridges;i++){
+                var col = (i<on)?c:dim;
+                paths += '<path d="M32 '+(32-rad[i])+' a'+rad[i]+' '+rad[i]+' 0 0 1 '+rad[i]+' '+rad[i]+'" stroke="'+col+'" stroke-width="2" fill="none"/>';
+            }
+            return '<svg viewBox="0 0 64 64">'+paths+'</svg>';
+        }
+        if (key === 'capability') {
+            // 3x3 dot grid; light up Math.ceil(9*lit) nodes
+            var on2 = Math.max(0, Math.min(9, Math.ceil(9*lit)));
+            var dots='';
+            var coords=[[14,14],[32,14],[50,14],[14,32],[32,32],[50,32],[14,50],[32,50],[50,50]];
+            for (var j=0;j<9;j++){
+                var lit2 = j<on2;
+                dots += '<circle cx="'+coords[j][0]+'" cy="'+coords[j][1]+'" r="3" fill="'+(lit2?c:'transparent')+'" stroke="'+(lit2?c:dim)+'" stroke-width="1.5"/>';
+            }
+            // Connectors
+            var lines='<g stroke="'+dim+'" stroke-width="1" fill="none">'
+                + '<line x1="17" y1="14" x2="29" y2="14"/><line x1="35" y1="14" x2="47" y2="14"/>'
+                + '<line x1="17" y1="32" x2="29" y2="32"/><line x1="35" y1="32" x2="47" y2="32"/>'
+                + '<line x1="17" y1="50" x2="29" y2="50"/><line x1="35" y1="50" x2="47" y2="50"/>'
+                + '<line x1="14" y1="17" x2="14" y2="29"/><line x1="32" y1="17" x2="32" y2="29"/>'
+                + '<line x1="50" y1="17" x2="50" y2="29"/><line x1="14" y1="35" x2="14" y2="47"/>'
+                + '<line x1="32" y1="35" x2="32" y2="47"/><line x1="50" y1="35" x2="50" y2="47"/>'
+                + '</g>';
+            return '<svg viewBox="0 0 64 64">'+lines+dots+'</svg>';
+        }
+        if (key === 'operational') {
+            // Pie / dial — wedge sweeps proportional to score
+            var pct = lit;
+            var deg = pct * 360;
+            var rad2 = 24, cx = 32, cy = 32;
+            var rd = (deg-90)*Math.PI/180;
+            var x = cx + rad2 * Math.cos(rd);
+            var y = cy + rad2 * Math.sin(rd);
+            var large = (deg>180)?1:0;
+            var wedge = (pct<=0)?'':'<path d="M'+cx+' '+cy+' L'+cx+' '+(cy-rad2)+' A'+rad2+' '+rad2+' 0 '+large+' 1 '+x.toFixed(2)+' '+y.toFixed(2)+' Z" fill="'+c+'"/>';
+            return '<svg viewBox="0 0 64 64">'+
+                '<circle cx="32" cy="32" r="24" fill="none" stroke="'+dim+'" stroke-width="1.5"/>'+
+                wedge+
+                '<circle cx="32" cy="32" r="3" fill="'+c+'"/>'+
+                '</svg>';
+        }
+        if (key === 'reputation') {
+            // Hub + spokes; nodes get filled progressively
+            var nodes = [[14,14],[50,14],[55,32],[50,50],[14,50],[9,32]];
+            var on3 = Math.max(0, Math.min(6, Math.ceil(6*lit)));
+            var spokes='<g stroke="'+c+'" stroke-width="1" fill="none">';
+            for (var k=0;k<6;k++){
+                spokes += '<line x1="32" y1="32" x2="'+nodes[k][0]+'" y2="'+nodes[k][1]+'" opacity="'+(k<on3?1:0.25)+'"/>';
+            }
+            spokes += '</g>';
+            var ndots='<g>';
+            ndots += '<circle cx="32" cy="32" r="4" fill="'+c+'"/>';
+            for (var m=0;m<6;m++){
+                var rN = (m===2||m===5)?2:2.5;
+                ndots += '<circle cx="'+nodes[m][0]+'" cy="'+nodes[m][1]+'" r="'+rN+'" fill="'+(m<on3?c:'transparent')+'" stroke="'+c+'" stroke-width="1.2" opacity="'+(m<on3?1:0.4)+'"/>';
+            }
+            ndots += '</g>';
+            return '<svg viewBox="0 0 64 64">'+spokes+ndots+'</svg>';
+        }
+        // compliance — shield + check sweep
+        var checkLit = lit > 0.4;
+        return '<svg viewBox="0 0 64 64">'+
+            '<path d="M32 6 L54 14 V32 Q54 48 32 58 Q10 48 10 32 V14 Z" fill="none" stroke="'+(checkLit?c:dim)+'" stroke-width="2"/>'+
+            (checkLit ? '<path d="M22 32 L30 40 L44 24" stroke="'+c+'" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : '')+
+            '</svg>';
+    }
+
+    // Variant D · render evidence/gap strings as chips. Bolds any leading digits.
+    function _chipHtml(text, kind) {
+        // Match leading "123 something" -> bold the number, plain rest.
+        var m = (text||'').match(/^([0-9][0-9,]*\s+|[<>][0-9][0-9,]*\s+)(.+)$/);
+        var inner;
+        if (m) inner = '<b>'+esc(m[1].trim())+'</b> '+esc(m[2]);
+        else inner = esc(text||'');
+        var cls = (kind==='ok')?'td-chip td-chip-ok':(kind==='miss')?'td-chip td-chip-miss':'td-chip';
+        return '<div class="'+cls+'">'+inner+'</div>';
+    }
+
     function renderPanel(agent){
         var panel=document.getElementById('tdPanel');
         if (!panel) return;
@@ -1710,22 +1837,30 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var layerCls = L.key==='compliance'?'td-layer-compliance':'';
             if (L.score<30) layerCls += ' td-layer-weak';
             else if (L.score>=70) layerCls += ' td-layer-strong';
+            // ── Variant D · layered hero + stats ─────────────────
+            // Chips: cap at 3 (1-2 evidence "ok" + 1-2 gap "miss"), keep
+            // CTA persistent. Icon morphs with score.
+            var chips = '';
+            (L.evidence||[]).slice(0,2).forEach(function(e){ chips += _chipHtml(e,'ok'); });
+            (L.gaps||[]).slice(0, Math.max(1, 3-(L.evidence||[]).slice(0,2).length)).forEach(function(g){ chips += _chipHtml(g,'miss'); });
+            var iconSvg = _layerIcon(L.key, L.score);
             html+='<div class="td-layer '+layerCls+'">'+
-                '<div class="td-layer-head">'+
-                    '<div class="td-layer-title">'+
-                        '<span class="td-layer-name">'+esc(L.name)+'</span>'+
-                        (state.eventsByLayer ? renderSparkline(L.key) : '')+
+                '<div class="td-layer-d-grid">'+
+                    '<div class="td-layer-d-icon" aria-hidden="true">'+iconSvg+'</div>'+
+                    '<div class="td-layer-d-body">'+
+                        '<div class="td-layer-head">'+
+                            '<div class="td-layer-title">'+
+                                '<span class="td-layer-name">'+esc(L.name)+'</span>'+
+                                (state.eventsByLayer ? renderSparkline(L.key) : '')+
+                            '</div>'+
+                            '<span class="td-layer-score">'+L.score+'</span>'+
+                        '</div>'+
+                        '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>'+
+                        (chips ? '<div class="td-chips">'+chips+'</div>' : '')+
+                        (L.action ? '<button class="td-layer-action" data-td-action="'+esc(L.key)+'">'+esc(L.action)+' &rsaquo;</button>' : '')+
                     '</div>'+
-                    '<span class="td-layer-score">'+L.score+'</span>'+
                 '</div>'+
-                '<div class="td-layer-bar"><div class="td-layer-bar-fill '+barCls+'" style="width:'+L.score+'%;"></div></div>';
-            if (L.evidence.length)
-                html+='<div class="td-evidence">'+L.evidence.map(function(e){return '<div class="td-evidence-item"><span class="td-ev-sym">+</span><span>'+esc(e)+'</span></div>';}).join('')+'</div>';
-            if (L.gaps.length)
-                html+='<div class="td-gaps">'+L.gaps.map(function(g){return '<div class="td-gap-item"><span class="td-ev-sym">!</span><span>'+esc(g)+'</span></div>';}).join('')+'</div>';
-            if (L.action)
-                html+='<button class="td-layer-action" data-td-action="'+esc(L.key)+'">'+esc(L.action)+' &rsaquo;</button>';
-            html+='</div>';
+            '</div>';
         });
         html+='</div>';
         panel.innerHTML=html;
