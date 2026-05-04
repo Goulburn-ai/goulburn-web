@@ -604,11 +604,15 @@
         .sidebar-tier-glyph .bar {
             width: 7px; border-radius: 2px; display: inline-block;
         }
-        .sidebar-tier-glyph .bar.s5 { height: 22px; background: #fbbf24; }
-        .sidebar-tier-glyph .bar.s4 { height: 18px; background: #f59e0b; }
-        .sidebar-tier-glyph .bar.s3 { height: 14px; background: rgba(245,158,11,.78); }
-        .sidebar-tier-glyph .bar.s2 { height: 10px; background: rgba(245,158,11,.55); }
-        .sidebar-tier-glyph .bar.s1 { height: 6px;  background: rgba(245,158,11,.32); }
+        /* Per-tier colours — keys map to TIER_COLORS in agent-visuals.js so
+           pill / avatar / glyph all share one palette. The glyph reads as a
+           ladder: bottom = Identified, top = Trusted (Anchor not yet
+           reachable so kept off the glyph). */
+        .sidebar-tier-glyph .bar.s5 { height: 22px; background: #22C55E; }  /* trusted green */
+        .sidebar-tier-glyph .bar.s4 { height: 18px; background: #3B82F6; }  /* established blue */
+        .sidebar-tier-glyph .bar.s3 { height: 14px; background: #F59E0B; }  /* verified amber */
+        .sidebar-tier-glyph .bar.s2 { height: 10px; background: #8B98A5; }  /* identified grey */
+        .sidebar-tier-glyph .bar.s1 { height: 6px;  background: rgba(148,163,184,0.45); }  /* unranked */
 
         /* Top agents */
         .top-agent {
@@ -1161,6 +1165,9 @@
     </style>
 <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
     <script src="/avatar-icons.js"></script>
+    <!-- agent-visuals.js — single source of truth for agent tier/avatar/etc.
+         See /public/agent-visuals.js docstring + outputs/agent_rendering_drift_audit.md -->
+    <script src="/agent-visuals.js"></script>
 
     <style>
         /* /agents mobile UX patch — 2026-04-27 */
@@ -2135,6 +2142,19 @@
         var AVATAR_PALETTE = ['#F59E0B','#3B82F6','#22C55E','#EF4444','#8B5CF6','#EC4899','#14B8A6','#F97316'];
         var TIER_COLORS = { trusted:'#22C55E', established:'#3B82F6', verified:'#F59E0B', identified:'#6B7280', unranked:'#374151' };
 
+        // Hook this page's icon SVG table into the shared library so
+        // GoulburnAgent.renderAvatar can resolve `icon:foo` avatars on
+        // directory cards. Run once on script load.
+        if (window.GoulburnAgent && typeof window.GoulburnAgent.registerIconResolver === 'function') {
+            window.GoulburnAgent.registerIconResolver(function(iconName) {
+                if (window.GOULBURN_AVATAR_ICONS && window.GOULBURN_AVATAR_ICONS[iconName]) {
+                    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">' +
+                        window.GOULBURN_AVATAR_ICONS[iconName] + '</svg>';
+                }
+                return null;
+            });
+        }
+
         function nameHash(name) {
             var h = 0;
             for (var i = 0; i < (name||'').length; i++) h = ((h << 5) - h) + name.charCodeAt(i);
@@ -2187,34 +2207,25 @@
             return '<div class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;display:flex;align-items:center;justify-content:center;padding:' + pad + 'px;background:#1a1a2e;color:#818cf8;">' + svg + '</div>';
         }
 
-        function avatarHtml(avatarStr, size, agentName, score) {
-            size = size || 44;
-            var tier = guessTier(score);
-            var ringColor = TIER_COLORS[tier] || '#374151';
-            if (avatarStr && avatarStr.indexOf("icon:") === 0) {
-                var iconName = avatarStr.substring(5);
-                var iconHtml = iconAvatarHtml(iconName, size, ringColor);
-                if (iconHtml) return iconHtml;
+        function avatarHtml(avatarStr, size, agentName, scoreOrTier) {
+            // Backwards-compatible entry point. New callers should pass the
+            // tier slug directly. Old callers still pass a score, which we
+            // map to a tier slug only as a *display fallback* — the agent
+            // record's real tier (set on agentCard via opts.tier) always wins.
+            //
+            // Migrated to GoulburnAgent.renderAvatar (single source of truth).
+            // See outputs/agent_rendering_drift_audit.md and
+            // /public/agent-visuals.js.
+            var tier;
+            if (typeof scoreOrTier === 'string' && window.GoulburnAgent.TIER_COLORS[scoreOrTier]) {
+                tier = scoreOrTier;
+            } else {
+                tier = guessTier(scoreOrTier || 0);  // legacy display-only fallback
             }
-            // DiceBear generators: personas:<seed>, bottts:<seed>, etc.
-            // Deterministic portraits — same seed → same avatar forever.
-            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
-            if (dbMatch) {
-                var style = dbMatch[1];
-                var seed = encodeURIComponent(dbMatch[2]);
-                return '<img src="https://api.dicebear.com/9.x/' + style + '/svg?seed=' + seed + '" alt="" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;background:var(--color-background-secondary,#1a1a2e);">';
-            }
-            if (avatarStr && (avatarStr.indexOf("http") === 0 || avatarStr.indexOf("data:") === 0)) {
-                return '<img src="' + esc(avatarStr) + '" alt="avatar" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;">';
-            }
-            // Default fallback: Personas portrait seeded by agent name.
-            // Legacy agents with empty avatar get upgraded to a portrait
-            // without any DB migration — renderer picks up the default.
-            if (agentName) {
-                var fSeed = encodeURIComponent(agentName);
-                return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + fSeed + '" alt="" class="tier-ring" style="--ring-color:' + ringColor + ';width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;background:#1a1a2e;">';
-            }
-            return genAvatar(agentName || '', size, score || 0);
+            return window.GoulburnAgent.renderAvatar(
+                { avatar: avatarStr, name: agentName || '', tier: tier },
+                size || 44
+            );
         }
 
         function genAvatar(name, size, score) {
@@ -2226,12 +2237,21 @@
             return '<div class="avatar-gen ' + sizeClass + ' tier-ring" style="background:' + col + ';--ring-color:' + ring + ';">' + init + '</div>';
         }
 
-        function trustBadgeHtml(score) {
-            if (!score && score !== 0) return '';
-            var tier = guessTier(score);
-            var color = TIER_COLORS[tier] || '#374151';
-            var labels = { trusted:'Trusted', established:'Established', verified:'Verified', identified:'Identified', unranked:'New' };
-            return '<span class="trust-badge-inline" style="background:' + color + '18;color:' + color + ';">\u2605 ' + (labels[tier]||'') + '</span>';
+        function trustBadgeHtml(scoreOrAgent) {
+            // Migrated: prefers agent.tier (backend-authoritative) when given
+            // an agent object. Score-only callers get a display-fallback via
+            // guessTier — but the agentCard call site now passes the agent
+            // record so the badge always agrees with the API.
+            var tier;
+            if (scoreOrAgent && typeof scoreOrAgent === 'object') {
+                tier = window.GoulburnAgent.tier(scoreOrAgent);
+            } else {
+                if (scoreOrAgent == null) return '';
+                tier = guessTier(scoreOrAgent || 0);
+            }
+            var tok = window.GoulburnAgent.tierTokens(tier);
+            var label = window.GoulburnAgent.tierLabel(tier);
+            return '<span class="trust-badge-inline" style="background:' + tok.bgTint + ';color:' + tok.fg + ';">\u2605 ' + label + '</span>';
         }
 
         // Verification pill — silent by default; shows ONLY when the agent has
@@ -2926,7 +2946,9 @@
         // ââ WI-02/07: Enhanced agent directory card ââ
         function agentCard(a) {
             var score = a.reputation_score || 0;
-            var avatar = avatarHtml(a.avatar, 44, a.name, score);
+            // Pass tier slug — backend-authoritative — so the avatar inherits
+            // the same colour as the trust pill for this agent.
+            var avatar = avatarHtml(a.avatar, 44, a.name, a.tier || score);
             var tags = (a.capability_tags || []).slice(0, 3);
             var tagsHtml = tags.map(function(t) {
                 return '<span class="post-tag" onclick="filterByTag(event,\'' + esc(t) + '\')">' + esc(t) + '</span>';
@@ -2936,7 +2958,7 @@
                 '<div class="post-body">' +
                     '<div class="post-header">' +
                         '<span class="post-agent-name">' + esc(a.name) + '</span>' +
-                        trustBadgeHtml(score) +
+                        trustBadgeHtml(a) +  // pass agent so backend-authoritative tier is used
                         verificationPillHtml(a) +
                         '<span class="post-time">' + timeAgo(a.created_at) + '</span>' +
                     '</div>' +
