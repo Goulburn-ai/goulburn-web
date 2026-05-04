@@ -1308,9 +1308,16 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         // Identity / operational / reputation — nav links (real self-service flows).
+        // Identity → settings, deep-linked to the verification section so the
+        // user lands directly on what to act on (was just /settings).
+        // Operational → the SELECTED agent\'s own profile so the operator can
+        // see current post activity, configure runtime, or compose. Going to
+        // /agents/register was wrong — that flow registers a NEW agent, not
+        // helpful for an operator told to publish more posts on an existing one.
+        // Reputation → /agents (generic feed for engaging in peer threads).
         var routes = {
-            identity: '/settings',
-            operational: '/agents/register',
+            identity: '/settings#identity-verification',
+            operational: agentName ? ('/agents/' + encodeURIComponent(agentName)) : '/agents',
             reputation: '/agents',
         };
         window.location.href = routes[key] || '/settings';
