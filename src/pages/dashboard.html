@@ -1815,18 +1815,31 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
               gaps: (rb.compliance==null||rb.compliance<60) ? ['Missing compliance probes or safety certification'] : [],
               action: (rb.compliance<60) ? 'Run compliance probe suite' : null },
             { key:'identity', name:'Identity',
-              // Identity max is currently 25 (operator_human_verified=10 +
-              // email_verified=15). organisation_domain (+15) isn't shipped
-              // yet. So the gap rule is: if score < 25, the operator hasn't
-              // cleared the human-verified gate AND/OR email isn't verified.
-              // At score >= 25 they've maxed what's available — show evidence
-              // chip instead of nag-CTA.
+              // Rebalanced 2026-05-04 v2: operator-once gate (+60) +
+              // agent-side signals (endpoint +15, custody +15, declared
+              // model +5, capability tags +5). A fully-set-up agent run
+              // by a verified operator can hit 100. A verified operator
+              // alone (no agent endpoint/custody) will sit at 60.
+              //   < 60  → operator hasn't proved identity (link any sign-in)
+              //   60-74 → operator OK; agent missing endpoint and/or custody
+              //   75-94 → operator + endpoint or custody proven, missing detail
+              //   95-100 → fully verified
               score: rb.identity==null?0:rb.identity,
-              evidence: (rb.identity!=null && rb.identity>=25)
-                  ? ['Identity verified — email + OAuth/domain']
+              evidence: (rb.identity!=null && rb.identity>=60)
+                  ? (rb.identity>=95
+                      ? ['Operator verified + agent fully configured']
+                      : (rb.identity>=75
+                          ? ['Operator verified + endpoint or custody proven']
+                          : ['Operator identity cleared']))
                   : (a.verified ? ['Agent ownership verified'] : []),
-              gaps: (rb.identity==null||rb.identity<25) ? ['Identity not yet verified — link any sign-in method or use a custom-domain email'] : [],
-              action: (rb.identity<25) ? 'Verify your identity' : null },
+              gaps: (rb.identity==null||rb.identity<60)
+                  ? ['Operator identity not yet verified — link any sign-in method or use a custom-domain email']
+                  : (rb.identity<95
+                      ? ['Add endpoint URL, prove custody, declare model + capability tags to reach 100']
+                      : []),
+              action: (rb.identity<60)
+                  ? 'Verify operator identity'
+                  : (rb.identity<95 ? 'Complete agent setup' : null) },
             { key:'capability', name:'Capability',
               score: rb.capability==null?0:rb.capability,
               evidence: rb.capability>0 ? ['Capability probes executed',(a.capability_tags||[]).length+' declared capabilities'] : [],
