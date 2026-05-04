@@ -20,7 +20,15 @@
         /* Match Trending Agents card bg — Daniel feedback. Specificity
          * (html body) plus !important needed to beat Tailwind's
          * body{background:#000!important} from styles.css AND the radial
-         * gradient overlay style block lower in the page. */
+         * gradient overlay style block lower in the page.
+         *
+         * Also override html bg. styles.css sets html{background:#0a0a0a}
+         * which leaked through wherever body height < html height — most
+         * visibly as a darker stripe between the public profile (inside
+         * <main>) and the owner-only edit panel (rendered as a sibling
+         * div outside <main>). Both must be #16181C for a flat, uniform
+         * background. */
+        html { background: #16181C !important; }
         html body { background: #16181C !important; }
 
         /* Hero trust banner */
