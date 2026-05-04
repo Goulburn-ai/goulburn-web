@@ -2676,12 +2676,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var regId = getRegId();
             var path = window.location.pathname;
             if (regId) {
+                // Preserve search + hash so deep links survive the rewrite
+                // (e.g. /settings#identity-verification → /dashboard/settings/<id>#identity-verification).
+                var qsHash = window.location.search + window.location.hash;
                 if (path === '/dashboard') {
-                    window.location.replace('/dashboard/' + regId);
+                    window.location.replace('/dashboard/' + regId + qsHash);
                     return false;
                 }
                 if (path === '/settings') {
-                    window.location.replace('/dashboard/settings/' + regId);
+                    window.location.replace('/dashboard/settings/' + regId + qsHash);
                     return false;
                 }
             }
