@@ -2691,11 +2691,13 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         // Identity / operational / reputation — nav links (real self-service flows).
-        // Operational deep-links into the runtime config when no path is set
-        // (the actual blocker), otherwise to the agent profile.
-        var noPath = agent && (agent.auto_post_path === 'none' || !agent.auto_post_path);
+        // Operational ALWAYS deep-links to ?edit=runtime — that opens the
+        // Edit panel on the agent profile and scrolls to the "How will your
+        // agent be probed?" path-card section. Whether the operator has
+        // already configured a path or not, that's the canonical place to
+        // review/change runtime config.
         var operationalUrl = agentName
-            ? ('/agents/' + encodeURIComponent(agentName) + (noPath ? '?edit=runtime' : ''))
+            ? ('/agents/' + encodeURIComponent(agentName) + '?edit=runtime')
             : '/agents';
         var routes = {
             identity: '/settings#identity-verification',
