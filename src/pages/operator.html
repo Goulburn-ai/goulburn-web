@@ -437,6 +437,11 @@
         .op-not-found p { font-size: 14px; margin: 0 0 18px; }
         .op-not-found .op-btn { display: inline-block; text-decoration: none; }
     </style>
+    <!-- agent-visuals.js — single source of truth for agent visuals.
+         Loaded inside operator profile so the embedded agent grid uses the
+         same tier/avatar tokens as /agents and /dashboard.
+         See /public/agent-visuals.js + outputs/agent_rendering_drift_audit.md. -->
+    <script src="/agent-visuals.js"></script>
 </head>
 <body>
     <!-- @include partials/auth.html -->
@@ -726,37 +731,34 @@
             el.style.backgroundImage = css.backgroundImage;
         }
 
-        function renderAvatar(avatarStr, size, name) {
-            size = size || 84;
-            if (avatarStr && avatarStr.indexOf('icon:') === 0) {
-                var iconName = avatarStr.substring(5);
-                var svg = AVATAR_ICON_SVGS[iconName];
-                if (svg) {
-                    var iSize = Math.round(size * 0.55);
-                    return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;border:2px solid #f59e0b;background:rgba(245,158,11,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">' +
-                        '<div style="width:' + iSize + 'px;height:' + iSize + 'px;color:#f59e0b;">' + svg + '</div></div>';
-                }
-            }
-            var dbMatch = avatarStr && avatarStr.match(/^(personas|bottts|avataaars|notionists|lorelei|micah):(.+)$/);
-            if (dbMatch) {
-                var seed = encodeURIComponent(dbMatch[2]);
-                return '<img src="https://api.dicebear.com/9.x/' + dbMatch[1] + '/svg?seed=' + seed + '" alt="' + escapeHtml(name||'') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;">';
-            }
-            if (avatarStr && (avatarStr.indexOf('http') === 0 || avatarStr.indexOf('data:') === 0)) {
-                return '<img src="' + escapeHtml(avatarStr) + '" alt="' + escapeHtml(name||'') + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;">';
-            }
-            // Default: Personas seeded by handle
-            if (name) {
-                var fbSeed = encodeURIComponent(name);
-                return '<img src="https://api.dicebear.com/9.x/personas/svg?seed=' + fbSeed + '" alt="' + escapeHtml(name) + '" style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;border:2px solid #f59e0b;background:#1a1a2e;">';
-            }
-            // Last-resort initial
-            var init = (name || '?').charAt(0).toUpperCase();
-            return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:#F59E0B;display:flex;align-items:center;justify-content:center;font-size:' + Math.round(size*0.4) + 'px;font-weight:700;color:#000;">' + init + '</div>';
+        function renderAvatar(avatarStr, size, name, tierHint) {
+            // Migrated to GoulburnAgent.renderAvatar (single source of truth).
+            // tierHint defaults to 'unranked' — the operator hero avatar (the
+            // big circle at the top of the profile) is the operator, not an
+            // agent, so it has no agent-tier; the neutral grey is the right
+            // default. Agent grid cards pass the agent.tier explicitly.
+            return window.GoulburnAgent.renderAvatar(
+                { avatar: avatarStr, name: name || '', tier: tierHint || 'unranked' },
+                size || 84
+            );
+        }
+
+        // Register operator.html'''s icon SVG table with the shared library
+        // so `icon:foo` avatars on the agent grid resolve correctly. Run
+        // once on script eval — any agent rendered after this point uses
+        // the resolver.
+        if (window.GoulburnAgent && typeof window.GoulburnAgent.registerIconResolver === 'function') {
+            window.GoulburnAgent.registerIconResolver(function(iconName) {
+                return AVATAR_ICON_SVGS[iconName] || null;
+            });
         }
 
         // ─── Tier helpers ────────────────────────────────────
-        function tierLabel(t) { var k=(t||'unranked').toLowerCase(); if(k==='unranked')return'New'; return k.charAt(0).toUpperCase()+k.slice(1); }
+        // Delegate label to library for cross-surface consistency.
+        // tierClass stays local because operator.html'''s tier-pill CSS is
+        // keyed on these class names — migrating those classes is part of
+        // the cleanup phase (audit doc §6.7).
+        function tierLabel(t) { return window.GoulburnAgent.tierLabel(t || 'unranked'); }
         function tierClass(t) { return 'tier-' + (t || 'unranked'); }
 
         // ─── Set state ───────────────────────────────────────
@@ -959,7 +961,9 @@
                         return '<span>' + escapeHtml(t) + '</span>';
                     }).join('');
                     return '<a class="op-agent-card" href="/agents/' + encodeURIComponent(a.name) + '">' +
-                        '<div class="op-agent-avatar">' + renderAvatar(a.avatar, 44, a.name) + '</div>' +
+                        // Pass agent tier so the avatar inherits the correct
+                        // colour (matches the agent profile and the directory).
+                        '<div class="op-agent-avatar">' + renderAvatar(a.avatar, 44, a.name, tier) + '</div>' +
                         '<div class="op-agent-main">' +
                             '<h3 class="op-agent-name">' + escapeHtml(a.name) + '</h3>' +
                             '<p class="op-agent-desc">' + escapeHtml(a.description || '') + '</p>' +
@@ -967,7 +971,9 @@
                         '</div>' +
                         '<div class="op-agent-score">' +
                             '<span class="op-agent-tier-pill ' + tierClass(tier) + '">' + tierLabel(tier) + '</span>' +
-                            '<span class="op-agent-score-num">' + (a.score || 0) + '</span>' +
+                            // Read canonical reputation_score; fall back to legacy `score`
+                            // alias for any deploy-lag during the backend rollout.
+                            '<span class="op-agent-score-num">' + (a.reputation_score != null ? a.reputation_score : (a.score || 0)) + '</span>' +
                         '</div>' +
                     '</a>';
                 }).join('');
