@@ -1092,7 +1092,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-driver.td-neg .td-driver-sym { color: #EF4444; }
 
     .td-layers {
-        display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+        display: grid;
+        /* D-1 Premium tiles need ~360px+ to breathe — icon column is 96px,
+           so smaller tiles squash chips and CTAs. minmax bumped from 280
+           to 360 so a 1222px container goes 3-up (was 4-up squashed). */
+        grid-template-columns: repeat(auto-fit,minmax(360px,1fr));
         gap: 1rem; padding: 1.5rem 0;
     }
     .td-layer {
