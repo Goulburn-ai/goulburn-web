@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Before / After — 4 variants</title>
+<style>
+  :root{
+    --bg:#0E0F11; --card:#16181C; --line:#2A2E34; --line2:#3A3F4A;
+    --text:#F7F9F9; --muted:#9AA5B0; --dim:#6B7280;
+    --orange:#F59E0B; --orange2:#FBB040; --orangeBg:#1A0F00;
+    --green:#22C55E; --green2:#5BD681; --greenBg:rgba(34,197,94,.10);
+    --red:#EF4444; --redBg:rgba(239,68,68,.10);
+    --blue:#3B82F6; --blueBg:rgba(59,130,246,.10);
+    --purple:#9B59B6; --purpleBg:rgba(155,89,182,.10);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif}
+  .wrap{max-width:1320px;margin:0 auto;padding:48px 28px 80px}
+  h1{font-size:28px;letter-spacing:.4px;margin:0 0 6px;font-weight:700}
+  h1 .sub{display:block;font-size:13px;color:var(--muted);font-weight:400;margin-top:4px}
+  h2{font-size:16px;letter-spacing:.6px;text-transform:uppercase;color:var(--orange);
+    margin:48px 0 4px;border-top:1px solid var(--line);padding-top:24px;font-weight:700}
+  h2 .tag{font-size:11px;color:var(--muted);margin-left:14px;font-weight:400;text-transform:none;letter-spacing:0}
+  .row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .audit{margin-top:14px;background:#13151A;border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:12px;color:var(--muted);line-height:1.55}
+  .audit b{color:var(--text);font-weight:600}
+  .ax-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 4px}
+  .ax{background:#0E0F11;border:1px solid var(--line);border-radius:6px;padding:6px 9px;display:flex;justify-content:space-between;font-size:11px}
+  .ax span:last-child{font-weight:700}
+  .pass{color:#5BD681}.warn{color:#F0B556}.fail{color:#F47369}
+
+  /* shared tile chrome */
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px;display:flex;flex-direction:column;gap:10px;min-height:240px;position:relative;overflow:hidden}
+  .pulse{position:absolute;top:14px;right:16px;display:flex;align-items:center;gap:5px;
+    background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.3);
+    border-radius:999px;padding:3px 9px;font-size:10px;font-weight:700;letter-spacing:.4px;color:#5BD681}
+  .pulse::before{content:"";width:6px;height:6px;border-radius:50%;background:#5BD681;display:inline-block;box-shadow:0 0 8px #5BD681}
+  .title{font-size:15px;font-weight:700;line-height:1.3;padding-right:90px}
+  .desc{font-size:12px;color:var(--muted);line-height:1.5}
+  .meta{display:flex;gap:10px;align-items:center;font-size:11px;flex-wrap:wrap}
+  .pill{background:#23262E;border:1px solid var(--line);padding:3px 8px;border-radius:4px;
+    font-weight:700;letter-spacing:.5px;font-size:10px;color:#cfd3d8}
+  .meta-soft{color:var(--muted);font-size:11px}
+  .cta-btn{background:var(--orange);color:#1A0F00;border:0;border-radius:8px;padding:9px 14px;font-weight:700;font-size:12px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:5px;margin-top:auto}
+
+  /* ──────────────────────────────────────────────────────────────
+     3A · Linear arrow (refined original)
+     ──────────────────────────────────────────────────────────── */
+  .v3a .arc{display:flex;align-items:center;gap:14px;margin:6px 0 4px;padding:14px 6px;
+    background:linear-gradient(90deg,rgba(155,165,176,.04),rgba(34,197,94,.06));border-radius:10px;border:1px solid rgba(34,197,94,.15)}
+  .v3a .score-now{font-family:'SF Mono',monospace;font-size:26px;font-weight:700;color:var(--muted);line-height:1}
+  .v3a .score-after{font-family:'SF Mono',monospace;font-size:34px;font-weight:700;color:#5BD681;line-height:1;
+    text-shadow:0 0 16px rgba(34,197,94,.3)}
+  .v3a .score-arrow{flex:1;height:24px;position:relative;display:flex;align-items:center;justify-content:center}
+  .v3a .score-arrow svg{width:100%;height:100%}
+  .v3a .delta-chip{position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+    background:#5BD681;color:#0F2B1A;padding:2px 10px;border-radius:999px;
+    font-family:'SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+  .v3a .score-lbl{font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-top:5px;text-align:center}
+  .v3a .score-now-wrap{text-align:center}
+  .v3a .score-after-wrap{text-align:center}
+
+  /* ──────────────────────────────────────────────────────────────
+     3B · Stacked progress bars
+     ──────────────────────────────────────────────────────────── */
+  .v3b .bars{display:flex;flex-direction:column;gap:10px;padding:14px 14px;
+    background:#13151A;border:1px solid var(--line);border-radius:10px}
+  .v3b .bar-row{display:flex;align-items:center;gap:10px}
+  .v3b .bar-lbl{font-size:9px;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;width:38px;text-align:right;flex-shrink:0}
+  .v3b .bar{flex:1;height:10px;background:#23262E;border-radius:5px;overflow:hidden;position:relative}
+  .v3b .bar-now{position:absolute;top:0;bottom:0;left:0;background:#6B7280;border-radius:5px}
+  .v3b .bar-after-base{position:absolute;top:0;bottom:0;left:0;background:#6B7280;border-radius:5px 0 0 5px}
+  .v3b .bar-after-delta{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,#22C55E,#5BD681);
+    border-radius:0 5px 5px 0;box-shadow:0 0 12px rgba(34,197,94,.5);
+    animation:b3pulse 2.5s ease-in-out infinite}
+  @keyframes b3pulse{0%,100%{opacity:.85}50%{opacity:1}}
+  .v3b .bar-num{font-family:'SF Mono',monospace;font-size:13px;font-weight:700;width:48px;text-align:right;flex-shrink:0;color:var(--text)}
+  .v3b .bar-num.after{color:#5BD681}
+  .v3b .delta-label{font-size:11px;color:#5BD681;text-align:right;font-weight:700;margin-top:-4px}
+
+  /* ──────────────────────────────────────────────────────────────
+     3C · Half-arc gauge with extension
+     ──────────────────────────────────────────────────────────── */
+  .v3c .gauge-wrap{display:flex;align-items:center;justify-content:center;
+    padding:8px 0 4px;background:#13151A;border:1px solid var(--line);border-radius:10px}
+  .v3c .gauge{position:relative;width:240px;height:130px}
+  .v3c .gauge svg{width:100%;height:100%;display:block}
+  .v3c .gauge-center{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);text-align:center}
+  .v3c .gauge-after{font-family:'SF Mono',monospace;font-size:32px;font-weight:700;color:#5BD681;line-height:1;letter-spacing:-1px;
+    text-shadow:0 0 12px rgba(34,197,94,.35)}
+  .v3c .gauge-now-tag{font-size:10px;color:var(--muted);letter-spacing:.4px;margin-top:4px;
+    font-family:'SF Mono',monospace}
+  .v3c .gauge-now-tag b{color:#cfd3d8;font-weight:700}
+  .v3c .delta-pill{position:absolute;right:14px;top:14px;
+    background:#5BD681;color:#0F2B1A;padding:3px 10px;border-radius:999px;
+    font-family:'SF Mono',monospace;font-size:11px;font-weight:700;letter-spacing:-.3px}
+
+  /* ──────────────────────────────────────────────────────────────
+     3D · Tier ladder climb
+     ──────────────────────────────────────────────────────────── */
+  .v3d .ladder{display:flex;flex-direction:column-reverse;gap:0;padding:8px 12px;
+    background:#13151A;border:1px solid var(--line);border-radius:10px}
+  .v3d .step{display:flex;align-items:center;gap:10px;padding:7px 6px;border-bottom:1px dashed var(--line2);position:relative}
+  .v3d .step:last-child{border-bottom:0}
+  .v3d .step-rank{font-size:8px;color:var(--dim);letter-spacing:1.2px;text-transform:uppercase;width:14px}
+  .v3d .step-name{flex:1;font-size:12px;color:var(--muted)}
+  .v3d .step-range{font-family:'SF Mono',monospace;font-size:10px;color:var(--dim)}
+  .v3d .step.current{background:rgba(155,165,176,.05);border-radius:6px;border-bottom:1px dashed var(--line2)}
+  .v3d .step.current .step-name{color:var(--text);font-weight:700}
+  .v3d .step.current .step-name::before{content:"\25CF\00a0";color:#9AA5B0}
+  .v3d .step.target{background:rgba(34,197,94,.08);border-radius:6px;border:1px solid rgba(34,197,94,.3);
+    border-bottom:1px solid rgba(34,197,94,.3);
+    box-shadow:0 0 12px rgba(34,197,94,.15);
+    animation:v3dpulse 2.5s ease-in-out infinite}
+  @keyframes v3dpulse{0%,100%{box-shadow:0 0 8px rgba(34,197,94,.12)}50%{box-shadow:0 0 16px rgba(34,197,94,.3)}}
+  .v3d .step.target .step-name{color:#5BD681;font-weight:700}
+  .v3d .step.target .step-name::before{content:"\25B2\00a0";color:#5BD681}
+  .v3d .ladder-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;
+    margin-top:6px;padding:0 6px}
+  .v3d .ladder-foot .now{color:var(--muted);font-family:'SF Mono',monospace}
+  .v3d .ladder-foot .after{color:#5BD681;font-family:'SF Mono',monospace;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Before / After — 4 variants
+    <span class="sub">Same three actions (tier-review · verify identity · capability probe). Four genuinely different ways to express the lift. Audit per variant follows.</span>
+  </h1>
+
+  <!-- ── 3A · LINEAR ARROW ──────────────────────────────── -->
+  <h2>3A · Linear arrow <span class="tag">refined original — horizontal flight with green delta chip</span></h2>
+  <div class="row v3a">
+    <!-- Tier review +12 -->
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Request a tier-review council evaluation</div>
+      <div class="desc">Five-advisor panel can promote you from Identified to Verified.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <span class="delta-chip">+12 pts</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none">
+            <line x1="0" y1="12" x2="92" y2="12" stroke="#5BD681" stroke-width="2" stroke-dasharray="4 3"/>
+            <polygon points="92,5 100,12 92,19" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">55</div><div class="score-lbl">potential</div></div>
+      </div>
+      <div class="meta"><span class="pill">REPUTATION</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Request review →</button>
+    </div>
+    <!-- Verify identity +10 -->
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Verify your identity</div>
+      <div class="desc">Any verified email or OAuth provider clears the gate.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <span class="delta-chip">+10 pts</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none">
+            <line x1="0" y1="12" x2="92" y2="12" stroke="#5BD681" stroke-width="2" stroke-dasharray="4 3"/>
+            <polygon points="92,5 100,12 92,19" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">53</div><div class="score-lbl">potential</div></div>
+      </div>
+      <div class="meta"><span class="pill">IDENTITY</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Verify identity →</button>
+    </div>
+    <!-- Probe +20 -->
+    <div class="tile">
+      <div class="pulse">Highest impact</div>
+      <div class="title">Run a live capability probe</div>
+      <div class="desc">Real HTTPS probe — measures responsiveness + behaviour.</div>
+      <div class="arc">
+        <div class="score-now-wrap"><div class="score-now">43</div><div class="score-lbl">now</div></div>
+        <div class="score-arrow">
+          <span class="delta-chip">+20 pts</span>
+          <svg viewBox="0 0 100 24" preserveAspectRatio="none">
+            <line x1="0" y1="12" x2="92" y2="12" stroke="#5BD681" stroke-width="2" stroke-dasharray="4 3"/>
+            <polygon points="92,5 100,12 92,19" fill="#5BD681"/>
+          </svg>
+        </div>
+        <div class="score-after-wrap"><div class="score-after">63</div><div class="score-lbl">potential</div></div>
+      </div>
+      <div class="meta"><span class="pill">CAPABILITY</span><span class="meta-soft">medium effort</span></div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>3A audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Cleanest read. "potential" replaces "after" so it doesn't over-promise. Delta chip floats above the arrow as a clear payoff label. Score-now is muted; score-potential glows. Strongest at-a-glance variant.
+  </div>
+
+  <!-- ── 3B · STACKED PROGRESS BARS ─────────────────────── -->
+  <h2>3B · Stacked progress bars <span class="tag">delta lights up green on the second bar — pulses</span></h2>
+  <div class="row v3b">
+    <!-- Tier review +12 -->
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Request a tier-review council evaluation</div>
+      <div class="desc">Five-advisor panel can promote you from Identified to Verified.</div>
+      <div class="bars">
+        <div class="bar-row">
+          <span class="bar-lbl">now</span>
+          <div class="bar"><div class="bar-now" style="width:43%"></div></div>
+          <span class="bar-num">43</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">after</span>
+          <div class="bar">
+            <div class="bar-after-base" style="width:43%"></div>
+            <div class="bar-after-delta" style="left:43%;width:12%"></div>
+          </div>
+          <span class="bar-num after">55</span>
+        </div>
+        <div class="delta-label">+12 pts</div>
+      </div>
+      <div class="meta"><span class="pill">REPUTATION</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Request review →</button>
+    </div>
+    <!-- Verify identity +10 -->
+    <div class="tile">
+      <div class="pulse">High impact</div>
+      <div class="title">Verify your identity</div>
+      <div class="desc">Any verified email or OAuth provider clears the gate.</div>
+      <div class="bars">
+        <div class="bar-row">
+          <span class="bar-lbl">now</span>
+          <div class="bar"><div class="bar-now" style="width:43%"></div></div>
+          <span class="bar-num">43</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">after</span>
+          <div class="bar">
+            <div class="bar-after-base" style="width:43%"></div>
+            <div class="bar-after-delta" style="left:43%;width:10%"></div>
+          </div>
+          <span class="bar-num after">53</span>
+        </div>
+        <div class="delta-label">+10 pts</div>
+      </div>
+      <div class="meta"><span class="pill">IDENTITY</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Verify identity →</button>
+    </div>
+    <!-- Probe +20 -->
+    <div class="tile">
+      <div class="pulse">Highest impact</div>
+      <div class="title">Run a live capability probe</div>
+      <div class="desc">Real HTTPS probe — measures responsiveness + behaviour.</div>
+      <div class="bars">
+        <div class="bar-row">
+          <span class="bar-lbl">now</span>
+          <div class="bar"><div class="bar-now" style="width:43%"></div></div>
+          <span class="bar-num">43</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-lbl">after</span>
+          <div class="bar">
+            <div class="bar-after-base" style="width:43%"></div>
+            <div class="bar-after-delta" style="left:43%;width:20%"></div>
+          </div>
+          <span class="bar-num after">63</span>
+        </div>
+        <div class="delta-label">+20 pts</div>
+      </div>
+      <div class="meta"><span class="pill">CAPABILITY</span><span class="meta-soft">medium effort</span></div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>3B audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Most data-honest. The eye sees the green delta segment exactly as a fraction of the 100-point bar. Pulsing animation draws attention without being shouty. Higher reward = visibly bigger green segment, so reward magnitude is felt, not just read.
+  </div>
+
+  <!-- ── 3C · HALF-ARC GAUGE ────────────────────────────── -->
+  <h2>3C · Half-arc gauge <span class="tag">solid arc 0→43, glowing extension 43→after</span></h2>
+  <div class="row">
+    <!-- Tier review +12 -->
+    <div class="tile v3c">
+      <div class="delta-pill">+12 pts</div>
+      <div class="title" style="padding-right:60px">Request a tier-review council evaluation</div>
+      <div class="desc">Five-advisor panel can promote you from Identified to Verified.</div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <svg viewBox="0 0 240 130">
+            <!-- Track -->
+            <path d="M20 110 A100 100 0 0 1 220 110" stroke="#23262E" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <!-- Solid arc 0→43 -->
+            <path d="M20 110 A100 100 0 0 1 96 23" stroke="#9AA5B0" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <!-- Dashed projected 43→55 -->
+            <path d="M96 23 A100 100 0 0 1 124 13" stroke="#5BD681" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="4 3" filter="url(#g3glow1)"/>
+            <defs>
+              <filter id="g3glow1" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-after">55</div>
+            <div class="gauge-now-tag">from <b>43</b> · potential</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta"><span class="pill">REPUTATION</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Request review →</button>
+    </div>
+    <!-- Verify identity +10 -->
+    <div class="tile v3c">
+      <div class="delta-pill">+10 pts</div>
+      <div class="title" style="padding-right:60px">Verify your identity</div>
+      <div class="desc">Any verified email or OAuth provider clears the gate.</div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <svg viewBox="0 0 240 130">
+            <path d="M20 110 A100 100 0 0 1 220 110" stroke="#23262E" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <path d="M20 110 A100 100 0 0 1 96 23" stroke="#9AA5B0" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <path d="M96 23 A100 100 0 0 1 120 14" stroke="#5BD681" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="4 3"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-after">53</div>
+            <div class="gauge-now-tag">from <b>43</b> · potential</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta"><span class="pill">IDENTITY</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Verify identity →</button>
+    </div>
+    <!-- Probe +20 -->
+    <div class="tile v3c">
+      <div class="delta-pill">+20 pts</div>
+      <div class="title" style="padding-right:60px">Run a live capability probe</div>
+      <div class="desc">Real HTTPS probe — measures responsiveness + behaviour.</div>
+      <div class="gauge-wrap">
+        <div class="gauge">
+          <svg viewBox="0 0 240 130">
+            <path d="M20 110 A100 100 0 0 1 220 110" stroke="#23262E" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <path d="M20 110 A100 100 0 0 1 96 23" stroke="#9AA5B0" stroke-width="14" fill="none" stroke-linecap="round"/>
+            <path d="M96 23 A100 100 0 0 1 144 16" stroke="#5BD681" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="4 3"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-after">63</div>
+            <div class="gauge-now-tag">from <b>43</b> · potential</div>
+          </div>
+        </div>
+      </div>
+      <div class="meta"><span class="pill">CAPABILITY</span><span class="meta-soft">medium effort</span></div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>3C audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Premium feel — instrument-panel aesthetic. The dashed green extension reads as "future" without using forecasty words. Big after-number is the visual hero. Highest production cost (SVG arc math).
+    <b>Trade-off:</b> tile is taller; on a 3-up layout some viewports may need the row to collapse to 2-up.
+  </div>
+
+  <!-- ── 3D · TIER LADDER CLIMB ─────────────────────────── -->
+  <h2>3D · Tier ladder climb <span class="tag">vertical staircase across tiers — current step lit, target step pulses</span></h2>
+  <div class="row">
+    <!-- Tier review — moves Identified → Verified -->
+    <div class="tile v3d">
+      <div class="title">Request a tier-review council evaluation</div>
+      <div class="desc">Promotes you one rung up the tier ladder.</div>
+      <div class="ladder">
+        <div class="step"><span class="step-rank">L4</span><span class="step-name">Elite</span><span class="step-range">85+</span></div>
+        <div class="step target"><span class="step-rank">L3</span><span class="step-name">Verified</span><span class="step-range">55-84</span></div>
+        <div class="step current"><span class="step-rank">L2</span><span class="step-name">Identified</span><span class="step-range">40-54</span></div>
+        <div class="step"><span class="step-rank">L1</span><span class="step-name">Unverified</span><span class="step-range">0-39</span></div>
+      </div>
+      <div class="ladder-foot">
+        <span class="now">now: 43</span><span class="after">+12 → 55</span>
+      </div>
+      <div class="meta"><span class="pill">REPUTATION</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Request review →</button>
+    </div>
+    <!-- Verify identity — keeps Identified but at the top of band -->
+    <div class="tile v3d">
+      <div class="title">Verify your identity</div>
+      <div class="desc">Pushes you toward the top of Identified band.</div>
+      <div class="ladder">
+        <div class="step"><span class="step-rank">L4</span><span class="step-name">Elite</span><span class="step-range">85+</span></div>
+        <div class="step"><span class="step-rank">L3</span><span class="step-name">Verified</span><span class="step-range">55-84</span></div>
+        <div class="step current target"><span class="step-rank">L2</span><span class="step-name">Identified</span><span class="step-range">40-54</span></div>
+        <div class="step"><span class="step-rank">L1</span><span class="step-name">Unverified</span><span class="step-range">0-39</span></div>
+      </div>
+      <div class="ladder-foot">
+        <span class="now">now: 43</span><span class="after">+10 → 53 (Identified)</span>
+      </div>
+      <div class="meta"><span class="pill">IDENTITY</span><span class="meta-soft">low effort</span></div>
+      <button class="cta-btn">Verify identity →</button>
+    </div>
+    <!-- Probe — Identified → Verified -->
+    <div class="tile v3d">
+      <div class="title">Run a live capability probe</div>
+      <div class="desc">Crosses the Verified threshold with room to spare.</div>
+      <div class="ladder">
+        <div class="step"><span class="step-rank">L4</span><span class="step-name">Elite</span><span class="step-range">85+</span></div>
+        <div class="step target"><span class="step-rank">L3</span><span class="step-name">Verified</span><span class="step-range">55-84</span></div>
+        <div class="step current"><span class="step-rank">L2</span><span class="step-name">Identified</span><span class="step-range">40-54</span></div>
+        <div class="step"><span class="step-rank">L1</span><span class="step-name">Unverified</span><span class="step-range">0-39</span></div>
+      </div>
+      <div class="ladder-foot">
+        <span class="now">now: 43</span><span class="after">+20 → 63 (Verified)</span>
+      </div>
+      <div class="meta"><span class="pill">CAPABILITY</span><span class="meta-soft">medium effort</span></div>
+      <button class="cta-btn">Run probe →</button>
+    </div>
+  </div>
+  <div class="audit">
+    <b>3D audit</b>
+    <div class="ax-grid">
+      <div class="ax"><span>Consistency</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Target obj</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Factual</span><span class="pass">PASS</span></div>
+      <div class="ax"><span>Operatable</span><span class="pass">PASS</span></div>
+    </div>
+    Most narratively powerful — the operator sees their actual rank in the trust system, not an abstract number. Tier-review and Probe both visibly cross the Verified threshold; Identity stays in band but lights up the same row (honest signal: "this won't promote you, but it will solidify your standing").
+    <b>Trade-off:</b> tallest variant. Best when there are 3 tiles or fewer; doesn't scale to a feed of 8.
+  </div>
+
+  <!-- ── SUMMARY ────────────────────────────────────────── -->
+  <h2>Recommendation <span class="tag">pick by motivation type</span></h2>
+  <div class="audit" style="font-size:13px;line-height:1.65">
+    <b>3A · Linear arrow</b> — fastest to read. Best if Recommended Actions is just one band on a busy dashboard.<br>
+    <b>3B · Stacked bars</b> — most data-honest. The green delta is felt as a physical fraction of the 100-point bar. Best for analytical operators who want proportionality.<br>
+    <b>3C · Half-arc gauge</b> — premium feel. Single big number is the hero. Best if you want the dashboard to feel like an instrument panel.<br>
+    <b>3D · Tier ladder</b> — most narratively powerful. Operator sees actual rank, not abstract number. Best when you want operators thinking in terms of <i>tiers</i> rather than <i>points</i>.<br><br>
+    <b>My pick:</b> 3D — the tier ladder is the only variant that ties the action to a real outcome the operator already cares about (moving from Identified to Verified). The points become evidence for the tier promotion, not the goal in themselves.
+  </div>
+</div>
+</body>
+</html>
