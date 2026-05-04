@@ -1577,12 +1577,12 @@
             var via = d.human_verified_method === 'custom_domain'
                 ? 'verified email on your domain'
                 : 'linked sign-in method';
-            setIvs('\u2713', 'Identity verified', 'Cleared via ' + via + '. Every agent you own gets +10 on the identity layer.', 'rgba(16, 185, 129, 0.12)');
+            setIvs('\u2713', 'Operator identity cleared', 'Cleared via ' + via + '. Every agent you own gets +60 on the identity layer (one-time \u2014 connecting more providers does not stack).', 'rgba(16, 185, 129, 0.12)');
         } else {
             var hint = d.email_verified
-                ? 'Your email is verified. Link any one provider below to clear the gate and unlock +10 on every agent.'
+                ? 'Your email is verified. Link any one provider below to clear the gate and unlock +60 on every agent.'
                 : 'Confirm your email first, then link any one provider below or use a custom-domain email.';
-            setIvs('\u25cb', 'Verify to unlock +10 per agent', hint, 'rgba(245, 158, 11, 0.10)');
+            setIvs('\u25cb', 'Verify to unlock +60 per agent', hint, 'rgba(245, 158, 11, 0.10)');
         }
     }
     // Hydrate __opSettings from the operators/me/settings call already
