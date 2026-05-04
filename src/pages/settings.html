@@ -752,12 +752,26 @@
             <div id="billingStatus" style="margin-top:0.75rem;font-size:0.85em;color:rgba(247,249,249,0.6);"></div>
         </div>
 
-        <!-- Connected Platforms Section -->
+        <!-- Identity verification Section (was: Connected Platforms) -->
         <div class="settings-card">
-            <h2>Connected Platforms</h2>
+            <h2>Identity verification</h2>
             <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
-                Identity providers linked to your account for sign-in. To award trust points, bind a provider to each agent from its edit panel — that's where Identity &amp; Provenance signals are scored.
+                Verify you're a real human. Any one of the methods below clears the gate — pick whichever is easiest. A verified email on a custom domain is sufficient on its own; if your email is on a free webmail provider (Gmail, Outlook, iCloud, etc.) you also need to link any one OAuth provider.
             </p>
+
+            <!-- Identity-verified status row (set by JS from /me/settings) -->
+            <div id="identityVerifiedStatus" class="platform-row" style="background: var(--dark-100); border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="ivsIcon" style="font-size: 22px;">⏳</span>
+                    <div>
+                        <p id="ivsLabel" style="margin: 0; font-weight: 600;">Checking your verification…</p>
+                        <p id="ivsHint" style="margin: 0; font-size: 0.8rem; color: var(--dark-500);">&nbsp;</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sign-in methods list (header + per-method rows) -->
+            <p style="color: var(--dark-500); font-size: 0.8rem; margin: 1.25rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.05em;">Sign-in methods linked to this account</p>
 
             <!-- Dynamic platform rows rendered by JS -->
             <div id="platformList"></div>
@@ -1029,10 +1043,10 @@
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var PLATFORMS = [
-        { id: 'google',   label: 'Google',   icon: '🔵', trustPts: 15 },
-        { id: 'github',   label: 'GitHub',   icon: '🐙', trustPts: 30 },
-        { id: 'linkedin', label: 'LinkedIn', icon: '💼', trustPts: 15 },
-        { id: 'discord',  label: 'Discord',  icon: '⚙️', trustPts: 10 }
+        { id: 'google',   label: 'Google',   icon: '🔵' },
+        { id: 'github',   label: 'GitHub',   icon: '🐙' },
+        { id: 'linkedin', label: 'LinkedIn', icon: '💼' },
+        { id: 'discord',  label: 'Discord',  icon: '⚙️' }
     ];
     var connectedPlatforms = [];
     var currentApiKey = null;
@@ -1449,20 +1463,20 @@
         var container = document.getElementById('platformList');
         container.innerHTML = PLATFORMS.map(function(p) {
             var isConnected = connectedPlatforms.indexOf(p.id) !== -1;
-            var ptsClass = isConnected ? 'platform-trust-pts active' : 'platform-trust-pts';
-            var ptsText = 'Up to +' + p.trustPts + ' pts per agent';
             return '<div class="platform-row">' +
                 '<div class="platform-info">' +
                     '<div class="platform-icon">' + p.icon + '</div>' +
                     '<div>' +
                         '<p class="platform-name">' + p.label + '</p>' +
-                        '<p class="' + ptsClass + '">' + ptsText + '</p>' +
+                        '<p class="platform-trust-pts" style="color: var(--dark-500); font-size: 0.8rem;">' +
+                          (isConnected ? 'Sign-in available with this method' : 'Optional — already verified by another method, or use this if you want to add a fallback sign-in') +
+                        '</p>' +
                     '</div>' +
                 '</div>' +
                 '<div class="platform-actions">' +
                     '<span class="status-badge ' + (isConnected ? 'status-connected' : 'status-disconnected') + '">' +
                         '<span class="dot"></span>' +
-                        (isConnected ? 'Sign-in linked' : 'Not linked') +
+                        (isConnected ? 'Linked' : 'Not linked') +
                     '</span>' +
                     (isConnected
                         ? '<button class="btn btn-secondary" data-cp-action="disconnect" data-cp-platform="' + p.id + '" style="color: var(--red-500);">Disconnect</button>'
@@ -1471,6 +1485,8 @@
                 '</div>' +
             '</div>';
         }).join('');
+        // After rendering platforms, refresh the identity-verified status row
+        if (typeof refreshIdentityStatus === 'function') refreshIdentityStatus();
     }
 
     // ── Platform OAuth Connect ──
@@ -1528,6 +1544,59 @@
             showToast('Failed to disconnect: ' + err.message, 'error');
         });
     }
+
+    // ── Identity-verified status row ─────────────────────────────────
+    // Reads cached fields off window.__opSettings (populated by the
+    // operators/me/settings fetch). Three states:
+    //   verified:    green check, "Identity verified · via {method}"
+    //   verifiable:  amber, "Verify by linking any provider"
+    //   blocked:     red, "Disposable email — please change your email"
+    var __opSettings = null;
+    function setIvs(icon, label, hint, color) {
+        var elI = document.getElementById('ivsIcon');
+        var elL = document.getElementById('ivsLabel');
+        var elH = document.getElementById('ivsHint');
+        var row = document.getElementById('identityVerifiedStatus');
+        if (!elI || !elL || !elH || !row) return;
+        elI.textContent = icon;
+        elL.textContent = label;
+        elH.textContent = hint || '\u00a0';
+        row.style.background = color || 'var(--dark-100)';
+    }
+    function refreshIdentityStatus() {
+        var d = __opSettings;
+        if (!d) {
+            setIvs('\u23f3', 'Checking your verification…', '', null);
+            return;
+        }
+        if (d.email_disposable) {
+            setIvs('\u26a0', 'Disposable email detected', 'Change your email to a real address — verification cannot complete on a throwaway domain.', 'rgba(220, 38, 38, 0.12)');
+            return;
+        }
+        if (d.human_verified) {
+            var via = d.human_verified_method === 'custom_domain'
+                ? 'verified email on your domain'
+                : 'linked sign-in method';
+            setIvs('\u2713', 'Identity verified', 'Cleared via ' + via + '. Every agent you own gets +10 on the identity layer.', 'rgba(16, 185, 129, 0.12)');
+        } else {
+            var hint = d.email_verified
+                ? 'Your email is verified. Link any one provider below to clear the gate and unlock +10 on every agent.'
+                : 'Confirm your email first, then link any one provider below or use a custom-domain email.';
+            setIvs('\u25cb', 'Verify to unlock +10 per agent', hint, 'rgba(245, 158, 11, 0.10)');
+        }
+    }
+    // Hydrate __opSettings from the operators/me/settings call already
+    // happening on page load (see loadSettingsData) by piggy-backing the
+    // existing fetch — we add a separate fetch here so we don't have to
+    // re-thread the existing chain. Cheap; same endpoint, same response.
+    (function hydrateIvs() {
+        try {
+            fetch((typeof API_BASE !== 'undefined' ? API_BASE : 'https://api.goulburn.ai') + '/api/v1/operators/me/settings', { credentials: 'include' })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(d) { if (d) { __opSettings = d; refreshIdentityStatus(); } })
+                .catch(function() { /* leave row in 'checking' state */ });
+        } catch (_) {}
+    })();
 
     // ── CSP-safe delegated listener for Connect / Disconnect buttons ──
     // The platform list is rendered by renderPlatforms() via innerHTML, which
