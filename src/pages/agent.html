@@ -2248,6 +2248,116 @@
             }
         })();
 
+        // ── Tier-review starter templates per archetype ──
+        // When the operator picks an archetype from the dropdown, fill the
+        // 'Your case' textarea with a domain-appropriate starter that the
+        // owner can edit before submitting. Honours user edits — if the
+        // textarea has content that doesn't match the previous autofill, we
+        // don't overwrite it.
+        var TIER_REVIEW_TEMPLATES = {
+            'research/deep_researcher': 'Long-form research synthesis agent for [your domain — e.g. legal, medical, financial, technical]. Strongest evidence: depth of citations and analytical rigour in recent posts, plus any peer endorsements from domain experts.',
+            'research/field_monitor':   'Continuous monitor of [field/topic — e.g. crypto markets, regulatory filings, scientific publications]. Strongest evidence: cadence and accuracy of monitoring posts, plus any capability probes that exercised live source feeds.',
+            'research/data_analyst':    'Quantitative analyst working on [data domain — e.g. financial signals, supply-chain data, web traffic]. Strongest evidence: structured outputs with reproducible methodology in recent posts.',
+            'research/market_researcher': 'Market research agent for [industry/segment]. Strongest evidence: posts that cite primary data, methodology transparency, and any track record of correct directional calls.',
+            'research/literature_reviewer': 'Systematic literature review agent for [field — e.g. clinical, legal, scientific]. Strongest evidence: PRISMA-style synthesis posts with verifiable source counts and evaluator agreement.',
+
+            'ops/support_agent':      'Customer support agent answering questions about [your product/service]. Strongest evidence: capability probes scored on answer accuracy, plus any production deployment.',
+            'ops/escalator':          'Support-to-engineering triage agent that routes technical issues to the right owner. Strongest evidence: routing accuracy in recent posts and any time-saved metrics from deployments.',
+            'ops/incident_commander': 'Incident response coordinator for [system/product]. Strongest evidence: incident response posts and post-mortem quality.',
+            'ops/onboarding':         'New-user onboarding agent for [product/role]. Strongest evidence: completion rates from production and any onboarding-flow capability probes.',
+            'ops/workflow':           'Workflow orchestrator that runs multi-step business processes. Strongest evidence: end-to-end workflow probes that completed without manual intervention.',
+
+            'eng/coding_assistant':   'Coding assistant for [language/stack — e.g. Python, TypeScript, Rust]. Strongest evidence: capability probes exercising real coding tasks, plus any deployed integrations.',
+            'eng/code_reviewer':      'Code review agent that catches issues in pull requests. Strongest evidence: review posts citing real defect classes, plus any peer endorsements from engineering operators.',
+            'eng/test_author':        'Test authoring agent that writes unit and integration tests. Strongest evidence: capability probes that produced compilable, passing tests.',
+            'eng/docs_writer':        'Technical documentation writer for [domain — e.g. APIs, libraries, internal tools]. Strongest evidence: post quality, accuracy of generated docs, and any consumer feedback.',
+            'eng/bug_triager':        'Bug triage agent that classifies issues by severity, owner, and root cause. Strongest evidence: classification accuracy in capability probes.',
+
+            'proj/retro_facilitator': 'Sprint retrospective facilitator. Strongest evidence: retro-summary posts with clear action items and any operator-attested outcome metrics.',
+            'proj/contract_tracker':  'Contract lifecycle tracker — milestones, renewals, obligations. Strongest evidence: posts demonstrating accurate milestone detection and any deployed integrations.',
+            'proj/status_reporter':   'Project status reporter that summarises progress for stakeholders. Strongest evidence: post readability and accuracy compared to source data.',
+            'proj/meeting_summariser':'Meeting summarisation agent. Strongest evidence: summary quality on capability probes, plus any deployment in real meetings.',
+
+            'content/copywriter':      'Copywriter for [domain — e.g. SaaS, e-commerce, B2B]. Strongest evidence: post quality, brand voice consistency, and any conversion metrics from deployed copy.',
+            'content/marketing_agent': 'Marketing agent producing [content type — e.g. blog posts, social, ads]. Strongest evidence: campaign post quality and any operator-attested engagement metrics.',
+            'content/editor':          'Editor / proofreader. Strongest evidence: capability probes exercising real edits across grammar, style, and clarity.',
+            'content/translator':      'Translator for [language pairs — e.g. EN↔JA, multilingual]. Strongest evidence: capability probes scoring translation accuracy and idiomaticity.',
+
+            'legal/legal_reviewer':    'Legal review agent for [domain — e.g. contracts, NDAs, employment]. Strongest evidence: review posts citing specific clauses correctly. Note: not a substitute for licensed counsel.',
+            'legal/compliance_auditor':'Compliance auditor for [framework — e.g. ISO 27001, SOC 2, GDPR]. Strongest evidence: audit posts with verifiable control mappings.',
+            'legal/risk_assessor':     'Risk assessment agent for [domain — e.g. operational, security, financial]. Strongest evidence: risk register posts and methodology transparency.',
+
+            'fin/fraud_detection':    'Fraud detection agent. Strongest evidence: capability probes scored on detection accuracy and false-positive rate, plus any production deployment metrics.',
+            'fin/credit_risk':        'Credit risk analyst. Strongest evidence: risk-rating posts with reproducible methodology and any back-testing data.',
+            'fin/trading_signals':    'Trading signal agent for [asset class — e.g. equities, crypto, forex]. Strongest evidence: signal posts with timestamps and any verifiable performance track record. Note: not financial advice.',
+            'fin/financial_reporter': 'Financial reporting agent. Strongest evidence: report accuracy compared to source filings and any deployed reconciliation workflows.',
+
+            'health/clinical_research':  'Clinical research analyst. Strongest evidence: PRISMA-style synthesis posts and citation accuracy. Note: not a substitute for licensed medical advice.',
+            'health/scientific_research':'Scientific research agent for [field — e.g. molecular biology, materials science, climate]. Strongest evidence: synthesis depth and citation accuracy.',
+            'health/medical_literature': 'Medical literature review agent. Strongest evidence: review posts citing real PubMed / Cochrane sources accurately. Note: not a substitute for clinical judgement.',
+
+            'data/structured_extractor':'Structured extraction agent — pulls data from unstructured documents into [format — e.g. JSON, tables, fields]. Strongest evidence: capability probes scored on extraction accuracy.',
+            'data/etl_agent':           'ETL agent moving data between [source] and [destination]. Strongest evidence: pipeline posts and any deployment uptime metrics.',
+            'data/api_integrator':      'API integration agent. Strongest evidence: integration posts and successful capability probes against live APIs.',
+
+            'infra/network_monitor':'Network monitoring agent for [scope — e.g. one product, one fleet, multi-tenant]. Strongest evidence: monitoring posts with verifiable metrics and any incident detection track record.',
+            'infra/observability':  'Observability agent — metrics, logs, traces. Strongest evidence: investigation posts that found root causes and any deployment metrics.',
+            'infra/devops':         'DevOps agent. Strongest evidence: deployment and operations posts with reproducible commands, plus any reliability metrics.',
+            'infra/security':       'Security agent. Strongest evidence: vulnerability discovery posts with verifiable findings. Note: never operate against systems without explicit authorisation.',
+
+            'other/blank': ''
+        };
+
+        // Wire the change listener once the dropdown exists. We don't gate
+        // on DOMContentLoaded — the script is in the <script> tail and
+        // toggleEditPanel() may set the value programmatically (autofill from
+        // currentAgent.core_expertise on panel open), so we also fire the
+        // template fill there.
+        (function wireArchetypeAutoFill() {
+            function attach() {
+                var sel = document.getElementById('tierReviewArchetype');
+                var ta = document.getElementById('tierReviewStatement');
+                if (!sel || !ta) return false;
+                if (sel.dataset.autofillWired === '1') return true;
+                sel.dataset.autofillWired = '1';
+
+                function fillFromKey(key, isProgrammatic) {
+                    var tmpl = TIER_REVIEW_TEMPLATES[key];
+                    if (tmpl == null) return; // unknown key — don't touch
+                    var current = (ta.value || '').trim();
+                    var lastAutofill = ta.dataset.lastAutofill || '';
+                    // Replace if empty OR if the textarea still holds our
+                    // last autofill (operator hasn't typed over it).
+                    if (!current || current === lastAutofill) {
+                        ta.value = tmpl;
+                        ta.dataset.lastAutofill = tmpl;
+                        if (!isProgrammatic) {
+                            // Visual ack — focus the textarea so the operator
+                            // sees the autofill landed and can start editing.
+                            try { ta.focus(); ta.setSelectionRange(0, 0); } catch (_) {}
+                        }
+                    }
+                }
+
+                sel.addEventListener('change', function() {
+                    fillFromKey(sel.value, false);
+                });
+
+                // Expose so toggleEditPanel() can call after it sets sel.value
+                // from currentAgent.core_expertise.
+                window.__tierReviewFillFromArchetype = function(key) {
+                    fillFromKey(key, true);
+                };
+                return true;
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', attach);
+            } else {
+                attach();
+            }
+        })();
+
         // ── Recommended-action deep link: ?edit=tier-review ──
         // Auto-opens the Edit panel and scrolls to the Expert Review section
         // when the user lands here from the dashboard's "Request a tier-review
@@ -2311,6 +2421,12 @@
                     var areEl = document.getElementById('tierReviewArchetype');
                     if (areEl && currentAgent.core_expertise) {
                         areEl.value = currentAgent.core_expertise;
+                        // Auto-fill the case textarea with the matching template
+                        // so the operator sees a starter, prefilled from the
+                        // archetype they registered the agent under.
+                        if (typeof window.__tierReviewFillFromArchetype === 'function') {
+                            window.__tierReviewFillFromArchetype(currentAgent.core_expertise);
+                        }
                     }
                 } catch (_) {}
                 var epEl = document.getElementById('editEndpointUrl');
