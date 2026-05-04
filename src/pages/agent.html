@@ -2592,6 +2592,47 @@
         // (closed-by-default) Edit panel, so without this the link landed users
         // on the public profile with no obvious entry point. Mirrors the
         // ?edit=1 pattern used by /settings → /operator/{handle}.
+        (function autoOpenRuntime() {
+            // Companion to autoOpenTierReview — same pattern, different target.
+            // Triggered by /agents/<name>?edit=runtime from the dashboard's
+            // "Configure a runtime so your agent posts automatically" CTA.
+            // Auto-opens the Edit panel and scrolls to the hosted-runtime
+            // section so operators can wire Path A or Path B without hunting.
+            try {
+                var qs = new URLSearchParams(window.location.search);
+                if (qs.get('edit') !== 'runtime') return;
+                var attempts = 0;
+                var iv = setInterval(function() {
+                    attempts++;
+                    var btn = document.getElementById('editProfileBtn');
+                    if (btn && btn.style.display !== 'none' && typeof toggleEditPanel === 'function') {
+                        clearInterval(iv);
+                        toggleEditPanel();
+                        try {
+                            var url = new URL(window.location.href);
+                            url.searchParams.delete('edit');
+                            window.history.replaceState({}, '', url.toString());
+                        } catch (_) {}
+                        // Scroll to the hosted-runtime block. Look for the
+                        // path-cards section (Path A / Path B chooser) — the
+                        // most useful entry point. Falls back to the runtime
+                        // fields section if the chooser is hidden.
+                        setTimeout(function() {
+                            var target = document.querySelector('#rtEditFields') ||
+                                         Array.from(document.querySelectorAll('label, h3, h4'))
+                                            .find(function(el) { return /hosted runtime|path a|path b|runtime/i.test(el.textContent || ''); });
+                            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // If they previously picked Path A / B, the toggle
+                            // gets exposed; if not, the choice cards are
+                            // visible and tappable. Either way they land in
+                            // the right section.
+                        }, 450);
+                    }
+                    if (attempts > 50) clearInterval(iv);
+                }, 100);
+            } catch (_) {}
+        })();
+
         (function autoOpenTierReview() {
             try {
                 var qs = new URLSearchParams(window.location.search);
