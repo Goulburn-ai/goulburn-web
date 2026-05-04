@@ -1111,7 +1111,8 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-layer-score {
         font-family: 'SF Mono','Menlo','Consolas',monospace;
-        font-size: 1.5rem; font-weight: 400; color: #F7F9F9;
+        font-size: 2.5rem; font-weight: 400; color: #F7F9F9;
+        line-height: 1; letter-spacing: -1px;
     }
     .td-layer-bar {
         width: 100%; height: 4px; background: #2A2E34;
@@ -1134,23 +1135,42 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-evidence-item .td-ev-sym { color: #22C55E; }
     .td-gap-item .td-ev-sym { color: #F59E0B; }
-    /* ── Variant D · layered hero + stats ────────────────────────
-       Per-layer SVG icon on left; title + score + chips + CTA on right. */
+    /* ── Variant D-1 · Premium/Bold layered hero + stats ──────────
+       Tier-color halo (bg tint + 3px left stripe + tier border) makes
+       "what is this layer" instantly readable at a glance. */
+    .td-layer { --lcol: #F59E0B; --lcol-bg: rgba(245,158,11,0.08); --lcol-border: rgba(245,158,11,0.30); }
+    .td-layer.td-layer-color-identity    { --lcol: #EF4444; --lcol-bg: rgba(239,68,68,0.10);  --lcol-border: rgba(239,68,68,0.35);  }
+    .td-layer.td-layer-color-capability  { --lcol: #9B59B6; --lcol-bg: rgba(155,89,182,0.10); --lcol-border: rgba(155,89,182,0.35); }
+    .td-layer.td-layer-color-operational { --lcol: #22C55E; --lcol-bg: rgba(34,197,94,0.10);  --lcol-border: rgba(34,197,94,0.35);  }
+    .td-layer.td-layer-color-reputation  { --lcol: #3B82F6; --lcol-bg: rgba(59,130,246,0.10); --lcol-border: rgba(59,130,246,0.35); }
+    .td-layer.td-layer-color-compliance  { --lcol: #22C55E; --lcol-bg: rgba(34,197,94,0.10);  --lcol-border: rgba(34,197,94,0.35);  }
+
     .td-layer-d-grid { display: flex; gap: 14px; align-items: stretch; }
     .td-layer-d-icon {
-        flex: 0 0 76px; background: #13151A; border: 1px solid #2A2E34;
-        border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        flex: 0 0 96px;
+        background: var(--lcol-bg);
+        border: 1px solid var(--lcol-border);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
         position: relative; overflow: hidden; align-self: stretch;
     }
-    .td-layer-d-icon svg { width: 56px; height: 56px; display: block; }
+    .td-layer-d-icon::before {
+        content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+        width: 3px; background: var(--lcol);
+    }
+    .td-layer-d-icon svg {
+        width: 64px; height: 64px; display: block;
+        filter: drop-shadow(0 0 8px var(--lcol));
+    }
     .td-layer-d-body { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
     .td-layer-d-body .td-layer-head { margin-bottom: 0; }
     .td-layer-d-body .td-layer-bar { margin-top: 0; }
     .td-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
     .td-chip {
-        font-size: 11px; background: #181B21; border: 1px solid #2A2E34;
-        border-radius: 999px; padding: 4px 10px; color: #9AA5B0;
+        font-size: 12px; background: #181B21; border: 1px solid #2A2E34;
+        border-radius: 999px; padding: 6px 12px; color: #9AA5B0;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+        display: inline-flex; align-items: center; gap: 6px;
     }
     /* Miss-chips often carry sentence-length copy ("No endpoint or runtime
        configured — agent cannot auto-publish"). nowrap+ellipsis on those
@@ -1160,13 +1180,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         white-space: normal; line-height: 1.4; padding: 5px 10px;
         max-width: 100%; flex: 1 1 100%;
     }
-    .td-chip b { color: #F7F9F9; font-weight: 600; margin-right: 4px; }
+    .td-chip b { color: #F7F9F9; font-weight: 700; font-family: 'SF Mono','Menlo','Consolas',monospace; }
     .td-chip.td-chip-ok { border-color: rgba(34,197,94,0.35); color: #A6D9B6; }
     .td-chip.td-chip-ok b { color: #C7F0D2; }
     .td-chip.td-chip-miss { border-color: rgba(245,158,11,0.4); color: #F4C16E; }
     .td-chip.td-chip-miss b { color: #FFD58A; }
-    .td-layer-compliance .td-layer-d-icon { flex: 0 0 96px; }
-    .td-layer-compliance .td-layer-d-icon svg { width: 64px; height: 64px; }
+    /* (compliance now uses default 96px icon col, no override needed) */
     @media (max-width: 520px) {
         .td-layer-d-grid { flex-direction: column; }
         .td-layer-d-icon { flex: 0 0 84px; height: 84px; }
@@ -1181,7 +1200,14 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
        3. The chips block sits at the top, action/healthy at the bottom,
           empty space lives in between rather than below — body still
           looks intentional even when content is sparse. */
-    .td-layer-d-body .td-layer-action { margin-top: auto; }
+    .td-layer-d-body .td-layer-action {
+        margin-top: auto;
+        width: 100%;
+        justify-content: space-between;
+        align-self: stretch;
+        padding: 11px 14px;
+        font-size: 0.8125rem;
+    }
     .td-layer-healthy {
         margin-top: auto; display: inline-flex; align-items: center;
         gap: 6px; font-size: 11px; color: #5BD681; font-weight: 600;
@@ -1227,12 +1253,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
        Same pill shape as the CTA button, lighter green tint, calmer
        padding so the row's bottom-anchor feels balanced across tiles. */
     .td-layer-healthy {
-        padding: 8px 12px;
+        padding: 11px 14px;
         border: 1px solid rgba(34,197,94,0.30);
         background: rgba(34,197,94,0.06);
         border-radius: 8px;
         font-size: 12px;
         gap: 8px;
+        width: 100%;
+        align-self: stretch;
+        justify-content: flex-start;
     }
 
     .td-layer-action {
@@ -1967,6 +1996,8 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var layerCls = L.key==='compliance'?'td-layer-compliance':'';
             if (L.score<30) layerCls += ' td-layer-weak';
             else if (L.score>=70) layerCls += ' td-layer-strong';
+            // D-1 Premium/Bold: per-layer tier-color halo on icon column
+            layerCls += ' td-layer-color-' + L.key;
             // ── Variant D · layered hero + stats ─────────────────
             // Chips: cap at 3 (1-2 evidence "ok" + 1-2 gap "miss"), keep
             // CTA persistent. Icon morphs with score.
