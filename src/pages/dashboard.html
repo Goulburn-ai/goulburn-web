@@ -1154,7 +1154,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
     .td-layer.td-layer-color-identity    { --lcol: #EF4444; --lcol-bg: rgba(239,68,68,0.10);  --lcol-border: rgba(239,68,68,0.35);  }
     .td-layer.td-layer-color-capability  { --lcol: #9B59B6; --lcol-bg: rgba(155,89,182,0.10); --lcol-border: rgba(155,89,182,0.35); }
-    .td-layer.td-layer-color-operational { --lcol: #22C55E; --lcol-bg: rgba(34,197,94,0.10);  --lcol-border: rgba(34,197,94,0.35);  }
+    .td-layer.td-layer-color-operational { --lcol: #14B8A6; --lcol-bg: rgba(20,184,166,0.10); --lcol-border: rgba(20,184,166,0.35); }
     .td-layer.td-layer-color-reputation  { --lcol: #3B82F6; --lcol-bg: rgba(59,130,246,0.10); --lcol-border: rgba(59,130,246,0.35); }
     .td-layer.td-layer-color-compliance  { --lcol: #22C55E; --lcol-bg: rgba(34,197,94,0.10);  --lcol-border: rgba(34,197,94,0.35);  }
 
@@ -1622,7 +1622,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     .td-pulse-seg.td-seg-compliance { background: #F59E0B; }
     .td-pulse-seg.td-seg-identity { background: #EF4444; }
     .td-pulse-seg.td-seg-capability { background: #8B5CF6; }
-    .td-pulse-seg.td-seg-operational { background: #22C55E; }
+    .td-pulse-seg.td-seg-operational { background: #14B8A6; }
     .td-pulse-seg.td-seg-reputation { background: #06B6D4; }
     .td-pulse-labels {
         display: flex; justify-content: space-between;
@@ -1741,7 +1741,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             <div class="td-pulse-legend-item" data-layer="compliance"><span class="td-pulse-legend-sw" style="background:#F59E0B;"></span>Compliance</div>
             <div class="td-pulse-legend-item" data-layer="identity"><span class="td-pulse-legend-sw" style="background:#EF4444;"></span>Identity</div>
             <div class="td-pulse-legend-item" data-layer="capability"><span class="td-pulse-legend-sw" style="background:#8B5CF6;"></span>Capability</div>
-            <div class="td-pulse-legend-item" data-layer="operational"><span class="td-pulse-legend-sw" style="background:#22C55E;"></span>Operational</div>
+            <div class="td-pulse-legend-item" data-layer="operational"><span class="td-pulse-legend-sw" style="background:#14B8A6;"></span>Operational</div>
             <div class="td-pulse-legend-item" data-layer="reputation"><span class="td-pulse-legend-sw" style="background:#06B6D4;"></span>Reputation</div>
         </div>
         <button class="td-pulse-clear" id="tdPulseClear" style="display:none;">Clear filter \u2715</button>
@@ -1897,7 +1897,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             compliance: '#22C55E',
             identity:   '#EF4444',
             capability: '#9B59B6',
-            operational:'#22C55E',
+            operational:'#14B8A6',
             reputation: '#3B82F6'
         };
         var c = colors[key] || '#F59E0B';
@@ -2253,7 +2253,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     // Sparkline: 7-day event density for one layer. 80\u00d718 viewBox, 7 points.
     var LAYER_COLOURS = {
         compliance: '#F59E0B', identity: '#EF4444',
-        capability: '#8B5CF6', operational: '#22C55E', reputation: '#06B6D4',
+        capability: '#8B5CF6', operational: '#14B8A6', reputation: '#06B6D4',
     };
 
     function renderSparkline(layerKey) {
