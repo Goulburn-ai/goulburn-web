@@ -1563,16 +1563,42 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     /* Compact upvote rows (Week 4 polish) */
     .td-event.td-event-upvote .td-event-body { opacity: 0.65; }
     .td-event.td-event-upvote .td-event-text { font-size: 0.8rem; }
-    .td-timeline-more {
-        margin-top: 0.65rem; padding: 0.5rem 0.9rem;
-        background: transparent; border: 1px solid #2A2E34;
-        color: #B1B7BD; border-radius: 0.35rem;
-        font-size: 0.8125rem; font-weight: 500; cursor: pointer;
-        text-align: center; width: 100%;
+    /* Timeline pagination — replaces the old .td-timeline-more expand-all
+       button. Shows Prev | window-of-page-numbers | Next + meta. */
+    .td-timeline-pager {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+        margin-top: 12px; padding: 10px 12px;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid #2A2E34; border-radius: 8px;
+        font-size: 0.8125rem;
     }
-    .td-timeline-more:hover { border-color: #3A3F45; color: #F7F9F9; }
-    .td-timeline-less { color: rgba(247,249,249,0.55); }
-    .td-timeline-less:hover { color: #F7F9F9; }
+    .td-page-nav, .td-page-num {
+        background: transparent; border: 1px solid #2A2E34;
+        color: #B1B7BD; border-radius: 6px;
+        padding: 5px 10px; font-size: 0.78rem; font-weight: 500;
+        cursor: pointer; min-width: 32px; text-align: center;
+        font-family: inherit;
+    }
+    .td-page-nav:hover:not(:disabled),
+    .td-page-num:hover:not(.td-page-num-active) {
+        border-color: #3A3F45; color: #F7F9F9; background: rgba(255,255,255,0.03);
+    }
+    .td-page-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+    .td-page-num-active {
+        background: #F59E0B; border-color: #F59E0B; color: #1A0F00;
+        font-weight: 700;
+    }
+    .td-page-nums {
+        display: flex; gap: 4px; align-items: center;
+    }
+    .td-page-ellipsis {
+        color: #6B7280; padding: 0 4px; font-size: 0.78rem;
+    }
+    .td-page-meta {
+        margin-left: auto; color: #9AA5B0; font-size: 0.74rem;
+        font-family: 'SF Mono','Menlo','Consolas',monospace;
+    }
+    .td-page-meta strong { color: #F7F9F9; font-weight: 700; }
 
     /* ====== Option A — Sparklines inside layer panels ====== */
     .td-layer-title {
@@ -2061,7 +2087,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
     }
     // Evidence timeline (Week 2)
-    var DEFAULT_TIMELINE_CAP = 5;
+    var TIMELINE_PAGE_SIZE = 10;  // events per page (was: 5 cap + show-all)
     function _renderEventHtml(e) {
         var sym = e.impact === 'pos' ? '+' : (e.impact === 'neg' ? '\u2212' : '\u00B7');
         var symCls = e.impact === 'pos' ? 'td-event-pos' : (e.impact === 'neg' ? 'td-event-neg' : 'td-event-neutral');
@@ -2093,51 +2119,91 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         wrap.style.display = '';
-        // Reset expanded state on every fresh render (new fetch / filter change).
-        // _drawTimeline reuses the same events array for expand/collapse without refetching.
+        // Reset pagination on every fresh render (new fetch / filter change).
         state.timelineEvents = events;
-        state.timelineExpanded = false;
+        state.timelinePage = 0;
         _drawTimeline();
     }
 
-    // Render the timeline at its current expanded state. Splits state.timelineEvents
-    // into initial (cap=5) + rest, with a Show-more / Show-less toggle button.
+    // Render the timeline at the current page. Pagination shows
+    // TIMELINE_PAGE_SIZE events per page with Prev / page numbers / Next
+    // controls — replaces the old expand-all "Show 195 more" pattern that
+    // produced an unscrollable page.
     function _drawTimeline() {
         var timeline = document.getElementById('tdTimeline');
         if (!timeline) return;
         var events = state.timelineEvents || [];
-        var cap = DEFAULT_TIMELINE_CAP;
-        var rest = events.slice(cap);
-        var visibleEvents = state.timelineExpanded ? events : events.slice(0, cap);
+        var size = TIMELINE_PAGE_SIZE;
+        var totalPages = Math.max(1, Math.ceil(events.length / size));
+        // Clamp page to valid range
+        if (state.timelinePage == null) state.timelinePage = 0;
+        if (state.timelinePage > totalPages - 1) state.timelinePage = totalPages - 1;
+        if (state.timelinePage < 0) state.timelinePage = 0;
+        var page = state.timelinePage;
+        var start = page * size;
+        var end = start + size;
+        var visibleEvents = events.slice(start, end);
         var html = visibleEvents.map(_renderEventHtml).join('');
 
-        if (rest.length > 0) {
-            if (state.timelineExpanded) {
-                html += '<button class="td-timeline-more td-timeline-less" id="tdTimelineLess">Show less</button>';
-            } else {
-                html += '<button class="td-timeline-more" id="tdTimelineMore">Show ' + rest.length + ' more</button>';
+        if (events.length > size) {
+            // Pagination footer
+            var winSize = 5;  // window of page numbers around current
+            var winStart = Math.max(0, page - Math.floor(winSize/2));
+            var winEnd = Math.min(totalPages, winStart + winSize);
+            if (winEnd - winStart < winSize) winStart = Math.max(0, winEnd - winSize);
+            var pages = '';
+            // First-page jump
+            if (winStart > 0) {
+                pages += '<button class="td-page-num" data-page="0">1</button>';
+                if (winStart > 1) pages += '<span class="td-page-ellipsis">…</span>';
             }
+            for (var i = winStart; i < winEnd; i++) {
+                var cls = i === page ? 'td-page-num td-page-num-active' : 'td-page-num';
+                pages += '<button class="' + cls + '" data-page="' + i + '">' + (i + 1) + '</button>';
+            }
+            // Last-page jump
+            if (winEnd < totalPages) {
+                if (winEnd < totalPages - 1) pages += '<span class="td-page-ellipsis">…</span>';
+                pages += '<button class="td-page-num" data-page="' + (totalPages - 1) + '">' + totalPages + '</button>';
+            }
+            var prevDisabled = page === 0 ? ' disabled' : '';
+            var nextDisabled = page >= totalPages - 1 ? ' disabled' : '';
+            html += '<div class="td-timeline-pager">' +
+                '<button class="td-page-nav" data-action="prev"' + prevDisabled + '>← Prev</button>' +
+                '<div class="td-page-nums">' + pages + '</div>' +
+                '<button class="td-page-nav" data-action="next"' + nextDisabled + '>Next →</button>' +
+                '<div class="td-page-meta">' +
+                    'Page <strong>' + (page + 1) + '</strong> of ' + totalPages +
+                    ' · ' + events.length + ' events' +
+                '</div>' +
+            '</div>';
         }
         timeline.innerHTML = html;
 
-        var moreBtn = document.getElementById('tdTimelineMore');
-        if (moreBtn) {
-            moreBtn.addEventListener('click', function() {
-                state.timelineExpanded = true;
-                _drawTimeline();
+        // Wire pagination handlers
+        var pager = timeline.querySelector('.td-timeline-pager');
+        if (pager) {
+            pager.querySelectorAll('.td-page-num').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    state.timelinePage = parseInt(btn.dataset.page, 10) || 0;
+                    _drawTimeline();
+                    var wrap = document.getElementById('tdTimelineWrap');
+                    if (wrap && wrap.scrollIntoView) {
+                        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
             });
-        }
-        var lessBtn = document.getElementById('tdTimelineLess');
-        if (lessBtn) {
-            lessBtn.addEventListener('click', function() {
-                state.timelineExpanded = false;
-                _drawTimeline();
-                // Re-anchor: scroll the timeline header back into view so the user
-                // doesn't end up far below the section after collapsing.
-                var wrap = document.getElementById('tdTimelineWrap');
-                if (wrap && wrap.scrollIntoView) {
-                    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+            pager.querySelectorAll('.td-page-nav').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    if (btn.disabled) return;
+                    var dir = btn.dataset.action === 'prev' ? -1 : 1;
+                    state.timelinePage = (state.timelinePage || 0) + dir;
+                    _drawTimeline();
+                    var wrap = document.getElementById('tdTimelineWrap');
+                    if (wrap && wrap.scrollIntoView) {
+                        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
             });
         }
     }
