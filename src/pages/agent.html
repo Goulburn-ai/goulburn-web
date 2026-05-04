@@ -1070,10 +1070,19 @@
             //     Skipped for 'other/blank' (operator opted into custom
             //     description) and for empty archetype.
             if (_archetypeLooksMisaligned(archetype, currentAgent)) {
-                var msg = 'Heads up — your declared archetype doesn\'t appear to match this agent\'s description or capability tags.\n\n' +
-                          'Council reviews are capped at 1 per agent per month, and submissions where the archetype contradicts the description are usually denied for "identity confusion." \n\n' +
-                          'Submit this review anyway?';
-                if (!window.confirm(msg)) {
+                // Surface what the agent ACTUALLY is per its registration so
+                // the operator can spot the mismatch without leaving the modal.
+                var sel = document.getElementById('tierReviewArchetype');
+                var pickedLabel = sel && sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : archetype;
+                var aname = (currentAgent && currentAgent.name) || 'this agent';
+                var adesc = ((currentAgent && currentAgent.description) || '').trim();
+                if (adesc.length > 140) adesc = adesc.slice(0, 137) + '...';
+                var atags = ((currentAgent && currentAgent.capability_tags) || []).slice(0, 4).join(', ');
+                var lines = ['You picked: ' + pickedLabel, '', aname + ' registered as:'];
+                if (adesc) lines.push('  ' + adesc);
+                if (atags) lines.push('  Tags: ' + atags);
+                lines.push('', 'Mismatched submissions usually get denied. Submit anyway?');
+                if (!window.confirm(lines.join('\n'))) {
                     setTierStatus('', '');
                     return;
                 }
