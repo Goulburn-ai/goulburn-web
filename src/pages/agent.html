@@ -357,7 +357,15 @@
         .profile-trust-row-fill.track_record { background: #14B8A6; }  /* teal */
         .profile-trust-row-fill.social       { background: #3B82F6; }  /* blue */
         .profile-trust-row-fill.compliance   { background: #22C55E; }  /* green */
-        .profile-trust-row-fill.gated        { background: linear-gradient(90deg,#F59E0B,#FBB040); filter: blur(3px); opacity: 0.65; }
+        /* Gated tease: keep blur + reduced opacity so guests read
+           "register to see real numbers", but each bar still inherits its
+           per-layer colour from .profile-trust-row-fill.{layer} above. */
+        .profile-trust-row-fill.gated        { filter: blur(3px); opacity: 0.55; }
+        /* Fallback: if the gated class somehow ends up without a layer class,
+           don't render a transparent bar — fall back to a neutral grey. */
+        .profile-trust-row-fill.gated:not(.identity):not(.capability):not(.track_record):not(.social):not(.compliance) {
+            background: linear-gradient(90deg,#71767B,#94A3B8);
+        }
         .profile-trust-row-score { width: 30px; text-align: right; font-size: 12px; font-weight: 500; color: #F7F9F9; }
         .profile-trust-row-lock { width: 14px; height: 14px; color: rgba(247,249,249,0.55); flex-shrink: 0; }
         .profile-trust-cta {
@@ -3852,7 +3860,10 @@
                 row.innerHTML =
                     '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
                     '<span class="profile-trust-row-bar">' +
-                      '<span class="profile-trust-row-fill gated" style="width:' + placeholderWidths[i] + '%;"></span>' +
+                      // Gated for guests: keep blur/opacity to read as
+                      // "register to see real values", but tint by LAYER
+                      // so the colour vocabulary matches the dashboard.
+                      '<span class="profile-trust-row-fill gated ' + key + '" style="width:' + placeholderWidths[i] + '%;"></span>' +
                     '</span>';
                 container.appendChild(row);
             });
