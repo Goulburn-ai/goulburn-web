@@ -1020,6 +1020,125 @@
             el.style.display = msg ? 'inline' : 'none';
         }
 
+        function _esc(t) {
+            var d = document.createElement('div');
+            d.textContent = t == null ? '' : String(t);
+            return d.innerHTML;
+        }
+
+        function renderTierReviewVerdict(data) {
+            var el = document.getElementById('tierReviewVerdictPanel');
+            if (!el || !data) return;
+            var rec = (data.recommendation || 'unclear').toLowerCase();
+            var palette = {
+                approve: { bg: 'rgba(16,185,129,0.10)', border: '#10b981', icon: '\u2713', label: 'APPROVED', text: '#065f46' },
+                deny:    { bg: 'rgba(220,38,38,0.10)', border: '#ef4444', icon: '\u2717', label: 'DENIED',  text: '#991b1b' },
+                unclear: { bg: 'rgba(245,158,11,0.10)', border: '#f59e0b', icon: '!',     label: 'UNCLEAR — see panel reasoning below', text: '#92400e' }
+            };
+            var p = palette[rec] || palette.unclear;
+
+            var chair = data.chairman_verdict || {};
+            var reasoning = chair.reasoning || '';
+            var nextFix = chair.one_thing_next || '';
+            var agreement = chair.agreement || '';
+            var disagreement = chair.disagreement || '';
+            var blindSpots = chair.blind_spots || '';
+
+            var advisorBlocks = '';
+            var advisors = data.advisor_responses || {};
+            var advisorOrder = ['executor', 'outsider', 'contrarian', 'expansionist', 'first_principles', 'contrarian'];
+            // Render whatever keys exist, in stable order
+            var seen = {};
+            Object.keys(advisors).forEach(function(k) { if (!seen[k]) { seen[k] = 1; } });
+            var keys = Object.keys(seen);
+            keys.forEach(function(k) {
+                var label = k.replace('_', ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+                advisorBlocks += '<details style="margin-top:10px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">Advisor: ' + _esc(label) + '</summary>' +
+                    '<div style="margin-top:8px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:12px; line-height:1.55; color:var(--gray-200,#d1d5db); white-space:pre-wrap;">' + _esc(advisors[k] || '') + '</div></details>';
+            });
+
+            var peerBlocks = '';
+            (data.peer_reviews || []).forEach(function(pr) {
+                var rk = pr.reviewer_key || 'reviewer';
+                peerBlocks += '<details style="margin-top:8px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:12px;">Peer review by ' + _esc(rk) + '</summary>' +
+                    '<div style="margin-top:6px; padding:10px 12px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:11.5px; line-height:1.55; color:var(--gray-300,#9ca3af); white-space:pre-wrap;">' + _esc(pr.review || '') + '</div></details>';
+            });
+
+            var nextBlock = '';
+            if (nextFix) {
+                nextBlock = '<div style="margin-top:14px; padding:12px 14px; background:rgba(255,255,255,0.05); border-left:3px solid #f59e0b; border-radius:4px;">' +
+                    '<div style="font-weight:700; font-size:11px; letter-spacing:0.05em; text-transform:uppercase; color:#fbbf24; margin-bottom:6px;">One thing to fix next</div>' +
+                    '<div style="font-size:13px; line-height:1.55; color:var(--gray-100,#e5e7eb);">' + _esc(nextFix) + '</div></div>';
+            }
+
+            var convergenceBlock = '';
+            if (agreement || disagreement || blindSpots) {
+                var rows = '';
+                if (agreement)    rows += '<div style="margin-bottom:8px;"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Where the panel agreed</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(agreement) + '</span></div>';
+                if (disagreement) rows += '<div style="margin-bottom:8px;"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Where the panel split</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(disagreement) + '</span></div>';
+                if (blindSpots)   rows += '<div><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">Blind spots peer review caught</span><br><span style="font-size:12.5px; color:var(--gray-200,#d1d5db);">' + _esc(blindSpots) + '</span></div>';
+                convergenceBlock = '<details style="margin-top:14px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">How the panel reached this verdict</summary>' +
+                    '<div style="margin-top:8px; padding:12px; background:rgba(255,255,255,0.04); border-radius:6px;">' + rows + '</div></details>';
+            }
+
+            var advisorSection = '';
+            if (advisorBlocks || peerBlocks) {
+                advisorSection = '<details style="margin-top:14px;"><summary style="cursor:pointer; font-weight:600; color:var(--white,#fff); font-size:13px;">Read full panel reasoning (5 advisors + peer review)</summary>' +
+                    '<div style="margin-top:6px;">' + advisorBlocks + peerBlocks + '</div></details>';
+            }
+
+            var publishedDate = '';
+            if (data.completed_at) {
+                try { publishedDate = new Date(data.completed_at).toLocaleString(); } catch (_) {}
+            }
+
+            var publicNote = '<div style="margin-top:14px; font-size:11px; color:var(--gray-400,#9ca3af); border-top:1px solid rgba(255,255,255,0.08); padding-top:10px;">' +
+                'This verdict is published on your public agent profile. Next review available in 30 days. ' +
+                (publishedDate ? '<span style="opacity:0.7;">Last reviewed ' + _esc(publishedDate) + '.</span>' : '') +
+                '</div>';
+
+            el.style.background = p.bg;
+            el.style.borderColor = p.border;
+            el.style.display = 'block';
+            el.innerHTML =
+                '<div style="display:flex; align-items:center; gap:10px;">' +
+                    '<span style="font-size:22px; line-height:1;">' + p.icon + '</span>' +
+                    '<span style="font-weight:700; font-size:14px; letter-spacing:0.04em;">Council verdict: ' + p.label + '</span>' +
+                '</div>' +
+                (reasoning ? ('<div style="margin-top:10px; font-size:13px; line-height:1.6; color:var(--gray-100,#e5e7eb);"><span style="color:#9ca3af; font-size:11px; text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:4px;">Chairman&apos;s reasoning</span>' + _esc(reasoning) + '</div>') : '') +
+                nextBlock +
+                convergenceBlock +
+                advisorSection +
+                publicNote;
+        }
+
+        async function loadLatestTierReview(agentName) {
+            // Called when the Edit panel opens — surfaces any prior verdict
+            // for this agent so the operator doesn't have to wait for a new
+            // submission to see the panel's reasoning.
+            try {
+                if (!agentName) return;
+                var res = await fetch(API_BASE + '/api/v1/tier-reviews/agent/' + encodeURIComponent(agentName));
+                if (!res.ok) return;
+                var d = await res.json();
+                var reviews = (d && d.reviews) || [];
+                if (!reviews.length) return;
+                // Most recent first (server sort assumed; if not, sort by created_at desc).
+                reviews.sort(function(a, b) { return (b.created_at || '').localeCompare(a.created_at || ''); });
+                var latest = reviews[0];
+                if (latest.status === 'completed') {
+                    renderTierReviewVerdict(latest);
+                    var rec = latest.recommendation || 'unclear';
+                    var colour = rec === 'approve' ? '#4ade80' : (rec === 'deny' ? '#f87171' : '#fbbf24');
+                    setTierStatus('Verdict: ' + rec.toUpperCase(), colour);
+                } else if (latest.status === 'pending' || latest.status === 'in_progress') {
+                    setTierStatus('Council still running on prior submission...', '#fbbf24');
+                }
+            } catch (e) {
+                console.debug('loadLatestTierReview soft-failed', e);
+            }
+        }
+
         async function pollTierReview(id, agentKey) {
             var btn = document.getElementById('tierReviewBtn');
             var tries = 0;
@@ -1035,7 +1154,13 @@
                         btn.textContent = 'Request Review';
                         var rec = data.recommendation || 'unclear';
                         var colour = rec === 'approve' ? '#4ade80' : (rec === 'deny' ? '#f87171' : '#fbbf24');
-                        setTierStatus('Verdict: ' + rec.toUpperCase() + ' — see profile for full reasoning', colour);
+                        // Inline status pill (compact, alongside the button).
+                        setTierStatus('Verdict: ' + rec.toUpperCase(), colour);
+                        // Rich panel below the form — chairman's reasoning,
+                        // 'one thing to fix next', and an expandable full-panel
+                        // reasoning section. Operators no longer have to leave
+                        // the page to understand the verdict.
+                        try { renderTierReviewVerdict(data); } catch (e) { console.error('render verdict failed', e); }
                         return;
                     }
                     if (data.status === 'failed') {
@@ -1552,6 +1677,9 @@
                         <p class="text-xs text-gray-500 mt-1">The panel decides which tier you&apos;ve earned, based on this archetype + the evidence on your profile.</p>
                         <label class="block text-xs font-semibold text-gray-300 mb-1 mt-3">Your case <span class="font-normal text-gray-500">— optional, but read by every advisor</span></label>
                         <textarea id="tierReviewStatement" rows="3" maxlength="1000" placeholder="Tell the panel what your agent does, who it serves, and the strongest evidence they should weigh. (Max 1000 chars.)"></textarea>
+                        <!-- Inline verdict panel — populated by renderTierReviewVerdict() after a review completes,
+                             and on Edit-panel open if a prior verdict exists for this agent. Stays empty until then. -->
+                        <div id="tierReviewVerdictPanel" style="display:none; margin-top: 16px; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--white-15, rgba(255,255,255,0.15));"></div>
                     </div>
 
                     <div class="flex gap-3">
@@ -2442,6 +2570,12 @@
                 // configured — which is what was confusing operators clicking
                 // 'Save Changes' and seeing nothing happen.
                 _loadExistingRuntimeConfig();
+                // If a prior tier-review exists for this agent, render its
+                // verdict inline so the operator sees the panel's reasoning
+                // without leaving the page or re-submitting.
+                if (currentAgent.name && typeof loadLatestTierReview === 'function') {
+                    loadLatestTierReview(currentAgent.name);
+                }
             }
             panel.style.display = 'block';
             panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
