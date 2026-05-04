@@ -1105,8 +1105,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         display: flex; flex-direction: column; gap: 0.6rem;
     }
     .td-layer.td-layer-compliance { grid-column: 1 / -1; }
-    .td-layer.td-layer-weak { border-left: 3px solid #EF4444; }
-    .td-layer.td-layer-strong { border-left: 3px solid #22C55E; }
+    /* Tile left edge color is the LAYER color, not the score color
+       (see td-layer-color-{key} block below). Score signal lives on
+       the score number + bar fill. */
     .td-layer-head { display: flex; align-items: center; justify-content: space-between; }
     .td-layer-name {
         font-size: 0.8125rem; font-weight: 700;
@@ -1143,6 +1144,14 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
        Tier-color halo (bg tint + 3px left stripe + tier border) makes
        "what is this layer" instantly readable at a glance. */
     .td-layer { --lcol: #F59E0B; --lcol-bg: rgba(245,158,11,0.08); --lcol-border: rgba(245,158,11,0.30); }
+    /* Layer-color left edge — 4px stripe matches the icon color. */
+    .td-layer.td-layer-color-identity,
+    .td-layer.td-layer-color-capability,
+    .td-layer.td-layer-color-operational,
+    .td-layer.td-layer-color-reputation,
+    .td-layer.td-layer-color-compliance {
+        border-left: 4px solid var(--lcol);
+    }
     .td-layer.td-layer-color-identity    { --lcol: #EF4444; --lcol-bg: rgba(239,68,68,0.10);  --lcol-border: rgba(239,68,68,0.35);  }
     .td-layer.td-layer-color-capability  { --lcol: #9B59B6; --lcol-bg: rgba(155,89,182,0.10); --lcol-border: rgba(155,89,182,0.35); }
     .td-layer.td-layer-color-operational { --lcol: #22C55E; --lcol-bg: rgba(34,197,94,0.10);  --lcol-border: rgba(34,197,94,0.35);  }
