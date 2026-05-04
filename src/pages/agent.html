@@ -2248,6 +2248,50 @@
             }
         })();
 
+        // ── Recommended-action deep link: ?edit=tier-review ──
+        // Auto-opens the Edit panel and scrolls to the Expert Review section
+        // when the user lands here from the dashboard's "Request a tier-review
+        // council evaluation" card. The Expert Review form lives inside the
+        // (closed-by-default) Edit panel, so without this the link landed users
+        // on the public profile with no obvious entry point. Mirrors the
+        // ?edit=1 pattern used by /settings → /operator/{handle}.
+        (function autoOpenTierReview() {
+            try {
+                var qs = new URLSearchParams(window.location.search);
+                if (qs.get('edit') !== 'tier-review') return;
+                // Wait for currentAgent + ownership flag to settle. The Edit
+                // button only displays when the viewer owns this agent; until
+                // then toggleEditPanel() bails on its gateOnPendingDeletion
+                // / currentAgent guards.
+                var attempts = 0;
+                var iv = setInterval(function() {
+                    attempts++;
+                    var btn = document.getElementById('editProfileBtn');
+                    if (btn && btn.style.display !== 'none' && typeof toggleEditPanel === 'function') {
+                        clearInterval(iv);
+                        toggleEditPanel();
+                        // Strip the param so reload doesn't re-trigger.
+                        try {
+                            var url = new URL(window.location.href);
+                            url.searchParams.delete('edit');
+                            window.history.replaceState({}, '', url.toString());
+                        } catch (_) {}
+                        // Scroll to Expert Review label inside the panel and
+                        // focus the archetype dropdown so the next interaction
+                        // is one keystroke away.
+                        setTimeout(function() {
+                            var label = Array.from(document.querySelectorAll('.edit-panel label'))
+                                .find(function(l) { return /Expert Review/.test(l.textContent || ''); });
+                            if (label) label.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            var dd = document.getElementById('tierReviewArchetype');
+                            if (dd) dd.focus();
+                        }, 450);
+                    }
+                    if (attempts > 50) clearInterval(iv); // ~5s give-up
+                }, 100);
+            } catch (_) {}
+        })();
+
         function toggleEditPanel() {
             if (gateOnPendingDeletion("Edit Profile")) return;
             var panel = document.getElementById('editPanel');
