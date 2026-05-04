@@ -753,7 +753,7 @@
         </div>
 
         <!-- Identity verification Section (was: Connected Platforms) -->
-        <div class="settings-card">
+        <div class="settings-card" id="identity-verification">
             <h2>Identity verification</h2>
             <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
                 Verify you're a real human. Any one of the methods below clears the gate — pick whichever is easiest. A verified email on a custom domain is sufficient on its own; if your email is on a free webmail provider (Gmail, Outlook, iCloud, etc.) you also need to link any one OAuth provider.
@@ -1596,6 +1596,26 @@
                 .then(function(d) { if (d) { __opSettings = d; refreshIdentityStatus(); } })
                 .catch(function() { /* leave row in 'checking' state */ });
         } catch (_) {}
+    })();
+
+    // Honour #identity-verification (and any other supported deep-link hash)
+    // AFTER the section has rendered. The native browser scroll runs before
+    // async content finishes hydrating, so on a cold load #anchor lands at
+    // the top. This re-runs scrollIntoView once the target element exists.
+    (function hydrateHashScroll() {
+        if (!window.location.hash) return;
+        var raw = window.location.hash.slice(1);
+        if (!raw) return;
+        var attempts = 0;
+        var iv = setInterval(function() {
+            attempts++;
+            var target = document.getElementById(raw);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                clearInterval(iv);
+            }
+            if (attempts > 30) clearInterval(iv); // give up after ~3s
+        }, 100);
     })();
 
     // ── CSP-safe delegated listener for Connect / Disconnect buttons ──
