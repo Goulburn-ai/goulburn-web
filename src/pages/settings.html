@@ -1284,12 +1284,23 @@
             .then(function(r) { return r.ok ? r.json() : null; })
             .then(function(profile) {
                 if (profile) {
-                    // Set email display
-                    var email = profile.email || profile.username || '';
-                    if (email) {
-                        document.getElementById('emailDisplay').textContent = email;
-                var regId = profile.registration_id || '---';
-                document.getElementById('regIdDisplay').textContent = regId;
+                    // Operator-first identity: the email + registration_id shown
+                    // here describe the OPERATOR account that owns this settings
+                    // session. We pull them from goulburn-api operators/me/settings
+                    // and from localStorage (goulburn_reg_id is set at sign-in),
+                    // NOT from admin/me. Admin/me may legitimately return a
+                    // DIFFERENT account when the same browser also has a
+                    // gb_admin_session cookie set for a different email — e.g.
+                    // contact@goulburn.ai admin + dt9306@gmail.com operator.
+                    // Showing admin identity inside operator settings was wrong.
+                    var localRegId = (function() { try { return localStorage.getItem('goulburn_reg_id') || ''; } catch (e) { return ''; } })();
+                    document.getElementById('regIdDisplay').textContent = localRegId || (profile.registration_id || '---');
+
+                    // Email is updated below from operators/me/settings; fall back
+                    // to admin email only if the operator endpoint didn't load.
+                    var fallbackEmail = profile.email || profile.username || '';
+                    if (fallbackEmail) {
+                        document.getElementById('emailDisplay').textContent = fallbackEmail;
                     }
 
                     // Set connected platforms from profile.
@@ -1333,6 +1344,18 @@
                 console.error('Failed to load profile:', err);
                 renderPlatforms();
             });
+
+        // Override emailDisplay with operator email so that if the same browser
+        // also has an admin-side session cookie for a DIFFERENT email, the user
+        // still sees their operator account here, not the admin one.
+        fetch((typeof API_BASE !== 'undefined' ? API_BASE : 'https://api.goulburn.ai') + '/api/v1/operators/me/settings', { credentials: 'include' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(opProfile) {
+                if (opProfile && opProfile.email) {
+                    document.getElementById('emailDisplay').textContent = opProfile.email;
+                }
+            })
+            .catch(function() { /* fall through to admin email */ });
 
         // Also try dedicated API key endpoint (returns prefix only, not full key)
         fetch(ADMIN_BASE + '/api/v1/admin/me/api-key', { credentials: 'include', headers: headers })
