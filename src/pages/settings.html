@@ -1436,8 +1436,8 @@
                         (isConnected ? 'Sign-in linked' : 'Not linked') +
                     '</span>' +
                     (isConnected
-                        ? '<button class="btn btn-secondary" onclick="disconnectPlatform(\'' + p.id + '\')" style="color: var(--red-500);">Disconnect</button>'
-                        : '<button class="btn btn-secondary" onclick="connectPlatform(\'' + p.id + '\')">Connect</button>'
+                        ? '<button class="btn btn-secondary" data-cp-action="disconnect" data-cp-platform="' + p.id + '" style="color: var(--red-500);">Disconnect</button>'
+                        : '<button class="btn btn-secondary" data-cp-action="connect" data-cp-platform="' + p.id + '">Connect</button>'
                     ) +
                 '</div>' +
             '</div>';
@@ -1499,6 +1499,27 @@
             showToast('Failed to disconnect: ' + err.message, 'error');
         });
     }
+
+    // ── CSP-safe delegated listener for Connect / Disconnect buttons ──
+    // The platform list is rendered by renderPlatforms() via innerHTML, which
+    // injects per-platform <button> nodes whose inline onclick attributes were
+    // silently blocked by Phase 2 CSP (build-time SHA hash allowlist only
+    // covers static HTML). One delegated listener at document level — STATIC
+    // and hashable — dispatches to connectPlatform / disconnectPlatform based
+    // on data-cp-action + data-cp-platform attributes set by the template.
+    document.addEventListener('click', function(ev) {
+        var t = ev.target;
+        var btn = t && t.closest && t.closest('[data-cp-action][data-cp-platform]');
+        if (!btn) return;
+        var action = btn.dataset.cpAction;
+        var platform = btn.dataset.cpPlatform;
+        if (!action || !platform) return;
+        if (action === 'connect' && typeof connectPlatform === 'function') {
+            connectPlatform(platform);
+        } else if (action === 'disconnect' && typeof disconnectPlatform === 'function') {
+            disconnectPlatform(platform);
+        }
+    });
 
     // ── Password ──
     function togglePasswordForm() {
