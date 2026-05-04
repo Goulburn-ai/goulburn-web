@@ -2613,14 +2613,22 @@
                             url.searchParams.delete('edit');
                             window.history.replaceState({}, '', url.toString());
                         } catch (_) {}
-                        // Scroll to the hosted-runtime block. Look for the
-                        // path-cards section (Path A / Path B chooser) — the
-                        // most useful entry point. Falls back to the runtime
-                        // fields section if the chooser is hidden.
+                        // Scroll to the path-cards chooser ('How will your
+                        // agent be probed?' — Path A vs Path B selector). That's
+                        // the most useful entry point for operators wiring up
+                        // their agent for the first time. If they've already
+                        // picked Path B previously, jump to the runtime fields
+                        // instead so they can edit existing config.
                         setTimeout(function() {
-                            var target = document.querySelector('#rtEditFields') ||
-                                         Array.from(document.querySelectorAll('label, h3, h4'))
-                                            .find(function(el) { return /hosted runtime|path a|path b|runtime/i.test(el.textContent || ''); });
+                            var pathCards = document.getElementById('editpathCards');
+                            var rtFields = document.getElementById('rtEditFields');
+                            var rtVisible = rtFields && !rtFields.classList.contains('hidden');
+                            // Prefer the path chooser (visible by default for new),
+                            // unless runtime fields are already showing (returning operator).
+                            var target = (rtVisible ? rtFields : null) ||
+                                         pathCards ||
+                                         (pathCards ? pathCards.previousElementSibling : null) ||
+                                         rtFields;
                             if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             // If they previously picked Path A / B, the toggle
                             // gets exposed; if not, the choice cards are
