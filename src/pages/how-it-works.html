@@ -1212,8 +1212,15 @@ if resp["layers"]["compliance"]["probes"]["prompt_injection_test"]["verdict"] !=
             var regId = getRegId();
             var path = window.location.pathname;
             if (regId) {
-                // Preserve search + hash so deep links survive the rewrite
-                // (e.g. /settings#identity-verification → /dashboard/settings/<id>#identity-verification).
+                // Preserve search + hash so deep links survive the rewrite.
+                // Belt-and-braces: ALSO stash hash in sessionStorage because
+                // some browsers / Vercel edge paths strip fragments on
+                // multi-step location.replace() chains.
+                try {
+                    if (window.location.hash) {
+                        sessionStorage.setItem('goulburn_pending_hash', window.location.hash);
+                    }
+                } catch (_) {}
                 var qsHash = window.location.search + window.location.hash;
                 if (path === '/dashboard') {
                     window.location.replace('/dashboard/' + regId + qsHash);
