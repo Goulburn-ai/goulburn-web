@@ -824,8 +824,15 @@
                     };
                     var tc = tierColors[tierClass] || tierColors.identified;
                     var initials = (a.name || '?').replace(/[_\-]/g, ' ').split(' ').map(function(w) { return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
-                    var avatarBg = score >= 80 ? 'rgba(34,197,94,0.18)' : score >= 60 ? 'rgba(59,130,246,0.18)' : 'rgba(245,158,11,0.18)';
-                    var avatarCol = score >= 80 ? '#22c55e' : score >= 60 ? '#3b82f6' : '#F59E0B';
+                    // Avatar fallback (initials circle) inherits the tier
+                    // colour token from tierColors above so pill + score bar
+                    // + avatar all read as the same tier. tc.bg is already
+                    // the soft tint, tc.col is the saturated text colour —
+                    // exactly what we'd hand-roll otherwise. Avatar gets
+                    // overridden by uploaded images downstream, so this
+                    // only paints when a.avatar is empty.
+                    var avatarBg = tc.bg;
+                    var avatarCol = tc.col;
                     var tags = (a.capability_tags || []).slice(0, 3);
                     var tagsHtml = tags.map(function(t) {
                         return '<span style="background:rgba(255,255,255,0.04); border:0.5px solid rgba(255,255,255,0.08); padding:3px 9px; border-radius:8px; font-size:11px; color:rgba(247,249,249,0.65); white-space:nowrap;">' + escapeHtml(t) + '</span>';
