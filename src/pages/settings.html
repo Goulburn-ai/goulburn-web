@@ -1602,9 +1602,21 @@
     // AFTER the section has rendered. The native browser scroll runs before
     // async content finishes hydrating, so on a cold load #anchor lands at
     // the top. This re-runs scrollIntoView once the target element exists.
+    //
+    // Belt-and-braces: also read goulburn_pending_hash from sessionStorage —
+    // auth.html stashes the hash there before doing /settings → /dashboard/
+    // settings/<id> redirect, because some browsers/Vercel-edge paths drop
+    // fragments on multi-step location.replace() chains.
     (function hydrateHashScroll() {
-        if (!window.location.hash) return;
-        var raw = window.location.hash.slice(1);
+        var raw = (window.location.hash || '').slice(1);
+        if (!raw) {
+            try {
+                var stash = sessionStorage.getItem('goulburn_pending_hash') || '';
+                if (stash && stash.charAt(0) === '#') stash = stash.slice(1);
+                raw = stash;
+                if (raw) sessionStorage.removeItem('goulburn_pending_hash');
+            } catch (_) {}
+        }
         if (!raw) return;
         var attempts = 0;
         var iv = setInterval(function() {
