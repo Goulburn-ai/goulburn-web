@@ -18,17 +18,51 @@
   var API = 'https://api.goulburn.ai';
   var SITE = 'https://goulburn.ai';
 
+  // ─── Lockstep palette ──────────────────────────────────────────────
+  //
+  //  This widget runs on third-party sites we don't control, so it can't
+  //  reach for /agent-visuals.js without taking on a cross-origin dep
+  //  chain that breaks when goulburn.ai is briefly slow. The tier and
+  //  layer colour tables below MUST stay in lockstep with the canonical
+  //  values in /public/agent-visuals.js (the GoulburnAgent library that
+  //  every goulburn.ai page uses). If you change one, change the other.
+  //
+  //  Widget tokens use a slightly different shape than the library:
+  //    fill = library .fg                   (saturated colour for shield + bar)
+  //    bg   = light-pastel for the pill bg  (widget renders on light pages)
+  //    text = dark text for the pill        (widget renders on light pages)
+  //
+  //  See outputs/agent_rendering_drift_audit.md §6.6 for migration plan.
+
   var TIER_COLOURS = {
-    trusted:     { fill: '#22c55e', bg: '#dcfce7', text: '#166534' },
-    established: { fill: '#3b82f6', bg: '#dbeafe', text: '#1e40af' },
-    verified:    { fill: '#f59e0b', bg: '#fef3c7', text: '#92400e' },
-    identified:  { fill: '#6b7280', bg: '#f3f4f6', text: '#374151' },
-    unranked:    { fill: '#94a3b8', bg: '#f1f5f9', text: '#64748b' }
+    anchor:      { fill: '#A78BFA', bg: '#ede9fe', text: '#5b21b6' },
+    trusted:     { fill: '#22C55E', bg: '#dcfce7', text: '#166534' },
+    established: { fill: '#3B82F6', bg: '#dbeafe', text: '#1e40af' },
+    verified:    { fill: '#F59E0B', bg: '#fef3c7', text: '#92400e' },
+    identified:  { fill: '#8B98A5', bg: '#f3f4f6', text: '#374151' },
+    unranked:    { fill: '#94A3B8', bg: '#f1f5f9', text: '#64748b' },
+    not_found:   { fill: '#94A3B8', bg: '#f1f5f9', text: '#64748b' }
   };
 
+  // Label vocabulary mirrors GoulburnAgent.tierLabel (library) — 'New'
+  // for unranked, not 'Unranked'. Keeps widget badges identical to what
+  // visitors see on goulburn.ai itself.
   var TIER_LABELS = {
-    trusted: 'Trusted', established: 'Established',
-    verified: 'Verified', identified: 'Identified', unranked: 'Unranked'
+    anchor: 'Anchor', trusted: 'Trusted', established: 'Established',
+    verified: 'Verified', identified: 'Identified',
+    unranked: 'New', not_found: 'New'
+  };
+
+  // Per-layer colours mirror GoulburnAgent.LAYER_COLORS — same tokens the
+  // dashboard and agent profile use. Replaces the prior behaviour where
+  // every layer bar was the agent'''s tier colour (one big blue or green
+  // strip), which lost the per-layer signal.
+  var LAYER_COLOURS = {
+    identity:     '#EF4444',
+    capability:   '#9B59B6',
+    track_record: '#14B8A6',
+    social:       '#3B82F6',
+    compliance:   '#22C55E'
   };
 
   var LAYER_LABELS = {
@@ -121,7 +155,7 @@
     html += '<div class="gw-shield">' + shieldSvg + '</div>';
     html += '<div class="gw-info">';
     html += '<div class="gw-name">' + esc(data.agent || agentName) + '</div>';
-    html += '<div class="gw-tier" style="background:' + tc.bg + ';color:' + tc.text + ';">' + (TIER_LABELS[tier] || 'Unranked') + '</div>';
+    html += '<div class="gw-tier" style="background:' + tc.bg + ';color:' + tc.text + ';">' + (TIER_LABELS[tier] || 'New') + '</div>';
     html += '</div>';
     html += '</div>';
 
@@ -134,7 +168,9 @@
         var ls = (layer && layer.score) || 0;
         html += '<div class="gw-layer">';
         html += '<span class="gw-layer-label">' + (LAYER_LABELS[key] || key) + '</span>';
-        html += '<div class="gw-layer-track"><div class="gw-layer-fill" style="width:' + ls + '%;background:' + tc.fill + ';"></div></div>';
+        // Per-layer colour (mirrors goulburn.ai dashboard and profile)
+        var lc = LAYER_COLOURS[key] || tc.fill;
+        html += '<div class="gw-layer-track"><div class="gw-layer-fill" style="width:' + ls + '%;background:' + lc + ';"></div></div>';
         html += '</div>';
       }
       html += '</div>';
