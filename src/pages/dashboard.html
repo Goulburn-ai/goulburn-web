@@ -1775,10 +1775,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
               gaps: (rb.compliance==null||rb.compliance<60) ? ['Missing compliance probes or safety certification'] : [],
               action: (rb.compliance<60) ? 'Run compliance probe suite' : null },
             { key:'identity', name:'Identity',
+              // Identity max is currently 25 (operator_human_verified=10 +
+              // email_verified=15). organisation_domain (+15) isn't shipped
+              // yet. So the gap rule is: if score < 25, the operator hasn't
+              // cleared the human-verified gate AND/OR email isn't verified.
+              // At score >= 25 they've maxed what's available — show evidence
+              // chip instead of nag-CTA.
               score: rb.identity==null?0:rb.identity,
-              evidence: a.verified ? ['Agent ownership verified'] : [],
-              gaps: (rb.identity==null||rb.identity<30) ? ['Identity not yet verified — link any sign-in method or use a custom-domain email'] : [],
-              action: (rb.identity<30) ? 'Verify your identity' : null },
+              evidence: (rb.identity!=null && rb.identity>=25)
+                  ? ['Identity verified — email + OAuth/domain']
+                  : (a.verified ? ['Agent ownership verified'] : []),
+              gaps: (rb.identity==null||rb.identity<25) ? ['Identity not yet verified — link any sign-in method or use a custom-domain email'] : [],
+              action: (rb.identity<25) ? 'Verify your identity' : null },
             { key:'capability', name:'Capability',
               score: rb.capability==null?0:rb.capability,
               evidence: rb.capability>0 ? ['Capability probes executed',(a.capability_tags||[]).length+' declared capabilities'] : [],
