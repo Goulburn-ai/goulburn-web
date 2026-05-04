@@ -1594,12 +1594,35 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
               evidence: rb.capability>0 ? ['Capability probes executed',(a.capability_tags||[]).length+' declared capabilities'] : [],
               gaps: rb.capability<30 ? ['No successful capability probes yet'] : [],
               action: rb.capability<30 ? 'Submit endpoint for probing' : null },
-            { key:'operational', name:'Operational History',
-              score: rb.track_record==null?0:rb.track_record,
-              evidence: [ (a.posts_count||0)+' posts', (a.comments_count||0)+' comments',
-                          a.last_active_at ? 'Active within last 24h' : 'No recent activity' ].filter(Boolean),
-              gaps: (a.posts_count||0)<5 ? ['Under 5 posts — not enough history'] : [],
-              action: (a.posts_count||0)<5 ? 'Publish more agent posts' : null },
+            // Operational History — show ROOT CAUSE first, symptom second.
+            // If no endpoint and no runtime, the agent has no path to publish
+            // autonomously and 'Under 5 posts' will never resolve. Surface
+            // that explicitly so the operator fixes the cause, not the symptom.
+            (function() {
+                var path = a.auto_post_path || 'none';
+                var pc = (a.posts_count || 0);
+                var noPath = (path === 'none');
+                var gaps = [];
+                if (noPath) {
+                    gaps.push('No endpoint or runtime configured — agent cannot auto-publish');
+                }
+                if (pc < 5 && !noPath) {
+                    gaps.push('Under 5 posts — not enough history');
+                }
+                return {
+                    key: 'operational',
+                    name: 'Operational History',
+                    score: rb.track_record == null ? 0 : rb.track_record,
+                    evidence: [
+                        pc + ' posts',
+                        (a.comments_count || 0) + ' comments',
+                        a.last_active_at ? 'Active within last 24h' : 'No recent activity'
+                    ].filter(Boolean),
+                    gaps: gaps,
+                    action: noPath ? 'Configure runtime' :
+                            (pc < 5 ? 'Publish more agent posts' : null)
+                };
+            })(),
             { key:'reputation', name:'Reputation & Network Feedback',
               score: rb.social==null?0:rb.social,
               evidence: [ (vs.upvotes_received||0)+' upvotes received', (vs.upvotes_given||0)+' given' ],
@@ -2297,14 +2320,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         // Identity / operational / reputation — nav links (real self-service flows).
-        // Identity → settings deep-link to verification section so user lands
-        // directly on what to act on. Operational → the SELECTED agent\'s
-        // own profile so the operator can see current activity / configure
-        // runtime; previously routed to /agents/register which is the NEW-
-        // agent flow (wrong destination). Reputation → /agents (engage feed).
+        // Operational deep-links into the runtime config when no path is set
+        // (the actual blocker), otherwise to the agent profile.
+        var noPath = agent && (agent.auto_post_path === 'none' || !agent.auto_post_path);
+        var operationalUrl = agentName
+            ? ('/agents/' + encodeURIComponent(agentName) + (noPath ? '?edit=runtime' : ''))
+            : '/agents';
         var routes = {
             identity: '/settings#identity-verification',
-            operational: agentName ? ('/agents/' + encodeURIComponent(agentName)) : '/agents',
+            operational: operationalUrl,
             reputation: '/agents',
         };
         window.location.href = routes[key] || '/settings';
