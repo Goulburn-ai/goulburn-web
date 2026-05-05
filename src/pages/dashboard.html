@@ -2759,7 +2759,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         try {
             var resp = await fetch(API + '/agents/' + encodeURIComponent(agentName) + '/probe/run?kind=' + kind, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                credentials: 'include', headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
             });
             var body = await resp.json().catch(function() { return {}; });
 
@@ -2835,7 +2835,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         var session=goulburnAuth.getSession();
-        var headers={ 'Content-Type':'application/json', 'Authorization':'Bearer '+session };
+        var headers={ 'Content-Type':'application/json', 'Authorization': (session ? 'Bearer ' + session : '') };
         var API=(typeof window.GOULBURN_API_URL!=='undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
         // Fix 3: preflight session check. isAuthenticated() only verifies the
         // localStorage key exists, not that the bearer is still valid in admin
@@ -3242,7 +3242,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                         : 'https://admin.goulburn.ai') + '/api/v1/auth/logout', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: _tok ? { 'Authorization': 'Bearer ' + _tok } : {},
+                    headers: _tok ? { 'Authorization': (_tok ? 'Bearer ' + _tok : '') } : {},
                 }).catch(function () {});
             } catch (e) {}
             clearSession();
@@ -3498,7 +3498,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
             fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
             })
             .then(function(r) {
                 if (r.status === 401 || r.status === 403) {
@@ -3818,7 +3818,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var _opSession = goulburnAuth.getSession();
             if (_opSession) {
                 fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
-                    headers: { 'Authorization': 'Bearer ' + _opSession }
+                    headers: { 'Authorization': (_opSession ? 'Bearer ' + _opSession : '') }
                 }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                     if (!me) return;
                     if (window._tusSetTier && me.paid_tier) window._tusSetTier(me.paid_tier);
@@ -3926,14 +3926,24 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     // ── Data Loading ──
     function loadDashboardData() {
-        var session = goulburnAuth.getSession();
-        var headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + session
-        };
+        // Phase B (cookie-as-truth, 2026-05-05): use goulburnAuth.authFetch()
+        // so credentials:'include' is always sent and the Authorization
+        // header is omitted when the bearer is absent (cookie-only path).
+        // Building `Bearer ` + null literally was the silent-401 bug
+        // surfaced by login_audit_2026_05_05 §F1.
+        var authFetch = (typeof goulburnAuth !== 'undefined' && goulburnAuth.authFetch)
+            ? goulburnAuth.authFetch
+            : function(u, o) {
+                o = o || {};
+                o.credentials = 'include';
+                var t = goulburnAuth && goulburnAuth.getSession && goulburnAuth.getSession();
+                o.headers = Object.assign({ 'Content-Type': 'application/json' }, o.headers || {});
+                if (t) o.headers.Authorization = 'Bearer ' + t;
+                return fetch(u, o);
+            };
 
         // Step 1: Fetch user profile to get owner_id
-        fetch(ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include', headers: headers })
+        authFetch(ADMIN_BASE + '/api/v1/admin/me')
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(profile) {
@@ -3964,18 +3974,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     }
                 }
 
-                // Step 2: Fetch agents — use owner_id if available, otherwise fetch all
+                // Step 2: Fetch agents via authFetch() so cookie attaches.
+                // Phase B: never construct `Bearer null`. /agents/mine accepts
+                // bearer OR cookie since 4e6a1df.
                 var agentsUrl = API_BASE + '/api/v1/agents/mine';
 
-                // Identity comes from the admin session Bearer token in headers.
-                // /agents/mine returns only agents owned by the authenticated human.
-                //
-                // 401 != empty data — bearer token expired or admin Redis lost
-                // the session. Surface a session-expired card via the global
-                // flag so the operator sees a re-auth prompt instead of a
-                // misleading "no agents yet" empty state. Setting the flag
-                // here is read by renderAgents() below.
-                return fetch(agentsUrl, { headers: headers })
+                // 401 != empty data — surface session-expired card via the
+                // global flag so the operator sees a re-auth prompt instead
+                // of the misleading "no agents yet" empty state.
+                return authFetch(agentsUrl)
                     .then(function(r) {
                         if (r.status === 401 || r.status === 403) {
                             window.__sessionExpired = true;
@@ -4512,7 +4519,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             },
             body: JSON.stringify({ agent_id: agentId, api_key: apiKey })
         })
@@ -4575,7 +4582,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         // handler on the server does name-based lookup + owner check.
         fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName), { credentials: 'include',
             method: 'DELETE',
-            headers: { 'Authorization': 'Bearer ' + session }
+            headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
         })
         .then(function(r) {
             if (r.ok || r.status === 204) {
@@ -4647,7 +4654,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         // Step 1: clear deleted_at on the admin side
         fetch(ADMIN_BASE + '/api/v1/admin/reactivate', { credentials: 'include',
             method: 'POST',
-            headers: { 'Authorization': 'Bearer ' + session }
+            headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
         })
         .then(function(r) {
             return r.json().then(function(d) { return { ok: r.ok, data: d }; });
@@ -4661,7 +4668,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             // Step 2: cascade on goulburn-api — restore agents to ACTIVE
             return fetch(API_BASE + '/api/v1/owners/me/reactivate-account', { credentials: 'include',
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + session }
+                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
             })
             .catch(function() {})
             .then(function() {
@@ -4726,7 +4733,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             if (!session || !tbody) return;
             var ADMIN_BASE = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE) || 'https://admin.goulburn.ai';
             fetch(ADMIN_BASE + '/api/v1/me/recent-logins', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + session }
+                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
             }).then(function(r) {
                 if (!r.ok) return null;
                 return r.json();

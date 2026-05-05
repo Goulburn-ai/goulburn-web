@@ -1270,7 +1270,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         try {
             var resp = await fetch(API + '/agents/' + encodeURIComponent(agentName) + '/probe/run?kind=' + kind, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                credentials: 'include', headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
             });
             var body = await resp.json().catch(function() { return {}; });
 
@@ -1342,7 +1342,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             return;
         }
         var session=goulburnAuth.getSession();
-        var headers={ 'Content-Type':'application/json', 'Authorization':'Bearer '+session };
+        var headers={ 'Content-Type':'application/json', 'Authorization': (session ? 'Bearer ' + session : '') };
         var API=(typeof window.GOULBURN_API_URL!=='undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
         fetch(API+'/agents/mine',{headers:headers})
             .then(function(r){return r.ok?r.json():{data:[]};})

@@ -1570,7 +1570,7 @@
                         : 'https://admin.goulburn.ai') + '/api/v1/auth/logout', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: _tok ? { 'Authorization': 'Bearer ' + _tok } : {},
+                    headers: _tok ? { 'Authorization': (_tok ? 'Bearer ' + _tok : '') } : {},
                 }).catch(function () {});
             } catch (e) {}
             clearSession();
@@ -1816,7 +1816,7 @@
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
             fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
             })
             .then(function(r) {
                 if (r.status === 401 || r.status === 403) {
@@ -2597,7 +2597,7 @@
                 : 'Upvote';
             fetch(API + '/votes', { credentials: 'include',
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
                 body: JSON.stringify({
                     target_id: postId,
                     target_type: 'post',
@@ -3094,7 +3094,7 @@
 
             container.innerHTML = '<div class="profile-card"><div style="color:#71767B;font-size:0.85rem;">Loading profile...</div></div>';
             var session = goulburnAuth.getSession();
-            var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session };
+            var headers = { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') };
 
             // Failsafe: if nothing has rendered in 12s, replace the spinner
             // with a minimal profile card so the user never gets stuck.
@@ -4077,7 +4077,7 @@
             if (btn) { btn.disabled = true; btn.textContent = 'Saving...'; }
             fetch((window.ADMIN_BASE || 'https://admin.goulburn.ai') + '/api/v1/admin/me/avatar', { credentials: 'include',
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
                 body: JSON.stringify({ avatar: _opAvatarModalState.selected })
             })
             .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })

@@ -999,7 +999,7 @@
             var session = getSession();
             if (!session) return;
             fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + session }
+                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
             }).then(function(r) {
                 if (!r.ok) return null;
                 return r.json();
@@ -1380,7 +1380,7 @@
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + session
+                        'Authorization': (session ? 'Bearer ' + session : '')
                     },
                     body: JSON.stringify(payload)
                 }).then(function(r) {
@@ -1419,7 +1419,7 @@
             }
             bindEditModal();
             var _initSession = getSession();
-            var _initHeaders = _initSession ? { 'Authorization': 'Bearer ' + _initSession } : {};
+            var _initHeaders = _initSession ? { 'Authorization': (_initSession ? 'Bearer ' + _initSession : '') } : {};
             fetch(API_BASE + '/api/v1/operators/' + encodeURIComponent(handle.toLowerCase()), { credentials: 'include', headers: _initHeaders })
                 .then(function(r) {
                     if (r.status === 404) { showState('opStateNotFound'); return null; }
