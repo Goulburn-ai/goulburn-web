@@ -414,10 +414,14 @@
             }
 
             authUI.showStatus('Completing sign-in...', false);
+            // Pass the "Remain Logged In" checkbox state to callback-exchange
+            // so OAuth sign-in produces the same 365-day session as password
+            // sign-in. Without this every OAuth login was a 30-min sliding
+            // session — silent dashboard timeouts every half-hour.
             fetch(`${API_BASE}/api/v1/auth/oauth/callback-exchange`, { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ provider: platform, code, state })
+                body: JSON.stringify({ provider: platform, code, state, remember: _shouldRemember() })
             })
                 .then(r => r.json().then(data => ({ ok: r.ok, data })))
                 .then(({ ok, data }) => {
