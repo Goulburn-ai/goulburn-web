@@ -1,0 +1,111 @@
+<!--
+  Phase 1 auth-rewrite partial — cookie-only.
+
+  Replaces partials/auth.html (500+ lines) with a 90-line cookie-first
+  version backed by /api/auth/me on goulburn-api. NO bearer mirror in
+  localStorage. NO __goulburnCookieAuthOk flag. NO destructive stale
+  guards. NO inactivity timer with TOTP branches.
+
+  Source of truth for "is the user signed in?":
+    GET https://api.goulburn.ai/api/auth/me with credentials:'include'
+       → 200 { user: {...} }      → signed in
+       → 200 { user: null }       → signed out (guest)
+       → 404 / network error      → flag is off OR network down → guest
+
+  Used by the new sign-in page (Step 6) and post-cutover by every page.
+-->
+<script>
+(function() {
+    var API_BASE = 'https://api.goulburn.ai';
+
+    var _user = null;
+    var _ready = null;
+
+    async function probe() {
+        try {
+            var r = await fetch(API_BASE + '/api/auth/me', {
+                credentials: 'include',
+                cache: 'no-store',
+            });
+            if (r.ok) {
+                var body = await r.json();
+                _user = body && body.user ? body.user : null;
+                return _user;
+            }
+        } catch (_) { /* network or 404 — treat as guest */ }
+        _user = null;
+        return null;
+    }
+
+    function ready() {
+        if (_ready === null) _ready = probe();
+        return _ready;
+    }
+
+    function user() { return _user; }
+    function isAuthenticated() { return _user !== null; }
+
+    function identityTier() {
+        if (!_user) return 0;
+        var ident = _user.identity || {};
+        if (ident.identity_verified_at) return 2;
+        if (ident.email_verified_at) return 1;
+        return 0;
+    }
+
+    function identityScore() {
+        var t = identityTier();
+        return t === 2 ? 100 : (t === 1 ? 50 : 0);
+    }
+
+    async function signOut() {
+        try {
+            await fetch(API_BASE + '/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (_) { /* best-effort */ }
+        _user = null;
+        _ready = Promise.resolve(null);
+        try {
+            document.dispatchEvent(new CustomEvent('goulburn:auth-changed', {
+                detail: { user: null }
+            }));
+        } catch (_) {}
+        window.location.href = '/';
+    }
+
+    function authFetch(url, opts) {
+        opts = Object.assign({}, opts || {});
+        opts.credentials = 'include';
+        return fetch(url, opts);
+    }
+
+    // Trigger probe on partial load. Pages can `await goulburnAuth.ready()`
+    // for a definitive answer, or call `goulburnAuth.user()` synchronously
+    // once ready resolves. Probe result is cached for the lifetime of the
+    // page; navigation reloads it.
+    ready().then(function(u) {
+        try {
+            document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
+                detail: { user: u }
+            }));
+        } catch (_) {}
+    });
+
+    // Public surface — intentionally minimal. Compare to the old partial's
+    // ~12 exports (setSession, clearSession, getRegId, etc.). Bearer-mirror
+    // helpers, validateSession, authReady promise, _initAuthState IIFE all
+    // gone — the cookie itself is the only state we manage.
+    window.goulburnAuth = {
+        API_BASE: API_BASE,
+        ready: ready,
+        user: user,
+        isAuthenticated: isAuthenticated,
+        identityTier: identityTier,
+        identityScore: identityScore,
+        signOut: signOut,
+        authFetch: authFetch,
+    };
+})();
+</script>
