@@ -441,7 +441,16 @@
                         try {
                             _persistSession(data);
                         } catch (e) {}
-                        window.location.replace('/agents');
+                        // P0-1 fix (auth audit 2026-05-05): OAuth callback was
+                        // hardcoded to /agents, bypassing Phase B's /dashboard
+                        // default. /agents is guest-rendered and never validates
+                        // the cookie session, so OAuth users landed in guest
+                        // state with a perfectly valid session cookie sitting
+                        // in their browser. Route through redirectAfterAuth()
+                        // so OAuth + password paths converge on the same logic
+                        // (defaults to /dashboard, honours ?redirect= param,
+                        // routes ?next=checkout flows correctly).
+                        redirectAfterAuth(data.session_token);
                         return;
                     }
                     authUI.showStatus('Unexpected response from sign-in', true);
