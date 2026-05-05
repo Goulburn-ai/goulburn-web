@@ -447,19 +447,17 @@
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
-                headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
-            })
+            // Phase B (2026-05-05): NEVER clearSession() + reload() on a 401
+            // from /admin/me. That self-destructive guard caused the "hard
+            // refresh logs me out" symptom — a transient 401 (e.g. cookie
+            // not yet replicated to the read replica) wiped a perfectly
+            // valid bearer and reloaded into a guest state. Cookie auth
+            // probe via validateSession() is enough; the page can render
+            // best-effort with whatever localStorage data we have.
+            (typeof goulburnAuth.authFetch === 'function'
+                ? goulburnAuth.authFetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me')
+                : fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include' }))
             .then(function(r) {
-                if (r.status === 401 || r.status === 403) {
-                    if (goulburnAuth.clearSession) goulburnAuth.clearSession();
-                    if (!sessionStorage.getItem('goulburn_stale_session_reloaded')) {
-                        sessionStorage.setItem('goulburn_stale_session_reloaded', '1');
-                        window.location.reload();
-                    }
-                    return null;
-                }
-                sessionStorage.removeItem('goulburn_stale_session_reloaded');
                 return r.ok ? r.json() : null;
             })
             .catch(function() { return null; })
