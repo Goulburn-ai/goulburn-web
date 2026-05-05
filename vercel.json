@@ -129,7 +129,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!maintenance(\\.html)?$|favicon|icons/|manifest|robots|sitemap|sw\\.js|widget\\.js|styles\\.css|.*\\.(?:css|js|png|jpg|jpeg|svg|webp|ico|woff2|json|webmanifest|map|txt|xml)$).*)",
+      "source": "/:path*",
       "destination": "/maintenance.html"
     },
     {
