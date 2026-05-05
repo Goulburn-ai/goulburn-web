@@ -3204,13 +3204,22 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         //
         // Returns: Promise<boolean> — true when API says we'''re authed.
         async function validateSession() {
+            // Probe target is goulburn-admin's /auth/me — lightweight
+            // session-validity check (Item 4 of the auth production pass).
+            // Two Redis HGETALLs vs a multi-table Postgres trip.
+            // credentials:include sends the gb_user_session cookie so this
+            // works for cookie-only auth (Fix 4).
             try {
-                var r = await fetch(
-                    (typeof window.GOULBURN_API_URL !== '''undefined''' && window.GOULBURN_API_URL || '''https://api.goulburn.ai/api/v1''') + '''/operators/me/settings''',
-                    { credentials: '''include''' }
-                );
+                var base = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE)
+                    ? goulburnAuth.ADMIN_BASE
+                    : 'https://admin.goulburn.ai';
+                var r = await fetch(base + '/api/v1/auth/me', { credentials: 'include' });
                 if (r.ok) {
                     window.__goulburnCookieAuthOk = true;
+                    // Cache identity for downstream consumers.
+                    try {
+                        window.__goulburnAuthMe = await r.json();
+                    } catch (_) {}
                     return true;
                 }
             } catch (e) {
