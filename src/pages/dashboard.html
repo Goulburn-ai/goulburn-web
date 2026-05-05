@@ -3186,7 +3186,37 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         function isAuthenticated() {
-            return !!getSession();
+            // Sync answer for non-network callers. localStorage hit is the
+            // fast path. If localStorage is empty but the page has done a
+            // server probe and confirmed an active cookie session, the
+            // window-level flag flips this true so cookie-only flows pass
+            // the same gate without first writing a bearer to storage.
+            return !!getSession() || window.__goulburnCookieAuthOk === true;
+        }
+
+        // Server-side session probe — used when localStorage is empty to
+        // decide whether the page should redirect to /sign-in or continue
+        // with cookie-only auth (the gb_user_session HttpOnly cookie set
+        // by goulburn-admin). Frontend never sees the bearer in this path
+        // — every authed fetch sets credentials:'''include''' so the cookie
+        // auto-attaches; goulburn-api'''s get_human_owner accepts both
+        // bearer + cookie since 2026-05-05 (Fix 4).
+        //
+        // Returns: Promise<boolean> — true when API says we'''re authed.
+        async function validateSession() {
+            try {
+                var r = await fetch(
+                    (typeof window.GOULBURN_API_URL !== '''undefined''' && window.GOULBURN_API_URL || '''https://api.goulburn.ai/api/v1''') + '''/operators/me/settings''',
+                    { credentials: '''include''' }
+                );
+                if (r.ok) {
+                    window.__goulburnCookieAuthOk = true;
+                    return true;
+                }
+            } catch (e) {
+                // Network error — treat as unauthenticated; safe default.
+            }
+            return false;
         }
 
         function signOut() {
@@ -3194,10 +3224,20 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             window.location.href = '/';
         }
 
-        function requireAuth() {
+        async function requireAuth() {
             if (!isAuthenticated()) {
-                window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
+                // Server-validate before assuming logged out. localStorage
+                // could be empty for two reasons:
+                //   1. user truly never signed in              → redirect
+                //   2. user signed in but bearer was cleared    → cookie alive
+                // Without this probe we treated (2) as (1), surfacing a
+                // misleading "no agents yet" empty state instead of the
+                // real session. See login_audit_2026_05_05 §F1.
+                var ok = await validateSession();
+                if (!ok) {
+                    window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                    return false;
+                }
             }
             // If on bare /dashboard or /settings, redirect to ID-based URL
             var regId = getRegId();

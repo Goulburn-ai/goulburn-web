@@ -741,10 +741,15 @@
                     };
 
                     // 5. /authenticate/complete
+                    // Mirror the "Remain Logged In" checkbox into the WebAuthn
+                    // complete payload so the passkey path produces the same
+                    // 365-day session as password/OAuth — closes the silent
+                    // 30-min sliding session bug for passkey users.
+                    var passkeyBody = Object.assign({}, body, { remember: _shouldRemember() });
                     var completeRes = await fetch(goulburnAuth.ADMIN_BASE + '/api/v1/webauthn/authenticate/complete?challenge_id=' + encodeURIComponent(challengeId), { credentials: 'include',
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(body)
+                        body: JSON.stringify(passkeyBody)
                     });
                     if (!completeRes.ok) {
                         var err = await completeRes.text();
