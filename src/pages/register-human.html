@@ -301,7 +301,9 @@
             fetch(ADMIN_BASE + '/api/v1/auth/verify-email', { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: pendingEmail, code: code })
+                // Newly-registered users default to remembered sessions —
+                // they just signed up, they expect to stay signed in.
+                body: JSON.stringify({ email: pendingEmail, code: code, remember: true })
             })
             .then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); })
             .then(function(res) {
