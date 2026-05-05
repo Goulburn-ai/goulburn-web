@@ -110,6 +110,11 @@
       "source": "/realprobes",
       "destination": "/probes#why-live-probes",
       "permanent": true
+    },
+    {
+      "source": "/sign-in-v2",
+      "destination": "/sign-in",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -148,10 +153,6 @@
     {
       "source": "/sign-in",
       "destination": "/sign-in.html"
-    },
-    {
-      "source": "/sign-in-v2",
-      "destination": "/sign-in-v2.html"
     },
     {
       "source": "/dashboard/:id(\\d{18})",
