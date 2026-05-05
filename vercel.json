@@ -115,9 +115,23 @@
       "source": "/sign-in-v2",
       "destination": "/sign-in",
       "permanent": true
+    },
+    {
+      "source": "/sign-in-legacy",
+      "destination": "/sign-in",
+      "permanent": true
+    },
+    {
+      "source": "/sign-in-legacy.html",
+      "destination": "/sign-in",
+      "permanent": true
     }
   ],
   "rewrites": [
+    {
+      "source": "/((?!maintenance(\\.html)?$|favicon|icons/|manifest|robots|sitemap|sw\\.js|widget\\.js|styles\\.css|.*\\.(?:css|js|png|jpg|jpeg|svg|webp|ico|woff2|json|webmanifest|map|txt|xml)$).*)",
+      "destination": "/maintenance.html"
+    },
     {
       "source": "/reactivate",
       "destination": "/reactivate.html"

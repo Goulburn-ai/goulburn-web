@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maintenance &mdash; goulburn.ai</title>
-    <meta name="description" content="goulburn.ai is undergoing scheduled maintenance. We'll be back shortly.">
+    <meta name="description" content="goulburn.ai is offline for a 48-hour maintenance window while we ship the new sign-in. We'll be back.">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,7 +96,7 @@
         <h1>We'll be right back</h1>
 
         <p class="subtitle">
-            goulburn.ai is undergoing scheduled maintenance. We'll be back shortly.
+            goulburn.ai is offline for a 48-hour maintenance window while we ship the new sign-in. We'll be back.
         </p>
 
         <div class="time-box">
@@ -114,7 +114,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         var el = document.getElementById('returnTime');
         var est = new Date();
-        est.setHours(est.getHours() + 1);
+        // 48-hour maintenance window — set when entering maintenance mode.
+        est.setHours(est.getHours() + 48);
         el.textContent = est.toLocaleString('en-US', {
             weekday: 'short', year: 'numeric', month: 'short',
             day: 'numeric', hour: '2-digit', minute: '2-digit',
