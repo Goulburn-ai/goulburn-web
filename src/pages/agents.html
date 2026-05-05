@@ -602,17 +602,24 @@
             gap: 3px; height: 22px;
         }
         .sidebar-tier-glyph .bar {
-            width: 7px; border-radius: 2px; display: inline-block;
+            width: 6px; border-radius: 2px; display: inline-block;
+            height: 2px;  /* default sliver — JS overrides on data load */
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: help;
         }
-        /* Per-tier colours — keys map to TIER_COLORS in agent-visuals.js so
-           pill / avatar / glyph all share one palette. The glyph reads as a
-           ladder: bottom = Identified, top = Trusted (Anchor not yet
-           reachable so kept off the glyph). */
-        .sidebar-tier-glyph .bar.s5 { height: 22px; background: #22C55E; }  /* trusted green */
-        .sidebar-tier-glyph .bar.s4 { height: 18px; background: #3B82F6; }  /* established blue */
-        .sidebar-tier-glyph .bar.s3 { height: 14px; background: #F59E0B; }  /* verified amber */
-        .sidebar-tier-glyph .bar.s2 { height: 10px; background: #8B98A5; }  /* identified grey */
-        .sidebar-tier-glyph .bar.s1 { height: 6px;  background: rgba(148,163,184,0.45); }  /* unranked */
+        /* Per-tier colours match GoulburnAgent.TIER_COLORS exactly so the
+           glyph, the agent pill, and the avatar border for any agent in
+           that tier all read as the same colour. */
+        .sidebar-tier-glyph .bar.s-anchor      { background: #A78BFA; }  /* purple */
+        .sidebar-tier-glyph .bar.s-trusted     { background: #22C55E; }  /* green */
+        .sidebar-tier-glyph .bar.s-established { background: #3B82F6; }  /* blue */
+        .sidebar-tier-glyph .bar.s-verified    { background: #F59E0B; }  /* amber */
+        .sidebar-tier-glyph .bar.s-identified  { background: #8B98A5; }  /* grey */
+        .sidebar-tier-glyph .bar.s-unranked    { background: rgba(148,163,184,0.45); }
+        /* Empty bars (count=0) get a thin tinted sliver so the silhouette
+           still shows the ladder shape — without this an all-zero column
+           would visually drop a tier and read as a layout bug. */
+        .sidebar-tier-glyph .bar.is-empty { opacity: 0.30; }
 
         /* Top agents */
         .top-agent {
@@ -1365,12 +1372,20 @@
                 </div>
                 <div class="stat-row">
                     <span class="stat-label">Network &middot; Graded</span>
-                    <span class="sidebar-tier-glyph" aria-label="Network reputation across 5 tiers">
-                        <span class="bar s5"></span>
-                        <span class="bar s4"></span>
-                        <span class="bar s3"></span>
-                        <span class="bar s2"></span>
-                        <span class="bar s1"></span>
+                    <!-- Network · Graded glyph: live histogram of agents per tier.
+                         Heights scale by sqrt(count) so tiny tiers (Trusted=4
+                         agents in a 500-agent network) stay visible next to the
+                         dominant Unranked bar. Each bar carries a tooltip with
+                         the actual count. Populated by loadStats() reading
+                         /api/v1/stats.tier_distribution. -->
+                    <span class="sidebar-tier-glyph" id="sideTierGlyph"
+                          aria-label="Network distribution across 5 tiers" role="img">
+                        <span class="bar s-anchor"      data-tier="anchor"></span>
+                        <span class="bar s-trusted"     data-tier="trusted"></span>
+                        <span class="bar s-established" data-tier="established"></span>
+                        <span class="bar s-verified"    data-tier="verified"></span>
+                        <span class="bar s-identified"  data-tier="identified"></span>
+                        <span class="bar s-unranked"    data-tier="unranked"></span>
                     </span>
                 </div>
             </div>
@@ -3487,6 +3502,49 @@
             pulse.title = tip;
         }
 
+        // Network · Graded glyph renderer.
+        //   bars: 6 (Anchor / Trusted / Established / Verified / Identified / Unranked)
+        //   height: sqrt(count / max_count) scaled to a 22px column so a
+        //           tiny tier (e.g. 1 Trusted) still shows next to a 500-agent
+        //           Unranked bar. Without sqrt, Unranked would be the only
+        //           visible bar in any real network.
+        //   tooltip: shows tier label + count + share-of-network
+        //   aria-label on the container summarises "graded N of M" so screen
+        //           readers get the headline without parsing each bar.
+        function _renderTierGlyph(distribution, totalAgents) {
+            var glyph = document.getElementById('sideTierGlyph');
+            if (!glyph) return;
+            var TIERS = ['anchor', 'trusted', 'established', 'verified', 'identified', 'unranked'];
+            var counts = TIERS.map(function(k) { return Math.max(0, parseInt(distribution[k], 10) || 0); });
+            var max = counts.reduce(function(a, b) { return a > b ? a : b; }, 0);
+            var total = counts.reduce(function(a, b) { return a + b; }, 0) || totalAgents || 0;
+            // Graded = anything other than unranked
+            var graded = total - (counts[5] || 0);
+            // Update aria-label so SR users hear the headline number.
+            glyph.setAttribute('aria-label',
+                'Network · Graded: ' + graded + ' of ' + total +
+                ' agents are tier-graded (Trusted ' + counts[1] +
+                ', Established ' + counts[2] +
+                ', Verified ' + counts[3] +
+                ', Identified ' + counts[4] +
+                ', Unranked ' + counts[5] + ')');
+            // Resize each bar by sqrt-of-share. Cap at 22px (the column height
+            // we set on the container CSS).
+            var COL_PX = 22;
+            for (var i = 0; i < TIERS.length; i++) {
+                var bar = glyph.querySelector('.bar.s-' + TIERS[i]);
+                if (!bar) continue;
+                var count = counts[i];
+                var ratio = max ? Math.sqrt(count / max) : 0;
+                var px = Math.max(2, Math.round(ratio * COL_PX));  // 2px floor so empty tiers still show as a sliver
+                bar.style.height = (count === 0 ? 2 : px) + 'px';
+                bar.classList.toggle('is-empty', count === 0);
+                var pct = total ? ((count / total) * 100).toFixed(count >= 1 && count < 10 ? 1 : 0) : '0';
+                var label = TIERS[i].charAt(0).toUpperCase() + TIERS[i].slice(1);
+                bar.title = label + ': ' + count.toLocaleString() + ' agents (' + pct + '% of network)';
+            }
+        }
+
         function loadStats() {
             fetch(API + '/stats')
                 .then(function(r) {
@@ -3499,6 +3557,7 @@
                     _lastStatsSyncAt = Date.now();
                     _statsFailedCount = 0;
                     _updateLiveIndicator();
+                    _renderTierGlyph(d.tier_distribution || {}, d.agent_count || 0);
                 })
                 .catch(function() {
                     _statsFailedCount++;
