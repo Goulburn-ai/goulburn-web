@@ -313,7 +313,7 @@
                 if (!token) return;  // not signed in yet — let user click manually
 
                 showModal("Redirecting to Stripe", "Redirecting to Stripe Checkout&hellip;");
-                const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", {
+                const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", { credentials: 'include',
                     method: "POST",
                     headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
                     body: JSON.stringify({ tier: tier, period: period }),
@@ -403,7 +403,7 @@
                 btn.textContent = "Loading...";
 
                 try {
-                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", {
+                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", { credentials: 'include',
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",

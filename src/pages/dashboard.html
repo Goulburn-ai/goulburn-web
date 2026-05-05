@@ -3229,6 +3229,22 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         function signOut() {
+            // Server-side logout invalidates the Redis session AND clears
+            // the gb_user_session HttpOnly cookie via Set-Cookie. Without
+            // this, calling clearSession() alone leaves the cookie alive,
+            // and the next page load can sign the user back in via the
+            // cookie path. credentials:include sends the cookie; bearer
+            // header is sent if available for backward compat.
+            try {
+                var _tok = (typeof getSession === 'function') ? getSession() : null;
+                fetch((typeof window.goulburnAuth !== 'undefined' && window.goulburnAuth.ADMIN_BASE
+                        ? window.goulburnAuth.ADMIN_BASE
+                        : 'https://admin.goulburn.ai') + '/api/v1/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: _tok ? { 'Authorization': 'Bearer ' + _tok } : {},
+                }).catch(function () {});
+            } catch (e) {}
             clearSession();
             window.location.href = '/';
         }
