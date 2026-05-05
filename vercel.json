@@ -150,6 +150,10 @@
       "destination": "/sign-in.html"
     },
     {
+      "source": "/sign-in-v2",
+      "destination": "/sign-in-v2.html"
+    },
+    {
       "source": "/dashboard/:id(\\d{18})",
       "destination": "/dashboard.html"
     },
