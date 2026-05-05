@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-04-26-30';
+const VERSION = 'c-2026-05-05-31';
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
@@ -157,18 +157,39 @@ async function routePage(req, url) {
 }
 
 async function routeApi(req, url) {
-  // Always-fresh paths
+  // Auth-bearing requests must NEVER be served stale or cached. Auth state
+  // can change at any moment (sign-out, session revoke, token rotate, switch
+  // account), and a cached response from a prior session leaks the previous
+  // user's data into the current user's view. Detection: either the SPA set
+  // an Authorization header, or it asked the browser to attach cookies via
+  // credentials:'include'. Both signal "this response is per-user".
+  const isAuthBearing = !!req.headers.get('authorization') || req.credentials === 'include';
+  if (isAuthBearing) {
+    return networkOnlyNoCache(req);
+  }
+  // Always-fresh paths (kept for belt-and-braces even though SPA usually
+  // sends auth headers for these — covers rare guest/probe calls).
   const networkFirstPaths = [
     '/agents/mine',
     '/access-log',
     '/trust-events',
     '/dashboard',
+    '/operators/me',
+    '/auth/me',
+    '/billing/',
   ];
   if (networkFirstPaths.some((p) => url.pathname.includes(p))) {
     return networkFirst(req, API);
   }
-  // SWR for read-only feed/profile/teaser/stats
+  // SWR for genuinely public read-only feed/profile/teaser/stats.
   return staleWhileRevalidate(req, API);
+}
+
+async function networkOnlyNoCache(req) {
+  // Pure passthrough. Never reads cache, never writes cache. Failure path
+  // returns the network error verbatim so the SPA can show its own
+  // "session expired" UI rather than a stale 200.
+  return fetch(req);
 }
 
 async function networkFirst(req, cacheName) {
