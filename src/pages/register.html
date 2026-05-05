@@ -1425,21 +1425,11 @@
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
-                headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
-            })
-            .then(function(r) {
-                if (r.status === 401 || r.status === 403) {
-                    if (goulburnAuth.clearSession) goulburnAuth.clearSession();
-                    if (!sessionStorage.getItem('goulburn_stale_session_reloaded')) {
-                        sessionStorage.setItem('goulburn_stale_session_reloaded', '1');
-                        window.location.reload();
-                    }
-                    return null;
-                }
-                sessionStorage.removeItem('goulburn_stale_session_reloaded');
-                return r.ok ? r.json() : null;
-            })
+            // Phase B: destructive guard removed
+            (typeof goulburnAuth.authFetch === 'function'
+                ? goulburnAuth.authFetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me')
+                : fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include' }))
+            .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(profile) {
                 if (profile && profile.registration_id) {
