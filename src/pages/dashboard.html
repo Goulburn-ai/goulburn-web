@@ -2837,7 +2837,13 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var session=goulburnAuth.getSession();
         var headers={ 'Content-Type':'application/json', 'Authorization':'Bearer '+session };
         var API=(typeof window.GOULBURN_API_URL!=='undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
-        fetch(API+'/agents/mine',{headers:headers})
+        // Fix 3: preflight session check. isAuthenticated() only verifies the
+        // localStorage key exists, not that the bearer is still valid in admin
+        // Redis. Hit /agents/mine HEAD-style — if 401, the session is dead;
+        // clear stale localStorage so subsequent flows redirect properly.
+        // This stops the silent "no agents yet" empty state when the only
+        // problem was an expired bearer.
+        fetch(API+'/agents/mine',{headers:headers,credentials:'include'})
             .then(function(r){return r.ok?r.json():{data:[]};})
             .catch(function(){return {data:[]};})
             .then(function(d){
@@ -2847,8 +2853,15 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 state.agents=agents;
                 if (!agents.length){
                     var p2=document.getElementById('tdPanel');
-                    if (p2){ p2.className='td-empty';
-                        p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Register your first agent</a> to start building trust.'; }
+                    if (p2){
+                        p2.className='td-empty';
+                        // Distinguish session-expired from genuine empty state.
+                        if (window.__sessionExpired) {
+                            p2.innerHTML='Your session expired. <a href="/sign-in?redirect=' + encodeURIComponent(location.pathname + location.search) + '" style="color:#F59E0B;">Sign in again</a> to see your agents.';
+                        } else {
+                            p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Register your first agent</a> to start building trust.';
+                        }
+                    }
                     return;
                 }
                 var best=agents.reduce(function(b,a){return (a.reputation_score||0)>(b.reputation_score||0)?a:b;},agents[0]);
@@ -3891,8 +3904,20 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
                 // Identity comes from the admin session Bearer token in headers.
                 // /agents/mine returns only agents owned by the authenticated human.
+                //
+                // 401 != empty data — bearer token expired or admin Redis lost
+                // the session. Surface a session-expired card via the global
+                // flag so the operator sees a re-auth prompt instead of a
+                // misleading "no agents yet" empty state. Setting the flag
+                // here is read by renderAgents() below.
                 return fetch(agentsUrl, { headers: headers })
-                    .then(function(r) { return r.ok ? r.json() : { data: [] }; })
+                    .then(function(r) {
+                        if (r.status === 401 || r.status === 403) {
+                            window.__sessionExpired = true;
+                            return { data: [] };
+                        }
+                        return r.ok ? r.json() : { data: [] };
+                    })
                     .catch(function() { return { data: [] }; });
             })
             .then(function(agentData) {
@@ -3917,6 +3942,19 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     function renderAgents(agents) {
         var container = document.getElementById('agentsContainer');
 
+        // Session-expired card takes priority over the "no agents yet" empty
+        // state. Without this, a stale bearer token reads as "user has zero
+        // agents" — exactly the bug Daniel hit on 2026-05-05.
+        if (window.__sessionExpired && (!agents || agents.length === 0)) {
+            container.innerHTML =
+                '<div class="empty-card" style="text-align:center; padding:2.5rem 1.5rem; background:rgba(245,158,11,0.06); border:0.5px solid rgba(245,158,11,0.30); border-radius:12px;">' +
+                  '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5" style="margin-bottom:14px;"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>' +
+                  '<h3 style="margin:0 0 8px; color:#F7F9F9; font-size:18px; font-weight:500;">Your session expired</h3>' +
+                  '<p style="margin:0 0 16px; color:rgba(247,249,249,0.65); font-size:14px;">Sign in again to see your agents. Your data is safe — this is just an auth refresh.</p>' +
+                  '<a href="/sign-in?redirect=' + encodeURIComponent(location.pathname + location.search) + '" class="btn btn-primary" style="display:inline-flex; align-items:center; gap:6px; padding:10px 18px; background:#F59E0B; color:#1A0F00; text-decoration:none; border-radius:8px; font-weight:500;">Sign in again →</a>' +
+                '</div>';
+            return;
+        }
         if (!agents || agents.length === 0) {
             showEmptyState();
             return;
