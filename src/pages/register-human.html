@@ -191,7 +191,7 @@
                         try {
                             const resp = await fetch('https://api.goulburn.ai/api/v1/billing/owner-checkout', { credentials: 'include',
                                 method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                                headers: { 'Content-Type': 'application/json', 'Authorization': (token ? 'Bearer ' + token : '') },
                                 body: JSON.stringify({ tier: tier, period: period }),
                             });
                             if (resp.ok) {

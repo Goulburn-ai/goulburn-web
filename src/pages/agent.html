@@ -1170,7 +1170,7 @@
             try {
                 var res = await fetch(API_BASE + '/api/v1/tier-reviews/request', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (authToken ? 'Bearer ' + authToken : '') },
                     body: JSON.stringify(body)
                 });
                 if (!res.ok) {
@@ -2201,7 +2201,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             if (!session) return;
             try {
                 var res = await fetch(API_BASE + '/api/v1/agents/mine', { credentials: 'include',
-                    headers: { 'Authorization': 'Bearer ' + session }
+                    headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
                 });
                 if (!res.ok) return;
                 var agents = await res.json();
@@ -2272,7 +2272,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             try {
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + path, { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + session }
+                    headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
                 });
                 if (!res.ok) {
                     var body = await res.json().catch(function(){ return {}; });
@@ -2397,7 +2397,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             try {
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/reactivate', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + session }
+                    headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
                 });
                 var body = await res.json().catch(function(){ return {}; });
                 if (!res.ok) {
@@ -2449,7 +2449,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             try {
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()), { credentials: 'include',
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + session }
+                    headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
                 });
                 if (!res.ok) {
                     var body = await res.json().catch(function(){ return {}; });
@@ -2838,7 +2838,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 if (!key) return;
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
                     method: 'GET',
-                    headers: { 'Authorization': 'Bearer ' + key }
+                    headers: { 'Authorization': (key ? 'Bearer ' + key : '') }
                 });
                 if (!res.ok) {
                     // No runtime configured. If the agent already has a non-runtime
@@ -3099,7 +3099,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
 
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (key ? 'Bearer ' + key : '') },
                     body: JSON.stringify(payload)
                 });
                 var body = null;
@@ -3178,7 +3178,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + session
+                        'Authorization': (session ? 'Bearer ' + session : '')
                     },
                     body: JSON.stringify(payload)
                 });
@@ -4967,7 +4967,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             try {
                 var resp = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(getAgentName()) + '/claim', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
                     body: JSON.stringify({ agent_api_key: key })
                 });
                 var data = await resp.json().catch(function(){ return {}; });

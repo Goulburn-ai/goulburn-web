@@ -1175,7 +1175,7 @@
             var token = goulburnAuth.getSession();
             if (!token) return;
             fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-status', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                headers: { 'Authorization': (token ? 'Bearer ' + token : ''), 'Content-Type': 'application/json' }
             })
             .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, status: r.status, data: j }; }); })
             .then(function(res) {
@@ -1264,7 +1264,7 @@
             btn.textContent = 'Opening Stripe…';
             fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-portal', { credentials: 'include',
                 method: 'POST',
-                headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                headers: { 'Authorization': (token ? 'Bearer ' + token : ''), 'Content-Type': 'application/json' },
                 body: JSON.stringify({ return_url: window.location.origin + '/settings' })
             })
             .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, status: r.status, data: j }; }); })
@@ -1290,7 +1290,7 @@
         var session = goulburnAuth.getSession();
         var headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + session
+            'Authorization': (session ? 'Bearer ' + session : '')
         };
 
         // Operator-side identity fetch — kicks off in parallel with admin/me
@@ -1528,7 +1528,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             }
         })
         .then(function(r) {
@@ -1687,7 +1687,7 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             },
             body: JSON.stringify({
                 current_password: current,
@@ -1759,7 +1759,7 @@
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             }
         })
         .then(function(r) {
@@ -1813,7 +1813,7 @@
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             },
             body: JSON.stringify({ password: pw, confirmation: 'DELETE' })
         })
@@ -1831,7 +1831,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + session
+                    'Authorization': (session ? 'Bearer ' + session : '')
                 }
             })
             .catch(function() { /* best-effort; admin side is the source of truth */ })
@@ -1868,7 +1868,7 @@
     function tfaAuthHeaders() {
         return {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + goulburnAuth.getSession()
+            'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '')
         };
     }
 
@@ -2049,7 +2049,7 @@
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + session
+                'Authorization': (session ? 'Bearer ' + session : '')
             },
             body: JSON.stringify({ weekly_digest: !!enabled })
         })
@@ -2089,7 +2089,7 @@
         var path = window.location.pathname;
         if (path !== '/settings' && path !== '/settings/') return;  // already stamped or other page
         fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://admin.goulburn.ai') + '/api/v1/admin/me', { credentials: 'include',
-            headers: { 'Authorization': 'Bearer ' + session }
+            headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
         })
         .then(function(r) { return r.ok ? r.json() : null; })
         .catch(function() { return null; })
@@ -2139,7 +2139,7 @@
             if (!list) return;
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials', {
-                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                    headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
                 });
                 if (!res.ok) {
                     list.innerHTML = '';
@@ -2177,7 +2177,7 @@
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials/' + encodeURIComponent(credentialId), {
                     method: 'DELETE',
-                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                    headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
                 });
                 if (res.ok) {
                     _pkStatus('Passkey revoked.');
@@ -2206,7 +2206,7 @@
                     : (navigator.platform || 'this device');
                 var beginRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/begin', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') },
                     body: JSON.stringify({ device_label: deviceLabel })
                 });
                 if (!beginRes.ok) throw new Error('begin failed: ' + beginRes.status);
@@ -2238,7 +2238,7 @@
 
                 var completeRes = await fetch(ADMIN_BASE + '/api/v1/webauthn/register/complete?challenge_id=' + encodeURIComponent(challengeId), { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') },
                     body: JSON.stringify(body)
                 });
                 if (!completeRes.ok) {
@@ -2329,7 +2329,7 @@
                 };
                 var res = await fetch(ADMIN_BASE + '/api/v1/push/subscribe', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
+                    headers: { 'Content-Type': 'application/json', 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') },
                     body: JSON.stringify(body)
                 });
                 if (!res.ok) throw new Error('server rejected subscription');
@@ -2348,7 +2348,7 @@
                 if (sub) {
                     await fetch(ADMIN_BASE + '/api/v1/push/unsubscribe', { credentials: 'include',
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + goulburnAuth.getSession() },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') },
                         body: JSON.stringify({ endpoint: sub.endpoint })
                     });
                     await sub.unsubscribe();
@@ -2365,7 +2365,7 @@
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/push/test-send', { credentials: 'include',
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                    headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
                 });
                 var data = await res.json();
                 _pushStatus('Test fired. Sent: ' + (data.sent || 0) + ' (dead: ' + (data.dead || 0) + ')');
@@ -2399,7 +2399,7 @@
             var apiBase = (typeof goulburnAuth !== 'undefined' && goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
             if (!session) return;
             fetch(apiBase + '/api/v1/operators/me/settings', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + session }
+                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
             }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                 if (!me || !me.handle) return;
                 // Append ?edit=1 so operator.html auto-opens the edit modal — single click flow.

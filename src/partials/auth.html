@@ -81,8 +81,88 @@
         }
 
         function isAuthenticated() {
-            return !!getSession();
+            // Sync best-guess. Returns true if EITHER:
+            //   1. bearer present in localStorage/sessionStorage, or
+            //   2. validateSession() probed /auth/me successfully and set
+            //      the cookie-auth flag (cookie-only path).
+            //
+            // Phase B (2026-05-05): callers that need a definitive answer
+            // before doing privileged work should `await goulburnAuth.authReady`
+            // — that promise resolves after the initial /auth/me probe completes.
+            return !!getSession() || window.__goulburnCookieAuthOk === true;
         }
+
+        // Async session probe — confirms cookie-based session is alive by
+        // calling goulburn-admin's /auth/me with credentials:'include' so the
+        // gb_user_session cookie auto-attaches. Sets window-level flags on
+        // success so synchronous isAuthenticated() callers see the new state.
+        async function validateSession() {
+            try {
+                var r = await fetch(ADMIN_BASE + '/api/v1/auth/me', { credentials: 'include' });
+                if (r.ok) {
+                    window.__goulburnCookieAuthOk = true;
+                    try { window.__goulburnAuthMe = await r.json(); } catch (_) {}
+                    // Mirror minimum identity into localStorage for nav/sidebar
+                    // consumers that read these synchronously. Does NOT mirror
+                    // the bearer — cookie remains the source of truth.
+                    try {
+                        var me = window.__goulburnAuthMe || {};
+                        if (me.user_id) localStorage.setItem('goulburn_user_id', me.user_id);
+                        if (me.registration_id) localStorage.setItem('goulburn_reg_id', me.registration_id);
+                    } catch (_) {}
+                    return true;
+                }
+            } catch (_) {}
+            return false;
+        }
+
+        // Auth-aware fetch helper. Always sends credentials:'include' so the
+        // gb_user_session cookie attaches on cross-subdomain requests; ALSO
+        // sets Authorization: Bearer when a bearer is present (back-compat
+        // during the Phase B transition; backend accepts either since
+        // commit 4e6a1df, 2026-05-05). Use this helper for every authed
+        // fetch — never `Authorization: 'Bearer ' + getSession()` directly,
+        // because that emits literal `Bearer null` when getSession() returns
+        // null and triggers backend 401s on the cookie-only path.
+        function authFetch(url, opts) {
+            opts = Object.assign({}, opts || {});
+            opts.credentials = 'include';
+            var headers = Object.assign({}, opts.headers || {});
+            var token = getSession();
+            if (token && !headers.Authorization && !headers.authorization) {
+                headers.Authorization = 'Bearer ' + token;
+            }
+            // Default Content-Type for non-GET; harmless on GET.
+            if (!headers['Content-Type'] && !headers['content-type']) {
+                headers['Content-Type'] = 'application/json';
+            }
+            opts.headers = headers;
+            return fetch(url, opts);
+        }
+
+        // Promise<boolean> — resolves once we know the auth state.
+        // - If bearer is present at load time, resolves true synchronously
+        //   on next tick (no probe needed).
+        // - If bearer is absent, kicks off /auth/me probe and resolves
+        //   based on the result. Cookie-only sign-in works through this.
+        var _authReadyResolve;
+        var authReady = new Promise(function(res) { _authReadyResolve = res; });
+        (function _initAuthState() {
+            if (getSession()) {
+                _authReadyResolve(true);
+                return;
+            }
+            validateSession().then(function(ok) {
+                _authReadyResolve(ok);
+                // Fire DOM event for nav.html and other listeners that need
+                // to refresh UI after the probe completes (cookie-only sign-in).
+                try {
+                    document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
+                        detail: { authenticated: ok, source: 'cookie' },
+                    }));
+                } catch (_) {}
+            });
+        })();
 
         function signOut() {
             // Phase 1.5: invalidate session server-side BEFORE clearing client state.
@@ -94,17 +174,41 @@
                 fetch(window.goulburnAuth.ADMIN_BASE + '/api/v1/auth/logout', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+                    headers: token ? { 'Authorization': (token ? 'Bearer ' + token : '') } : {},
                 }).catch(function () {});
             } catch (e) {}
             clearSession();
+            // Phase B: clear cookie-auth flag so isAuthenticated() flips to
+            // false immediately — without this, navigation guards downstream
+            // would still see a stale cookieAuthOk flag.
+            try { window.__goulburnCookieAuthOk = false; } catch (_) {}
+            try { window.__goulburnAuthMe = null; } catch (_) {}
             window.location.href = '/';
         }
 
         function requireAuth() {
+            // Sync best-effort gate. When ONLY the cookie path is alive
+            // (Phase B), isAuthenticated() returns true the moment
+            // window.__goulburnCookieAuthOk is set by validateSession().
+            //
+            // Edge case: page loads with no bearer and authReady has not
+            // resolved yet. Trigger a background probe; redirect to
+            // /sign-in only AFTER it confirms unauthenticated. The page
+            // may briefly start rendering before redirect — acceptable
+            // tradeoff vs blocking with a synchronous network call.
             if (!isAuthenticated()) {
-                window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
-                return false;
+                authReady.then(function(ok) {
+                    if (!ok) {
+                        window.location.href = '/sign-in?redirect=' + encodeURIComponent(window.location.pathname);
+                    }
+                });
+                // If bearer is absent AND authReady has not yet resolved,
+                // we can't know yet — return false to be safe; the await
+                // above will handle the eventual redirect. Pages that need
+                // strict gating should `await goulburnAuth.authReady` first.
+                if (!getSession() && window.__goulburnCookieAuthOk !== true) {
+                    return false;
+                }
             }
             // If on bare /dashboard or /settings, redirect to ID-based URL
             var regId = getRegId();
@@ -142,7 +246,11 @@
             signOut: signOut,
             requireAuth: requireAuth,
             getRegId: getRegId,
-            setRegId: setRegId
+            setRegId: setRegId,
+            // Phase B (cookie-as-truth):
+            validateSession: validateSession,
+            authFetch: authFetch,
+            authReady: authReady,
         };
     })();
     </script>
@@ -340,7 +448,7 @@
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
             fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include',
-                headers: { 'Authorization': 'Bearer ' + goulburnAuth.getSession() }
+                headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
             })
             .then(function(r) {
                 if (r.status === 401 || r.status === 403) {
