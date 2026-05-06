@@ -804,51 +804,6 @@
             </p>
         </div>
 
-        <!-- Two-Factor Authentication -->
-        <div class="settings-card" id="twoFactorCard" style="margin-bottom: 1.5rem;">
-            <h2>Two-Factor Authentication</h2>
-            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1rem;">
-                Add a second layer of security with a time-based one-time password from your authenticator app.
-            </p>
-
-            <div id="twoFactorStatusRow" style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.75rem 0;">
-                <div>
-                    <strong id="twoFactorStateLabel">Loading...</strong>
-                    <p id="twoFactorBackupLine" style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.25rem;"></p>
-                </div>
-                <button id="twoFactorPrimaryBtn" class="btn btn-primary" type="button" style="display: none;">Enable</button>
-            </div>
-
-            <div id="twoFactorEnableBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
-                <p style="font-size: 0.875rem; margin-bottom: 0.75rem;">Scan this QR code with your authenticator app, then enter the 6-digit code below.</p>
-                <div id="twoFactorQrBox" style="background: white; padding: 12px; display: inline-block; border-radius: 4px;"></div>
-                <p style="font-size: 0.75rem; color: var(--dark-600); margin-top: 0.5rem; word-break: break-all;">
-                    Manual setup key: <code id="twoFactorSecretText"></code>
-                </p>
-                <div style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
-                    <input type="text" id="twoFactorConfirmCode" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456" style="flex: 1; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px;" />
-                    <button id="twoFactorConfirmBtn" class="btn btn-primary" type="button">Confirm</button>
-                    <button id="twoFactorCancelBtn" class="btn btn-secondary" type="button">Cancel</button>
-                </div>
-            </div>
-
-            <div id="twoFactorBackupBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px; color: var(--dark-800);">
-                <p style="font-size: 0.875rem; margin-bottom: 0.5rem;"><strong>Save these backup codes somewhere safe.</strong> Each can be used once if you lose your authenticator.</p>
-                <pre id="twoFactorBackupList" style="background: #ffffff; color: #1a1a2e; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.875rem; white-space: pre-wrap; border: 1px solid var(--dark-200);"></pre>
-                <button id="twoFactorBackupAckBtn" class="btn btn-primary" type="button" style="margin-top: 0.5rem;">I have saved them</button>
-            </div>
-
-            <div id="twoFactorDisableBox" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--dark-50); border-radius: 6px;">
-                <p style="font-size: 0.875rem; margin-bottom: 0.75rem;">Confirm your password and enter a current 2FA code to disable.</p>
-                <div class="password-wrapper" style="margin-bottom: 0.5rem;"><input type="password" id="twoFactorDisablePassword" placeholder="Password" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px;" /><button type="button" class="eye-toggle" onclick="togglePwVis('twoFactorDisablePassword', this)" title="Show password">&#128065;</button></div>
-                <input type="text" id="twoFactorDisableCode" inputmode="numeric" maxlength="14" placeholder="123456 or backup code" style="width: 100%; padding: 0.5rem; border: 1px solid var(--dark-200); border-radius: 4px; margin-bottom: 0.5rem;" />
-                <div style="display: flex; gap: 0.5rem;">
-                    <button id="twoFactorDisableConfirmBtn" class="btn btn-danger" type="button">Disable 2FA</button>
-                    <button id="twoFactorDisableCancelBtn" class="btn btn-secondary" type="button">Cancel</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Sign-in security (PWA Phase D — Passkeys) -->
         <div class="settings-card" id="passkeysCard" style="margin-bottom: 1.5rem;">
             <h2>Sign-in security</h2>
