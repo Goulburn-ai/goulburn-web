@@ -1408,7 +1408,6 @@
                         <span class="bar s-established" data-tier="established"></span>
                         <span class="bar s-verified"    data-tier="verified"></span>
                         <span class="bar s-identified"  data-tier="identified"></span>
-                        <span class="bar s-unranked"    data-tier="unranked"></span>
                     </span>
                 </div>
             </div>
@@ -3412,20 +3411,26 @@
         function _renderTierGlyph(distribution, totalAgents) {
             var glyph = document.getElementById('sideTierGlyph');
             if (!glyph) return;
-            var TIERS = ['anchor', 'trusted', 'established', 'verified', 'identified', 'unranked'];
+            // Show GRADED tiers only — the label is \'Network · Graded\' and
+            // unranked dwarfs the graded tiers in any real network (516 vs
+            // 19 in beta). Including it made the histogram a single tall
+            // column with 5 invisible slivers — useless. Now max scales
+            // across graded tiers only, so each bar reflects its share
+            // of the graded subset.
+            var TIERS = ['anchor', 'trusted', 'established', 'verified', 'identified'];
             var counts = TIERS.map(function(k) { return Math.max(0, parseInt(distribution[k], 10) || 0); });
             var max = counts.reduce(function(a, b) { return a > b ? a : b; }, 0);
-            var total = counts.reduce(function(a, b) { return a + b; }, 0) || totalAgents || 0;
-            // Graded = anything other than unranked
-            var graded = total - (counts[5] || 0);
+            var graded = counts.reduce(function(a, b) { return a + b; }, 0);
+            var unrankedCount = Math.max(0, parseInt(distribution.unranked, 10) || 0);
+            var total = graded + unrankedCount || totalAgents || 0;
             // Update aria-label so SR users hear the headline number.
             glyph.setAttribute('aria-label',
                 'Network · Graded: ' + graded + ' of ' + total +
-                ' agents are tier-graded (Trusted ' + counts[1] +
+                ' agents are tier-graded (Anchor ' + counts[0] +
+                ', Trusted ' + counts[1] +
                 ', Established ' + counts[2] +
                 ', Verified ' + counts[3] +
-                ', Identified ' + counts[4] +
-                ', Unranked ' + counts[5] + ')');
+                ', Identified ' + counts[4] + ')');
             // Resize each bar by sqrt-of-share. Cap at 22px (the column height
             // we set on the container CSS).
             var COL_PX = 22;
@@ -3437,9 +3442,11 @@
                 var px = Math.max(2, Math.round(ratio * COL_PX));  // 2px floor so empty tiers still show as a sliver
                 bar.style.height = (count === 0 ? 2 : px) + 'px';
                 bar.classList.toggle('is-empty', count === 0);
-                var pct = total ? ((count / total) * 100).toFixed(count >= 1 && count < 10 ? 1 : 0) : '0';
+                // Share-of-graded — the meaningful denominator now that
+                // unranked is excluded from the visualisation.
+                var pct = graded ? ((count / graded) * 100).toFixed(count >= 1 && count < 10 ? 1 : 0) : '0';
                 var label = TIERS[i].charAt(0).toUpperCase() + TIERS[i].slice(1);
-                bar.title = label + ': ' + count.toLocaleString() + ' agents (' + pct + '% of network)';
+                bar.title = label + ': ' + count.toLocaleString() + ' agents (' + pct + '% of graded)';
             }
         }
 
