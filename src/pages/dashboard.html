@@ -799,6 +799,29 @@
             if (mGuest) mGuest.classList.add('hidden');
             if (mAuth) mAuth.classList.remove('hidden');
         }
+        // Cookie-session path — auth_v2.html dispatches goulburn:auth-ready
+        // after probing /api/auth/me. The legacy bearer fast-path above only
+        // catches localStorage sessions; this catches cookie-only ones.
+        function _flipNavCookieAware() {
+            var guest = document.getElementById('navGuest');
+            var auth = document.getElementById('navAuth');
+            var mGuest = document.getElementById('mobileGuest');
+            var mAuth = document.getElementById('mobileAuth');
+            if (guest) guest.classList.add('hidden');
+            if (auth) auth.classList.remove('hidden');
+            if (mGuest) mGuest.classList.add('hidden');
+            if (mAuth) mAuth.classList.remove('hidden');
+        }
+        document.addEventListener('goulburn:auth-ready', function(ev) {
+            if (ev && ev.detail && (ev.detail.user || ev.detail.authenticated)) {
+                _flipNavCookieAware();
+            }
+        });
+        try {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.authReady) {
+                goulburnAuth.authReady.then(function(ok) { if (ok) _flipNavCookieAware(); });
+            }
+        } catch (_) {}
     })();
     
             // Update nav links with registration ID
