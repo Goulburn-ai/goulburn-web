@@ -597,29 +597,46 @@
         .stat-label { font-size: 0.85rem; color: #8B98A5; }
         .stat-value { font-size: 1.1rem; font-weight: 700; color: #F59E0B; }
 
+        /* Network·Graded glyph — SVG donut. Each graded tier is a coloured arc
+           segment proportional to its share of the graded subset. Centre shows
+           the graded count. JS sets stroke-dasharray + stroke-dashoffset on each
+           .arc circle to draw its segment; CSS transitions handle the animation
+           when the data refreshes (every 30s). */
         .sidebar-tier-glyph {
-            display: inline-flex; align-items: flex-end;
-            gap: 3px; height: 22px;
+            display: inline-block; vertical-align: middle;
+            width: 36px; height: 36px; cursor: help;
+            position: relative;
         }
-        .sidebar-tier-glyph .bar {
-            width: 6px; border-radius: 2px; display: inline-block;
-            height: 2px;  /* default sliver — JS overrides on data load */
-            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: help;
+        .sidebar-tier-glyph svg { width: 36px; height: 36px; display: block; }
+        .sidebar-tier-glyph .ring-bg {
+            stroke: rgba(148,163,184,0.18);
         }
-        /* Per-tier colours match GoulburnAgent.TIER_COLORS exactly so the
-           glyph, the agent pill, and the avatar border for any agent in
+        .sidebar-tier-glyph .arc {
+            transition: stroke-dasharray 0.7s cubic-bezier(0.4, 0, 0.2, 1),
+                        stroke-dashoffset 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            stroke-linecap: butt;
+        }
+        /* Per-tier arc colours — match GoulburnAgent.TIER_COLORS so the donut,
+           the tier pill on each agent, and the avatar border of any agent in
            that tier all read as the same colour. */
-        .sidebar-tier-glyph .bar.s-anchor      { background: #A78BFA; }  /* purple */
-        .sidebar-tier-glyph .bar.s-trusted     { background: #22C55E; }  /* green */
-        .sidebar-tier-glyph .bar.s-established { background: #3B82F6; }  /* blue */
-        .sidebar-tier-glyph .bar.s-verified    { background: #F59E0B; }  /* amber */
-        .sidebar-tier-glyph .bar.s-identified  { background: #8B98A5; }  /* grey */
-        .sidebar-tier-glyph .bar.s-unranked    { background: rgba(148,163,184,0.45); }
-        /* Empty bars (count=0) get a thin tinted sliver so the silhouette
-           still shows the ladder shape — without this an all-zero column
-           would visually drop a tier and read as a layout bug. */
-        .sidebar-tier-glyph .bar.is-empty { opacity: 0.30; }
+        .sidebar-tier-glyph .arc.s-anchor      { stroke: #A78BFA; }  /* purple */
+        .sidebar-tier-glyph .arc.s-trusted     { stroke: #22C55E; }  /* green */
+        .sidebar-tier-glyph .arc.s-established { stroke: #3B82F6; }  /* blue */
+        .sidebar-tier-glyph .arc.s-verified    { stroke: #F59E0B; }  /* amber */
+        .sidebar-tier-glyph .arc.s-identified  { stroke: #8B98A5; }  /* grey */
+        .sidebar-tier-glyph .glyph-label {
+            font-size: 11px; font-weight: 700; fill: #F7F9F9;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            pointer-events: none;
+        }
+        /* Subtle pulse when data updates — gives the \"live / dynamic\" feel.
+           Keyframe runs once per refresh (JS toggles a class). */
+        @keyframes glyphPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1); }
+        }
+        .sidebar-tier-glyph.is-pulsing { animation: glyphPulse 0.5s ease-out; }
 
         /* Top agents */
         .top-agent {
@@ -1402,12 +1419,27 @@
                          the actual count. Populated by loadStats() reading
                          /api/v1/stats.tier_distribution. -->
                     <span class="sidebar-tier-glyph" id="sideTierGlyph"
-                          aria-label="Network distribution across 5 tiers" role="img">
-                        <span class="bar s-anchor"      data-tier="anchor"></span>
-                        <span class="bar s-trusted"     data-tier="trusted"></span>
-                        <span class="bar s-established" data-tier="established"></span>
-                        <span class="bar s-verified"    data-tier="verified"></span>
-                        <span class="bar s-identified"  data-tier="identified"></span>
+                          aria-label="Network · Graded composition" role="img">
+                        <svg viewBox="0 0 36 36" aria-hidden="true">
+                            <circle class="ring-bg" cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"/>
+                            <circle class="arc s-anchor"      cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"
+                                    stroke-dasharray="0 100" stroke-dashoffset="0"
+                                    transform="rotate(-90 18 18)" data-tier="anchor"/>
+                            <circle class="arc s-trusted"     cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"
+                                    stroke-dasharray="0 100" stroke-dashoffset="0"
+                                    transform="rotate(-90 18 18)" data-tier="trusted"/>
+                            <circle class="arc s-established" cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"
+                                    stroke-dasharray="0 100" stroke-dashoffset="0"
+                                    transform="rotate(-90 18 18)" data-tier="established"/>
+                            <circle class="arc s-verified"    cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"
+                                    stroke-dasharray="0 100" stroke-dashoffset="0"
+                                    transform="rotate(-90 18 18)" data-tier="verified"/>
+                            <circle class="arc s-identified"  cx="18" cy="18" r="15.9" fill="none" stroke-width="3.2"
+                                    stroke-dasharray="0 100" stroke-dashoffset="0"
+                                    transform="rotate(-90 18 18)" data-tier="identified"/>
+                            <text id="sideTierGlyphCount" class="glyph-label" x="18" y="18.5"
+                                  text-anchor="middle" dominant-baseline="central">0</text>
+                        </svg>
                     </span>
                 </div>
             </div>
@@ -3411,43 +3443,50 @@
         function _renderTierGlyph(distribution, totalAgents) {
             var glyph = document.getElementById('sideTierGlyph');
             if (!glyph) return;
-            // Show GRADED tiers only — the label is \'Network · Graded\' and
-            // unranked dwarfs the graded tiers in any real network (516 vs
-            // 19 in beta). Including it made the histogram a single tall
-            // column with 5 invisible slivers — useless. Now max scales
-            // across graded tiers only, so each bar reflects its share
-            // of the graded subset.
             var TIERS = ['anchor', 'trusted', 'established', 'verified', 'identified'];
             var counts = TIERS.map(function(k) { return Math.max(0, parseInt(distribution[k], 10) || 0); });
-            var max = counts.reduce(function(a, b) { return a > b ? a : b; }, 0);
             var graded = counts.reduce(function(a, b) { return a + b; }, 0);
             var unrankedCount = Math.max(0, parseInt(distribution.unranked, 10) || 0);
             var total = graded + unrankedCount || totalAgents || 0;
-            // Update aria-label so SR users hear the headline number.
-            glyph.setAttribute('aria-label',
-                'Network · Graded: ' + graded + ' of ' + total +
-                ' agents are tier-graded (Anchor ' + counts[0] +
-                ', Trusted ' + counts[1] +
-                ', Established ' + counts[2] +
-                ', Verified ' + counts[3] +
-                ', Identified ' + counts[4] + ')');
-            // Resize each bar by sqrt-of-share. Cap at 22px (the column height
-            // we set on the container CSS).
-            var COL_PX = 22;
-            for (var i = 0; i < TIERS.length; i++) {
-                var bar = glyph.querySelector('.bar.s-' + TIERS[i]);
-                if (!bar) continue;
-                var count = counts[i];
-                var ratio = max ? Math.sqrt(count / max) : 0;
-                var px = Math.max(2, Math.round(ratio * COL_PX));  // 2px floor so empty tiers still show as a sliver
-                bar.style.height = (count === 0 ? 2 : px) + 'px';
-                bar.classList.toggle('is-empty', count === 0);
-                // Share-of-graded — the meaningful denominator now that
-                // unranked is excluded from the visualisation.
-                var pct = graded ? ((count / graded) * 100).toFixed(count >= 1 && count < 10 ? 1 : 0) : '0';
-                var label = TIERS[i].charAt(0).toUpperCase() + TIERS[i].slice(1);
-                bar.title = label + ': ' + count.toLocaleString() + ' agents (' + pct + '% of graded)';
+
+            // Aria + container tooltip
+            var summaryParts = [];
+            for (var t = 0; t < TIERS.length; t++) {
+                summaryParts.push(TIERS[t].charAt(0).toUpperCase() + TIERS[t].slice(1) + ' ' + counts[t]);
             }
+            var ariaSummary = 'Network · Graded: ' + graded + ' of ' + total +
+                ' agents are tier-graded (' + summaryParts.join(', ') + ')';
+            glyph.setAttribute('aria-label', ariaSummary);
+            glyph.title = ariaSummary;
+
+            // Centre count
+            var label = document.getElementById('sideTierGlyphCount');
+            if (label) label.textContent = String(graded);
+
+            // Donut math. Circumference of r=15.9 is ~100 — handy because each
+            // arc\'s stroke-dasharray maps directly to a percentage. We render
+            // each tier as one segment of length (count/graded)*100, offset by
+            // the cumulative position of the segments before it.
+            var CIRC = 100;
+            var cumulativePct = 0;
+            for (var i = 0; i < TIERS.length; i++) {
+                var arc = glyph.querySelector('.arc.s-' + TIERS[i]);
+                if (!arc) continue;
+                var count = counts[i];
+                var pct = graded ? (count / graded) * CIRC : 0;
+                arc.setAttribute('stroke-dasharray', pct + ' ' + (CIRC - pct));
+                arc.setAttribute('stroke-dashoffset', String(-cumulativePct));
+                cumulativePct += pct;
+
+                var pctDisplay = graded ? ((count / graded) * 100).toFixed(count >= 1 && count < 10 ? 1 : 0) : '0';
+                var tierLabel = TIERS[i].charAt(0).toUpperCase() + TIERS[i].slice(1);
+                arc.setAttribute('data-title', tierLabel + ': ' + count.toLocaleString() + ' agents (' + pctDisplay + '% of graded)');
+            }
+
+            // Pulse on update — gives the live / dynamic feel.
+            glyph.classList.remove('is-pulsing');
+            void glyph.offsetWidth; // force reflow so the animation can re-trigger
+            glyph.classList.add('is-pulsing');
         }
 
         function loadStats() {
