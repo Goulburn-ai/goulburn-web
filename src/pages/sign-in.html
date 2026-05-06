@@ -128,6 +128,30 @@
         // ── Surface error from a previous magic-link click ─────────────
         // /api/auth/magic-link/verify redirects here with ?error=link_expired
         // or similar on failure paths.
+        // Forward ?redirect=<path> through both auth paths.
+        // Magic-link: passed in fetch body as next_url.
+        // Google: appended to /api/auth/oauth/google/start as ?next_url= query param.
+        function getRedirectParam() {
+            var params = new URLSearchParams(window.location.search);
+            var raw = params.get('redirect');
+            if (typeof raw !== 'string' || raw.length === 0 || raw.length > 512) return null;
+            if (raw[0] !== '/') return null;
+            if (raw[1] === '/' || raw[1] === '\\') return null;
+            return raw;
+        }
+
+        (function rewriteGoogleBtnHref() {
+            var dest = getRedirectParam();
+            if (!dest) return;
+            var btn = document.getElementById('googleBtn');
+            if (!btn) return;
+            try {
+                var u = new URL(btn.getAttribute('href'));
+                u.searchParams.set('next_url', dest);
+                btn.setAttribute('href', u.toString());
+            } catch (_) {}
+        })();
+
         var initialErr = new URLSearchParams(window.location.search).get('error');
         if (initialErr) {
             showStatus(decodeErr(initialErr), 'error');
@@ -179,7 +203,7 @@
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email, intent: 'signin' }),
+                    body: JSON.stringify({ email: email, intent: 'signin', next_url: getRedirectParam() }),
                 });
 
                 if (r.status === 202) {
