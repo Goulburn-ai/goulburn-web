@@ -2891,8 +2891,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 selectAgent(best.id);
             });
     }
-    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded',load);
-    else load();
+    function _bootLoad() {
+        try {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
+                goulburnAuth.ready().then(load);
+            } else {
+                load();
+            }
+        } catch (_) { load(); }
+    }
+    if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', _bootLoad);
+    else _bootLoad();
 })();
 </script>
 
