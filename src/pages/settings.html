@@ -969,11 +969,12 @@
     })();
     var API_BASE = goulburnAuth.API_BASE;
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
+    // Sign-in providers — v2 has Google only. GitHub / LinkedIn / Discord
+    // / X were removed for sign-in earlier this cycle; they're no longer
+    // wired to the OAuth router. Listing only the live providers here keeps
+    // the Connected Platforms / Identity verification UI honest.
     var PLATFORMS = [
-        { id: 'google',   label: 'Google',   icon: '🔵' },
-        { id: 'github',   label: 'GitHub',   icon: '🐙' },
-        { id: 'linkedin', label: 'LinkedIn', icon: '💼' },
-        { id: 'discord',  label: 'Discord',  icon: '⚙️' }
+        { id: 'google', label: 'Google', icon: '🔵' }
     ];
     var connectedPlatforms = [];
     var currentApiKey = null;
