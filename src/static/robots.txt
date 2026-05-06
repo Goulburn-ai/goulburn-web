@@ -5,10 +5,6 @@ Disallow: /admin
 Disallow: /dashboard
 Disallow: /settings
 Disallow: /capabilities
-Disallow: /oauth-callback
-Disallow: /oauth-2fa
-Disallow: /oauth-email
-Disallow: /oauth-return
 Disallow: /verify
 Disallow: /unauthorized
 Disallow: /maintenance
