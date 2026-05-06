@@ -987,7 +987,7 @@
     <div class="toast" id="toast"></div>
 
     <!-- @include partials/footer.html -->
-    <!-- @include partials/auth.html -->
+    <!-- @include partials/auth_v2.html -->
 
     <script>
     // ── Settings — wired to real API endpoints ──
@@ -1604,7 +1604,7 @@
     // the top. This re-runs scrollIntoView once the target element exists.
     //
     // Belt-and-braces: also read goulburn_pending_hash from sessionStorage —
-    // auth.html stashes the hash there before doing /settings → /dashboard/
+    // auth_v2.html stashes the hash there before doing /settings → /dashboard/
     // settings/<id> redirect, because some browsers/Vercel-edge paths drop
     // fragments on multi-step location.replace() chains.
     (function hydrateHashScroll() {

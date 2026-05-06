@@ -282,7 +282,7 @@
     </div>
 
     <!-- @include partials/footer.html -->
-    <!-- @include partials/auth.html -->
+    <!-- @include partials/auth_v2.html -->
 
     <script>
     (function () {
@@ -380,7 +380,7 @@
                 const tier = btn.dataset.tier;
                 const period = currentPeriod;
 
-                // Check session via the goulburnAuth helper from partials/auth.html.
+                // Check session via the goulburnAuth helper from partials/auth_v2.html.
                 // Uses the same getSession() the rest of the site uses (dashboard,
                 // settings, claim flow). Returns the session token string or null.
                 let token = null;

@@ -61,7 +61,7 @@
         // sole source of truth — cookie-only sessions are first-class. We:
         //   1. Render guest UI by default (avoid an auth-flash for true guests)
         //   2. Flip to auth UI synchronously if a bearer is present (fast path)
-        //   3. Otherwise, listen for goulburn:auth-ready (fired by auth.html
+        //   3. Otherwise, listen for goulburn:auth-ready (fired by auth_v2.html
         //      partial after its /auth/me probe completes) and flip if the
         //      cookie-only session is alive.
         function _flipNavToAuth() {
