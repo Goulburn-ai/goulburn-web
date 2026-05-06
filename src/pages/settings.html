@@ -1023,8 +1023,22 @@
     var connectedPlatforms = [];
     var currentApiKey = null;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!goulburnAuth.requireAuth()) return;
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Wait for the auth probe before deciding. requireAuth() is sync
+        // and for cookie-only v2 sessions it returns false during the probe
+        // window (probe hasn't resolved at DOMContentLoaded). Without this
+        // await, the whole init function early-returned and loadSettingsData()
+        // never ran — Account section stayed at HTML placeholder values.
+        try {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
+                await goulburnAuth.ready();
+            }
+        } catch (_) {}
+        if (typeof goulburnAuth === 'undefined' || !goulburnAuth.isAuthenticated()) {
+            window.location.href = '/sign-in?redirect=' +
+                encodeURIComponent(window.location.pathname + window.location.search);
+            return;
+        }
 
         // Extract registration ID from URL: /dashboard/settings/{18-digit-id}
         var settingsPathParts = window.location.pathname.split('/');
