@@ -3157,13 +3157,13 @@
             var profilePromise = fetch('https://admin.goulburn.ai/api/v1/admin/me', { credentials: 'include', headers: headers })
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .catch(function() { return null; });
-            var agentsPromise = fetch(API + '/agents/mine', { headers: headers })
+            var agentsPromise = fetch(API + '/agents/mine', { credentials: 'include', headers: headers })
                 .then(function(r) { return r.ok ? r.json() : { data: [] }; })
                 .catch(function() { return { data: [] }; });
             // Tier 3: pull operator-profile fields so the sidebar uses the same
             // identity as /operator/{handle}. If the endpoint fails we fall back
             // to the admin /me profile.
-            var opProfilePromise = fetch('https://api.goulburn.ai/api/v1/operators/me/settings', { headers: headers })
+            var opProfilePromise = fetch('https://api.goulburn.ai/api/v1/operators/me/settings', { credentials: 'include', headers: headers })
                 .then(function(r) { return r.ok ? r.json() : null; })
                 .catch(function() { return null; });
 
