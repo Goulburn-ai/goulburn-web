@@ -88,7 +88,11 @@
             //      goulburn:auth-ready event when it fires.
             // Both paths converge on _flipNavToAuth() if cookie auth is alive.
             function _onAuthReadyEvent(ev) {
-                if (ev && ev.detail && ev.detail.authenticated) {
+                // Accept either flag — auth_v2.html dispatches { user, authenticated }.
+                // Old code only checked .authenticated; if the partial regresses
+                // to user-only, this still works.
+                var ok = !!(ev && ev.detail && (ev.detail.authenticated || ev.detail.user));
+                if (ok) {
                     _flipNavToAuth();
                     if (typeof _stampNavRegId === 'function') _stampNavRegId();
                 }
