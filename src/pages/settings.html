@@ -1159,7 +1159,8 @@
 
         function loadBillingStatus() {
             var token = goulburnAuth.getSession();
-            if (!token) return;
+            // No bail on missing token — cookie-only v2 sessions still reach
+            // the endpoint via credentials:include.
             fetch(API_BASE_FOR_BILLING + '/api/v1/billing/owner-status', { credentials: 'include',
                 headers: { 'Authorization': (token ? 'Bearer ' + token : ''), 'Content-Type': 'application/json' }
             })
@@ -2098,7 +2099,7 @@
         // /settings/:id    -> leave alone
         if (typeof goulburnAuth === 'undefined') return;
         var session = goulburnAuth.getSession && goulburnAuth.getSession();
-        if (!session) return;
+        // No bail — v2 sessions are valid without a localStorage bearer.
         var path = window.location.pathname;
         if (path !== '/settings' && path !== '/settings/') return;  // already stamped or other page
         fetch((typeof ADMIN_BASE !== 'undefined' ? ADMIN_BASE : 'https://admin.goulburn.ai') + '/api/v1/admin/me', { credentials: 'include',
@@ -2410,7 +2411,7 @@
         try {
             var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
             var apiBase = (typeof goulburnAuth !== 'undefined' && goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
-            if (!session) return;
+            // No bail — credentials:include sends the v2 cookie.
             fetch(apiBase + '/api/v1/operators/me/settings', { credentials: 'include',
                 headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
             }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
