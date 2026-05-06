@@ -156,7 +156,7 @@
         _ready = Promise.resolve(null);
         try {
             document.dispatchEvent(new CustomEvent('goulburn:auth-changed', {
-                detail: { user: null }
+                detail: { user: null, authenticated: false }
             }));
         } catch (_) {}
         window.location.href = '/';
@@ -192,7 +192,7 @@
     initialReady.then(function(u) {
         try {
             document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
-                detail: { user: u }
+                detail: { user: u, authenticated: u !== null }
             }));
         } catch (_) {}
     });
