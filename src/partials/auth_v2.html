@@ -1,27 +1,95 @@
 <!--
-  Phase 1 auth-rewrite partial — cookie-only.
+  Phase 1 auth-rewrite partial — cookie-first with legacy bearer fallback.
 
-  Replaces partials/auth.html (500+ lines) with a 90-line cookie-first
-  version backed by /api/auth/me on goulburn-api. NO bearer mirror in
-  localStorage. NO __goulburnCookieAuthOk flag. NO destructive stale
-  guards. NO inactivity timer with TOTP branches.
+  Background:
+    The new sign-in flow stores a session token in an HttpOnly cookie
+    (gb_session) issued by goulburn-api at /api/auth/me. Pages probe
+    that endpoint, treat 200 + user payload as "signed in," 200 + null
+    as "guest," anything else as "guest defensively."
 
-  Source of truth for "is the user signed in?":
-    GET https://api.goulburn.ai/api/auth/me with credentials:'include'
-       → 200 { user: {...} }      → signed in
-       → 200 { user: null }       → signed out (guest)
-       → 404 / network error      → flag is off OR network down → guest
+    Legacy users (pre-2026-05-06) still have a Bearer token in
+    localStorage and a Redis-backed session. Rather than force them
+    to re-sign-in, this partial performs a SECOND probe to the legacy
+    /api/v1/auth/me with the Bearer header on its way to deprecation.
+    Once we observe legacy session traffic has dropped to zero, the
+    fallback block can be deleted.
 
-  Used by the new sign-in page (Step 6) and post-cutover by every page.
+  Public API on window.goulburnAuth (intentionally a SUPERSET of the
+  old partials/auth.html surface, so the 16 legacy pages can swap their
+  include with no code changes):
+
+    // v2 — preferred
+    .ready()              -> Promise<user|null>   // resolves with user object
+    .user()               -> user|null            // synchronous, after ready
+    .isAuthenticated()    -> bool
+    .identityTier()       -> 0 | 1 | 2
+    .identityScore()      -> 0 | 50 | 100
+    .signOut()            -> sends to /, wipes cookie + bearer
+    .authFetch(url, opts) -> fetch with credentials:include + bearer if present
+
+    // legacy compat — same shape as old partials/auth.html
+    .API_BASE             -> 'https://api.goulburn.ai'
+    .ADMIN_BASE           -> 'https://admin.goulburn.ai'
+    .getSession()         -> bearer-or-null from localStorage/sessionStorage
+    .setSession(t, opts)  -> persist bearer (legacy callers)
+    .clearSession()       -> wipe bearer + reg id
+    .getRegId()           -> registration_id from user or cache
+    .setRegId(id)         -> persist registration_id cache
+    .requireAuth()        -> redirects to /sign-in if probe resolves null
+    .validateSession()    -> Promise<bool>; like ready() but boolean
+    .authReady            -> Promise<bool>; eager-resolved on partial load
 -->
 <script>
 (function() {
-    var API_BASE = 'https://api.goulburn.ai';
+    var API_BASE   = 'https://api.goulburn.ai';
+    var ADMIN_BASE = 'https://admin.goulburn.ai';
+    var SESSION_LS_KEY = 'goulburn_session';
+    var REG_ID_LS_KEY  = 'goulburn_reg_id';
 
-    var _user = null;
+    var _user  = null;
     var _ready = null;
 
+    // ── Bearer / reg-id storage helpers (legacy) ────────────────────
+    function getSession() {
+        try {
+            var v = localStorage.getItem(SESSION_LS_KEY);
+            if (v) return v;
+        } catch (_) {}
+        try { return sessionStorage.getItem(SESSION_LS_KEY) || null; }
+        catch (_) { return null; }
+    }
+    function setSession(token, opts) {
+        opts = opts || {};
+        try {
+            if (opts.remember === false) {
+                sessionStorage.setItem(SESSION_LS_KEY, token);
+                localStorage.removeItem(SESSION_LS_KEY);
+            } else {
+                localStorage.setItem(SESSION_LS_KEY, token);
+                sessionStorage.removeItem(SESSION_LS_KEY);
+            }
+        } catch (_) {}
+        // re-probe so isAuthenticated() reflects the new state
+        _ready = probe();
+    }
+    function clearSession() {
+        try { localStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
+        try { sessionStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
+        try { localStorage.removeItem(REG_ID_LS_KEY); } catch (_) {}
+        _user = null;
+    }
+    function getRegId() {
+        if (_user && _user.registration_id) return _user.registration_id;
+        try { return localStorage.getItem(REG_ID_LS_KEY) || null; }
+        catch (_) { return null; }
+    }
+    function setRegId(id) {
+        try { if (id) localStorage.setItem(REG_ID_LS_KEY, id); } catch (_) {}
+    }
+
+    // ── Session probe: cookie first, bearer fallback ────────────────
     async function probe() {
+        // Path 1 — new cookie probe.
         try {
             var r = await fetch(API_BASE + '/api/auth/me', {
                 credentials: 'include',
@@ -29,10 +97,42 @@
             });
             if (r.ok) {
                 var body = await r.json();
-                _user = body && body.user ? body.user : null;
-                return _user;
+                if (body && body.user) {
+                    _user = body.user;
+                    if (_user.registration_id) setRegId(_user.registration_id);
+                    return _user;
+                }
+                // 200 with user:null — definitively not signed in via v2.
+                // Continue to legacy fallback before declaring guest.
             }
-        } catch (_) { /* network or 404 — treat as guest */ }
+        } catch (_) { /* network or 404 — fall through */ }
+
+        // Path 2 — legacy bearer probe (deprecation in flight).
+        var bearer = getSession();
+        if (bearer) {
+            try {
+                var r2 = await fetch(API_BASE + '/api/v1/auth/me', {
+                    headers: { 'Authorization': 'Bearer ' + bearer },
+                    credentials: 'include',
+                    cache: 'no-store',
+                });
+                if (r2.ok) {
+                    var body2 = await r2.json();
+                    // Legacy /me returns the user fields at top-level,
+                    // not under a `user` key. Normalise.
+                    var legacyUser = body2 && body2.user ? body2.user
+                                   : (body2 && body2.email ? body2 : null);
+                    if (legacyUser) {
+                        _user = legacyUser;
+                        if (legacyUser.registration_id) setRegId(legacyUser.registration_id);
+                        return _user;
+                    }
+                }
+                // Stale bearer — wipe so next probe doesn't repeat the call.
+                if (r2.status === 401) clearSession();
+            } catch (_) { /* network — give up */ }
+        }
+
         _user = null;
         return null;
     }
@@ -41,7 +141,6 @@
         if (_ready === null) _ready = probe();
         return _ready;
     }
-
     function user() { return _user; }
     function isAuthenticated() { return _user !== null; }
 
@@ -49,23 +148,33 @@
         if (!_user) return 0;
         var ident = _user.identity || {};
         if (ident.identity_verified_at) return 2;
-        if (ident.email_verified_at) return 1;
+        if (ident.email_verified_at)    return 1;
         return 0;
     }
-
     function identityScore() {
         var t = identityTier();
         return t === 2 ? 100 : (t === 1 ? 50 : 0);
     }
 
+    async function validateSession() {
+        var u = await ready();
+        return u !== null;
+    }
+
     async function signOut() {
+        // Best-effort: hit BOTH logout endpoints so legacy Redis sessions
+        // also drop. Ignore errors — we wipe local state regardless.
         try {
             await fetch(API_BASE + '/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
+                method: 'POST', credentials: 'include',
             });
-        } catch (_) { /* best-effort */ }
-        _user = null;
+        } catch (_) {}
+        try {
+            await fetch(ADMIN_BASE + '/api/v1/auth/logout', {
+                method: 'POST', credentials: 'include',
+            });
+        } catch (_) {}
+        clearSession();
         _ready = Promise.resolve(null);
         try {
             document.dispatchEvent(new CustomEvent('goulburn:auth-changed', {
@@ -78,14 +187,40 @@
     function authFetch(url, opts) {
         opts = Object.assign({}, opts || {});
         opts.credentials = 'include';
+        // If a legacy bearer is sitting in localStorage and the caller
+        // hasn't already set Authorization, attach it. New v2 endpoints
+        // ignore Authorization in favour of the cookie; legacy endpoints
+        // require it. This single line bridges both worlds.
+        var bearer = getSession();
+        if (bearer) {
+            opts.headers = Object.assign({}, opts.headers || {});
+            if (!opts.headers.Authorization && !opts.headers.authorization) {
+                opts.headers.Authorization = 'Bearer ' + bearer;
+            }
+        }
         return fetch(url, opts);
     }
 
-    // Trigger probe on partial load. Pages can `await goulburnAuth.ready()`
-    // for a definitive answer, or call `goulburnAuth.user()` synchronously
-    // once ready resolves. Probe result is cached for the lifetime of the
-    // page; navigation reloads it.
-    ready().then(function(u) {
+    function requireAuth() {
+        if (isAuthenticated()) return true;
+        ready().then(function(u) {
+            if (u === null) {
+                window.location.href = '/sign-in?redirect=' +
+                    encodeURIComponent(window.location.pathname + window.location.search);
+            }
+        });
+        return false;
+    }
+
+    // Eager kickoff so .authReady is a real Promise the moment pages load.
+    var initialReady = ready();
+
+    // Boolean-shaped variant for legacy consumers (auth.html\'s authReady
+    // resolved with bool). Mapping user|null -> true|false preserves the
+    // old `.then(function(ok){ if (!ok) {...} })` pattern.
+    var authReadyBool = initialReady.then(function(u) { return u !== null; });
+
+    initialReady.then(function(u) {
         try {
             document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
                 detail: { user: u }
@@ -93,12 +228,11 @@
         } catch (_) {}
     });
 
-    // Public surface — intentionally minimal. Compare to the old partial's
-    // ~12 exports (setSession, clearSession, getRegId, etc.). Bearer-mirror
-    // helpers, validateSession, authReady promise, _initAuthState IIFE all
-    // gone — the cookie itself is the only state we manage.
     window.goulburnAuth = {
-        API_BASE: API_BASE,
+        // bases
+        API_BASE:   API_BASE,
+        ADMIN_BASE: ADMIN_BASE,
+        // v2 API
         ready: ready,
         user: user,
         isAuthenticated: isAuthenticated,
@@ -106,6 +240,15 @@
         identityScore: identityScore,
         signOut: signOut,
         authFetch: authFetch,
+        // legacy compat
+        getSession: getSession,
+        setSession: setSession,
+        clearSession: clearSession,
+        getRegId: getRegId,
+        setRegId: setRegId,
+        requireAuth: requireAuth,
+        validateSession: validateSession,
+        authReady: authReadyBool,
     };
 })();
 </script>
