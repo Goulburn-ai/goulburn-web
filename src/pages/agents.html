@@ -3173,7 +3173,18 @@
                     var agentData = results[1] || {};
                     var opProfile = results[2];
                     var agents = agentData.data || agentData.agents || [];
+                    // Cookie-only v2 sessions may get null from admin/me (cross-
+                    // subdomain cookie quirk). Fall back to the user object the
+                    // auth_v2 partial already cached, then to opProfile, before
+                    // declaring guest. Without this fallback the page renders
+                    // "Discover AI Agents" for a perfectly signed-in user.
                     if (!profile) {
+                        try {
+                            var u = (typeof goulburnAuth !== 'undefined' && goulburnAuth.user) ? goulburnAuth.user() : null;
+                            if (u) profile = { email: u.email, name: u.display_name || u.email, registration_id: u.registration_id, avatar: u.avatar };
+                        } catch (_) {}
+                    }
+                    if (!profile && !opProfile) {
                         rendered.done = true;
                         renderLoggedOutSidebar(container);
                         return;
