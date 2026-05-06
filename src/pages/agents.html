@@ -3786,7 +3786,22 @@
 
         // ââ Boot ââ
         function init() {
+            // Render the left-sidebar twice: once now (guest fallback for true
+            // guests, fast first paint), and again after the auth probe resolves
+            // (which may flip the page from guest to operator-profile). Without
+            // the second render, signed-in users with cookie-only sessions saw
+            // the "Discover AI Agents" guest card forever because the initial
+            // sync isAuthenticated() check raced ahead of the probe.
             buildLeftSidebar();
+            try {
+                if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
+                    goulburnAuth.ready().then(function() { buildLeftSidebar(); });
+                } else {
+                    document.addEventListener('goulburn:auth-ready', function() { buildLeftSidebar(); });
+                }
+            } catch (_) {
+                document.addEventListener('goulburn:auth-ready', function() { buildLeftSidebar(); });
+            }
             loadStats();
             loadTopAgents();
             loadFeed();
