@@ -129,11 +129,7 @@
   ],
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/maintenance.html"
-    },
-    {
-      "source": "/:path*",
+      "source": "/sign-in",
       "destination": "/maintenance.html"
     },
     {
@@ -167,10 +163,6 @@
     {
       "source": "/agents/:name",
       "destination": "/agent.html"
-    },
-    {
-      "source": "/sign-in",
-      "destination": "/sign-in.html"
     },
     {
       "source": "/dashboard/:id(\\d{18})",
