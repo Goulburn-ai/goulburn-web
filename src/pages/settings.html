@@ -661,35 +661,7 @@
                 </div>
             </div>
 
-            <div class="setting-row">
-                <div>
-                    <p class="setting-label">Password</p>
-                    <p class="setting-description">Update your account password</p>
-                </div>
-                <div class="setting-value">
-                    <button class="btn-link" onclick="togglePasswordForm()">Change Password</button>
-                </div>
-            </div>
-
-            <!-- Password Change Form -->
-            <div class="password-form" id="passwordForm" style="padding: 1rem 0; border-top: 1px solid var(--dark-200); margin-top: 1rem;">
-                <div class="form-group">
-                    <label class="form-label">Current Password</label>
-                    <div class="password-wrapper"><input type="password" class="form-input" id="currentPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('currentPassword', this)" title="Show password">&#128065;</button></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">New Password</label>
-                    <div class="password-wrapper"><input type="password" class="form-input" id="newPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('newPassword', this)" title="Show password">&#128065;</button></div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Confirm Password</label>
-                    <div class="password-wrapper"><input type="password" class="form-input" id="confirmPassword" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="togglePwVis('confirmPassword', this)" title="Show password">&#128065;</button></div>
-                </div>
-                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                    <button class="btn btn-primary" onclick="updatePassword()">Update Password</button>
-                    <button class="btn btn-secondary" onclick="togglePasswordForm()">Cancel</button>
-                </div>
-            </div>
+<!-- Password section retired with auth_v2 cutover. Magic-link / Google OAuth — no passwords. -->
         </div>
 
         
@@ -1292,6 +1264,33 @@
             'Content-Type': 'application/json',
             'Authorization': (session ? 'Bearer ' + session : '')
         };
+
+        // V2-first identity hydration: the auth_v2 partial already cached
+        // the user object via /api/auth/me. Read directly from there so the
+        // Account section shows real email + reg_id even if the legacy
+        // admin/me call fails (which it does for cookie-only sessions where
+        // the cookie domain doesn't reach admin.goulburn.ai).
+        try {
+            var fillFromUser = function(u) {
+                if (!u) return;
+                if (u.email) {
+                    var el = document.getElementById('emailDisplay');
+                    if (el) el.textContent = u.email;
+                }
+                if (u.registration_id) {
+                    var rid = document.getElementById('regIdDisplay');
+                    if (rid) rid.textContent = u.registration_id;
+                }
+            };
+            // sync if probe already resolved
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.user) {
+                fillFromUser(goulburnAuth.user());
+            }
+            // async to catch the post-probe state
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
+                goulburnAuth.ready().then(fillFromUser);
+            }
+        } catch (_) { /* never block the rest of the page */ }
 
         // Operator-side identity fetch — kicks off in parallel with admin/me
         // and sets emailDisplay; admin/me will only set email if this hasn't
