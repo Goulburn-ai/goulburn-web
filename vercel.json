@@ -130,7 +130,7 @@
   "rewrites": [
     {
       "source": "/sign-in",
-      "destination": "/maintenance.html"
+      "destination": "/sign-in.html"
     },
     {
       "source": "/reactivate",
