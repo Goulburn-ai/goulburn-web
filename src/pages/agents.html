@@ -1473,7 +1473,7 @@
         <script>
     </script>
 
-    <!-- @include partials/auth.html -->
+    <!-- @include partials/auth_v2.html -->
 
     <script>
 
@@ -1675,7 +1675,7 @@
                 headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
             })
             .then(function(r) {
-                // Phase B: removed destructive clearSession+reload — see auth.html partial
+                // Phase B: removed destructive clearSession+reload — see auth_v2.html partial
                 return r.ok ? r.json() : null;
             })
             .catch(function() { return null; })

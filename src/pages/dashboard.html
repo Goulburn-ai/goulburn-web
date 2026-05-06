@@ -3106,7 +3106,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         <script>
     </script>
 
-    <!-- @include partials/auth.html -->
+    <!-- @include partials/auth_v2.html -->
 
     <script>
 
@@ -3304,7 +3304,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             //     entry) and wipe it so the UI doesn't pretend the user is signed in.
             // Without (2), authHref() returns direct profile links + the user thinks
             // they're not logged in but the page treats them as authed.
-            // Phase B (2026-05-05): destructive guard removed — see auth.html
+            // Phase B (2026-05-05): destructive guard removed — see auth_v2.html
             (typeof goulburnAuth.authFetch === 'function'
                 ? goulburnAuth.authFetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me')
                 : fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include' }))

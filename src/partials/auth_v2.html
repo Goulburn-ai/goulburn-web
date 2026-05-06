@@ -1,42 +1,30 @@
 <!--
-  Phase 1 auth-rewrite partial — cookie-first with legacy bearer fallback.
+  Auth partial — cookie-first probe with legacy bearer fallback,
+  plus the session-timeout banner, registration-id URL stamp, and
+  pwa_install include that the previous partials/auth.html provided.
 
-  Background:
-    The new sign-in flow stores a session token in an HttpOnly cookie
-    (gb_session) issued by goulburn-api at /api/auth/me. Pages probe
-    that endpoint, treat 200 + user payload as "signed in," 200 + null
-    as "guest," anything else as "guest defensively."
+  Public API on window.goulburnAuth (superset of legacy auth.html so
+  the rest of the site can include this partial without code changes):
 
-    Legacy users (pre-2026-05-06) still have a Bearer token in
-    localStorage and a Redis-backed session. Rather than force them
-    to re-sign-in, this partial performs a SECOND probe to the legacy
-    /api/v1/auth/me with the Bearer header on its way to deprecation.
-    Once we observe legacy session traffic has dropped to zero, the
-    fallback block can be deleted.
-
-  Public API on window.goulburnAuth (intentionally a SUPERSET of the
-  old partials/auth.html surface, so the 16 legacy pages can swap their
-  include with no code changes):
-
-    // v2 — preferred
-    .ready()              -> Promise<user|null>   // resolves with user object
-    .user()               -> user|null            // synchronous, after ready
+    // v2 (preferred)
+    .ready()              -> Promise<user|null>
+    .user()               -> user|null (sync after ready)
     .isAuthenticated()    -> bool
     .identityTier()       -> 0 | 1 | 2
     .identityScore()      -> 0 | 50 | 100
-    .signOut()            -> sends to /, wipes cookie + bearer
-    .authFetch(url, opts) -> fetch with credentials:include + bearer if present
+    .signOut()            -> wipes cookie + bearer, redirects to /
+    .authFetch(url, opts) -> fetch with credentials:include + bearer if any
 
-    // legacy compat — same shape as old partials/auth.html
+    // legacy compat
     .API_BASE             -> 'https://api.goulburn.ai'
     .ADMIN_BASE           -> 'https://admin.goulburn.ai'
     .getSession()         -> bearer-or-null from localStorage/sessionStorage
-    .setSession(t, opts)  -> persist bearer (legacy callers)
+    .setSession(t, opts)  -> persist bearer (callers from old sign-in)
     .clearSession()       -> wipe bearer + reg id
     .getRegId()           -> registration_id from user or cache
-    .setRegId(id)         -> persist registration_id cache
+    .setRegId(id)         -> persist registration_id
     .requireAuth()        -> redirects to /sign-in if probe resolves null
-    .validateSession()    -> Promise<bool>; like ready() but boolean
+    .validateSession()    -> Promise<bool>; like ready() but boolean-shaped
     .authReady            -> Promise<bool>; eager-resolved on partial load
 -->
 <script>
@@ -69,7 +57,6 @@
                 sessionStorage.removeItem(SESSION_LS_KEY);
             }
         } catch (_) {}
-        // re-probe so isAuthenticated() reflects the new state
         _ready = probe();
     }
     function clearSession() {
@@ -89,7 +76,6 @@
 
     // ── Session probe: cookie first, bearer fallback ────────────────
     async function probe() {
-        // Path 1 — new cookie probe.
         try {
             var r = await fetch(API_BASE + '/api/auth/me', {
                 credentials: 'include',
@@ -102,12 +88,9 @@
                     if (_user.registration_id) setRegId(_user.registration_id);
                     return _user;
                 }
-                // 200 with user:null — definitively not signed in via v2.
-                // Continue to legacy fallback before declaring guest.
             }
-        } catch (_) { /* network or 404 — fall through */ }
+        } catch (_) {}
 
-        // Path 2 — legacy bearer probe (deprecation in flight).
         var bearer = getSession();
         if (bearer) {
             try {
@@ -118,8 +101,6 @@
                 });
                 if (r2.ok) {
                     var body2 = await r2.json();
-                    // Legacy /me returns the user fields at top-level,
-                    // not under a `user` key. Normalise.
                     var legacyUser = body2 && body2.user ? body2.user
                                    : (body2 && body2.email ? body2 : null);
                     if (legacyUser) {
@@ -128,9 +109,8 @@
                         return _user;
                     }
                 }
-                // Stale bearer — wipe so next probe doesn't repeat the call.
                 if (r2.status === 401) clearSession();
-            } catch (_) { /* network — give up */ }
+            } catch (_) {}
         }
 
         _user = null;
@@ -162,8 +142,6 @@
     }
 
     async function signOut() {
-        // Best-effort: hit BOTH logout endpoints so legacy Redis sessions
-        // also drop. Ignore errors — we wipe local state regardless.
         try {
             await fetch(API_BASE + '/api/auth/logout', {
                 method: 'POST', credentials: 'include',
@@ -187,10 +165,6 @@
     function authFetch(url, opts) {
         opts = Object.assign({}, opts || {});
         opts.credentials = 'include';
-        // If a legacy bearer is sitting in localStorage and the caller
-        // hasn't already set Authorization, attach it. New v2 endpoints
-        // ignore Authorization in favour of the cookie; legacy endpoints
-        // require it. This single line bridges both worlds.
         var bearer = getSession();
         if (bearer) {
             opts.headers = Object.assign({}, opts.headers || {});
@@ -212,12 +186,7 @@
         return false;
     }
 
-    // Eager kickoff so .authReady is a real Promise the moment pages load.
     var initialReady = ready();
-
-    // Boolean-shaped variant for legacy consumers (auth.html\'s authReady
-    // resolved with bool). Mapping user|null -> true|false preserves the
-    // old `.then(function(ok){ if (!ok) {...} })` pattern.
     var authReadyBool = initialReady.then(function(u) { return u !== null; });
 
     initialReady.then(function(u) {
@@ -229,10 +198,8 @@
     });
 
     window.goulburnAuth = {
-        // bases
         API_BASE:   API_BASE,
         ADMIN_BASE: ADMIN_BASE,
-        // v2 API
         ready: ready,
         user: user,
         isAuthenticated: isAuthenticated,
@@ -240,7 +207,6 @@
         identityScore: identityScore,
         signOut: signOut,
         authFetch: authFetch,
-        // legacy compat
         getSession: getSession,
         setSession: setSession,
         clearSession: clearSession,
@@ -252,3 +218,171 @@
     };
 })();
 </script>
+
+<!-- Session timeout: inactivity detection + auto-logout (ported verbatim
+     from legacy auth.html so 16-page migration is behaviour-preserving) -->
+<div id="sessionTimeoutBanner" style="display:none;position:fixed;bottom:24px;right:24px;z-index:9999;max-width:380px;width:calc(100% - 48px);background:#1a1a2e;border:1px solid rgba(245,158,11,0.4);border-radius:12px;padding:20px;box-shadow:0 8px 32px rgba(0,0,0,0.3);font-family:inherit;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+        <div style="flex-shrink:0;width:40px;height:40px;border-radius:50%;background:rgba(245,158,11,0.15);display:flex;align-items:center;justify-content:center;">
+            <svg width="20" height="20" fill="none" stroke="#f59e0b" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+            <p style="margin:0 0 4px;font-size:0.9rem;font-weight:600;color:#f1f5f9;">Session expiring</p>
+            <p style="margin:0 0 14px;font-size:0.8rem;color:#94a3b8;line-height:1.4;">You'll be signed out in <span id="timeoutCountdown" style="font-weight:700;color:#f59e0b;">60</span> seconds due to inactivity.</p>
+            <div style="display:flex;gap:8px;">
+                <button id="timeoutStayBtn" style="flex:1;padding:8px 0;border:none;border-radius:8px;background:#f59e0b;color:#000;font-size:0.8rem;font-weight:600;cursor:pointer;transition:background 0.15s;">Stay signed in</button>
+                <button id="timeoutLogoutBtn" style="flex:1;padding:8px 0;border:1px solid rgba(148,163,184,0.3);border-radius:8px;background:transparent;color:#94a3b8;font-size:0.8rem;font-weight:500;cursor:pointer;transition:all 0.15s;">Sign out now</button>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:14px;height:3px;background:rgba(148,163,184,0.15);border-radius:2px;overflow:hidden;">
+        <div id="timeoutProgressBar" style="height:100%;background:#f59e0b;border-radius:2px;width:100%;transition:width 1s linear;"></div>
+    </div>
+</div>
+
+<script>
+// Idle timeout controller
+(function() {
+    var IDLE_LIMIT_MS = 15 * 60 * 1000;
+    var COUNTDOWN_SEC = 60;
+
+    var idleTimer = null;
+    var countdownTimer = null;
+    var countdownRemaining = COUNTDOWN_SEC;
+    var banner = null;
+    var countdownEl = null;
+    var progressBar = null;
+    var isWarning = false;
+
+    function start() {
+        // Wait for the auth probe so we don't arm the timer for guests.
+        goulburnAuth.ready().then(function(u) {
+            if (u === null) return;
+
+            banner = document.getElementById('sessionTimeoutBanner');
+            countdownEl = document.getElementById('timeoutCountdown');
+            progressBar = document.getElementById('timeoutProgressBar');
+            if (!banner) return;
+
+            ['mousemove','mousedown','keydown','scroll','touchstart','click'].forEach(function(evt) {
+                document.addEventListener(evt, onActivity, { passive: true });
+            });
+            var stay = document.getElementById('timeoutStayBtn');
+            var out  = document.getElementById('timeoutLogoutBtn');
+            if (stay) stay.addEventListener('click', function() { dismissWarning(); resetIdleTimer(); });
+            if (out)  out.addEventListener('click', doLogout);
+
+            resetIdleTimer();
+        });
+    }
+
+    function onActivity() {
+        if (isWarning) dismissWarning();
+        resetIdleTimer();
+    }
+    function resetIdleTimer() {
+        if (idleTimer) clearTimeout(idleTimer);
+        idleTimer = setTimeout(showWarning, IDLE_LIMIT_MS);
+    }
+    function showWarning() {
+        if (!goulburnAuth.isAuthenticated()) return;
+        isWarning = true;
+        countdownRemaining = COUNTDOWN_SEC;
+        if (countdownEl) countdownEl.textContent = countdownRemaining;
+        if (progressBar) {
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '100%';
+            void progressBar.offsetWidth;
+            progressBar.style.transition = 'width 1s linear';
+        }
+        banner.style.display = 'block';
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateY(20px)';
+        void banner.offsetWidth;
+        banner.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        banner.style.opacity = '1';
+        banner.style.transform = 'translateY(0)';
+        tickCountdown();
+    }
+    function tickCountdown() {
+        if (countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(function() {
+            countdownRemaining--;
+            if (countdownEl) countdownEl.textContent = countdownRemaining;
+            if (progressBar) progressBar.style.width = ((countdownRemaining / COUNTDOWN_SEC) * 100) + '%';
+            if (countdownRemaining <= 0) {
+                clearInterval(countdownTimer);
+                doLogout();
+            }
+        }, 1000);
+    }
+    function dismissWarning() {
+        isWarning = false;
+        if (countdownTimer) clearInterval(countdownTimer);
+        if (banner) {
+            banner.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+            banner.style.opacity = '0';
+            banner.style.transform = 'translateY(20px)';
+            setTimeout(function() { banner.style.display = 'none'; }, 200);
+        }
+    }
+    function doLogout() {
+        isWarning = false;
+        if (countdownTimer) clearInterval(countdownTimer);
+        if (idleTimer) clearTimeout(idleTimer);
+        goulburnAuth.clearSession();
+        window.location.href = '/sign-in?timeout=1';
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
+
+// Universal registration-ID URL stamp. Adds ?u={reg_id} to the URL on
+// pages that don't already path-stamp. Re-imported verbatim from the
+// legacy partial so the address bar behaviour is identical.
+(function stampRegIdUniverse() {
+    try {
+        goulburnAuth.ready().then(function(u) {
+            if (u === null) return;
+
+            function stampIfMissing(regId) {
+                if (!regId) return;
+                var path = window.location.pathname;
+                if (/^\/dashboard(?:\/\d+)?\/?$/.test(path)) return;
+                if (/^\/settings(?:\/\d+)?\/?$/.test(path)) return;
+                if (/^\/dashboard\/settings(?:\/\d+)?\/?$/.test(path)) return;
+                var params = new URLSearchParams(window.location.search);
+                if (params.get('u') === regId) return;
+                params.set('u', regId);
+                var newUrl = path + '?' + params.toString() + window.location.hash;
+                try { history.replaceState(null, '', newUrl); } catch (_) {}
+            }
+
+            var cached = goulburnAuth.getRegId && goulburnAuth.getRegId();
+            if (cached) { stampIfMissing(cached); return; }
+
+            // Cold path — fetch /admin/me once for the registration_id.
+            // Defensive on failure: never wipe the session (Phase B
+            // 2026-05-05 lesson — transient 401s used to log valid users
+            // out via clearSession()+reload).
+            (typeof goulburnAuth.authFetch === 'function'
+                ? goulburnAuth.authFetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me')
+                : fetch(goulburnAuth.ADMIN_BASE + '/api/v1/admin/me', { credentials: 'include' }))
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .catch(function() { return null; })
+            .then(function(profile) {
+                if (profile && profile.registration_id) {
+                    if (goulburnAuth.setRegId) goulburnAuth.setRegId(profile.registration_id);
+                    stampIfMissing(profile.registration_id);
+                }
+            });
+        });
+    } catch (_) {}
+})();
+</script>
+
+<!-- @include partials/pwa_install.html -->
