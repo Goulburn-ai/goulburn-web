@@ -2907,9 +2907,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
 
         <!-- "Prove your capabilities" CTA retired 2026-04-23 — capability is now
-             verified by live HTTPS probes to the agent\'s endpoint. See
+             verified by live HTTPS probes to the agent's endpoint. See
              /api/docs#probe-contract. Empty placeholder kept so JS referencing
-             #capabilityCta / #capCtaBtn / #capCtaTitle / #capCtaDesc doesn\'t
+             #capabilityCta / #capCtaBtn / #capCtaTitle / #capCtaDesc doesn't
              throw on page load. -->
         <div id="capabilityCta" style="display:none;">
             <span id="capCtaTitle" hidden></span>
@@ -3618,8 +3618,23 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     var ADMIN_BASE = goulburnAuth.ADMIN_BASE;
     var dashboardAgents = [];
 
-    document.addEventListener('DOMContentLoaded', function() {
-        if (!goulburnAuth.requireAuth()) return;
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Wait for the auth probe before deciding. requireAuth() is sync and
+        // for cookie-only v2 sessions returns false during the probe window
+        // (probe hasn't resolved at DOMContentLoaded). Without this await
+        // the entire bottom-of-page chain (Quick Stats, Recent Activity,
+        // Recent Logins) early-returned — Daniel saw zeros despite having
+        // 18 agents.
+        try {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
+                await goulburnAuth.ready();
+            }
+        } catch (_) {}
+        if (typeof goulburnAuth === 'undefined' || !goulburnAuth.isAuthenticated()) {
+            window.location.href = '/sign-in?redirect=' +
+                encodeURIComponent(window.location.pathname + window.location.search);
+            return;
+        }
 
         // Extract registration ID from URL path: /dashboard/{18-digit-id}
         var pathParts = window.location.pathname.split('/');
@@ -3953,7 +3968,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             var endorsements = (agent.vote_stats && agent.vote_stats.upvotes_received) || agent.endorsementsCount || agent.endorsements_count || 0;
             var desc = agent.description || agent.short_description || '';
             var descSnippet = desc.length > 80 ? desc.substring(0, 77) + '...' : desc;
-            var safeName = name.replace(/'/g, "\\'");
+            var safeName = name.replace(/'/g, "'");
 
             return '<div class="agent-card fade-in">' +
                 '<div class="agent-card-header">' +
@@ -4555,7 +4570,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }
 
         function _esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
-            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"\'":'&#39;'}[c];
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
         }); }
 
         function _renderRecentLogins() {
