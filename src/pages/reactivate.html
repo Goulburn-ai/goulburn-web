@@ -142,9 +142,14 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Reactivate & sign in';
 
-                if (res.status === 200 && res.body.session_token) {
+                if (res.status === 200 && res.body && res.body.success) {
+                    // v2 path: server set gb_session cookie via Set-Cookie header,
+                    // no session_token in body. Legacy fallback path: session_token
+                    // present, mirror to localStorage for any pages still on bearer.
                     try {
-                        localStorage.setItem('goulburn_session', res.body.session_token);
+                        if (res.body.session_token) {
+                            localStorage.setItem('goulburn_session', res.body.session_token);
+                        }
                         if (res.body.registration_id) localStorage.setItem('goulburn_reg_id', res.body.registration_id);
                         if (res.body.user_id) localStorage.setItem('goulburn_user_id', res.body.user_id);
                     } catch (e) {}
