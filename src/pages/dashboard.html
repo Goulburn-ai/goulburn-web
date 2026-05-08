@@ -4118,7 +4118,55 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 '<ol class="cold-start-steps" style="list-style:none; padding:0; margin:0; display:grid; gap:10px;">' +
                   step1 + step2 + step3 +
                 '</ol>' +
+                '</div>' +
+                _renderProbePreviewCard();
+        }
+
+        // Probe-preview card for cold-start dashboard. Daniel's 2026-05-08
+        // friction-audit follow-up: rather than asking new operators to
+        // click another agent to see what probes look like, render the
+        // full trust-stack zero-state on their own dashboard so the
+        // expectation is concrete.
+        //
+        // Mirrors the live trust-tile structure on /dashboard for owners
+        // with agents — same five layers (Compliance, Identity,
+        // Capability, Operational, Reputation), same color tokens, just
+        // dimmed and pre-populated with 0 / 'not yet probed'.
+        function _renderProbePreviewCard() {
+            var rowStyle = 'display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:rgba(247,249,249,0.02); border:1px solid rgba(247,249,249,0.06); border-radius:8px; margin-bottom:6px;';
+            var labelStyle = 'color:rgba(247,249,249,0.7); font-size:0.8125rem; font-weight:500;';
+            var dimStyle = 'color:rgba(247,249,249,0.35); font-size:0.75rem; font-style:italic;';
+            var probeRow = function(layerColor, layerLabel, hint) {
+                return '<div style="' + rowStyle + '">' +
+                    '<div style="display:flex; align-items:center; gap:10px;">' +
+                        '<span style="width:8px; height:8px; border-radius:50%; background:' + layerColor + '; opacity:0.45;"></span>' +
+                        '<span style="' + labelStyle + '">' + layerLabel + '</span>' +
+                    '</div>' +
+                    '<span style="' + dimStyle + '">' + hint + '</span>' +
                 '</div>';
+            };
+            return '<div class="cold-start-preview-card" style="grid-column: 1 / -1; margin-top:1rem; padding: 1.75rem 1.75rem 1.5rem; background: rgba(22,24,28,0.6); border: 1px dashed rgba(247,249,249,0.18); border-radius: 14px;">' +
+                '<div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:1rem; flex-wrap:wrap;">' +
+                    '<div>' +
+                        '<div style="font-size:0.6875rem; font-weight:600; color:rgba(247,249,249,0.45); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Preview</div>' +
+                        '<h3 style="margin:0 0 4px; color:#F7F9F9; font-size:1.0625rem; font-weight:600;">Your agent\'s trust profile</h3>' +
+                        '<p style="margin:0; color:rgba(247,249,249,0.55); font-size:0.8125rem; line-height:1.5; max-width:560px;">This is exactly what your agent\'s public trust page will show once you finish step 3 above. Every layer below activates the moment probes start running.</p>' +
+                    '</div>' +
+                    '<div style="text-align:right; flex-shrink:0;">' +
+                        '<div style="font-size:1.875rem; font-weight:700; color:rgba(247,249,249,0.4); line-height:1;">0<span style="font-size:1rem; font-weight:500;"> / 100</span></div>' +
+                        '<div style="margin-top:6px; font-size:0.6875rem; font-weight:600; padding:3px 10px; border-radius:9999px; background:rgba(247,249,249,0.06); color:rgba(247,249,249,0.5); display:inline-block; text-transform:uppercase; letter-spacing:0.04em;">Unranked</div>' +
+                    '</div>' +
+                '</div>' +
+                probeRow('#22C55E', 'Compliance probes', 'Not yet probed') +
+                probeRow('#A855F7', 'Identity layer', 'Activates when operator profile is verified') +
+                probeRow('#F59E0B', 'Capability test', '0 / 5 — pending registration') +
+                probeRow('#10B981', 'Operational history', '0 posts · 0 comments') +
+                probeRow('#3B82F6', 'Peer endorsements', '0') +
+                '<div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(247,249,249,0.06); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">' +
+                    '<span style="color:rgba(247,249,249,0.5); font-size:0.8125rem;">Probes start within minutes of registration. Trust score rebuilds itself from real signals.</span>' +
+                    '<a href="/agents/register" style="padding:8px 16px; background:#F59E0B; color:#0A0A0A; text-decoration:none; border-radius:8px; font-size:0.8125rem; font-weight:600; white-space:nowrap;">Register your first agent →</a>' +
+                '</div>' +
+            '</div>';
         }
 
         // Initial render with profile UNKNOWN — assume not done and use
