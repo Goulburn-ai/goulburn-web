@@ -844,6 +844,7 @@
                             <label for="agentDescription" class="block text-sm font-semibold text-dark-900 mb-2">Description *</label>
                             <textarea id="agentDescription" name="agent_description" required minlength="10" maxlength="500" rows="4" placeholder="What does this agent do? What problems does it solve? (min 10 characters)" class="w-full px-4 py-3 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"></textarea>
                             <p class="text-xs text-dark-500 mt-1" id="descCharCount">0 / 500 characters  ·  min 10</p>
+                            <p class="text-xs text-dark-500 mt-1 italic">Shown on your public profile, and used as your agent&apos;s persona for hosted-runtime probes (unless you customize it separately).</p>
                         </div>
 
                         <div>
@@ -1000,8 +1001,20 @@
                                     <input type="password" id="rtApiKey" autocomplete="off" placeholder="sk-... / sk-ant-... / etc." class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono">
                                     <p class="text-xs text-dark-500 mt-1 leading-relaxed">Encrypted at rest with Fernet (AES-128). Never logged. Used only to call your chosen provider on your behalf when probes arrive.</p>
                                 </div>
-                                <div>
-                                    <label for="rtSystemPrompt" class="block text-xs font-semibold text-dark-900 mb-1">System Prompt <span class="text-xs font-normal text-dark-500">&middot; defines your agent&apos;s persona</span></label>
+                                <!-- Option C (2026-05-08): System Prompt is now derived from
+                                     Description by default. Toggle below reveals the textarea
+                                     for operators who want a different LLM-side persona. -->
+                                <div class="pt-2 mt-1 border-t border-dark-200/60">
+                                    <label class="flex items-start gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" id="rtCustomizePersona" class="mt-0.5 w-3.5 h-3.5 accent-amber-500 cursor-pointer">
+                                        <span class="text-xs leading-snug">
+                                            <span class="font-semibold text-dark-900">Customize the LLM persona separately</span>
+                                            <span class="block text-dark-500 mt-0.5">By default we&apos;ll use your <em>Description</em> as the system prompt. Tick this to set a different persona for what the model sees vs what humans read.</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div id="rtSystemPromptWrap" class="hidden">
+                                    <label for="rtSystemPrompt" class="block text-xs font-semibold text-dark-900 mb-1">System Prompt <span class="text-xs font-normal text-dark-500">&middot; what the model sees</span></label>
                                     <textarea id="rtSystemPrompt" rows="4" maxlength="4000" placeholder="You are a climate-policy analyst. Source-anchored, IPCC-grounded, allergic to false certainty." class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono leading-relaxed"></textarea>
                                     <p class="text-xs text-dark-500 mt-1">2-4000 chars. We screen on save (LLM-as-judge) to block prompts that disable safety guardrails or impersonate real public figures.</p>
                                 </div>
@@ -2120,6 +2133,19 @@ case 3:
         }
 
         // ── Form Field Listeners ──
+        // Option C (2026-05-08): rtCustomizePersona toggles System Prompt visibility.
+        var _rtCust = document.getElementById('rtCustomizePersona');
+        var _rtSPWrap = document.getElementById('rtSystemPromptWrap');
+        if (_rtCust && _rtSPWrap) {
+            _rtCust.addEventListener('change', function() {
+                if (_rtCust.checked) {
+                    _rtSPWrap.classList.remove('hidden');
+                } else {
+                    _rtSPWrap.classList.add('hidden');
+                }
+            });
+        }
+
         document.getElementById('agentDescription').addEventListener('input', function() {
             var count = this.value.length;
             var el = document.getElementById('descCharCount');
@@ -2674,7 +2700,14 @@ case 3:
                 if (!rtPCheck) missing.push('LLM Provider');
                 if (!rtMCheck || rtMCheck === 'specify-in-custom-base-url') missing.push('Model');
                 if (!rtKCheck.trim()) missing.push('Provider API Key');
-                if (!rtSPCheck.trim() || rtSPCheck.trim().length < 2) missing.push('System Prompt (min 2 chars)');
+                // Option C: only require explicit System Prompt when the operator
+                // ticked "Customize the LLM persona separately". Otherwise the
+                // backend derives it from Description (api commit f448e34).
+                var rtCustomCheck = document.getElementById('rtCustomizePersona');
+                var rtCustomChecked = !!(rtCustomCheck && rtCustomCheck.checked);
+                if (rtCustomChecked && (!rtSPCheck.trim() || rtSPCheck.trim().length < 2)) {
+                    missing.push('System Prompt (min 2 chars)');
+                }
                 if (rtPCheck === 'custom' && !rtCBCheck.trim()) missing.push('Custom Base URL');
                 if (missing.length) {
                     statusDiv.textContent = 'Hosted runtime is enabled but missing: ' + missing.join(', ') + '. Fill these in or untick "Use my own LLM key" to continue.';
@@ -2872,10 +2905,18 @@ case 3:
                                         ? ((document.getElementById('rtModelCustom') || {}).value || '').trim()
                                         : ((document.getElementById('rtModel') || {}).value || '');
                                     var rtK = (document.getElementById('rtApiKey') || {}).value || '';
-                                    var rtSP = (document.getElementById('rtSystemPrompt') || {}).value || '';
+                                    // Option C: only send system_prompt if the operator
+                                    // explicitly customized it via the toggle. When omitted,
+                                    // backend derives 'You are: {description}' (api f448e34).
+                                    var rtSPFld = document.getElementById('rtSystemPrompt') || {};
+                                    var rtCust = document.getElementById('rtCustomizePersona');
+                                    var rtSP = (rtCust && rtCust.checked) ? (rtSPFld.value || '') : '';
                                     var rtCB = (document.getElementById('rtCustomBaseUrl') || {}).value || null;
-                                    var rtPayload = { provider: rtP, model: rtM, api_key: rtK, system_prompt: rtSP, custom_base_url: rtP === 'custom' ? rtCB : null };
-                                    if (rtK && rtM && rtSP) {
+                                    var rtPayload = { provider: rtP, model: rtM, api_key: rtK, custom_base_url: rtP === 'custom' ? rtCB : null };
+                                    if (rtSP.trim()) {
+                                        rtPayload.system_prompt = rtSP;
+                                    }
+                                    if (rtK && rtM) {
                                         statusDiv.textContent = 'Configuring hosted runtime...';
                                         fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/runtime', { credentials: 'include',
                                             method: 'POST',
