@@ -4008,73 +4008,138 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
 
     function showEmptyState() {
-        // Cold-start: aspirational quick-start checklist, not "you have nothing".
-        // Updated 2026-05-08 — replaces dead empty card with 3-step path.
+        // Cold-start: aspirational quick-start checklist with dynamic
+        // step-completion. Updated 2026-05-08 (revised pass): replaces
+        // 'Verify your identity' with 'Customize your operator profile';
+        // wires dynamic completion via /api/v1/operators/me/settings so
+        // visual emphasis advances as steps are done.
         var container = document.getElementById('agentsContainer');
 
         // Re-set welcome line to cold-start version now that we know agents.length===0.
         try {
-            var headerP = document.querySelector('header p, [data-welcome], #welcomeLine') ||
-                          document.querySelector('p.font-display, .hero-subtitle, .welcome-text');
-            // Fallback: walk for the welcome paragraph by content match.
-            if (!headerP) {
-                var ps = document.querySelectorAll('p');
-                for (var i = 0; i < ps.length; i++) {
-                    if (ps[i].textContent && ps[i].textContent.indexOf('Welcome back') === 0) {
-                        headerP = ps[i];
-                        break;
-                    }
+            var headerP = null;
+            var ps = document.querySelectorAll('p');
+            for (var i = 0; i < ps.length; i++) {
+                if (ps[i].textContent && ps[i].textContent.indexOf('Welcome back') === 0) {
+                    headerP = ps[i];
+                    break;
                 }
             }
             if (headerP) {
                 var name = window.__operatorName || 'there';
-                headerP.textContent = 'Welcome to goulburn.ai, ' + name + '. You\'re three steps from your first verified agent.';
+                headerP.textContent = 'Welcome to goulburn.ai, ' + name + '. Two quick steps from your first verified agent.';
             }
         } catch (_) {}
 
-        container.innerHTML = '<div class="cold-start-card" style="grid-column: 1 / -1; padding: 2rem 1.75rem; background: linear-gradient(180deg, rgba(245,158,11,0.04) 0%, rgba(22,24,28,0) 100%); border: 1px solid rgba(245,158,11,0.20); border-radius: 14px;">' +
-            '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem;">' +
-              '<div style="width:36px; height:36px; border-radius:50%; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
-                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
-              '</div>' +
-              '<div>' +
-                '<h3 style="margin:0 0 2px; color:#F7F9F9; font-size:1.0625rem; font-weight:600;">Get your first agent verified</h3>' +
-                '<p style="margin:0; color:rgba(247,249,249,0.65); font-size:0.875rem;">Three quick steps. About 5 minutes total.</p>' +
-              '</div>' +
-            '</div>' +
-            '<ol class="cold-start-steps" style="list-style:none; padding:0; margin:0; display:grid; gap:10px;">' +
-              // Step 1 — done
-              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.20); border-radius:10px;">' +
-                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:#22C55E; display:flex; align-items:center; justify-content:center; margin-top:1px;">' +
-                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>' +
+        // Step renderer — lets us re-paint based on completion state.
+        // Symbolic SVG icons per step. Stroke-based, inherit the state's
+        // accent colour via currentColor so done=green / active=amber /
+        // pending=blue ties the icon to the rest of the row's visual weight.
+        // Maintenance-free — these are abstract glyphs, not screenshots.
+        var _STEP_ICONS = {
+            1: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>',
+            2: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="9" cy="12.5" r="2.2"/><path d="M14 10.5h4M14 14.5h4M6.5 16.5c.5-1.3 1.6-2.2 2.5-2.2s2 .9 2.5 2.2"/></svg>',
+            3: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="2"/><circle cx="9.5" cy="13.5" r="1.2" fill="currentColor"/><circle cx="14.5" cy="13.5" r="1.2" fill="currentColor"/><path d="M12 8V5"/><rect x="10" y="3" width="4" height="2" rx="0.5"/><path d="M3 14h2M19 14h2"/></svg>'
+        };
+
+        function _renderStep(state, num, title, desc, actionText, actionHref) {
+            var styles = {
+                done:    { bg: 'rgba(34,197,94,0.06)',   border: 'rgba(34,197,94,0.20)',  badgeBg: '#22C55E',     badgeFg: 'white',   actionBg: '',            actionFg: '',         actionBorder: '', iconColor: '#22C55E' },
+                active:  { bg: 'rgba(245,158,11,0.06)',  border: 'rgba(245,158,11,0.30)', badgeBg: 'transparent', badgeFg: '#F59E0B', actionBg: '#F59E0B',     actionFg: '#1A0F00',  actionBorder: 'transparent', iconColor: '#F59E0B' },
+                pending: { bg: 'rgba(34,127,242,0.04)',  border: 'rgba(34,127,242,0.20)', badgeBg: 'transparent', badgeFg: '#2280F2', actionBg: 'transparent', actionFg: '#F7F9F9',  actionBorder: 'rgba(247,249,249,0.30)', iconColor: '#2280F2' }
+            };
+            var s = styles[state] || styles.pending;
+            var badgeBorder = (state === 'done') ? '' : '1.5px solid ' + (state === 'active' ? 'rgba(245,158,11,0.7)' : 'rgba(34,127,242,0.6)');
+            var badgeContent = (state === 'done')
+                ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>'
+                : String(num);
+            var actionHtml = '';
+            if (state !== 'done' && actionText && actionHref) {
+                actionHtml = '<a href="' + actionHref + '" style="display:inline-block; margin-top:10px; padding:6px 12px; background:' + s.actionBg + '; color:' + s.actionFg + '; text-decoration:none; border:' + (s.actionBorder ? '1px solid ' + s.actionBorder : 'none') + '; border-radius:6px; font-size:0.8125rem; font-weight:500;">' + actionText + '</a>';
+            }
+            var iconHtml = (_STEP_ICONS[num] || '');
+            return '' +
+                '<li data-step="' + num + '" data-state="' + state + '" style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:' + s.bg + '; border:1px solid ' + s.border + '; border-radius:10px;">' +
+                  '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:' + s.badgeBg + '; ' + (badgeBorder ? 'border:' + badgeBorder + ';' : '') + ' display:flex; align-items:center; justify-content:center; margin-top:1px; color:' + s.badgeFg + '; font-size:0.8125rem; font-weight:600;">' +
+                    badgeContent +
+                  '</div>' +
+                  '<div style="flex:0 0 22px; color:' + s.iconColor + '; margin-top:1px; opacity:0.85;" aria-hidden="true">' +
+                    iconHtml +
+                  '</div>' +
+                  '<div style="flex:1;">' +
+                    '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">' + title + '</div>' +
+                    '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">' + desc + '</div>' +
+                    actionHtml +
+                  '</div>' +
+                '</li>';
+        }
+
+        function _renderChecklist(profileDone) {
+            // Step 1 (account): always done
+            // Step 2 (profile): done iff display_name OR bio is set on the operator profile
+            // Step 3 (agent):   active iff profile done; pending otherwise
+            var step1 = _renderStep('done', 1,
+                'Account created',
+                "You're signed in. Your operator profile is set up.",
+                '', '');
+            var step2 = profileDone
+                ? _renderStep('done', 2,
+                    'Operator profile customized',
+                    'Your handle, display name, avatar, and banner are saved.',
+                    '', '')
+                : _renderStep('active', 2,
+                    'Customize your operator profile',
+                    'Add a handle, display name, bio, and avatar so other operators can find you.',
+                    'Set up profile →',
+                    '/settings');
+            var step3State = profileDone ? 'active' : 'pending';
+            var step3 = _renderStep(step3State, 3,
+                'Register your first agent',
+                'Name, archetype, endpoint URL. Probes start running automatically.',
+                'Register agent →',
+                '/agents/register');
+
+            container.innerHTML = '<div class="cold-start-card" style="grid-column: 1 / -1; padding: 2rem 1.75rem; background: linear-gradient(180deg, rgba(245,158,11,0.04) 0%, rgba(22,24,28,0) 100%); border: 1px solid rgba(245,158,11,0.20); border-radius: 14px;">' +
+                '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem;">' +
+                  '<div style="width:36px; height:36px; border-radius:50%; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+                  '</div>' +
+                  '<div>' +
+                    '<h3 style="margin:0 0 2px; color:#F7F9F9; font-size:1.0625rem; font-weight:600;">Get your first agent shipped</h3>' +
+                    '<p style="margin:0; color:rgba(247,249,249,0.65); font-size:0.875rem;">Two quick steps. About 5 minutes total.</p>' +
+                  '</div>' +
                 '</div>' +
-                '<div style="flex:1;">' +
-                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Account created</div>' +
-                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">You\'re signed in. Your operator profile is set up.</div>' +
-                '</div>' +
-              '</li>' +
-              // Step 2 — verify identity
-              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.30); border-radius:10px;">' +
-                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:transparent; border:1.5px solid rgba(245,158,11,0.7); display:flex; align-items:center; justify-content:center; margin-top:1px; color:#F59E0B; font-size:0.8125rem; font-weight:600;">2</div>' +
-                '<div style="flex:1;">' +
-                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Verify your identity</div>' +
-                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">Unlocks the +60 Identity score for every agent you register. Two minutes.</div>' +
-                  '<a href="/settings#identity-verification" style="display:inline-block; margin-top:10px; padding:6px 12px; background:#F59E0B; color:#1A0F00; text-decoration:none; border-radius:6px; font-size:0.8125rem; font-weight:500;">Verify identity →</a>' +
-                '</div>' +
-              '</li>' +
-              // Step 3 — register agent
-              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(34,127,242,0.04); border:1px solid rgba(34,127,242,0.20); border-radius:10px;">' +
-                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:transparent; border:1.5px solid rgba(34,127,242,0.6); display:flex; align-items:center; justify-content:center; margin-top:1px; color:#2280F2; font-size:0.8125rem; font-weight:600;">3</div>' +
-                '<div style="flex:1;">' +
-                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Register your first agent</div>' +
-                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">Name, archetype, endpoint URL. Probes start running automatically.</div>' +
-                  '<a href="/agents/register" style="display:inline-block; margin-top:10px; padding:6px 12px; background:transparent; color:#F7F9F9; text-decoration:none; border:1px solid rgba(247,249,249,0.30); border-radius:6px; font-size:0.8125rem; font-weight:500;">Register agent →</a>' +
-                '</div>' +
-              '</li>' +
-            '</ol>' +
-            '</div>';
+                '<ol class="cold-start-steps" style="list-style:none; padding:0; margin:0; display:grid; gap:10px;">' +
+                  step1 + step2 + step3 +
+                '</ol>' +
+                '</div>';
+        }
+
+        // Initial render with profile UNKNOWN — assume not done so the
+        // active step is "Customize profile". The fetch below will repaint
+        // if the profile is actually complete.
+        _renderChecklist(false);
         document.getElementById('agentCount').textContent = '0';
+
+        // Fetch operator profile and update step 2 / step 3 visual state
+        // accordingly. If the request fails, leave the initial render alone
+        // — better to over-prompt than under-prompt for a step they've
+        // already done.
+        fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include' })
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(profile) {
+                if (!profile) return;
+                var dn = (profile.display_name || '').trim();
+                var bio = (profile.bio || '').trim();
+                var profileDone = !!(dn || bio);
+                if (profileDone) {
+                    // Re-render with step 2 done, step 3 active
+                    _renderChecklist(true);
+                }
+            })
+            .catch(function() { /* leave initial render */ });
     }
+
 
     // ── Stats ──
     function updateStats(agents) {
