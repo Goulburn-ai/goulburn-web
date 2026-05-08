@@ -4147,7 +4147,9 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 var bio = (profile.bio || '').trim();
                 var handle = (profile.handle || '').trim();
                 var profileDone = !!(dn || bio);
-                var deepLink = handle ? '/operator/' + encodeURIComponent(handle) + '?edit=1' : '/settings';
+                // ?return=/dashboard so save handler bounces back here with
+                // step 3 (Register agent) now the active orange one.
+                var deepLink = handle ? '/operator/' + encodeURIComponent(handle) + '?edit=1&return=/dashboard' : '/settings';
                 // Always re-render: even when not done, the deep-link is
                 // a better destination than /settings.
                 _renderChecklist(profileDone, deepLink);
