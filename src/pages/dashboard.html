@@ -4811,13 +4811,23 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         }); }
 
         function _renderRecentLogins() {
-            var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
             var tbody = document.getElementById('recentLoginsBody');
-            if (!session || !tbody) return;
+            if (!tbody) return;
+            // 2026-05-08 fix: don't bail when getSession() is null. v2-cookie
+            // users (magic-link, Google OAuth) have no localStorage Bearer,
+            // so getSession() returns null even though they ARE authenticated.
+            // The fetch sends credentials:'include' so cookie auth carries
+            // the request. Same fix pattern as operator.html commit 237e730.
+            var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
             var ADMIN_BASE = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ADMIN_BASE) || 'https://admin.goulburn.ai';
-            fetch(ADMIN_BASE + '/api/v1/me/recent-logins', { credentials: 'include',
-                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
-            }).then(function(r) {
+            var headers = {};
+            if (session) headers['Authorization'] = 'Bearer ' + session;
+            fetch(ADMIN_BASE + '/api/v1/me/recent-logins', { credentials: 'include', headers: headers })
+            .then(function(r) {
+                if (r.status === 401 || r.status === 403) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="padding: 1.25rem 0.75rem; color: var(--dark-400); text-align: center;">Sign in to see your recent logins.</td></tr>';
+                    return null;
+                }
                 if (!r.ok) return null;
                 return r.json();
             }).then(function(data) {
