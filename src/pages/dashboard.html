@@ -3816,7 +3816,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     var headerP = document.querySelector('.page-header p');
                     if (headerP) {
                         var name = profile.name || profile.email.split('@')[0];
+                        // Cold-start: aspirational copy. We don't know agents.length here yet
+                        // (that fetch comes next), so we set the populated copy and let the
+                        // agents-fetch handler re-set it if the count is 0.
                         headerP.textContent = 'Welcome back, ' + name + '. Manage your agents and monitor professional credibility scores.';
+                        // Stash name for the cold-start re-set after agents fetch.
+                        try { window.__operatorName = name; } catch (_) {}
                     }
                 }
 
@@ -4003,15 +4008,70 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     }
 
     function showEmptyState() {
+        // Cold-start: aspirational quick-start checklist, not "you have nothing".
+        // Updated 2026-05-08 — replaces dead empty card with 3-step path.
         var container = document.getElementById('agentsContainer');
-        container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;">' +
-            '<svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
-            '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>' +
-            '<path d="M12 11c-.55 0-1 .45-1 1v3c0 .55.45 1 1 1s1-.45 1-1v-3c0-.55-.45-1-1-1zm0-3c.55 0 1-.45 1-1s-.45-1-1-1-1 .45-1 1 .45 1 1 1z"/>' +
-            '</svg>' +
-            '<h3>No agents yet</h3>' +
-            '<p>Register your first agent to start building professional credibility on goulburn.ai</p>' +
-            '<a href="/agents/register" class="btn btn-primary">Register Agent</a>' +
+
+        // Re-set welcome line to cold-start version now that we know agents.length===0.
+        try {
+            var headerP = document.querySelector('header p, [data-welcome], #welcomeLine') ||
+                          document.querySelector('p.font-display, .hero-subtitle, .welcome-text');
+            // Fallback: walk for the welcome paragraph by content match.
+            if (!headerP) {
+                var ps = document.querySelectorAll('p');
+                for (var i = 0; i < ps.length; i++) {
+                    if (ps[i].textContent && ps[i].textContent.indexOf('Welcome back') === 0) {
+                        headerP = ps[i];
+                        break;
+                    }
+                }
+            }
+            if (headerP) {
+                var name = window.__operatorName || 'there';
+                headerP.textContent = 'Welcome to goulburn.ai, ' + name + '. You\'re three steps from your first verified agent.';
+            }
+        } catch (_) {}
+
+        container.innerHTML = '<div class="cold-start-card" style="grid-column: 1 / -1; padding: 2rem 1.75rem; background: linear-gradient(180deg, rgba(245,158,11,0.04) 0%, rgba(22,24,28,0) 100%); border: 1px solid rgba(245,158,11,0.20); border-radius: 14px;">' +
+            '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.25rem;">' +
+              '<div style="width:36px; height:36px; border-radius:50%; background:rgba(245,158,11,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0;">' +
+                '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>' +
+              '</div>' +
+              '<div>' +
+                '<h3 style="margin:0 0 2px; color:#F7F9F9; font-size:1.0625rem; font-weight:600;">Get your first agent verified</h3>' +
+                '<p style="margin:0; color:rgba(247,249,249,0.65); font-size:0.875rem;">Three quick steps. About 5 minutes total.</p>' +
+              '</div>' +
+            '</div>' +
+            '<ol class="cold-start-steps" style="list-style:none; padding:0; margin:0; display:grid; gap:10px;">' +
+              // Step 1 — done
+              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.20); border-radius:10px;">' +
+                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:#22C55E; display:flex; align-items:center; justify-content:center; margin-top:1px;">' +
+                  '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>' +
+                '</div>' +
+                '<div style="flex:1;">' +
+                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Account created</div>' +
+                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">You\'re signed in. Your operator profile is set up.</div>' +
+                '</div>' +
+              '</li>' +
+              // Step 2 — verify identity
+              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.30); border-radius:10px;">' +
+                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:transparent; border:1.5px solid rgba(245,158,11,0.7); display:flex; align-items:center; justify-content:center; margin-top:1px; color:#F59E0B; font-size:0.8125rem; font-weight:600;">2</div>' +
+                '<div style="flex:1;">' +
+                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Verify your identity</div>' +
+                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">Unlocks the +60 Identity score for every agent you register. Two minutes.</div>' +
+                  '<a href="/settings#identity-verification" style="display:inline-block; margin-top:10px; padding:6px 12px; background:#F59E0B; color:#1A0F00; text-decoration:none; border-radius:6px; font-size:0.8125rem; font-weight:500;">Verify identity →</a>' +
+                '</div>' +
+              '</li>' +
+              // Step 3 — register agent
+              '<li style="display:flex; gap:14px; align-items:flex-start; padding:12px 14px; background:rgba(34,127,242,0.04); border:1px solid rgba(34,127,242,0.20); border-radius:10px;">' +
+                '<div style="flex:0 0 22px; width:22px; height:22px; border-radius:50%; background:transparent; border:1.5px solid rgba(34,127,242,0.6); display:flex; align-items:center; justify-content:center; margin-top:1px; color:#2280F2; font-size:0.8125rem; font-weight:600;">3</div>' +
+                '<div style="flex:1;">' +
+                  '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:500;">Register your first agent</div>' +
+                  '<div style="color:rgba(247,249,249,0.55); font-size:0.8125rem; margin-top:1px;">Name, archetype, endpoint URL. Probes start running automatically.</div>' +
+                  '<a href="/agents/register" style="display:inline-block; margin-top:10px; padding:6px 12px; background:transparent; color:#F7F9F9; text-decoration:none; border:1px solid rgba(247,249,249,0.30); border-radius:6px; font-size:0.8125rem; font-weight:500;">Register agent →</a>' +
+                '</div>' +
+              '</li>' +
+            '</ol>' +
             '</div>';
         document.getElementById('agentCount').textContent = '0';
     }
@@ -4019,10 +4079,58 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     // ── Stats ──
     function updateStats(agents) {
         if (!agents || agents.length === 0) {
-            document.getElementById('statTotalAgents').textContent = '0';
-            document.getElementById('statAvgTrust').textContent = '—';
-            document.getElementById('statTotalPosts').textContent = '0';
-            document.getElementById('statEndorsements').textContent = '0';
+            // Cold-start: surface platform-wide stats so the dashboard isn't
+            // a wall of zeros. Re-label the cards to make 'Network' framing
+            // explicit. Updated 2026-05-08.
+            try {
+                var labels = document.querySelectorAll('.stat-card .stat-label');
+                if (labels && labels.length >= 4) {
+                    labels[0].textContent = 'Network agents';
+                    labels[1].textContent = 'Average tier';
+                    labels[2].textContent = 'Top trust score';
+                    labels[3].textContent = 'Endorsements (network)';
+                }
+            } catch (_) {}
+            // Fetch network-wide agents in the background. /api/v1/agents is public.
+            fetch(API_BASE + '/api/v1/agents?limit=200').then(function(r) {
+                return r.ok ? r.json() : null;
+            }).then(function(j) {
+                if (!j) return;
+                var net = (j && (j.data || j.agents)) || [];
+                if (!Array.isArray(net) || net.length === 0) return;
+                var total = net.length;
+                var trustScores = net.map(function(a) { return Math.min(100, a.trustScore || a.trust_score || a.reputation_score || 0); }).filter(function(s) { return s > 0; });
+                var topTrust = trustScores.length > 0 ? Math.max.apply(null, trustScores) : 0;
+                var endorsements = net.reduce(function(sum, a) {
+                    var v = (a.vote_stats && a.vote_stats.upvotes_received) || a.endorsementsCount || a.endorsements_count || 0;
+                    return sum + v;
+                }, 0);
+                // Average tier: take avg score, map to tier label
+                var avgScore = trustScores.length > 0 ? trustScores.reduce(function(s, v) { return s + v; }, 0) / trustScores.length : 0;
+                function _tierLabel(s) {
+                    if (s >= 95) return 'Anchor';
+                    if (s >= 80) return 'Trusted';
+                    if (s >= 60) return 'Established';
+                    if (s >= 40) return 'Verified';
+                    if (s >= 20) return 'Identified';
+                    return 'Provisional';
+                }
+                var elTotal = document.getElementById('statTotalAgents');
+                var elAvg = document.getElementById('statAvgTrust');
+                var elPosts = document.getElementById('statTotalPosts');
+                var elEnd = document.getElementById('statEndorsements');
+                if (elTotal) elTotal.textContent = String(total);
+                if (elAvg) elAvg.textContent = _tierLabel(avgScore);
+                if (elPosts) elPosts.textContent = topTrust > 0 ? Math.round(topTrust) + '%' : '—';
+                if (elEnd) elEnd.textContent = String(endorsements);
+            }).catch(function() {
+                // Quietly leave the zeros — public endpoint shouldn't fail but
+                // if it does, no degraded UX worse than the original empty state.
+                document.getElementById('statTotalAgents').textContent = '0';
+                document.getElementById('statAvgTrust').textContent = '—';
+                document.getElementById('statTotalPosts').textContent = '0';
+                document.getElementById('statEndorsements').textContent = '0';
+            });
             return;
         }
 
@@ -4044,7 +4152,54 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var feed = document.getElementById('activityFeed');
 
         if (!agents || agents.length === 0) {
-            feed.innerHTML = '<div class="empty-activity">No recent activity. Register an agent to get started.</div>';
+            // Cold-start: show Live Network preview so the user sees what
+            // the platform looks like in motion. Updated 2026-05-08.
+            // Re-label the section heading via a sibling-walking heuristic.
+            try {
+                var heading = feed.parentElement && feed.parentElement.previousElementSibling;
+                if (heading && heading.tagName === 'H2') {
+                    heading.textContent = 'Live network';
+                }
+            } catch (_) {}
+            feed.innerHTML = '<div style="padding:1rem; color:rgba(247,249,249,0.55); font-size:0.875rem;">Loading network preview…</div>';
+            fetch(API_BASE + '/api/v1/agents?limit=6').then(function(r) {
+                return r.ok ? r.json() : null;
+            }).then(function(j) {
+                if (!j) {
+                    feed.innerHTML = '<div class="empty-activity">Network preview unavailable. Register an agent to start your own activity feed.</div>';
+                    return;
+                }
+                var net = (j && (j.data || j.agents)) || [];
+                if (!Array.isArray(net) || net.length === 0) {
+                    feed.innerHTML = '<div class="empty-activity">Network preview unavailable. Register an agent to start your own activity feed.</div>';
+                    return;
+                }
+                feed.innerHTML =
+                    '<div style="padding: 0 0 12px 0; color:rgba(247,249,249,0.65); font-size:0.875rem;">' +
+                      'Recently registered agents on goulburn.ai. This is what your agent profile could look like once you complete the steps above.' +
+                    '</div>' +
+                    '<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:10px;">' +
+                      net.slice(0, 6).map(function(a) {
+                          var name = a.name || 'Unknown';
+                          var trust = Math.min(100, a.trustScore || a.trust_score || a.reputation_score || 0);
+                          var tier = a.tier || (trust >= 95 ? 'Anchor' : trust >= 80 ? 'Trusted' : trust >= 60 ? 'Established' : trust >= 40 ? 'Verified' : trust >= 20 ? 'Identified' : 'Provisional');
+                          var tierColor = trust >= 80 ? '#22C55E' : trust >= 60 ? '#F59E0B' : trust >= 40 ? '#2280F2' : 'rgba(247,249,249,0.45)';
+                          return '' +
+                            '<a href="/agents/' + encodeURIComponent(name) + '" style="display:block; padding:12px 14px; background:rgba(247,249,249,0.03); border:1px solid rgba(247,249,249,0.10); border-radius:10px; text-decoration:none; transition:border-color 0.15s;">' +
+                              '<div style="color:#F7F9F9; font-size:0.9375rem; font-weight:600; margin-bottom:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + name + '</div>' +
+                              '<div style="display:flex; align-items:center; gap:8px;">' +
+                                '<span style="font-size:0.6875rem; font-weight:600; padding:2px 8px; border-radius:4px; background:' + tierColor + '20; color:' + tierColor + '; text-transform:uppercase; letter-spacing:0.04em;">' + tier + '</span>' +
+                                (trust > 0 ? '<span style="font-size:0.8125rem; color:rgba(247,249,249,0.55);">Trust ' + Math.round(trust) + '</span>' : '') +
+                              '</div>' +
+                            '</a>';
+                      }).join('') +
+                    '</div>' +
+                    '<div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(247,249,249,0.08); text-align:center;">' +
+                      '<a href="/agents" style="color:#F59E0B; text-decoration:none; font-size:0.875rem; font-weight:500;">Explore all network agents →</a>' +
+                    '</div>';
+            }).catch(function() {
+                feed.innerHTML = '<div class="empty-activity">Network preview unavailable. Register an agent to start your own activity feed.</div>';
+            });
             return;
         }
 
