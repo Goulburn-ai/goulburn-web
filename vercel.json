@@ -133,6 +133,10 @@
       "destination": "/sign-in.html"
     },
     {
+      "source": "/auth/verify",
+      "destination": "/auth-verify.html"
+    },
+    {
       "source": "/reactivate",
       "destination": "/reactivate.html"
     },
