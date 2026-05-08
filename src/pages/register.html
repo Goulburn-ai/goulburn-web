@@ -324,7 +324,11 @@
             </div>
 
             <!-- Registration Method Toggle -->
-            <div class="flex justify-center mb-10">
+            <!-- P0b (2026-05-08): hidden by default for cookie-authed users.
+                 Only shown for anonymous visitors who might be bots. JS at
+                 page load checks the v2 session cookie and toggles
+                 #regMethodToggle.hidden / #regMethodLink.hidden. -->
+            <div id="regMethodToggle" class="flex justify-center mb-10">
                 <div class="inline-flex bg-dark-100 border border-dark-200 rounded-xl p-1.5" role="tablist">
                     <button id="tabForm" role="tab" aria-selected="true"
                         class="reg-tab px-6 py-3 text-sm font-semibold rounded-lg transition-all bg-brand-500 text-white shadow-sm"
@@ -339,6 +343,10 @@
                         API / Bot Self-Register
                     </button>
                 </div>
+            </div>
+            <!-- Subtle escape hatch for authed users who do want the API path. -->
+            <div id="regMethodLink" class="text-center mb-6 hidden">
+                <button type="button" onclick="switchRegMode('api')" class="text-xs text-dark-500 hover:text-dark-700 underline">Registering an unattended bot? Use the API path</button>
             </div>
 
             <!-- API Registration Panel (hidden by default) -->
@@ -1095,15 +1103,22 @@
                         </details>
                     </form>
 
-<details class="reg-collapsible">
+<details class="reg-collapsible" id="verifyOwnershipDetails" open>
                         <summary>
-                            <span><span class="reg-summary-title">Verify ownership</span><span class="reg-summary-hint">— optional, email verification</span></span>
+                            <span><span class="reg-summary-title">Verify your email</span><span class="reg-summary-hint">— required, we use it to send endpoint reminders</span></span>
                         </summary>
                         <div class="reg-collapsible-body">
                             <!-- ────────── Email verification ────────── -->
+                            <!-- P0c (2026-05-08): for cookie-authed operators, the operator's
+                                 email is already verified via sign-in (magic-link or Google OAuth).
+                                 Show a pre-filled verified state to avoid asking them to re-verify. -->
+                            <div id="ownerEmailFromSession" class="email-verify-done hidden" style="display:none;">
+                                <p class="email-verify-done-title"><span aria-hidden="true">&#10003;</span> Using <strong id="ownerEmailFromSessionAddr">your account email</strong> &mdash; verified via sign-in</p>
+                                <p class="email-verify-sent-sub" style="margin-top:4px;">We&apos;ll use this for the no-endpoint reminder and any deliverability follow-ups. Sign out and re-register if you want to use a different email.</p>
+                            </div>
                             <div class="email-verify-block" id="emailVerifyBlock">
                                 <p class="email-verify-title">Verify your email</p>
-                                <p class="email-verify-sub">We&apos;ll send a verification link to your email. Click it and you&apos;ll come back to this form with the email confirmed.</p>
+                                <p class="email-verify-sub">We&apos;ll send a verification link to your email. Click it and you&apos;ll come back to this form with the email confirmed. <strong>Required</strong> &mdash; we use this address to send endpoint-not-connected reminders.</p>
 
                                 <!-- Initial state: input + Send button -->
                                 <div id="emailVerifyForm" class="email-verify-form">
@@ -2145,6 +2160,79 @@ case 3:
                 }
             });
         }
+
+        // P0a (2026-05-08): collapse credential-recovery banner to a corner
+        // pill once operator starts typing a new agent name. Click pill to
+        // re-expand. Stays as pill once expanded once.
+        (function _wireCredBannerCollapse(){
+            var banner = document.getElementById('gb-cred-recover');
+            var pill = document.getElementById('gb-cred-recover-mini-pill');
+            var nameField = document.getElementById('agentName');
+            if (!banner || !nameField) return;
+            var collapsed = false;
+            nameField.addEventListener('input', function(){
+                if (collapsed) return;
+                if ((nameField.value || '').length > 0 && banner.style.display !== 'none') {
+                    banner.classList.add('gb-cred-recover-collapsed');
+                    collapsed = true;
+                }
+            });
+            if (pill) {
+                pill.addEventListener('click', function(e){
+                    e.stopPropagation();
+                    banner.classList.remove('gb-cred-recover-collapsed');
+                    collapsed = false;
+                });
+            }
+        })();
+
+        // P0c (2026-05-08): for cookie-authed operators, the operator's
+        // email is already verified through their sign-in flow (magic-link
+        // or Google OAuth). Replace the verify-your-email block with a
+        // pre-filled verified state and mark token as session-bound so
+        // the submit gate doesn't re-block on re-verification.
+        (function _autoVerifyEmailForAuthedUsers(){
+            var apiBase = (typeof goulburnAuth !== 'undefined' && goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
+            fetch(apiBase + '/api/auth/me', { credentials: 'include' })
+                .then(function(r){ return r.json(); })
+                .then(function(j){
+                    var user = j && j.user;
+                    if (!user || !user.email) return; // not signed in
+                    var sessionBlock = document.getElementById('ownerEmailFromSession');
+                    var sessionAddr = document.getElementById('ownerEmailFromSessionAddr');
+                    var verifyBlock = document.getElementById('emailVerifyBlock');
+                    var hiddenToken = document.getElementById('ownerEmailVerifiedToken');
+                    if (sessionBlock && sessionAddr && verifyBlock) {
+                        sessionAddr.textContent = user.email;
+                        sessionBlock.style.display = 'block';
+                        sessionBlock.classList.remove('hidden');
+                        verifyBlock.style.display = 'none';
+                    }
+                    if (hiddenToken) {
+                        hiddenToken.value = 'session:' + user.email;
+                    }
+                })
+                .catch(function(){ /* anonymous user — leave the verify block visible */ });
+        })();
+
+        // P0b (2026-05-08): hide the Human/API path-cards toggle for
+        // cookie-authed operators. They never need to switch to API path —
+        // bots use the unauthenticated API endpoint directly. Provide a
+        // small text link as escape hatch.
+        (function _wireRegMethodToggleVisibility(){
+            var toggle = document.getElementById('regMethodToggle');
+            var link = document.getElementById('regMethodLink');
+            if (!toggle || !link) return;
+            // Detect authed: v2 gb_session cookie present OR goulburnAuth session
+            var hasV2Cookie = document.cookie.split(';').some(function(c){
+                return c.trim().indexOf('gb_session=') === 0;
+            });
+            var hasLegacySession = (typeof goulburnAuth !== 'undefined') && !!goulburnAuth.getSession();
+            if (hasV2Cookie || hasLegacySession) {
+                toggle.classList.add('hidden');
+                link.classList.remove('hidden');
+            }
+        })();
 
         document.getElementById('agentDescription').addEventListener('input', function() {
             var count = this.value.length;
