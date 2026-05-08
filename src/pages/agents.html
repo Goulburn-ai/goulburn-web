@@ -3895,6 +3895,18 @@
     
         // ── Operator avatar picker ──
         function renderOperatorAvatarInner(avatarStr, initial) {
+            // Local esc — this function lives OUTSIDE the IIFE that defines
+            // the shared esc() helper at line 2038. Without this local copy,
+            // every render throws ReferenceError: esc is not defined, and
+            // the caller's catch falls back to email-derived avatar (stale
+            // "D" letter instead of the saved portrait). Bug surfaced
+            // 2026-05-08 after operator profile save flow was fixed.
+            function _esc(t) {
+                if (!t) return '';
+                var d = document.createElement('div');
+                d.textContent = t;
+                return d.innerHTML;
+            }
             if (avatarStr && avatarStr.indexOf('icon:') === 0) {
                 var name = avatarStr.substring(5);
                 if (window.GOULBURN_AVATAR_ICONS && window.GOULBURN_AVATAR_ICONS[name]) {
@@ -3908,7 +3920,7 @@
             if (avatarStr && (avatarStr.indexOf('data:') === 0 || avatarStr.indexOf('http') === 0)) {
                 return '<img src="' + avatarStr.replace(/"/g, '&quot;') + '" alt="avatar">';
             }
-            return esc(initial);
+            return _esc(initial);
         }
 
         var _opAvatarModalState = { selected: '', currentTab: 'portraits' };
