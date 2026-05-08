@@ -889,6 +889,14 @@
             font-weight: 700;
             color: #F7F9F9;
             margin-bottom: 0.15rem;
+            /* Long emails / handles wrap inside the card boundary instead
+               of bleeding past the right edge. overflow-wrap:anywhere lets
+               the browser break mid-token at any character — required for
+               emails since they have no natural break points (no spaces). */
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            line-height: 1.25;
+            max-width: 100%;
         }
         .profile-role {
             font-size: 0.8rem;
