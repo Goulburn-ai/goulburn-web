@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifying — goulburn.ai</title>
+    <meta name="description" content="Verifying your sign-in link.">
+    <meta name="robots" content="noindex,nofollow">
+    <!-- @include partials/head.html -->
+    <style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+</head>
+<body class="bg-dark-50 text-dark-900 antialiased min-h-screen">
+    <!-- @include partials/nav.html -->
+
+    <main class="pt-24 pb-20 px-6">
+        <div class="max-w-md mx-auto">
+            <div class="bg-white rounded-2xl border border-dark-200 shadow-lg p-8 fade-in">
+
+                <!-- Loading state (default visible) -->
+                <div id="verifyLoadingCard" class="text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-amber-50 mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" class="animate-spin">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-display font-semibold text-dark-900 mb-2">Verifying your sign-in</h1>
+                    <p class="text-dark-600 text-sm" id="verifyStatus">Just a moment&hellip;</p>
+                </div>
+
+                <!-- Error state (revealed if verify fails) -->
+                <div id="verifyErrorCard" class="hidden text-center">
+                    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-50 mb-4">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-xl font-display font-semibold text-dark-900 mb-2">Something went wrong</h1>
+                    <p class="text-dark-600 text-sm mb-6" id="verifyErrorMessage">We couldn't verify that link. Please request a new one.</p>
+                    <a id="verifyRetryLink" href="/sign-in" class="inline-block bg-brand-600 hover:bg-brand-700 text-white font-medium py-3 px-6 rounded-xl transition">Back to sign-in</a>
+                </div>
+
+                <noscript>
+                    <div class="text-center">
+                        <p class="text-dark-700 text-sm">This page requires JavaScript to verify your sign-in link.</p>
+                        <p class="mt-4"><a href="/sign-in" class="text-brand-600 hover:underline">Return to sign-in</a></p>
+                    </div>
+                </noscript>
+            </div>
+        </div>
+    </main>
+
+    <!-- @include partials/footer.html -->
+
+    <script>
+    (function () {
+        // Apex-routed magic-link verify (2026-05-08).
+        //
+        // The email link points here at https://goulburn.ai/auth/verify?token=...
+        // Sender/link domains now match (both goulburn.ai), which lifts urlwatch
+        // and similar gateway flags about "rarely seen sender↔link combinations."
+        //
+        // Flow: read ?token= from URL → fetch api.goulburn.ai verify endpoint
+        // with credentials:include → browser processes the api's 302 +
+        // Set-Cookie:gb_session (Domain=.goulburn.ai → cookie now in jar) →
+        // fetch resolves with r.url = whatever the api redirected to (dashboard,
+        // agents/{name}, or /sign-in?error=...) → we navigate locally to that path.
+        //
+        // The api endpoint at /api/auth/magic-link/verify is unchanged. Old
+        // in-flight emails (still pointed at api.goulburn.ai directly) keep
+        // working — backward compat is preserved.
+
+        var API_BASE = 'https://api.goulburn.ai';
+        var loadingCard = document.getElementById('verifyLoadingCard');
+        var errorCard = document.getElementById('verifyErrorCard');
+        var statusEl = document.getElementById('verifyStatus');
+        var errorMsgEl = document.getElementById('verifyErrorMessage');
+
+        function showError(messageOverride, retryHref) {
+            try { loadingCard.classList.add('hidden'); } catch (_) {}
+            try { errorCard.classList.remove('hidden'); } catch (_) {}
+            if (messageOverride && errorMsgEl) {
+                errorMsgEl.textContent = messageOverride;
+            }
+            if (retryHref) {
+                var link = document.getElementById('verifyRetryLink');
+                if (link) { link.href = retryHref; }
+            }
+        }
+
+        var params = new URLSearchParams(window.location.search);
+        var token = params.get('token');
+
+        if (!token) {
+            // Bounce immediately — no token to verify.
+            window.location.replace('/sign-in?error=missing_token');
+            return;
+        }
+
+        // Belt-and-braces input sanity. Magic-link tokens are JWTs (3 base64
+        // segments separated by dots, generally 200+ chars). Reject anything
+        // that's clearly malformed before sending it to the api.
+        if (token.length < 20 || token.length > 4096) {
+            showError('That sign-in link looks malformed. Please request a new one.', '/sign-in?error=malformed_token');
+            return;
+        }
+
+        var verifyUrl = API_BASE + '/api/auth/magic-link/verify?token=' + encodeURIComponent(token);
+
+        fetch(verifyUrl, {
+            method: 'GET',
+            credentials: 'include'
+        }).then(function (response) {
+            // The api endpoint always 302s on completion (success → dashboard
+            // or success-with-claim → /agents/{name}, failure → /sign-in?error=).
+            // Browser follows that 302; r.url is the final location (back on
+            // goulburn.ai because that's where the api redirects to).
+            //
+            // Set-Cookie was processed during the redirect chain. The cookie
+            // now lives in the browser's cookie jar for *.goulburn.ai.
+
+            var finalUrl = response.url || '';
+            try {
+                var u = new URL(finalUrl, window.location.origin);
+                if (u.origin === window.location.origin) {
+                    // Standard happy path — api redirected back to goulburn.ai.
+                    window.location.replace(u.pathname + u.search + u.hash);
+                    return;
+                }
+            } catch (_) { /* fall through */ }
+
+            // Defensive default — if r.url is somehow unparseable or off-origin,
+            // assume success and head to dashboard. The cookie was set during
+            // the redirect, so dashboard's auth probe will catch any auth issue.
+            window.location.replace('/dashboard');
+        }).catch(function (err) {
+            // Network error, CORS issue, or fetch was blocked by an extension.
+            // Don't silently redirect — give the user something actionable.
+            try { console && console.error && console.error('[auth-verify] fetch failed:', err); } catch (_) {}
+            showError('We couldn’t reach the sign-in service. Please check your connection and request a new link.', '/sign-in?error=verify_network');
+        });
+
+        // Defensive timeout — if the fetch is somehow hanging past ~12s, surface
+        // an error rather than leaving the user staring at the spinner forever.
+        setTimeout(function () {
+            if (!errorCard.classList.contains('hidden')) { return; }
+            if (loadingCard.classList.contains('hidden')) { return; }
+            // We're still in loading state — fetch hasn't resolved.
+            showError('Verification is taking longer than expected. Please try again.', '/sign-in?error=verify_timeout');
+        }, 12000);
+    })();
+    </script>
+</body>
+</html>
