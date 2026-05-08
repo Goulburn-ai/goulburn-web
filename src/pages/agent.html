@@ -1703,8 +1703,21 @@
                                     <input type="password" id="rtEditApiKey" autocomplete="off" placeholder="sk-... / sk-ant-... / etc." class="w-full px-3 py-2 rounded-lg text-sm font-mono" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;">
                                     <p class="text-xs text-amber-200/60 mt-1 leading-relaxed">Encrypted at rest with Fernet (AES-128). Never logged. Used only to call your chosen provider when probes arrive. <span class="text-amber-200/80">If a key is already saved, leave blank to keep it.</span></p>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">System Prompt <span class="font-normal text-amber-300/60">— defines your agent&apos;s persona</span></label>
+                                <!-- Option C (2026-05-08): System Prompt is hidden behind
+                                     "Customize the LLM persona separately" toggle. Same pattern
+                                     as register.html. When OFF, backend derives from agent
+                                     description (api commit f448e34). -->
+                                <div class="pt-2 mt-1" style="border-top:1px solid rgba(255,255,255,0.08);">
+                                    <label class="flex items-start gap-2 cursor-pointer select-none">
+                                        <input type="checkbox" id="rtEditCustomizePersona" class="mt-0.5 w-3.5 h-3.5 accent-amber-500 cursor-pointer">
+                                        <span class="text-xs leading-snug">
+                                            <span class="font-semibold text-amber-200">Customize the LLM persona separately</span>
+                                            <span class="block text-amber-200/60 mt-0.5">By default we&apos;ll use this agent&apos;s <em>Description</em> as the system prompt. Tick this to set a different persona for what the model sees vs what humans read.</span>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div id="rtEditSystemPromptWrap" class="hidden">
+                                    <label class="block text-xs font-semibold text-amber-200 mb-1" style="margin-bottom:4px;">System Prompt <span class="font-normal text-amber-300/60">— what the model sees</span></label>
                                     <textarea id="rtEditSystemPrompt" rows="4" maxlength="4000" placeholder="You are a climate-policy analyst. Source-anchored, IPCC-grounded, allergic to false certainty." class="w-full px-3 py-2 rounded-lg text-sm font-mono leading-relaxed" style="background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.15); color:#fff;"></textarea>
                                     <p class="text-xs text-amber-200/60 mt-1">2&ndash;4000 chars. We screen on save (LLM-as-judge) to block prompts that disable safety guardrails or impersonate real public figures.</p>
                                 </div>
@@ -2887,6 +2900,20 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 }
                 var sysPrompt = document.getElementById('rtEditSystemPrompt');
                 if (sysPrompt) sysPrompt.value = cfg.system_prompt || '';
+                // Option C: toggle ON when an existing system_prompt is present so
+                // operators see their saved value and don't accidentally clear it
+                // on first save. Toggle OFF only when there's nothing customized yet.
+                var rtEditCust = document.getElementById('rtEditCustomizePersona');
+                var rtEditWrap = document.getElementById('rtEditSystemPromptWrap');
+                if (rtEditCust && rtEditWrap) {
+                    var hasExistingPrompt = !!(cfg.system_prompt && cfg.system_prompt.trim().length > 0);
+                    rtEditCust.checked = hasExistingPrompt;
+                    if (hasExistingPrompt) {
+                        rtEditWrap.classList.remove('hidden');
+                    } else {
+                        rtEditWrap.classList.add('hidden');
+                    }
+                }
                 // API key is intentionally NOT pre-filled — it's encrypted at
                 // rest and never returned by the API. The placeholder hint
                 // already tells operators they can leave it blank to keep
@@ -2895,6 +2922,21 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 console.warn('runtime config load failed:', e);
             }
         }
+
+        // Option C (2026-05-08): rtEditCustomizePersona toggles wrap visibility.
+        (function _wireEditPersonaToggle(){
+            var t = document.getElementById('rtEditCustomizePersona');
+            var w = document.getElementById('rtEditSystemPromptWrap');
+            if (t && w) {
+                t.addEventListener('change', function() {
+                    if (t.checked) {
+                        w.classList.remove('hidden');
+                    } else {
+                        w.classList.add('hidden');
+                    }
+                });
+            }
+        })();
 
         function renderEditIconGrid() {
             var grid = document.getElementById('editIconGrid');
@@ -3066,7 +3108,13 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 if (!prov) missing.push('Provider');
                 if (!model) missing.push('Model');
                 if (!apiKey) missing.push('API Key');
-                if (!sysPrompt || sysPrompt.length < 2) missing.push('System Prompt');
+                // Option C: require min-2-chars only when toggle ON. When OFF, save
+                // sends empty string and backend re-derives from description.
+                var rtEditCustChk = document.getElementById('rtEditCustomizePersona');
+                var rtEditCustOn = !!(rtEditCustChk && rtEditCustChk.checked);
+                if (rtEditCustOn && (!sysPrompt || sysPrompt.length < 2)) {
+                    missing.push('System Prompt');
+                }
                 if (prov === 'custom' && !custBase) missing.push('Custom Base URL');
                 if (missing.length) {
                     show('Missing: ' + missing.join(', '), '#f87171');
@@ -3089,11 +3137,15 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
                 show('Configuring hosted runtime…', '#f59e0b');
 
+                // Option C: when toggle is OFF, send empty system_prompt so
+                // backend re-derives from description; when ON, send the value.
+                var rtEditCustForPayload = document.getElementById('rtEditCustomizePersona');
+                var rtEditCustOnForPayload = !!(rtEditCustForPayload && rtEditCustForPayload.checked);
                 var payload = {
                     provider: prov,
                     model: model,
                     api_key: apiKey,
-                    system_prompt: sysPrompt
+                    system_prompt: rtEditCustOnForPayload ? sysPrompt : ''
                 };
                 if (prov === 'custom') payload.custom_base_url = custBase;
 
