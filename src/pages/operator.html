@@ -1406,9 +1406,24 @@
                         saveBtn.textContent = 'Save';
                         return;
                     }
-                    // If handle changed, redirect to new URL; otherwise reload to refresh public view.
+                    // After successful save, decide where to go:
+                    //   1. If ?return=<path> param present AND it's a same-origin
+                    //      relative path, honor it — preserves the dashboard
+                    //      cold-start flow continuity (step 2 done → user lands
+                    //      back on /dashboard with step 3 now active).
+                    //   2. Otherwise: if handle changed, redirect to the new
+                    //      handle's profile URL; if not, just reload to refresh
+                    //      the public view.
                     var newHandle = (out.body && out.body.handle) || payload.handle;
-                    if (newHandle && newHandle !== getHandleFromUrl()) {
+                    var _qs = new URLSearchParams(window.location.search);
+                    var _ret = _qs.get('return') || '';
+                    // Open-redirect guard: only honor relative paths that start
+                    // with a single '/' (not '//' which is protocol-relative,
+                    // not '/\\' which is a backslash trick).
+                    var _retSafe = (typeof _ret === 'string' && _ret.length > 1 && _ret.charAt(0) === '/' && _ret.charAt(1) !== '/' && _ret.charAt(1) !== '\\') ? _ret : '';
+                    if (_retSafe) {
+                        window.location.href = _retSafe;
+                    } else if (newHandle && newHandle !== getHandleFromUrl()) {
                         window.location.href = '/operator/' + encodeURIComponent(newHandle);
                     } else {
                         window.location.reload();
