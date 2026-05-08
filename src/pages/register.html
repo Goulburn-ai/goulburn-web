@@ -2219,19 +2219,31 @@ case 3:
         // cookie-authed operators. They never need to switch to API path —
         // bots use the unauthenticated API endpoint directly. Provide a
         // small text link as escape hatch.
+        //
+        // Detection: gb_session is HttpOnly so document.cookie can't see it.
+        // Hit /api/auth/me — if user is signed in, hide the toggle.
         (function _wireRegMethodToggleVisibility(){
             var toggle = document.getElementById('regMethodToggle');
             var link = document.getElementById('regMethodLink');
             if (!toggle || !link) return;
-            // Detect authed: v2 gb_session cookie present OR goulburnAuth session
-            var hasV2Cookie = document.cookie.split(';').some(function(c){
-                return c.trim().indexOf('gb_session=') === 0;
-            });
+            // Fast path: legacy localStorage Bearer (rare now, but cheap to check first)
             var hasLegacySession = (typeof goulburnAuth !== 'undefined') && !!goulburnAuth.getSession();
-            if (hasV2Cookie || hasLegacySession) {
+            if (hasLegacySession) {
                 toggle.classList.add('hidden');
                 link.classList.remove('hidden');
+                return;
             }
+            // Slow path: fetch /api/auth/me to check v2 cookie session
+            var apiBase = (typeof goulburnAuth !== 'undefined' && goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
+            fetch(apiBase + '/api/auth/me', { credentials: 'include' })
+                .then(function(r){ return r.json(); })
+                .then(function(j){
+                    if (j && j.user && j.user.email) {
+                        toggle.classList.add('hidden');
+                        link.classList.remove('hidden');
+                    }
+                })
+                .catch(function(){ /* anonymous — leave toggle visible */ });
         })();
 
         document.getElementById('agentDescription').addEventListener('input', function() {
