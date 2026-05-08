@@ -996,10 +996,14 @@
         // If the visitor is signed in AND their /me/settings handle matches
         // the current page handle, surface the Edit button.
         function maybeShowEditButton(currentHandle) {
+            // Cookie-aware: try the request via credentials:'include' even
+            // if no legacy Bearer in localStorage. v2 users authenticate
+            // via HttpOnly gb_session cookie.
             var session = getSession();
-            if (!session) return;
-            fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
-                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
+            var _meHeaders = session ? { 'Authorization': 'Bearer ' + session } : {};
+            fetch(API_BASE + '/api/v1/operators/me/settings', {
+                credentials: 'include',
+                headers: _meHeaders
             }).then(function(r) {
                 if (!r.ok) return null;
                 return r.json();
@@ -1358,14 +1362,12 @@
                 saveBtn.disabled = true;
                 saveBtn.textContent = 'Saving…';
 
+                // Cookie-aware auth: 2026-05-08 — DO NOT bail on missing
+                // legacy Bearer. v2 users authenticate via HttpOnly
+                // gb_session cookie (invisible to JS). We try the request
+                // via credentials:'include' and ONLY surface "session
+                // expired" if the backend actually returns 401/403.
                 var session = getSession();
-                if (!session) {
-                    errEl.textContent = 'Your session has expired. Please sign in again.';
-                    errEl.style.display = '';
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Save';
-                    return;
-                }
 
                 var payload = {
                     handle: (document.getElementById('opEditHandle').value || '').toLowerCase().trim(),
@@ -1376,19 +1378,29 @@
                     public_profile: !!document.getElementById('opEditPublic').checked
                 };
 
-                fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include',
+                var _headers = { 'Content-Type': 'application/json' };
+                if (session) {
+                    _headers['Authorization'] = 'Bearer ' + session;
+                }
+
+                fetch(API_BASE + '/api/v1/operators/me/settings', {
+                    credentials: 'include',
                     method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': (session ? 'Bearer ' + session : '')
-                    },
+                    headers: _headers,
                     body: JSON.stringify(payload)
                 }).then(function(r) {
                     return r.json().then(function(body) { return { ok: r.ok, status: r.status, body: body }; });
                 }).then(function(out) {
                     if (!out.ok) {
-                        var msg = (out.body && (out.body.detail || out.body.message)) || ('Save failed (HTTP ' + out.status + ')');
-                        errEl.textContent = msg;
+                        // Real session expiration: backend returned 401/403.
+                        // Surface the expired message; otherwise show the
+                        // actual error from the response body.
+                        if (out.status === 401 || out.status === 403) {
+                            errEl.textContent = 'Your session has expired. Please sign in again.';
+                        } else {
+                            var msg = (out.body && (out.body.detail || out.body.message)) || ('Save failed (HTTP ' + out.status + ')');
+                            errEl.textContent = msg;
+                        }
                         errEl.style.display = '';
                         saveBtn.disabled = false;
                         saveBtn.textContent = 'Save';
