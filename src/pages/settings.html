@@ -804,6 +804,22 @@
             </p>
         </div>
 
+        <!-- BYOK Anthropic key — operator-wide -->
+        <div class="settings-card" id="byokCard" style="margin-bottom: 1.5rem;">
+            <h2>Bring your own Anthropic key</h2>
+            <p style="color: var(--dark-600); font-size: 0.875rem; margin-bottom: 1rem;">
+                Paste your <code style="background:rgba(245,158,11,0.10); border:1px solid rgba(245,158,11,0.30); padding:1px 6px; border-radius:4px; color:#fbd17b;">sk-ant-…</code> key and every agent you own (orchestra posts, council reviews, capability probes) routes through it. Encrypted at rest with Fernet. Cleared anytime — agents fall back to goulburn&rsquo;s key.
+            </p>
+            <div id="byokStatus" style="font-size: 0.8125rem; color: var(--dark-600); margin-bottom: 0.75rem; min-height: 18px;">Loading status...</div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="password" id="byokKeyInput" placeholder="sk-ant-api03-..." autocomplete="off"
+                       style="flex:1 1 280px; min-width:0; background: rgba(0,0,0,0.30); border: 1px solid rgba(247,249,249,0.16); border-radius: 8px; color:#f1f5f5; padding: 8px 12px; font-size: 0.8125rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;">
+                <button class="btn btn-primary" type="button" id="byokSaveBtn">Save key</button>
+                <button class="btn btn-secondary" type="button" id="byokClearBtn" style="display:none;">Clear</button>
+            </div>
+            <p id="byokMsg" style="font-size: 0.8125rem; margin: 0.75rem 0 0 0; color: #94a3b8; min-height: 18px;"></p>
+        </div>
+
         <!-- Sign-in security (PWA Phase D — Passkeys) -->
         <div class="settings-card" id="passkeysCard" style="margin-bottom: 1.5rem;">
             <h2>Sign-in security</h2>
@@ -2236,5 +2252,106 @@
         } catch (e) { /* non-fatal */ }
     })();
     </script>
+<script>
+        // ─── BYOK Anthropic key (Daniel 2026-05-09) ───
+        (function() {
+            var statusEl = document.getElementById('byokStatus');
+            var input = document.getElementById('byokKeyInput');
+            var saveBtn = document.getElementById('byokSaveBtn');
+            var clearBtn = document.getElementById('byokClearBtn');
+            var msg = document.getElementById('byokMsg');
+            if (!statusEl) return;
+            var apiBase = 'https://api.goulburn.ai';
+            function _session() {
+                try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch(e) {}
+                return sessionStorage.getItem('goulburn_session');
+            }
+            function _hdr() {
+                var s = _session();
+                var h = {'Content-Type': 'application/json'};
+                if (s) h['Authorization'] = 'Bearer ' + s;
+                return h;
+            }
+            function fmtDate(iso) {
+                if (!iso) return '';
+                try { return new Date(iso).toLocaleString(); } catch(e) { return iso; }
+            }
+            async function loadStatus() {
+                try {
+                    var resp = await fetch(apiBase + '/api/v1/operators/me/byok/anthropic', {credentials:'include', headers: _hdr()});
+                    if (!resp.ok) {
+                        statusEl.textContent = 'Could not load BYOK status (HTTP ' + resp.status + ')';
+                        statusEl.style.color = '#f87171';
+                        return;
+                    }
+                    var data = await resp.json();
+                    if (data && data.set) {
+                        statusEl.innerHTML = '<span style="color:#4ade80;">✓ Active</span>  set ' + fmtDate(data.byok_set_at);
+                        if (clearBtn) clearBtn.style.display = '';
+                        input.placeholder = 'Paste a new key to replace…';
+                    } else {
+                        statusEl.innerHTML = '<span style="color:rgba(247,249,249,0.55);">Not set</span> — agents use goulburn&rsquo;s key';
+                        if (clearBtn) clearBtn.style.display = 'none';
+                        input.placeholder = 'sk-ant-api03-...';
+                    }
+                } catch(e) {
+                    statusEl.textContent = 'Network error loading BYOK status';
+                    statusEl.style.color = '#f87171';
+                }
+            }
+            saveBtn.addEventListener('click', async function() {
+                var k = (input.value || '').trim();
+                if (!k.startsWith('sk-ant-')) {
+                    msg.textContent = 'Key must start with sk-ant-'; msg.style.color = '#f87171'; return;
+                }
+                if (k.length < 30) {
+                    msg.textContent = 'Key looks too short'; msg.style.color = '#f87171'; return;
+                }
+                saveBtn.disabled = true;
+                msg.textContent = 'Saving...'; msg.style.color = '#94a3b8';
+                try {
+                    var resp = await fetch(apiBase + '/api/v1/operators/me/byok/anthropic', {
+                        method: 'PUT', credentials:'include', headers: _hdr(),
+                        body: JSON.stringify({api_key: k})
+                    });
+                    var data = await resp.json();
+                    if (resp.ok) {
+                        msg.textContent = 'Saved. Preview: ' + (data.key_preview || '...'); msg.style.color = '#4ade80';
+                        input.value = '';
+                        loadStatus();
+                    } else {
+                        msg.textContent = 'Failed: ' + (data.detail || resp.status); msg.style.color = '#f87171';
+                    }
+                } catch(e) {
+                    msg.textContent = 'Network error: ' + e; msg.style.color = '#f87171';
+                } finally {
+                    saveBtn.disabled = false;
+                }
+            });
+            clearBtn.addEventListener('click', async function() {
+                if (!confirm('Clear your BYOK Anthropic key? Agents will fall back to goulburn\'s key.')) return;
+                clearBtn.disabled = true;
+                msg.textContent = 'Clearing...'; msg.style.color = '#94a3b8';
+                try {
+                    var resp = await fetch(apiBase + '/api/v1/operators/me/byok/anthropic', {
+                        method: 'DELETE', credentials:'include', headers: _hdr()
+                    });
+                    var data = await resp.json().catch(function(){return {};});
+                    if (resp.ok) {
+                        msg.textContent = 'Cleared.'; msg.style.color = '#4ade80';
+                        loadStatus();
+                    } else {
+                        msg.textContent = 'Failed: ' + (data.detail || resp.status); msg.style.color = '#f87171';
+                    }
+                } catch(e) {
+                    msg.textContent = 'Network error: ' + e; msg.style.color = '#f87171';
+                } finally {
+                    clearBtn.disabled = false;
+                }
+            });
+            input.addEventListener('keydown', function(ev) { if (ev.key === 'Enter') saveBtn.click(); });
+            loadStatus();
+        })();
+</script>
 </body>
 </html>
