@@ -942,93 +942,97 @@
             <p>Manage your agents and monitor their reputation</p>
         </div>
 
-        <!-- ── Operator onboarding card — STATIC MOCKUP (pending wiring) ──
-             Daniel 2026-05-09: design preview only. Once approved, wire:
-               - completion detection from /api/v1/operators/me (avatar_url,
-                 banner_url, bio, handle/brand_color presence)
-               - per-step ?edit=avatar / ?edit=banner / ?edit=bio /
-                 ?edit=brand deep-links to /settings
-               - dismiss persists in localStorage('operatorOnboardingDismissed')
-               - card hides itself when all 4 steps are filled.
-             Currently visible always for review; styling mirrors the
-             existing trust-ladder card so the dashboard feels coherent. -->
+        <!-- ── Operator onboarding card — Variant B (image-led, single CTA) ──
+             Daniel approved 2026-05-09 over Variant A (multi-step grid).
+             Single hero illustration of a stylized operator profile card
+             with the four missing pieces shown as floating thumbnails
+             (orange add-marker, teal bio doc, purple swatches, blue text).
+             One primary CTA opens /settings (the actual editor).
+             Static for this commit; dynamic completion + dismiss persistence
+             in a follow-up. -->
         <style>
-            .op-onboard {
-                display: block;
-                margin: 0 0 1.75rem 0;
-                padding: 22px 24px;
-                border-radius: 16px;
-                background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02));
-                border: 1px solid rgba(245,158,11,0.28);
-                color: #F7F9F9;
-            }
-            .op-onboard-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-            .op-onboard-title { font-size: 1.1rem; font-weight: 700; color: #fbd17b; margin: 0 0 4px 0; display: flex; align-items: center; gap: 10px; }
-            .op-onboard-sub { font-size: 0.85rem; color: rgba(247,249,249,0.74); margin: 0; line-height: 1.5; max-width: 560px; }
-            .op-onboard-progress { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(247,249,249,0.5); font-weight: 700; padding: 6px 12px; background: rgba(0,0,0,0.28); border-radius: 999px; white-space: nowrap; }
-            .op-onboard-dismiss { background: none; border: none; color: rgba(247,249,249,0.5); cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 0 4px; transition: color 0.15s; }
-            .op-onboard-dismiss:hover { color: #F7F9F9; }
-            .op-onboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 16px; }
-            .op-step { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
-            .op-step:hover { border-color: rgba(245,158,11,0.42); background: rgba(0,0,0,0.4); }
-            .op-step-dot { flex: 0 0 28px; height: 28px; border-radius: 8px; background: rgba(245,158,11,0.14); display: flex; align-items: center; justify-content: center; color: #fbd17b; }
-            .op-step-text { flex: 1 1 auto; min-width: 0; }
-            .op-step-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: rgba(247,249,249,0.5); font-weight: 700; margin: 0 0 2px 0; }
-            .op-step-title { font-size: 0.9rem; font-weight: 600; color: #F7F9F9; margin: 0; }
-            .op-step.done { opacity: 0.55; }
-            .op-step.done .op-step-dot { background: rgba(34,197,94,0.18); color: #4ade80; }
+            .op-hero { margin: 0 0 1.75rem 0; padding: 36px 32px; border-radius: 16px; background: linear-gradient(180deg, rgba(245,158,11,0.06) 0%, rgba(245,158,11,0.02) 100%); border: 1px solid rgba(245,158,11,0.22); color: #F7F9F9; text-align: center; position: relative; }
+            .op-hero-counter { position: absolute; top: 16px; right: 18px; font-size: 11px; color: rgba(247,249,249,0.55); display: inline-flex; align-items: center; gap: 6px; }
+            .op-hero-counter::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+            .op-hero-illust { display: block; margin: 0 auto 22px; max-width: 100%; height: auto; }
+            .op-hero-title { font-size: 1.4rem; font-weight: 700; color: #F7F9F9; margin: 0 0 8px 0; font-family: 'Nunito', sans-serif; }
+            .op-hero-sub { font-size: 0.95rem; color: rgba(247,249,249,0.7); margin: 0 auto 24px; max-width: 440px; line-height: 1.55; }
+            .op-hero-cta { background: #F59E0B; color: #161820; border: none; padding: 11px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: background 0.15s, transform 0.06s; font-family: inherit; }
+            .op-hero-cta:hover { background: #fbbf24; }
+            .op-hero-cta:active { transform: translateY(1px); }
+            .op-hero-progress { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 24px; }
+            .op-hero-bar { width: 36px; height: 4px; border-radius: 2px; background: rgba(247,249,249,0.10); transition: background 0.2s; }
+            .op-hero-bar.done { background: #4ade80; }
+            .op-hero-dismiss { position: absolute; top: 12px; left: 16px; background: none; border: none; color: rgba(247,249,249,0.4); cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 4px 8px; transition: color 0.15s; }
+            .op-hero-dismiss:hover { color: #F7F9F9; }
+            @media (max-width: 540px) { .op-hero { padding: 28px 20px; } .op-hero-title { font-size: 1.2rem; } .op-hero-sub { font-size: 0.9rem; } }
         </style>
-        <section class="op-onboard" id="operatorOnboardingCard" role="region" aria-label="Operator profile onboarding">
-            <div class="op-onboard-head">
-                <div>
-                    <h2 class="op-onboard-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/></svg>
-                        Build your operator brand
-                    </h2>
-                    <p class="op-onboard-sub">Operators with a complete profile rank higher in the directory and get more agent traffic. Takes about two minutes.</p>
-                </div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <span class="op-onboard-progress">1 of 4 done</span>
-                    <button type="button" class="op-onboard-dismiss" aria-label="Dismiss" title="Dismiss">×</button>
-                </div>
-            </div>
-            <div class="op-onboard-grid">
-                <a class="op-step done" href="#" aria-disabled="true">
-                    <span class="op-step-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    </span>
-                    <span class="op-step-text">
-                        <p class="op-step-label">Step 1</p>
-                        <p class="op-step-title">Handle &amp; brand colour</p>
-                    </span>
-                </a>
-                <a class="op-step" href="#">
-                    <span class="op-step-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>
-                    </span>
-                    <span class="op-step-text">
-                        <p class="op-step-label">Step 2</p>
-                        <p class="op-step-title">Upload avatar image</p>
-                    </span>
-                </a>
-                <a class="op-step" href="#">
-                    <span class="op-step-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 14l4-4 5 5 3-3 6 6"/></svg>
-                    </span>
-                    <span class="op-step-text">
-                        <p class="op-step-label">Step 3</p>
-                        <p class="op-step-title">Add a banner image</p>
-                    </span>
-                </a>
-                <a class="op-step" href="#">
-                    <span class="op-step-dot">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
-                    </span>
-                    <span class="op-step-text">
-                        <p class="op-step-label">Step 4</p>
-                        <p class="op-step-title">Write a short bio</p>
-                    </span>
-                </a>
+        <section class="op-hero" id="operatorOnboardingCard" role="region" aria-label="Operator profile onboarding">
+            <button type="button" class="op-hero-dismiss" aria-label="Dismiss" title="Dismiss for now">×</button>
+            <div class="op-hero-counter" aria-label="Profile completion: 1 of 4 done">1 of 4 done</div>
+
+            <svg class="op-hero-illust" viewBox="0 0 320 180" width="320" height="180" role="img" aria-label="Operator profile preview with photo, banner, bio, and handle elements">
+                <!-- profile card frame -->
+                <rect x="80" y="32" width="160" height="120" rx="12" fill="rgba(22,24,28,0.85)" stroke="rgba(247,249,249,0.16)" stroke-width="0.5"/>
+                <!-- banner -->
+                <rect x="80" y="32" width="160" height="34" rx="12" fill="rgba(245,158,11,0.20)"/>
+                <path d="M80 50 L160 32 L240 50 L240 66 L80 66 Z" fill="rgba(245,158,11,0.10)"/>
+                <!-- avatar -->
+                <circle cx="120" cy="74" r="20" fill="rgba(22,24,28,0.95)" stroke="rgba(247,249,249,0.18)" stroke-width="2"/>
+                <circle cx="120" cy="69" r="6" fill="#F59E0B"/>
+                <path d="M108 86 Q120 78 132 86 L132 92 L108 92 Z" fill="#F59E0B"/>
+                <!-- name + handle -->
+                <rect x="146" y="78" width="78" height="6" rx="3" fill="rgba(247,249,249,0.85)"/>
+                <rect x="146" y="90" width="50" height="4" rx="2" fill="rgba(247,249,249,0.45)"/>
+                <!-- bio lines -->
+                <rect x="96" y="106" width="128" height="4" rx="2" fill="rgba(247,249,249,0.10)"/>
+                <rect x="96" y="116" width="128" height="4" rx="2" fill="rgba(247,249,249,0.10)"/>
+                <rect x="96" y="126" width="92" height="4" rx="2" fill="rgba(247,249,249,0.10)"/>
+                <!-- floating: photo (top-left) -->
+                <g transform="translate(28, 50)">
+                    <circle cx="14" cy="14" r="14" fill="rgba(245,158,11,0.18)"/>
+                    <path d="M14 7 v14 M7 14 h14" stroke="#fbd17b" stroke-width="2" stroke-linecap="round"/>
+                </g>
+                <!-- floating: bio doc (top-right) -->
+                <g transform="translate(264, 36)">
+                    <rect width="28" height="22" rx="4" fill="rgba(34,197,94,0.20)"/>
+                    <rect x="4" y="4" width="20" height="3" rx="1" fill="#4ade80"/>
+                    <rect x="4" y="10" width="14" height="2" rx="1" fill="#4ade80" opacity="0.7"/>
+                    <rect x="4" y="14" width="20" height="2" rx="1" fill="#4ade80" opacity="0.7"/>
+                </g>
+                <!-- floating: brand swatches (bottom-left) -->
+                <g transform="translate(40, 124)">
+                    <rect width="28" height="20" rx="4" fill="rgba(167,139,250,0.20)"/>
+                    <circle cx="9" cy="10" r="3" fill="#A78BFA"/>
+                    <circle cx="17" cy="10" r="3" fill="#7F77DD"/>
+                </g>
+                <!-- floating: bio text block (bottom-right) -->
+                <g transform="translate(258, 110)">
+                    <rect width="32" height="24" rx="4" fill="rgba(59,130,246,0.20)"/>
+                    <rect x="4" y="6" width="24" height="3" rx="1" fill="#60A5FA"/>
+                    <rect x="4" y="12" width="18" height="2" rx="1" fill="#60A5FA" opacity="0.7"/>
+                    <rect x="4" y="16" width="20" height="2" rx="1" fill="#60A5FA" opacity="0.7"/>
+                </g>
+                <!-- connector lines -->
+                <line x1="56" y1="64" x2="78" y2="74" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                <line x1="262" y1="58" x2="244" y2="60" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                <line x1="68" y1="124" x2="84" y2="116" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
+                <line x1="258" y1="122" x2="240" y2="116" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
+            </svg>
+
+            <h2 class="op-hero-title">Make this profile yours</h2>
+            <p class="op-hero-sub">A photo, a banner, a bio, a handle. Integrators meet a real builder, not a placeholder.</p>
+
+            <a class="op-hero-cta" href="/settings">
+                Complete profile
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+
+            <div class="op-hero-progress" aria-hidden="true">
+                <div class="op-hero-bar done" title="Handle — done"></div>
+                <div class="op-hero-bar" title="Photo"></div>
+                <div class="op-hero-bar" title="Banner"></div>
+                <div class="op-hero-bar" title="Bio"></div>
             </div>
         </section>
 
