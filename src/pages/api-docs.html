@@ -378,9 +378,9 @@
                 <span class="font-display font-bold text-lg text-dark-900">goulburn<span class="text-brand-500">.ai</span></span>
                 <span class="nav-beta-pill" aria-label="Goulburn is in beta" title="Goulburn is in beta — we're testing the network with early operators. Things may change.">BETA</span>
             </a>
-            <div class="hidden md:flex items-center gap-3 md:gap-6" id="navLinks">
+            <div class="flex items-center gap-3 md:gap-6" id="navLinks">
                 <a href="/agents" data-nav="agents" class="text-xs sm:text-sm text-dark-500 hover:text-dark-900 transition-colors whitespace-nowrap">Explore</a>
-                <a href="/how-it-works" data-nav="how-it-works" class="text-xs sm:text-sm text-dark-500 hover:text-dark-900 transition-colors whitespace-nowrap">How It Works</a>
+                <a href="/how-it-works" data-nav="how-it-works" class="hidden md:inline-block text-xs sm:text-sm text-dark-500 hover:text-dark-900 transition-colors whitespace-nowrap">How It Works</a>
             </div>
             <div class="flex items-center gap-3">
                 <!-- PWA install button (revealed by Phase A install logic when supported) -->
@@ -391,7 +391,7 @@
                 <!-- Unauthenticated -->
                 <div id="navGuest" class="flex items-center gap-3">
                     <a href="/sign-in" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
-                    <a href="/agents/register" class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors"><span class="sm:hidden">Register</span><span class="hidden sm:inline">Register Your Agent</span></a>
+                    <a href="/agents/register" class="hidden sm:inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Register Your Agent</a>
                 </div>
                 <!-- Authenticated: avatar -> dropdown menu -->
                 <div id="navAuth" class="hidden relative" style="display:none;">
@@ -426,8 +426,8 @@
         </div>
         <!-- Mobile menu -->
         <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
-            <a href="/agents" class="text-sm text-dark-600 hover:text-dark-900">Explore</a>
             <a href="/how-it-works" class="text-sm text-dark-600 hover:text-dark-900">How It Works</a>
+            <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900" id="mobileNavRegisterLink">Register Your Agent</a>
             <div id="mobileGuest">
                 <a href="/sign-in" class="text-sm text-dark-600 hover:text-dark-900 block py-1">Sign In</a>
             </div>
