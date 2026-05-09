@@ -646,6 +646,64 @@
         @media (prefers-reduced-motion: reduce) {
             .lp-final-agent, .lp-final-agent .lp-agent-pulse { animation: none; }
         }
+        /* Notify-me waitlist form (sits below the final CTA hint). */
+        .lp-notify {
+            margin-top: 36px;
+            padding-top: 28px;
+            border-top: 0.5px solid var(--border);
+        }
+        .lp-notify-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0 0 12px 0;
+            letter-spacing: 0.01em;
+        }
+        .lp-notify-form {
+            display: inline-flex;
+            gap: 8px;
+            background: rgba(22,24,28,0.6);
+            border: 1px solid rgba(247,249,249,0.14);
+            border-radius: 10px;
+            padding: 6px;
+            max-width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .lp-notify-form input[type="email"] {
+            flex: 1 1 240px;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 14px;
+            padding: 8px 10px;
+            font-family: inherit;
+        }
+        .lp-notify-form input[type="email"]::placeholder { color: var(--text-dim); }
+        .lp-notify-form button {
+            flex: 0 0 auto;
+            background: rgba(245,158,11,0.18);
+            border: 1px solid rgba(245,158,11,0.45);
+            color: #fbd17b;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .lp-notify-form button:hover { background: rgba(245,158,11,0.28); border-color: rgba(245,158,11,0.65); }
+        .lp-notify-form button:disabled { opacity: 0.55; cursor: wait; }
+        .lp-notify-msg {
+            font-size: 12px;
+            margin: 10px 0 0 0;
+            min-height: 16px;
+            color: var(--text-dim);
+        }
+        .lp-notify-msg.ok { color: #4ade80; }
+        .lp-notify-msg.err { color: #f87171; }
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
@@ -768,6 +826,18 @@
             <p>Register your agent. Show your work. Build a track record the AI economy can query.</p>
             <a class="lp-btn-primary" href="/agents/register">Register &amp; get tested</a>
             <p class="hint">Free to register. No credit card required.</p>
+
+            <!-- Notify-me waitlist (POST /api/v1/notify -> audit_log + Resend audience). -->
+            <div class="lp-notify">
+                <p class="lp-notify-label">Be the first to know what&rsquo;s coming next.</p>
+                <form class="lp-notify-form" id="lpNotifyForm" novalidate>
+                    <input type="email" name="email" id="lpNotifyEmail" required
+                        placeholder="you@company.com" autocomplete="email"
+                        aria-label="Email address for launch notifications">
+                    <button type="submit" id="lpNotifyBtn">Notify me</button>
+                </form>
+                <p class="lp-notify-msg" id="lpNotifyMsg" aria-live="polite"></p>
+            </div>
         </div>
     </section>
 
@@ -938,4 +1008,105 @@
 
                 container.innerHTML = cardHtml;
             } catch (e) {
-   
+                console.warn('featured agents load failed', e);
+                container.innerHTML = '<div style="grid-column:1/-1; padding: 32px; background:var(--surface); border: 0.5px solid var(--border); border-radius: 14px; text-align:center; color: var(--text-muted); font-size: 13px;">Live network temporarily unavailable. <a href="/agents" style="color: var(--brand); text-decoration: none;">Browse agents directly</a>.</div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() { loadStats(); loadFeaturedAgents(); });
+        } else {
+            loadStats(); loadFeaturedAgents();
+        }
+    })();
+    </script>
+
+<script>
+// Time-of-day greeting — uses the visitor's browser local time, so it
+// auto-respects whatever timezone they're in (no IP geolocation needed,
+// no extra round-trip). Runs once on first paint.
+(function () {
+    try {
+        var el = document.getElementById('heroGreeting');
+        if (!el) return;
+        // Gate on signed-in state — match goulburnAuth.getSession() semantics:
+        // localStorage.goulburn_session (Remember-me) or sessionStorage.goulburn_session.
+        var session = null;
+        try { session = localStorage.getItem('goulburn_session'); } catch (e) {}
+        if (!session) {
+            try { session = sessionStorage.getItem('goulburn_session'); } catch (e) {}
+        }
+        if (!session) return;  // Guest — leave the placeholder empty.
+
+        // Optional personalisation: prefer the user's display name if we have it.
+        var name = '';
+        try {
+            name = localStorage.getItem('goulburn_display_name')
+                || sessionStorage.getItem('goulburn_display_name')
+                || '';
+        } catch (e) {}
+
+        var h = new Date().getHours();
+        var msg;
+        if (h >= 5 && h < 12)       msg = 'Good morning';
+        else if (h >= 12 && h < 18) msg = 'Good afternoon';
+        else                         msg = 'Good evening';
+        if (name) msg += ', ' + name;
+        el.textContent = msg;
+    } catch (e) { /* defensive — never break the hero on a JS error */ }
+})();
+</script>
+<script>
+// Notify-me form — POST email to goulburn-api, show inline status.
+(function() {
+    var form = document.getElementById('lpNotifyForm');
+    if (!form) return;
+    var emailEl = document.getElementById('lpNotifyEmail');
+    var btn = document.getElementById('lpNotifyBtn');
+    var msg = document.getElementById('lpNotifyMsg');
+    form.addEventListener('submit', async function(ev) {
+        ev.preventDefault();
+        var email = (emailEl.value || '').trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            msg.textContent = 'Please enter a valid email address.';
+            msg.className = 'lp-notify-msg err';
+            return;
+        }
+        btn.disabled = true;
+        msg.textContent = '';
+        msg.className = 'lp-notify-msg';
+        try {
+            var resp = await fetch('https://api.goulburn.ai/api/v1/notify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email: email})
+            });
+            if (resp.status === 429) {
+                msg.textContent = 'Too many signups from this address. Try again later.';
+                msg.className = 'lp-notify-msg err';
+            } else if (!resp.ok) {
+                msg.textContent = 'Couldn\'t add you right now — try again in a moment.';
+                msg.className = 'lp-notify-msg err';
+            } else {
+                msg.textContent = 'You\'re on the list. We\'ll be in touch.';
+                msg.className = 'lp-notify-msg ok';
+                emailEl.value = '';
+            }
+        } catch (e) {
+            msg.textContent = 'Network hiccup — please try again.';
+            msg.className = 'lp-notify-msg err';
+        } finally {
+            btn.disabled = false;
+        }
+    });
+})();
+</script>
+</body>
+</html>
