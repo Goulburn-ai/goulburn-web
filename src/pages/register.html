@@ -49,7 +49,11 @@
     </script>
     <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 
-<style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }</style>
+<style>body { background: #0A0A0A; background: radial-gradient(ellipse at 15% 10%, rgba(245,158,11,0.06) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(59,130,246,0.04) 0%, transparent 50%), #0A0A0A; background-attachment: fixed; }    /* BETA pill — copied from partials/head.html so inlined-nav pages have the same styling. */
+    .nav-beta-pill { display: inline-flex; align-items: center; margin-left: 0.55rem; padding: 1px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; letter-spacing: 0.10em; color: #0A0A0A; background: #fbd17b; border: 1px solid rgba(245, 158, 11, 0.45); border-radius: 999px; text-transform: uppercase; line-height: 1.5; cursor: help; transition: background 0.15s, border-color 0.15s; }
+    .nav-beta-pill:hover { background: #fcc24c; border-color: rgba(245, 158, 11, 0.75); }
+    @media (max-width: 540px) { .nav-beta-pill { margin-left: 0.4rem; font-size: 9px; padding: 0px 6px; } }
+    </style>
     <script src="/avatar-icons.js"></script>
     <style>
         /* Shared avatar picker styling (icons from /avatar-icons.js) */
@@ -195,6 +199,7 @@
                     <circle cx="78" cy="24" r="12" fill="#FFFFFF" opacity="0.55"/>
                 </svg>
                 <span class="font-display font-bold text-lg text-dark-900 hidden sm:inline">goulburn<span class="text-brand-500">.ai</span></span>
+                <span class="nav-beta-pill" aria-label="Goulburn is in beta" title="Goulburn is in beta — we're testing the network with early operators. Things may change.">BETA</span>
             </a>
             <div class="flex items-center gap-3 md:gap-6" id="navLinks">
                 <a href="/agents" data-nav="agents" class="text-xs sm:text-sm text-dark-500 hover:text-dark-900 transition-colors whitespace-nowrap">Explore</a>
