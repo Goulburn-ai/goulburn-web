@@ -969,26 +969,40 @@
              Static for this commit; dynamic completion + dismiss persistence
              in a follow-up. -->
         <style>
-            .op-hero { margin: 0 0 1.75rem 0; padding: 36px 32px; border-radius: 16px; background: #161820; border: 1px solid rgba(247,249,249,0.10); color: #F7F9F9; text-align: center; position: relative; }
+            /* 2026-05-09: switched to 2-column on desktop (illustration left, copy+CTA right)
+               so the card uses its full width instead of leaving empty pixels on either side
+               of a centered column. Single-column stack on mobile preserved. */
+            .op-hero { margin: 0 0 1.75rem 0; padding: 32px 36px; border-radius: 16px; background: #161820; border: 1px solid rgba(247,249,249,0.10); color: #F7F9F9; position: relative;
+                       display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: 36px; align-items: center; }
             .op-hero-counter { position: absolute; top: 16px; right: 18px; font-size: 11px; color: rgba(247,249,249,0.55); display: inline-flex; align-items: center; gap: 6px; }
             .op-hero-counter::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
-            .op-hero-illust { display: block; margin: 0 auto 22px; max-width: 100%; height: auto; }
-            .op-hero-title { font-size: 1.4rem; font-weight: 700; color: #F7F9F9; margin: 0 0 8px 0; font-family: 'Nunito', sans-serif; }
-            .op-hero-sub { font-size: 0.95rem; color: rgba(247,249,249,0.7); margin: 0 auto 24px; max-width: 440px; line-height: 1.55; }
+            .op-hero-illust-wrap { display: flex; align-items: center; justify-content: center; }
+            .op-hero-illust { display: block; max-width: 100%; height: auto; }
+            .op-hero-body { display: flex; flex-direction: column; align-items: flex-start; }
+            .op-hero-title { font-size: 1.5rem; font-weight: 700; color: #F7F9F9; margin: 0 0 10px 0; font-family: 'Nunito', sans-serif; line-height: 1.2; }
+            .op-hero-sub { font-size: 0.95rem; color: rgba(247,249,249,0.7); margin: 0 0 22px 0; max-width: 540px; line-height: 1.55; }
             .op-hero-cta { background: #F59E0B; color: #161820; border: none; padding: 11px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; transition: background 0.15s, transform 0.06s; font-family: inherit; }
             .op-hero-cta:hover { background: #fbbf24; }
             .op-hero-cta:active { transform: translateY(1px); }
-            .op-hero-progress { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 24px; }
+            .op-hero-progress { display: flex; align-items: center; justify-content: flex-start; gap: 6px; margin-top: 22px; }
             .op-hero-bar { width: 36px; height: 4px; border-radius: 2px; background: rgba(247,249,249,0.10); transition: background 0.2s; }
             .op-hero-bar.done { background: #4ade80; }
             .op-hero-dismiss { position: absolute; top: 12px; left: 16px; background: none; border: none; color: rgba(247,249,249,0.4); cursor: pointer; font-size: 1.4rem; line-height: 1; padding: 4px 8px; transition: color 0.15s; }
             .op-hero-dismiss:hover { color: #F7F9F9; }
-            @media (max-width: 540px) { .op-hero { padding: 28px 20px; } .op-hero-title { font-size: 1.2rem; } .op-hero-sub { font-size: 0.9rem; } }
+            @media (max-width: 720px) {
+                .op-hero { grid-template-columns: 1fr; gap: 18px; padding: 28px 22px; text-align: center; }
+                .op-hero-body { align-items: center; }
+                .op-hero-sub { margin-left: auto; margin-right: auto; }
+                .op-hero-progress { justify-content: center; }
+                .op-hero-title { font-size: 1.25rem; }
+                .op-hero-sub { font-size: 0.9rem; }
+            }
         </style>
         <section class="op-hero" id="operatorOnboardingCard" role="region" aria-label="Operator profile onboarding">
             <button type="button" class="op-hero-dismiss" aria-label="Dismiss" title="Dismiss for now">×</button>
             <div class="op-hero-counter" id="opHeroCounter" aria-label="Profile completion">1 of 4 done</div>
 
+            <div class="op-hero-illust-wrap">
             <svg class="op-hero-illust" viewBox="0 0 320 180" width="320" height="180" role="img" aria-label="Operator profile preview with photo, banner, bio, and handle elements">
                 <!-- profile card frame -->
                 <rect x="80" y="32" width="160" height="120" rx="12" fill="rgba(22,24,28,0.85)" stroke="rgba(247,249,249,0.16)" stroke-width="0.5"/>
@@ -1037,7 +1051,9 @@
                 <line x1="68" y1="124" x2="84" y2="116" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
                 <line x1="258" y1="122" x2="240" y2="116" stroke="rgba(247,249,249,0.18)" stroke-width="0.5" stroke-dasharray="2 2"/>
             </svg>
+            </div>
 
+            <div class="op-hero-body">
             <h2 class="op-hero-title">Make this profile yours</h2>
             <p class="op-hero-sub">A photo, a banner, a bio, a handle. Integrators meet a real builder, not a placeholder.</p>
 
@@ -1053,6 +1069,7 @@
                 <div class="op-hero-bar" id="opBarAvatar" title="Photo"></div>
                 <div class="op-hero-bar" id="opBarBanner" title="Banner"></div>
                 <div class="op-hero-bar" id="opBarBio" title="Bio"></div>
+            </div>
             </div>
         </section>
         <script>
