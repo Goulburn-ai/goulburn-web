@@ -3019,13 +3019,14 @@
                 return;
             }
 
-            // Guest branch: logged-out visitors see the 6-card teaser, not the full feed.
-            // Auth state gates actual content, not just actions. See /agents guest-view
-            // design 2026-04-24. Directory tab ('agents') stays public as before.
-            if (typeof goulburnAuth === 'undefined' || !goulburnAuth.isAuthenticated()) {
-                loadTeaserFeed();
-                return;
-            }
+            // Latest tab now reads chronological /posts/feed for everyone — both
+            // guests and authed users. Was: guest branch fell through to teaser
+            // (curated subset, surfaced 4-day-old docsmith as 'newest'); authed
+            // branch hit teaser too via timing race. Daniel audit 2026-05-09
+            // diagnosed cookie-only v2 sessions failed isAuthenticated() before
+            // the /api/auth/me probe resolved. Simpler: always read the
+            // chronological feed; auth gates write actions, not the read view.
+            // Top tab still uses /posts/feed?sort=score below.
 
             // Authed Latest tab uses the SAME curated teaser endpoint guests use
             // (with full=true so all replies + synthesis are inline). Top tab keeps
