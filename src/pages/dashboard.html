@@ -969,7 +969,7 @@
         </style>
         <section class="op-hero" id="operatorOnboardingCard" role="region" aria-label="Operator profile onboarding">
             <button type="button" class="op-hero-dismiss" aria-label="Dismiss" title="Dismiss for now">×</button>
-            <div class="op-hero-counter" aria-label="Profile completion: 1 of 4 done">1 of 4 done</div>
+            <div class="op-hero-counter" id="opHeroCounter" aria-label="Profile completion">1 of 4 done</div>
 
             <svg class="op-hero-illust" viewBox="0 0 320 180" width="320" height="180" role="img" aria-label="Operator profile preview with photo, banner, bio, and handle elements">
                 <!-- profile card frame -->
@@ -1031,32 +1031,89 @@
             </a>
 
             <div class="op-hero-progress" aria-hidden="true">
-                <div class="op-hero-bar done" title="Handle — done"></div>
-                <div class="op-hero-bar" title="Photo"></div>
-                <div class="op-hero-bar" title="Banner"></div>
-                <div class="op-hero-bar" title="Bio"></div>
+                <div class="op-hero-bar" id="opBarHandle" title="Handle"></div>
+                <div class="op-hero-bar" id="opBarAvatar" title="Photo"></div>
+                <div class="op-hero-bar" id="opBarBanner" title="Banner"></div>
+                <div class="op-hero-bar" id="opBarBio" title="Bio"></div>
             </div>
         </section>
         <script>
-            // Stamp the onboarding CTA so 'Complete profile' lands on the
-            // operator profile edit modal directly (no /settings stopover).
-            // Pattern matches settings.html line ~2229 — fetch /api/v1/operators/me/settings,
-            // grab handle, write /operator/<handle>?edit=1.
+            // Onboarding hero — drives:
+            //   1. CTA href     — /operator/<handle>?edit=1 (single-click to Edit modal)
+            //   2. Progress bars — green if the corresponding profile field is set
+            //   3. Counter      — "X of 4 done"
+            //   4. Auto-hide    — entire card hides when all 4 fields filled
+            //   5. Dismiss      — × persists in localStorage('opHeroDismissed')
             (function() {
+                var card = document.getElementById('operatorOnboardingCard');
                 var cta = document.getElementById('opHeroCta');
-                if (!cta) return;
+                if (!card || !cta) return;
+
+                // Honour persistent dismissal.
+                try {
+                    if (localStorage.getItem('opHeroDismissed') === '1') {
+                        card.style.display = 'none';
+                        return;
+                    }
+                } catch (e) { /* private mode — fall through */ }
+
+                // Wire the dismiss button.
+                var dismissBtn = card.querySelector('.op-hero-dismiss');
+                if (dismissBtn) {
+                    dismissBtn.addEventListener('click', function() {
+                        card.style.display = 'none';
+                        try { localStorage.setItem('opHeroDismissed', '1'); } catch (e) {}
+                    });
+                }
+
                 var apiBase = (window.GOULBURN_API_BASE || 'https://api.goulburn.ai');
                 var session = (function() {
                     try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
                     return sessionStorage.getItem('goulburn_session');
                 })();
+
+                function _isFilled(v) {
+                    return typeof v === 'string' && v.trim().length > 0;
+                }
+
                 fetch(apiBase + '/api/v1/operators/me/settings', {
                     credentials: 'include',
                     headers: session ? { 'Authorization': 'Bearer ' + session } : {}
                 }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
-                    if (!me || !me.handle) return;
-                    cta.href = '/operator/' + encodeURIComponent(me.handle) + '?edit=1';
-                }).catch(function() { /* fallback href stays as /settings */ });
+                    if (!me) return;
+                    // Stamp CTA href to the Edit modal.
+                    if (me.handle) cta.href = '/operator/' + encodeURIComponent(me.handle) + '?edit=1';
+
+                    var checks = {
+                        opBarHandle: _isFilled(me.handle),
+                        opBarAvatar: _isFilled(me.avatar),
+                        opBarBanner: _isFilled(me.banner),
+                        opBarBio:    _isFilled(me.bio)
+                    };
+                    var done = 0;
+                    Object.keys(checks).forEach(function(id) {
+                        var el = document.getElementById(id);
+                        if (!el) return;
+                        if (checks[id]) {
+                            el.classList.add('done');
+                            done++;
+                        } else {
+                            el.classList.remove('done');
+                        }
+                    });
+
+                    // Update counter copy + a11y label.
+                    var counter = document.getElementById('opHeroCounter');
+                    if (counter) {
+                        counter.textContent = done + ' of 4 done';
+                        counter.setAttribute('aria-label', 'Profile completion: ' + done + ' of 4 done');
+                    }
+
+                    // Auto-hide once 100% complete — no need to keep nagging.
+                    if (done === 4) {
+                        card.style.display = 'none';
+                    }
+                }).catch(function() { /* network hiccup — stays as default static state */ });
             })();
         </script>
 
