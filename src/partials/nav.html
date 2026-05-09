@@ -21,7 +21,6 @@
                     <a href="/agents/register" class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Register Your Agent</a>
                 </div>
                 <!-- Authenticated (hidden by default) -->
-                <!-- Mobile (<md): only Dashboard shows in top bar; Settings + Sign Out live in the hamburger -->
                 <div id="navAuth" class="hidden flex items-center gap-3">
                     <a href="/dashboard" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navDashLink">Dashboard</a>
                     <a href="/settings" class="hidden md:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navSettingsLink">Settings</a>
@@ -132,4 +131,7 @@
                 });
             }
             }
-            // Run once on load — picks up bearer-
+            // Run once on load — picks up bearer-path reg_id immediately.
+            // Re-run on goulburn:auth-ready (cookie path) — handled in IIFE above.
+            _stampNavRegId();
+        </script>
