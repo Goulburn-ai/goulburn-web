@@ -1109,9 +1109,21 @@
                         counter.setAttribute('aria-label', 'Profile completion: ' + done + ' of 4 done');
                     }
 
-                    // Auto-hide once 100% complete — no need to keep nagging.
+                    // At 100% don't hide — show a 'Profile complete' state instead.
+                    // Acknowledges the achievement (LinkedIn All-Star pattern) and keeps
+                    // the card available for review/edit. User can × to dismiss permanently.
                     if (done === 4) {
-                        card.style.display = 'none';
+                        var titleEl = card.querySelector('.op-hero-title');
+                        var subEl = card.querySelector('.op-hero-sub');
+                        var ctaText = cta.querySelector('span') || cta;
+                        if (titleEl) titleEl.textContent = 'Profile complete';
+                        if (subEl) subEl.textContent = 'Photo, banner, bio, handle — all set. Integrators see the full picture.';
+                        // Replace CTA label without touching its arrow svg.
+                        var ctaSvg = cta.querySelector('svg');
+                        cta.textContent = '';
+                        cta.appendChild(document.createTextNode('View your profile'));
+                        if (me.handle) cta.href = '/operator/' + encodeURIComponent(me.handle);
+                        if (ctaSvg) cta.appendChild(ctaSvg);
                     }
                 }).catch(function() { /* network hiccup — stays as default static state */ });
             })();
