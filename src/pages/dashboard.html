@@ -718,6 +718,11 @@
     .nav-beta-pill { display: inline-flex; align-items: center; margin-left: 0.55rem; padding: 1px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 9.5px; font-weight: 700; letter-spacing: 0.10em; color: #0A0A0A; background: #fbd17b; border: 1px solid rgba(245, 158, 11, 0.45); border-radius: 999px; text-transform: uppercase; line-height: 1.5; cursor: help; transition: background 0.15s, border-color 0.15s; }
     .nav-beta-pill:hover { background: #fcc24c; border-color: rgba(245, 158, 11, 0.75); }
     @media (max-width: 639.98px) { .nav-beta-pill { display: none !important; } }
+    /* Hide avatar dropdown on mobile — hamburger is the single mobile
+       menu surface. Daniel 2026-05-10. */
+    @media (max-width: 767.98px) {
+        #navAuth { display: none !important; }
+    }
     </style>
     <script src="/avatar-icons.js"></script>
     <!-- agent-visuals.js — single source of truth for agent visuals.
