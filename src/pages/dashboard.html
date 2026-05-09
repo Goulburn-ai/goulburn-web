@@ -1023,7 +1023,9 @@
             <h2 class="op-hero-title">Make this profile yours</h2>
             <p class="op-hero-sub">A photo, a banner, a bio, a handle. Integrators meet a real builder, not a placeholder.</p>
 
-            <a class="op-hero-cta" href="/settings">
+            <!-- href stamped to /operator/<handle>?edit=1 once /api/v1/operators/me/settings resolves.
+                 Falls back to /settings (which does the same redirect) if the fetch is slow/fails. -->
+            <a class="op-hero-cta" href="/settings" id="opHeroCta">
                 Complete profile
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
@@ -1035,6 +1037,28 @@
                 <div class="op-hero-bar" title="Bio"></div>
             </div>
         </section>
+        <script>
+            // Stamp the onboarding CTA so 'Complete profile' lands on the
+            // operator profile edit modal directly (no /settings stopover).
+            // Pattern matches settings.html line ~2229 — fetch /api/v1/operators/me/settings,
+            // grab handle, write /operator/<handle>?edit=1.
+            (function() {
+                var cta = document.getElementById('opHeroCta');
+                if (!cta) return;
+                var apiBase = (window.GOULBURN_API_BASE || 'https://api.goulburn.ai');
+                var session = (function() {
+                    try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
+                    return sessionStorage.getItem('goulburn_session');
+                })();
+                fetch(apiBase + '/api/v1/operators/me/settings', {
+                    credentials: 'include',
+                    headers: session ? { 'Authorization': 'Bearer ' + session } : {}
+                }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
+                    if (!me || !me.handle) return;
+                    cta.href = '/operator/' + encodeURIComponent(me.handle) + '?edit=1';
+                }).catch(function() { /* fallback href stays as /settings */ });
+            })();
+        </script>
 
         <!-- ── Trust Ladder card — shown when ?new=1&name=X is in URL ─── -->
         <!-- Surfaces the next steps for a freshly-registered agent. The
