@@ -388,11 +388,27 @@
                     <a href="/sign-in" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
                     <a href="/agents/register" class="inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Register Your Agent</a>
                 </div>
-                <!-- Authenticated (hidden by default) -->
-                <div id="navAuth" class="hidden flex items-center gap-3">
-                    <a href="/dashboard" class="text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navDashLink">Dashboard</a>
-                    <a href="/settings" class="hidden md:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors" id="navSettingsLink">Settings</a>
-                    <button onclick="goulburnAuth.signOut()" class="hidden md:inline-flex text-sm font-medium text-dark-500 hover:text-dark-900 transition-colors">Sign Out</button>
+                <!-- Authenticated: avatar -> dropdown menu -->
+                <div id="navAuth" class="hidden relative" style="display:none;">
+                    <button id="userMenuBtn" type="button"
+                            class="flex items-center gap-2 px-1.5 py-1 rounded-full bg-dark-100 hover:bg-dark-200 border border-dark-200 hover:border-brand-500 transition-colors"
+                            aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
+                        <span id="userMenuAvatar" class="w-8 h-8 rounded-full bg-brand-500 text-white text-sm font-bold flex items-center justify-center font-display">g</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="text-dark-500 mr-1">
+                            <path d="M6 9l6 6 6-6"/>
+                        </svg>
+                    </button>
+                    <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-dark-100 border border-dark-200 rounded-xl shadow-2xl py-2 z-50" role="menu" aria-labelledby="userMenuBtn">
+                        <div class="px-4 py-2 border-b border-dark-200">
+                            <div class="text-xs text-dark-500 leading-tight">Signed in as</div>
+                            <div id="userDropdownEmail" class="text-sm text-dark-900 font-medium truncate mt-0.5">&nbsp;</div>
+                        </div>
+                        <a href="/operator/" id="userDropdownProfile" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Your profile</a>
+                        <a href="/dashboard" id="userDropdownDash" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Dashboard</a>
+                        <a href="/settings" id="userDropdownSettings" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Settings</a>
+                        <div class="border-t border-dark-200 my-1"></div>
+                        <button id="userDropdownSignout" type="button" class="block w-full text-left px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Sign out</button>
+                    </div>
                 </div>
                 <!-- Mobile hamburger -->
                 <button class="md:hidden text-dark-600 w-11 h-11 flex items-center justify-center -mr-2" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
@@ -414,6 +430,69 @@
             </div>
         </div>
     </nav>
+    <script>
+    // ── User-menu dropdown wiring (inlined-nav pages) ─────────────────
+    (function() {
+        var btn = document.getElementById('userMenuBtn');
+        var panel = document.getElementById('userDropdown');
+        var navAuth = document.getElementById('navAuth');
+        var signoutBtn = document.getElementById('userDropdownSignout');
+        if (!btn || !panel) return;
+        function _showAuthDiv() { if (navAuth) { navAuth.style.display = ''; } }
+        function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
+        function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
+        function isOpen() { return !panel.classList.contains('hidden'); }
+        btn.addEventListener('click', function(ev) { ev.stopPropagation(); if (isOpen()) close(); else open(); });
+        document.addEventListener('click', function(ev) {
+            if (!isOpen()) return;
+            if (panel.contains(ev.target) || btn.contains(ev.target)) return;
+            close();
+        });
+        document.addEventListener('keydown', function(ev) {
+            if (ev.key === 'Escape' && isOpen()) { close(); btn.focus(); }
+        });
+        if (signoutBtn) signoutBtn.addEventListener('click', function() {
+            try { if (typeof goulburnAuth !== 'undefined') goulburnAuth.signOut(); } catch (e) {}
+        });
+        function _populate(user) {
+            if (!user) return;
+            _showAuthDiv();
+            var em = (user.email || '').trim();
+            var emEl = document.getElementById('userDropdownEmail');
+            if (emEl && em) emEl.textContent = em;
+            var avEl = document.getElementById('userMenuAvatar');
+            if (avEl && em) avEl.textContent = em.charAt(0).toUpperCase();
+            var reg = (function() {
+                try { return localStorage.getItem('goulburn_reg_id') || sessionStorage.getItem('goulburn_reg_id'); } catch (e) { return null; }
+            })();
+            if (reg) {
+                var d = document.getElementById('userDropdownDash');
+                if (d) d.href = '/dashboard/' + reg;
+                var s = document.getElementById('userDropdownSettings');
+                if (s) s.href = '/dashboard/settings/' + reg;
+            }
+            var handle = user.handle || user.operator_handle;
+            if (handle) {
+                var p = document.getElementById('userDropdownProfile');
+                if (p) p.href = '/operator/' + encodeURIComponent(handle);
+            }
+        }
+        document.addEventListener('goulburn:auth-ready', function(ev) {
+            if (ev && ev.detail && ev.detail.user) _populate(ev.detail.user);
+        });
+        try {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.authReady) {
+                goulburnAuth.authReady.then(function(ok) {
+                    if (ok && goulburnAuth.getUser) {
+                        var u = goulburnAuth.getUser();
+                        if (u) _populate(u);
+                    }
+                });
+            }
+        } catch (_) {}
+    })();
+    </script>
+
     <script>
     // Nav: highlight active link + auth state
     (function() {
