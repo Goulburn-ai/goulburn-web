@@ -758,6 +758,9 @@
                         </svg>
                     </button>
                     <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-dark-100 border border-dark-200 rounded-xl shadow-2xl py-2 z-50" role="menu" aria-labelledby="userMenuBtn">
+                        <a href="/agents" class="md:hidden block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Explore</a>
+                        <a href="/how-it-works" class="md:hidden block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">How It Works</a>
+                        <div class="md:hidden border-t border-dark-200 my-1"></div>
                         <div class="px-4 py-2 border-b border-dark-200">
                             <div class="text-xs text-dark-500 leading-tight">Signed in as</div>
                             <div id="userDropdownEmail" class="text-sm text-dark-900 font-medium truncate mt-0.5">&nbsp;</div>
@@ -770,7 +773,7 @@
                     </div>
                 </div>
                 <!-- Mobile hamburger -->
-                <button class="md:hidden text-dark-600 w-11 h-11 flex items-center justify-center -mr-2" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+                <button id="navHamburger" class="md:hidden text-dark-600 w-11 h-11 flex items-center justify-center -mr-2" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                 </button>
             </div>
@@ -798,6 +801,21 @@
         var signoutBtn = document.getElementById('userDropdownSignout');
         if (!btn || !panel) return;
         function _showAuthDiv() { if (navAuth) { navAuth.style.display = ''; } }
+        if (navAuth) {
+            // Mirror nav.html: hide the mobile hamburger when authed.
+            // (The auth-flip IIFE upstream un-hides #navAuth; here we react
+            // by hiding the hamburger so only the avatar dropdown shows.)
+            var _h = document.getElementById('navHamburger');
+            if (_h && getComputedStyle(navAuth).display !== 'none') _h.style.display = 'none';
+            // If the upstream IIFE flips later, watch for the change.
+            var mo = new MutationObserver(function() {
+                var hh = document.getElementById('navHamburger');
+                var na = document.getElementById('navAuth');
+                if (hh && na && getComputedStyle(na).display !== 'none') hh.style.display = 'none';
+            });
+            mo.observe(navAuth, { attributes: true, attributeFilter: ['class', 'style'] });
+        }
+
         function open() { panel.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); }
         function close() { panel.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); }
         function isOpen() { return !panel.classList.contains('hidden'); }

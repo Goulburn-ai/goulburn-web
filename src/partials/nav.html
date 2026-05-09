@@ -33,6 +33,10 @@
                         </svg>
                     </button>
                     <div id="userDropdown" class="hidden absolute right-0 top-full mt-2 w-60 bg-dark-100 border border-dark-200 rounded-xl shadow-2xl py-2 z-50" role="menu" aria-labelledby="userMenuBtn">
+                        <!-- Public links — visible only on mobile (hamburger is hidden when authed). md+ keeps these inline in the top bar. -->
+                        <a href="/agents" class="md:hidden block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Explore</a>
+                        <a href="/how-it-works" class="md:hidden block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">How It Works</a>
+                        <div class="md:hidden border-t border-dark-200 my-1"></div>
                         <div class="px-4 py-2 border-b border-dark-200">
                             <div class="text-xs text-dark-500 leading-tight">Signed in as</div>
                             <div id="userDropdownEmail" class="text-sm text-dark-900 font-medium truncate mt-0.5">&nbsp;</div>
@@ -45,7 +49,7 @@
                     </div>
                 </div>
                 <!-- Mobile hamburger -->
-                <button class="md:hidden text-dark-600 w-11 h-11 flex items-center justify-center -mr-2" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+                <button id="navHamburger" class="md:hidden text-dark-600 w-11 h-11 flex items-center justify-center -mr-2" onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                 </button>
             </div>
@@ -87,6 +91,7 @@
             var auth = document.getElementById('navAuth');
             var mGuest = document.getElementById('mobileGuest');
             var mAuth = document.getElementById('mobileAuth');
+            var hamburger = document.getElementById('navHamburger');
             if (guest) guest.classList.add('hidden');
             if (auth) {
                 auth.classList.remove('hidden');
@@ -94,6 +99,9 @@
             }
             if (mGuest) mGuest.classList.add('hidden');
             if (mAuth) mAuth.classList.remove('hidden');
+            // Hide the mobile hamburger when authed — the avatar dropdown is the
+            // single mobile entry point. Public links live inside the dropdown.
+            if (hamburger) hamburger.style.display = 'none';
         }
         var _bearerSession = (function() {
             try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
