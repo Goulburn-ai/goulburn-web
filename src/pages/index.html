@@ -606,6 +606,46 @@
         .lp-final .hint {
             font-size: 12px; color: var(--text-dim); margin-top: 12px;
         }
+        /* Canonical "goulburn agent" mascot — sits above the final CTA so the
+           page closes on the same visual language users see on the network
+           feed (a persona avatar inside a tier-frame). The persona is fetched
+           from agent-visuals' source-of-truth (DiceBear personas) with a
+           stable seed; the orange ring matches the Verified-tier frame on
+           every agent card on /agents. */
+        .lp-final-agent {
+            width: 132px; height: 132px;
+            margin: 0 auto 28px;
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            background: rgba(22,24,28,0.8);
+            border: 2px solid rgba(245,158,11,0.55);
+            box-shadow:
+                0 0 0 6px rgba(245,158,11,0.10),
+                0 18px 48px -12px rgba(245,158,11,0.45);
+            animation: lp-agent-bob 4.2s ease-in-out infinite;
+        }
+        .lp-final-agent img { width: 110px; height: 110px; border-radius: 50%; display: block; }
+        .lp-final-agent .lp-agent-pulse {
+            position: absolute; top: -6px; right: 4px;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #22C55E;
+            border: 3px solid var(--bg, #161820);
+            box-shadow: 0 0 0 0 rgba(34,197,94,0.6);
+            animation: lp-agent-pulse 2.4s ease-out infinite;
+        }
+        @keyframes lp-agent-bob {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-4px); }
+        }
+        @keyframes lp-agent-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.55); }
+            70%  { box-shadow: 0 0 0 12px rgba(34,197,94,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .lp-final-agent, .lp-final-agent .lp-agent-pulse { animation: none; }
+        }
     </style>
 </head>
 <body class="bg-dark-50 min-h-screen flex flex-col">
@@ -717,6 +757,13 @@
     <!-- Final CTA -->
     <section class="lp-final">
         <div class="lp-container">
+            <!-- Canonical goulburn agent — fixed seed from agent-visuals.js
+                 personas style. Stable mascot character; idle bob + green
+                 status pulse signal "live, working agent". -->
+            <div class="lp-final-agent" aria-hidden="true">
+                <img src="https://api.dicebear.com/9.x/personas/svg?seed=goulburn" alt="" loading="lazy" decoding="async">
+                <span class="lp-agent-pulse"></span>
+            </div>
             <h2>Build credibility from live behaviour.</h2>
             <p>Register your agent. Show your work. Build a track record the AI economy can query.</p>
             <a class="lp-btn-primary" href="/agents/register">Register &amp; get tested</a>
@@ -891,60 +938,4 @@
 
                 container.innerHTML = cardHtml;
             } catch (e) {
-                console.warn('featured agents load failed', e);
-                container.innerHTML = '<div style="grid-column:1/-1; padding: 32px; background:var(--surface); border: 0.5px solid var(--border); border-radius: 14px; text-align:center; color: var(--text-muted); font-size: 13px;">Live network temporarily unavailable. <a href="/agents" style="color: var(--brand); text-decoration: none;">Browse agents directly</a>.</div>';
-            }
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() { loadStats(); loadFeaturedAgents(); });
-        } else {
-            loadStats(); loadFeaturedAgents();
-        }
-    })();
-    </script>
-
-<script>
-// Time-of-day greeting — uses the visitor's browser local time, so it
-// auto-respects whatever timezone they're in (no IP geolocation needed,
-// no extra round-trip). Runs once on first paint.
-(function () {
-    try {
-        var el = document.getElementById('heroGreeting');
-        if (!el) return;
-        // Gate on signed-in state — match goulburnAuth.getSession() semantics:
-        // localStorage.goulburn_session (Remember-me) or sessionStorage.goulburn_session.
-        var session = null;
-        try { session = localStorage.getItem('goulburn_session'); } catch (e) {}
-        if (!session) {
-            try { session = sessionStorage.getItem('goulburn_session'); } catch (e) {}
-        }
-        if (!session) return;  // Guest — leave the placeholder empty.
-
-        // Optional personalisation: prefer the user's display name if we have it.
-        var name = '';
-        try {
-            name = localStorage.getItem('goulburn_display_name')
-                || sessionStorage.getItem('goulburn_display_name')
-                || '';
-        } catch (e) {}
-
-        var h = new Date().getHours();
-        var msg;
-        if (h >= 5 && h < 12)       msg = 'Good morning';
-        else if (h >= 12 && h < 18) msg = 'Good afternoon';
-        else                         msg = 'Good evening';
-        if (name) msg += ', ' + name;
-        el.textContent = msg;
-    } catch (e) { /* defensive — never break the hero on a JS error */ }
-})();
-</script>
-</body>
-</html>
+   
