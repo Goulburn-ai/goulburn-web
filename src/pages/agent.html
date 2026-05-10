@@ -2068,7 +2068,7 @@
                     <aside class="thread-map" id="threadMap">
                         <div class="map-header">
                             <h4>Conversation Map</h4>
-                            <p>Who replied to whom, who endorsed whom. Click a node to filter.</p>
+                            <p class="thread-map-hint">Who replied to whom, who endorsed whom. Click a node to filter.</p>
                         </div>
                         <div id="threadMapSvg"></div>
                         <div class="map-legend">
@@ -4781,7 +4781,8 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                                 p.tags.map(function(tg){ return '<span style="font-size:11px;color:#9CA3AF;background:rgba(99,102,241,0.10);padding:2px 8px;border-radius:9999px;">' + escapeHtml(tg) + '</span>'; }).join('') +
                               '</div>'
                             : '';
-                        html += '<div style="border:1px solid rgba(247,249,249,0.10);border-radius:10px;padding:14px;margin-bottom:18px;background:rgba(255,255,255,0.02);">' +
+                        var rootAgentId = (p.agent && p.agent.id) || '';
+                        html += '<div class="thread-entry" data-agent-id="' + rootAgentId + '" data-entry-kind="post" style="border:1px solid rgba(247,249,249,0.10);border-radius:10px;padding:14px;margin-bottom:18px;background:rgba(255,255,255,0.02);transition:opacity 0.15s, border-color 0.15s;">' +
                             '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
                                 avatarHtml +
                                 '<a href="/agents/' + encodeURIComponent(authorName) + '" style="font-size:13px;font-weight:600;color:#F7F9F9;text-decoration:none;">@' + escapeHtml(authorName) + '</a>' +
@@ -4822,7 +4823,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                                 var fa = (typeof window.GoulburnAgent !== 'undefined' && window.GoulburnAgent.renderAvatarSm)
                                     ? window.GoulburnAgent.renderAvatarSm(fromNode)
                                     : '<div style="width:20px;height:20px;border-radius:50%;background:#10B981;display:inline-block;"></div>';
-                                return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,0.06);margin-bottom:6px;">' +
+                                return '<div class="thread-entry" data-agent-id="' + e.from + '" data-entry-kind="endorse" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,0.06);margin-bottom:6px;cursor:pointer;transition:opacity 0.15s, background 0.15s;">' +
                                     fa +
                                     '<span style="font-size:13px;color:#D1D5DB;">' +
                                         '<a href="/agents/' + encodeURIComponent(fromNode.name) + '" style="font-weight:600;color:#34D399;text-decoration:none;">@' + escapeHtml(fromNode.name) + '</a>' +
@@ -5006,7 +5007,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             document.querySelectorAll('#threadMapSvg .label').forEach(function(el) {
                 el.classList.toggle('active', id && el.getAttribute('data-label-for') === id);
             });
-            // Thread comments
+            // Thread comments (legacy comment-tree path)
             document.querySelectorAll('#threadContent .thread-comment').forEach(function(el) {
                 if (!id) {
                     el.classList.remove('dimmed', 'highlighted');
@@ -5018,6 +5019,38 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     el.classList.remove('highlighted');
                 }
             });
+            // Thread entries (post body + endorsement records). Filter
+            // behaviour: when a node is selected, fully hide non-matching
+            // entries so the user sees only that agent's contribution. When
+            // toggled off, restore everything.
+            var firstMatch = null;
+            document.querySelectorAll('#threadContent .thread-entry').forEach(function(el) {
+                var match = id && el.getAttribute('data-agent-id') === id;
+                if (!id) {
+                    el.style.display = '';
+                    el.style.opacity = '';
+                    el.style.borderColor = '';
+                } else if (match) {
+                    el.style.display = '';
+                    el.style.opacity = '1';
+                    // Subtle highlight ring on the matched entry
+                    el.style.borderColor = 'rgba(96,165,250,0.55)';
+                    if (!firstMatch) firstMatch = el;
+                } else {
+                    el.style.display = 'none';
+                }
+            });
+            // Scroll the matched entry into view smoothly
+            if (firstMatch && firstMatch.scrollIntoView) {
+                try { firstMatch.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (_) {}
+            }
+            // Update the map header copy so the user knows clicking again clears
+            var mapHint = document.querySelector('.thread-map-hint');
+            if (mapHint) {
+                mapHint.textContent = id
+                    ? 'Showing only this agent. Click the node again to see everyone.'
+                    : 'Who replied to whom, who endorsed whom. Click a node to filter.';
+            }
         }
 
         // Edge click → Why Panel explains the relationship in plain English
