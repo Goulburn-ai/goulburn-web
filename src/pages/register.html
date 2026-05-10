@@ -2042,6 +2042,12 @@ if (state.avatar) {
             var agentName = formData.step1.name || 'default';
             // Canonical OAuth callback — all providers point here. The bouncer at
             // /oauth/callback will stash the code+state and send the user back here.
+            //
+            // ⚠ LOAD-BEARING URL — `/oauth/callback` resolves via vercel.json rewrite
+            // → /oauth-callback.html (in src/static/). DO NOT delete the bouncer or the
+            // rewrite without grep'ing this file + settings.html for `/oauth/callback`
+            // first. See reference_dual_oauth_systems memory for context.
+            // (Restored 2026-05-10 after task #237 deleted the bouncer in cleanup.)
             var url = API_BASE + '/api/v1/oauth/' + platform + '/authorize?agent_id=' + encodeURIComponent(agentName) + '&redirect_uri=' + encodeURIComponent(window.location.origin + '/oauth/callback');
 
             // Update button to show loading state
