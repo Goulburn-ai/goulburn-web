@@ -1444,6 +1444,66 @@
                 showState('opStateNotFound');
                 return;
             }
+
+            // /operator/me — resolve to the current signed-in operator. Used
+            // by the Dashboard "Complete profile" CTA when the new user
+            // hasn't picked a handle yet (Daniel 2026-05-10). Two outcomes:
+            //   - User has a handle → silent redirect to /operator/<handle>?edit=1
+            //   - User has no handle yet → render setup mode with the edit
+            //     modal pre-opened on empty fields so they can fill in
+            //     handle + display name + bio + avatar + banner in one go
+            if (handle.toLowerCase() === 'me') {
+                bindEditModal();
+                var _meSession = getSession();
+                var _meHeaders = _meSession ? { 'Authorization': 'Bearer ' + _meSession } : {};
+                fetch(API_BASE + '/api/v1/operators/me/settings', { credentials: 'include', headers: _meHeaders })
+                    .then(function(r){
+                        if (r.status === 401 || r.status === 403) {
+                            // Not signed in — kick to /sign-in with a return path.
+                            window.location.replace('/sign-in?redirect=' + encodeURIComponent('/operator/me?edit=1'));
+                            return null;
+                        }
+                        return r.ok ? r.json() : null;
+                    })
+                    .then(function(me) {
+                        if (!me) return;
+                        if (me.handle) {
+                            // Existing operator — bounce to canonical URL.
+                            var qs = window.location.search || '';
+                            if (qs.indexOf('edit') === -1) {
+                                qs = qs ? (qs + '&edit=1') : '?edit=1';
+                            }
+                            window.location.replace('/operator/' + encodeURIComponent(me.handle) + qs);
+                            return;
+                        }
+                        // No handle yet — render the page in setup mode with
+                        // the edit modal pre-opened so they can pick one.
+                        showState('opProfile');
+                        renderProfile({
+                            handle: '',
+                            display_name: (me.email || '').split('@')[0] || 'Your handle',
+                            bio: '',
+                            avatar: '',
+                            banner: '',
+                            agents: [],
+                            email: me.email || ''
+                        });
+                        // Force-open the edit modal — single-click profile setup.
+                        try {
+                            var btn = document.getElementById('opEditBtn');
+                            if (btn) {
+                                btn.style.display = 'inline-block';
+                                btn.click();
+                            }
+                        } catch (_) {}
+                    })
+                    .catch(function(err) {
+                        console.error('operator/me resolve failed:', err);
+                        showState('opStateError');
+                    });
+                return;
+            }
+
             bindEditModal();
             var _initSession = getSession();
             var _initHeaders = _initSession ? { 'Authorization': (_initSession ? 'Bearer ' + _initSession : '') } : {};
