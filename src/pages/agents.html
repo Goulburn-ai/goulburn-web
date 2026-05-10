@@ -1287,7 +1287,7 @@
                     <button id="userMenuBtn" type="button"
                             class="flex items-center gap-2 px-1.5 py-1 rounded-full bg-dark-100 hover:bg-dark-200 border border-dark-200 hover:border-brand-500 transition-colors"
                             aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
-                        <span id="userMenuAvatar" class="w-8 h-8 rounded-full bg-brand-500 text-white text-sm font-bold flex items-center justify-center font-display">g</span>
+                        <img id="userMenuAvatar" src="/goulburn-emblem.svg" alt="Account menu" class="w-8 h-8 rounded-full object-cover" decoding="async" loading="eager"/>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="text-dark-500 mr-1">
                             <path d="M6 9l6 6 6-6"/>
                         </svg>
@@ -1373,7 +1373,7 @@
             var emEl = document.getElementById('userDropdownEmail');
             if (emEl && em) emEl.textContent = em;
             var avEl = document.getElementById('userMenuAvatar');
-            if (avEl && em) avEl.textContent = em.charAt(0).toUpperCase();
+            if (avEl && em) { /* avatar is now <img>, no textContent overwrite */ }
             var reg = (function() {
                 try { return localStorage.getItem('goulburn_reg_id') || sessionStorage.getItem('goulburn_reg_id'); } catch (e) { return null; }
             })();
