@@ -106,8 +106,12 @@
 
         var verifyUrl = API_BASE + '/api/auth/magic-link/verify?token=' + encodeURIComponent(token);
 
+        // 2026-05-10: POST defeats email-gateway link prefetchers (urlwatch
+        // and similar safety scanners on .edu / corporate inboxes) that
+        // GET-fetch links to scan them, consuming our one-shot tokens before
+        // the human clicks. POSTs aren't issued by these scanners.
         fetch(verifyUrl, {
-            method: 'GET',
+            method: 'POST',
             credentials: 'include'
         }).then(function (response) {
             // The api endpoint always 302s on completion (success → dashboard
@@ -134,9 +138,28 @@
             window.location.replace('/dashboard');
         }).catch(function (err) {
             // Network error, CORS issue, or fetch was blocked by an extension.
-            // Don't silently redirect — give the user something actionable.
-            try { console && console.error && console.error('[auth-verify] fetch failed:', err); } catch (_) {}
-            showError('We couldn’t reach the sign-in service. Please check your connection and request a new link.', '/sign-in?error=verify_network');
+            // Before showing a scary error, probe /api/auth/me — the user
+            // may already have a valid prior session (12-month gb_session
+            // from a previous login, or a session that was minted by a
+            // gateway prefetch consuming this token first). If so, redirect
+            // them silently rather than telling them to "request a new link".
+            try { console && console.error && console.error('[auth-verify] fetch failed, probing session:', err); } catch (_) {}
+            fetch(API_BASE + '/api/auth/me', { method: 'GET', credentials: 'include' })
+                .then(function (r) { return r.ok ? r.json() : null; })
+                .then(function (me) {
+                    if (me && (me.email || me.user || me.id)) {
+                        // Already signed in — silent redirect to dashboard.
+                        window.location.replace('/dashboard?already_signed_in=1');
+                        return;
+                    }
+                    // Genuinely not signed in — token may have been burned
+                    // by an email-gateway prefetch. Tell the user something
+                    // useful instead of a generic network error.
+                    showError('That sign-in link was already used or has expired. Please request a new one.', '/sign-in?error=link_used');
+                })
+                .catch(function () {
+                    showError('We couldn’t reach the sign-in service. Please check your connection and request a new link.', '/sign-in?error=verify_network');
+                });
         });
 
         // Defensive timeout — if the fetch is somehow hanging past ~12s, surface
