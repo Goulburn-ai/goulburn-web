@@ -35,7 +35,7 @@
                     <button id="userMenuBtn" type="button"
                             class="flex items-center gap-2 px-1.5 py-1 rounded-full bg-dark-100 hover:bg-dark-200 border border-dark-200 hover:border-brand-500 transition-colors"
                             aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
-                        <img id="userMenuAvatar" src="/icons/icon-192.png" alt="Account menu" class="w-8 h-8 rounded-full object-cover" decoding="async" loading="eager"/>
+                        <img id="userMenuAvatar" src="/goulburn-emblem.svg" alt="Account menu" class="w-8 h-8 rounded-full object-cover" decoding="async" loading="eager"/>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="text-dark-500 mr-1">
                             <path d="M6 9l6 6 6-6"/>
                         </svg>
@@ -213,7 +213,7 @@
                     var em = (user.email || '').trim();
                     var emEl = document.getElementById('userDropdownEmail');
                     if (emEl && em) emEl.textContent = em;
-                    // Avatar is now the goulburn emblem (<img src="/icons/icon-192.png">).
+                    // Avatar is now the goulburn emblem (<img src="/goulburn-emblem.svg">).
                     // We deliberately do NOT overwrite textContent — keeping the brand
                     // mark consistent for every signed-in operator. The <img> tag carries
                     // its own fallback alt text so screen readers still get "Account menu".
