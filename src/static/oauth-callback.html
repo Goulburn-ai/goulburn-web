@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Connecting your account — goulburn.ai</title>
+    <style>
+        html, body { margin: 0; padding: 0; background: #0a0a0a; color: #f1f5f5; font-family: -apple-system, system-ui, sans-serif; min-height: 100vh; }
+        .wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 16px; padding: 24px; text-align: center; }
+        .spin { width: 32px; height: 32px; border: 3px solid rgba(245, 158, 11, 0.18); border-top-color: #F59E0B; border-radius: 50%; animation: r 0.9s linear infinite; }
+        @keyframes r { to { transform: rotate(360deg); } }
+        .msg { color: rgba(247, 249, 249, 0.65); font-size: 14px; }
+        .err { color: #f87171; font-size: 13px; max-width: 440px; line-height: 1.5; }
+        a { color: #F59E0B; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="spin" aria-hidden="true"></div>
+        <div class="msg" id="msg">Connecting your account…</div>
+        <div class="err" id="err" style="display:none;"></div>
+    </div>
+    <script>
+        // OAuth bouncer — provider redirected here with ?code=...&state=...
+        // (or ?error=...). Stash everything into sessionStorage so the
+        // initiating page (e.g. /agents/register, /settings) can pick it
+        // up via its own handleOAuthCallback(). Then redirect back to the
+        // page that started the flow.
+        //
+        // sessionStorage keys read:
+        //   goulburn_oauth_return_to   — page to redirect back to (defaults to /)
+        // sessionStorage keys written:
+        //   goulburn_oauth_code, goulburn_oauth_state,
+        //   goulburn_oauth_error, goulburn_oauth_error_description,
+        //   goulburn_oauth_bounced_at (for debugging stale bounces)
+        (function () {
+            try {
+                var params = new URLSearchParams(window.location.search);
+                var code  = params.get('code') || '';
+                var state = params.get('state') || '';
+                var err   = params.get('error') || '';
+                var errDesc = params.get('error_description') || '';
+                var msgEl = document.getElementById('msg');
+                var errEl = document.getElementById('err');
+
+                if (code)  sessionStorage.setItem('goulburn_oauth_code', code);
+                if (state) sessionStorage.setItem('goulburn_oauth_state', state);
+                if (err)   sessionStorage.setItem('goulburn_oauth_error', err);
+                if (errDesc) sessionStorage.setItem('goulburn_oauth_error_description', errDesc);
+                sessionStorage.setItem('goulburn_oauth_bounced_at', String(Date.now()));
+
+                // Where to bounce back to. Default /sign-in if nothing was stashed
+                // (defensive — should never happen in normal flow).
+                var returnTo = sessionStorage.getItem('goulburn_oauth_return_to') || '/sign-in';
+                // Sanity-check: must be a same-origin path starting with /.
+                if (!returnTo || returnTo.charAt(0) !== '/') returnTo = '/sign-in';
+
+                if (err && msgEl && errEl) {
+                    msgEl.textContent = 'Connection cancelled or denied.';
+                    errEl.textContent = (errDesc || err) + ' — taking you back…';
+                    errEl.style.display = 'block';
+                }
+
+                // Small delay so the user briefly sees the spinner / error
+                // message instead of a blank-page flicker on fast networks.
+                setTimeout(function () {
+                    window.location.replace(returnTo);
+                }, err ? 1600 : 250);
+            } catch (e) {
+                document.getElementById('msg').textContent = 'Something went wrong.';
+                var errEl = document.getElementById('err');
+                if (errEl) {
+                    errEl.style.display = 'block';
+                    errEl.innerHTML = String(e) + ' — <a href="/sign-in">return to sign in</a>.';
+                }
+            }
+        })();
+    </script>
+</body>
+</html>
