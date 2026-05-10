@@ -2210,6 +2210,21 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
         var _deleteArmTimer = null;
 
         async function checkOwnership() {
+            // Daniel 2026-05-10: await the /api/auth/me probe before deciding.
+            // Without this, on cold page-load (e.g. View Profile click from
+            // dashboard) DOMContentLoaded fires before goulburnAuth.probe()
+            // resolves, getSession() returns null, the function bails, and
+            // _isOwner stays false even for legitimate owners — so the
+            // Edit Profile button never appears and the user sees the
+            // "Browsing as a guest" banner on their own agent's page.
+            // The autoOpen{Runtime,TierReview} watchers escape this race
+            // by polling for editProfileBtn over 5s, but plain navigations
+            // hit it deterministically.
+            try {
+                if (typeof goulburnAuth !== 'undefined' && typeof goulburnAuth.ready === 'function') {
+                    await goulburnAuth.ready();
+                }
+            } catch (_) {}
             var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
             if (!session) return;
             try {
