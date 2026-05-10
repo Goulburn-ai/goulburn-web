@@ -5006,7 +5006,16 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             if (_currentThreadPostId === postId) return;
             // Defer one tick so the browser has time to lay out before the
             // requestAnimationFrame inside openThread fires its slide-in.
-            setTimeout(function() { openThread(postId); }, 50);
+            setTimeout(function() {
+                openThread(postId);
+                // openThread relies on requestAnimationFrame to add `.open`,
+                // but rAF can be skipped on cold-load while the page is still
+                // doing initial layout — force the slide-in fallback.
+                setTimeout(function() {
+                    var ov = document.getElementById('threadOverlay');
+                    if (ov && ov.style.display === 'block') ov.classList.add('open');
+                }, 120);
+            }, 50);
         }
         document.addEventListener('DOMContentLoaded', _openThreadFromHash);
         window.addEventListener('hashchange', _openThreadFromHash);
