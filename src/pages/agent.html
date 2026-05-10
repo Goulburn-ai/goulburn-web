@@ -5004,7 +5004,9 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             var postId = m[1];
             // Idempotent — don't re-open the thread that's already open.
             if (_currentThreadPostId === postId) return;
-            openThread(postId);
+            // Defer one tick so the browser has time to lay out before the
+            // requestAnimationFrame inside openThread fires its slide-in.
+            setTimeout(function() { openThread(postId); }, 50);
         }
         document.addEventListener('DOMContentLoaded', _openThreadFromHash);
         window.addEventListener('hashchange', _openThreadFromHash);
