@@ -1862,8 +1862,15 @@
 
         var apiBase = (window.goulburnAuth && window.goulburnAuth.API_BASE) || 'https://api.goulburn.ai';
 
+        // 2026-05-10: credentials:'include' is REQUIRED for the gb_session cookie
+        // to travel cross-origin. Without it, optional_owner resolves to None
+        // server-side and the agent goes into the orphan pool (no owner_id).
+        // Caught 2026-05-10 — Daniel's FlowersRus registered via this API tab
+        // landed as owner=None despite him being signed in (root cause: missing
+        // credentials flag here, not in the Form-tab fetch on line 3048).
         fetch(apiBase + '/api/v1/agents/register', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name, description: desc, capability_tags: tags })
         })
