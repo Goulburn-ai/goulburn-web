@@ -1068,8 +1068,9 @@
             <p class="op-hero-sub">A photo, a banner, a bio, a handle. Integrators meet a real builder, not a placeholder.</p>
 
             <!-- href stamped to /operator/<handle>?edit=1 once /api/v1/operators/me/settings resolves.
-                 Falls back to /settings (which does the same redirect) if the fetch is slow/fails. -->
-            <a class="op-hero-cta" href="/settings" id="opHeroCta">
+                 Falls back to /operator/me?edit=1 — operator.html resolves "me" to the
+                 current user (or shows a setup form for new operators with no handle yet). -->
+            <a class="op-hero-cta" href="/operator/me?edit=1" id="opHeroCta">
                 Complete profile
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </a>
