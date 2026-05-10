@@ -129,6 +129,10 @@
   ],
   "rewrites": [
     {
+      "source": "/oauth/callback",
+      "destination": "/oauth-callback.html"
+    },
+    {
       "source": "/sign-in",
       "destination": "/sign-in.html"
     },
