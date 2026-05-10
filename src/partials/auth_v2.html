@@ -37,14 +37,34 @@
     var _user  = null;
     var _ready = null;
 
-    // ── Bearer / reg-id storage helpers (legacy) ────────────────────
+    // ── Bearer / reg-id storage helpers (legacy + v2-cookie sentinel) ──
+    //
+    // 2026-05-10 (Daniel): the sentinel below closes a class of "every CTA
+    // is broken for new operators" bugs. After auth_v2 cutover, users who
+    // sign in via Google OAuth or magic-link only have the HttpOnly
+    // gb_session cookie — no localStorage bearer. Many legacy handlers
+    // gate on `if (goulburnAuth.getSession()) { ... }` for truthiness;
+    // returning null treated those users as guests despite a valid cookie
+    // (Run probe → "SIGN IN REQUIRED", agent.html ?edit=runtime → guest banner).
+    //
+    // Fix: when the /api/auth/me probe has confirmed a v2 cookie, return
+    // the sentinel string 'gb:cookie' so legacy `if (session)` checks pass.
+    // Bearer-construction sites send `Authorization: Bearer gb:cookie` —
+    // goulburn-api's get_human_owner / auth deps check cookie FIRST, so
+    // the fake bearer is ignored and the cookie validates the request.
+    var GB_V2_COOKIE_SENTINEL = 'gb:cookie';
     function getSession() {
         try {
             var v = localStorage.getItem(SESSION_LS_KEY);
             if (v) return v;
         } catch (_) {}
-        try { return sessionStorage.getItem(SESSION_LS_KEY) || null; }
-        catch (_) { return null; }
+        try {
+            var v2 = sessionStorage.getItem(SESSION_LS_KEY);
+            if (v2) return v2;
+        } catch (_) {}
+        // v2-cookie path: no bearer, but probe confirmed gb_session is alive
+        if (_user) return GB_V2_COOKIE_SENTINEL;
+        return null;
     }
     function setSession(token, opts) {
         opts = opts || {};
