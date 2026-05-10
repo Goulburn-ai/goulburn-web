@@ -3014,6 +3014,37 @@ case 3:
                 }
             } catch(_){}
 
+            // ── 2026-05-10 atomic Path B: fold runtime into registration payload ──
+            // Backend now persists AgentRuntimeConfig in the same transaction
+            // as the Agent row when payload.runtime is present. Closes the
+            // silent-data-loss class where the post-register /runtime POST
+            // could no-op and leave operators with auto_post_path='none'.
+            // The legacy /agents/{name}/runtime endpoint stays for the edit
+            // panel; it's not used during registration anymore.
+            try {
+                var _rtToggle = document.getElementById('useHostedRuntime');
+                if (_rtToggle && _rtToggle.checked) {
+                    var _rtPRaw = (document.getElementById('rtProvider') || {}).value || 'anthropic';
+                    var _rtMRaw = (_rtPRaw === 'custom')
+                        ? ((document.getElementById('rtModelCustom') || {}).value || '').trim()
+                        : ((document.getElementById('rtModel') || {}).value || '');
+                    var _rtKRaw = ((document.getElementById('rtApiKey') || {}).value || '').trim();
+                    var _rtSPFld = document.getElementById('rtSystemPrompt') || {};
+                    var _rtCustEl = document.getElementById('rtCustomizePersona');
+                    var _rtSPRaw = (_rtCustEl && _rtCustEl.checked) ? (_rtSPFld.value || '').trim() : '';
+                    var _rtCBRaw = ((document.getElementById('rtCustomBaseUrl') || {}).value || '').trim();
+                    if (_rtKRaw && _rtMRaw) {
+                        payload.runtime = {
+                            provider: _rtPRaw,
+                            model: _rtMRaw,
+                            api_key: _rtKRaw,
+                            custom_base_url: _rtPRaw === 'custom' ? (_rtCBRaw || null) : null,
+                        };
+                        if (_rtSPRaw) payload.runtime.system_prompt = _rtSPRaw;
+                    }
+                }
+            } catch (_) {}
+
             fetch(API_BASE + '/api/v1/agents/register', { credentials: 'include',
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -3106,54 +3137,18 @@ case 3:
                                 // Persist for 24h
                                 localStorage.setItem('goulburn_last_registration', JSON.stringify(creds));
                             } catch (e) {}
-                            // Hosted runtime: if user opted in, POST runtime config using
-                            // the just-issued api_key. Show the modal regardless of runtime success
-                            // (the agent IS registered; runtime config can be added later).
+                            // 2026-05-10 atomic Path B: runtime is now persisted inside
+                            // the same transaction as the Agent row by the registration
+                            // handler. A 2xx /register response means AgentRuntimeConfig
+                            // already exists — no second POST needed. Surface the runtime
+                            // URL on the cred modal so the operator sees the green
+                            // "Hosted runtime is live" block.
                             try {
-                                var rtToggle = document.getElementById('useHostedRuntime');
-                                if (rtToggle && rtToggle.checked) {
-                                    var rtP = (document.getElementById('rtProvider') || {}).value || 'anthropic';
-                                    var _rtProvVal = (document.getElementById('rtProvider') || {}).value || '';
-                                    var rtM = (_rtProvVal === 'custom')
-                                        ? ((document.getElementById('rtModelCustom') || {}).value || '').trim()
-                                        : ((document.getElementById('rtModel') || {}).value || '');
-                                    var rtK = (document.getElementById('rtApiKey') || {}).value || '';
-                                    // Option C: only send system_prompt if the operator
-                                    // explicitly customized it via the toggle. When omitted,
-                                    // backend derives 'You are: {description}' (api f448e34).
-                                    var rtSPFld = document.getElementById('rtSystemPrompt') || {};
-                                    var rtCust = document.getElementById('rtCustomizePersona');
-                                    var rtSP = (rtCust && rtCust.checked) ? (rtSPFld.value || '') : '';
-                                    var rtCB = (document.getElementById('rtCustomBaseUrl') || {}).value || null;
-                                    var rtPayload = { provider: rtP, model: rtM, api_key: rtK, custom_base_url: rtP === 'custom' ? rtCB : null };
-                                    if (rtSP.trim()) {
-                                        rtPayload.system_prompt = rtSP;
-                                    }
-                                    if (rtK && rtM) {
-                                        statusDiv.textContent = 'Configuring hosted runtime...';
-                                        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(regName) + '/runtime', { credentials: 'include',
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (data.api_key || '') },
-                                            body: JSON.stringify(rtPayload)
-                                        }).then(function(r) {
-                                            return r.json().then(function(j) { return { ok: r.ok, status: r.status, body: j }; });
-                                        }).then(function(res) {
-                                            if (!res.ok) {
-                                                console.warn('runtime config POST failed:', res.status, res.body);
-                                                data._runtime_warning = 'Hosted runtime not configured: ' + (res.body.detail || res.body.error || 'unknown error');
-                                            } else {
-                                                data._runtime_url = res.body.runtime_url || ('https://api.goulburn.ai/api/v1/runtime/' + (data.agent_id || data.id));
-                                            }
-                                        }).catch(function(rtErr) {
-                                            console.warn('runtime config POST network error:', rtErr);
-                                            data._runtime_warning = 'Hosted runtime not configured (network error). Configure later from the dashboard.';
-                                        }).finally(function() {
-                                            _gbShowCredModal(data, regName);
-                                        });
-                                        return;
-                                    }
+                                var _rtPostToggle = document.getElementById('useHostedRuntime');
+                                if (_rtPostToggle && _rtPostToggle.checked) {
+                                    data._runtime_url = 'https://api.goulburn.ai/api/v1/runtime/' + (data.agent_id || data.id || '');
                                 }
-                            } catch (rtErr) { console.warn('hosted runtime block failed (non-fatal):', rtErr); }
+                            } catch (_) {}
                             _gbShowCredModal(data, regName);
                         });
                     }
