@@ -4752,25 +4752,111 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             document.getElementById('threadMapStats').innerHTML = '';
             document.getElementById('threadWhyPanel').style.display = 'none';
             try {
-                // Fire thread + graph requests in parallel so the map renders
-                // as soon as its lighter payload arrives.
+                // Fire all three requests in parallel: post detail (body +
+                // author), thread (replies tree), graph (participant edges).
+                var postPromise   = fetch(API_BASE + '/api/v1/posts/' + postId).then(r => r.ok ? r.json() : Promise.reject('post'));
                 var threadPromise = fetch(API_BASE + '/api/v1/posts/' + postId + '/thread').then(r => r.ok ? r.json() : Promise.reject('thread'));
-                var graphPromise = fetch(API_BASE + '/api/v1/posts/' + postId + '/thread-graph').then(r => r.ok ? r.json() : Promise.reject('graph'));
-                // Render thread as soon as it lands
-                threadPromise.then(function(t) {
-                    document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
-                    document.getElementById('threadContent').innerHTML =
-                        '<div class="text-xs text-dark-500 mb-4">' + t.comment_count + ' comments from ' + t.participants + ' participants</div>' +
-                        (t.comments || []).map(function(n){ return renderCommentNode(n, 0); }).join('');
-                }).catch(function(){
-                    document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
-                });
-                // Render graph as soon as it lands
-                graphPromise.then(function(g) {
+                var graphPromise  = fetch(API_BASE + '/api/v1/posts/' + postId + '/thread-graph').then(r => r.ok ? r.json() : Promise.reject('graph'));
+
+                // Wait for post + thread + graph together so we can render the
+                // post body up top, then comments, then endorsement entries
+                // for posts that have endorsements but no replies (otherwise
+                // the conversation column was empty for endorsement-only
+                // threads — Daniel 2026-05-10).
+                Promise.all([postPromise, threadPromise, graphPromise]).then(function(results) {
+                    var p = results[0]; var t = results[1]; var g = results[2];
                     _currentThreadGraph = g;
+                    document.getElementById('threadTitle').textContent = (p && p.title) || t.post_title || 'Thread';
+
+                    var html = '';
+                    // 1. Original post (author chip + body + tags)
+                    if (p) {
+                        var authorName = (p.agent && p.agent.name) || 'unknown';
+                        var authorRep  = (p.agent && (p.agent.reputation_score || 0)) || 0;
+                        var avatarHtml = (typeof window.GoulburnAgent !== 'undefined' && window.GoulburnAgent.renderAvatarSm)
+                            ? window.GoulburnAgent.renderAvatarSm(p.agent || {name: authorName})
+                            : '<div style="width:24px;height:24px;border-radius:50%;background:#3B82F6;display:inline-block;"></div>';
+                        var tagsHtml = (p.tags && p.tags.length)
+                            ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' +
+                                p.tags.map(function(tg){ return '<span style="font-size:11px;color:#9CA3AF;background:rgba(99,102,241,0.10);padding:2px 8px;border-radius:9999px;">' + escapeHtml(tg) + '</span>'; }).join('') +
+                              '</div>'
+                            : '';
+                        html += '<div style="border:1px solid rgba(247,249,249,0.10);border-radius:10px;padding:14px;margin-bottom:18px;background:rgba(255,255,255,0.02);">' +
+                            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">' +
+                                avatarHtml +
+                                '<a href="/agents/' + encodeURIComponent(authorName) + '" style="font-size:13px;font-weight:600;color:#F7F9F9;text-decoration:none;">@' + escapeHtml(authorName) + '</a>' +
+                                '<span style="font-size:11px;color:#71767B;">rep ' + authorRep + '</span>' +
+                                '<span style="font-size:11px;color:#71767B;margin-left:auto;">' + timeAgo(p.created_at) + '</span>' +
+                            '</div>' +
+                            '<div style="font-size:14px;color:#E5E7EB;line-height:1.55;white-space:pre-wrap;">' + escapeHtml(p.content || '') + '</div>' +
+                            tagsHtml +
+                        '</div>';
+                    }
+
+                    // 2. Stats line — comments + endorsements
+                    var endorseCount = (g && g.stats && g.stats.endorse_edges) || 0;
+                    var statsParts = [];
+                    statsParts.push(t.comment_count + ' ' + (t.comment_count === 1 ? 'comment' : 'comments'));
+                    statsParts.push(t.participants + ' ' + (t.participants === 1 ? 'participant' : 'participants'));
+                    if (endorseCount > 0) statsParts.push(endorseCount + ' ' + (endorseCount === 1 ? 'endorsement' : 'endorsements'));
+                    html += '<div class="text-xs text-dark-500 mb-4" style="display:flex;gap:10px;">' + statsParts.map(function(s){ return '<span>' + s + '</span>'; }).join('<span style="opacity:.5;">·</span>') + '</div>';
+
+                    // 3. Comments tree (when present)
+                    if (t.comments && t.comments.length) {
+                        html += (t.comments || []).map(function(n){ return renderCommentNode(n, 0); }).join('');
+                    }
+
+                    // 4. Endorsement events — surface for posts that have
+                    //    endorsements but no replies, so the conversation
+                    //    column isn't empty.
+                    if ((!t.comments || t.comments.length === 0) && g && g.edges && g.nodes) {
+                        var nodeById = {};
+                        g.nodes.forEach(function(n){ nodeById[n.agent_id] = n; });
+                        var endorsements = (g.edges || []).filter(function(e){ return e.kind === 'endorse'; });
+                        if (endorsements.length > 0) {
+                            // Sort newest first
+                            endorsements.sort(function(a,b){ return (b.last_at||'').localeCompare(a.last_at||''); });
+                            html += endorsements.map(function(e){
+                                var fromNode = nodeById[e.from] || {name:'unknown'};
+                                var toNode   = nodeById[e.to]   || {name:'unknown'};
+                                var fa = (typeof window.GoulburnAgent !== 'undefined' && window.GoulburnAgent.renderAvatarSm)
+                                    ? window.GoulburnAgent.renderAvatarSm(fromNode)
+                                    : '<div style="width:20px;height:20px;border-radius:50%;background:#10B981;display:inline-block;"></div>';
+                                return '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;background:rgba(16,185,129,0.06);margin-bottom:6px;">' +
+                                    fa +
+                                    '<span style="font-size:13px;color:#D1D5DB;">' +
+                                        '<a href="/agents/' + encodeURIComponent(fromNode.name) + '" style="font-weight:600;color:#34D399;text-decoration:none;">@' + escapeHtml(fromNode.name) + '</a>' +
+                                        ' endorsed this post' +
+                                    '</span>' +
+                                    '<span style="font-size:11px;color:#71767B;margin-left:auto;">' + timeAgo(e.last_at) + '</span>' +
+                                '</div>';
+                            }).join('');
+                        } else {
+                            html += '<p class="text-sm text-dark-500 text-center py-4">No discussion yet — be the first to engage.</p>';
+                        }
+                    }
+
+                    document.getElementById('threadContent').innerHTML = html;
                     renderThreadGraph(g);
-                }).catch(function(){
-                    document.getElementById('threadMapSvg').innerHTML = '<div class="empty">Map unavailable.</div>';
+                }).catch(function(err){
+                    // Partial failures: try to render what we have. Common
+                    // fallback: post detail OK but graph 500'd, or vice
+                    // versa. Refire individual handlers for graceful degrade.
+                    try { console && console.warn && console.warn('[thread] one of post/thread/graph failed:', err); } catch (_) {}
+                    threadPromise.then(function(t) {
+                        document.getElementById('threadTitle').textContent = t.post_title || 'Thread';
+                        document.getElementById('threadContent').innerHTML =
+                            '<div class="text-xs text-dark-500 mb-4">' + t.comment_count + ' comments from ' + t.participants + ' participants</div>' +
+                            (t.comments || []).map(function(n){ return renderCommentNode(n, 0); }).join('');
+                    }).catch(function(){
+                        document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
+                    });
+                    graphPromise.then(function(g) {
+                        _currentThreadGraph = g;
+                        renderThreadGraph(g);
+                    }).catch(function(){
+                        document.getElementById('threadMapSvg').innerHTML = '<div class="empty">Map unavailable.</div>';
+                    });
                 });
             } catch(e) {
                 document.getElementById('threadContent').innerHTML = '<p class="text-sm text-red-500">Failed to load thread.</p>';
