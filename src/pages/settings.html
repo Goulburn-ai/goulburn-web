@@ -2017,6 +2017,7 @@
             try {
                 var res = await fetch(ADMIN_BASE + '/api/v1/webauthn/credentials/' + encodeURIComponent(credentialId), {
                     method: 'DELETE',
+                    credentials: 'include',
                     headers: { 'Authorization': (goulburnAuth.getSession() ? 'Bearer ' + goulburnAuth.getSession() : '') }
                 });
                 if (res.ok) {
