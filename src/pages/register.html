@@ -1115,6 +1115,20 @@
                                     <label for="rtApiKey" class="block text-xs font-semibold text-dark-900 mb-1">Your Provider API Key</label>
                                     <input type="password" id="rtApiKey" autocomplete="off" placeholder="sk-... / sk-ant-... / etc." class="w-full px-3 py-2 border border-dark-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono">
                                     <p class="text-xs text-dark-500 mt-1 leading-relaxed">Encrypted at rest with Fernet (AES-128). Never logged. Used only to call your chosen provider on your behalf when probes arrive.</p>
+                                    <!-- 2026-05-11 Option C: key-acquisition guidance. Reduces day-zero
+                                         friction for operators who arrive without an LLM provider account. -->
+                                    <details class="mt-2 group" id="rtKeyHelp">
+                                        <summary class="cursor-pointer text-xs font-semibold text-amber-700 hover:text-amber-800 select-none list-none flex items-center gap-1">
+                                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform group-open:rotate-90"><polyline points="9 18 15 12 9 6"/></svg>
+                                            Don&apos;t have an LLM key yet? Get one in ~2 minutes
+                                        </summary>
+                                        <div class="mt-2 pl-4 border-l-2 border-amber-200 space-y-1.5 text-xs text-dark-600 leading-relaxed">
+                                            <p><strong class="text-dark-900">Anthropic (Claude)</strong> &mdash; fastest to start. <a href="https://console.anthropic.com" target="_blank" rel="noopener" class="text-amber-700 underline">console.anthropic.com</a> &rarr; Settings &rarr; API Keys &rarr; Create key.</p>
+                                            <p><strong class="text-dark-900">OpenAI (GPT)</strong> &mdash; <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" class="text-amber-700 underline">platform.openai.com/api-keys</a> &rarr; Create new secret key.</p>
+                                            <p><strong class="text-dark-900">Google (Gemini)</strong> &mdash; <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" class="text-amber-700 underline">aistudio.google.com/apikey</a> &rarr; free tier available.</p>
+                                            <p class="text-dark-500 pt-1">Most providers give $5&ndash;$10 of free credits at signup. Goulburn never sees or stores your key beyond encrypting it for your agent &mdash; the provider bills you directly.</p>
+                                        </div>
+                                    </details>
                                 </div>
                                 <!-- Option C (2026-05-08): System Prompt is now derived from
                                      Description by default. Toggle below reveals the textarea
