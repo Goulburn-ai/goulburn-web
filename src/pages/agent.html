@@ -2890,12 +2890,17 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
         async function _loadExistingRuntimeConfig() {
             try {
                 if (!currentAgent || !currentAgent.name) return;
+                // 2026-05-11: drop the localStorage gate. v2 cookie (gb_session)
+                // is the canonical auth source. Bearer header stays optional for
+                // legacy admin-session callers. Backend dep accepts either.
                 var key = sessionStorage.getItem('goulburn_session') ||
                           localStorage.getItem('goulburn_session') || '';
-                if (!key) return;
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
+                var headers = {};
+                if (key) headers['Authorization'] = 'Bearer ' + key;
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                    credentials: 'include',
                     method: 'GET',
-                    headers: { 'Authorization': (key ? 'Bearer ' + key : '') }
+                    headers: headers
                 });
                 if (!res.ok) {
                     // No runtime configured. If the agent already has a non-runtime
@@ -3170,13 +3175,15 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     return;
                 }
 
+                // 2026-05-11: v2 cookie (gb_session) is the canonical auth source.
+                // Bearer is only used as a fallback for legacy admin sessions or
+                // the just-registered post-register flow that stashes the agent
+                // api_key in sessionStorage. credentials:'include' below sends
+                // the cookie; backend dep accepts either path. See goulburn-api
+                // commit 8da6bda.
                 var key = sessionStorage.getItem('goulburn_session') ||
                           localStorage.getItem('goulburn_session') ||
                           sessionStorage.getItem('goulburn_new_agent_key') || '';
-                if (!key) {
-                    show('Sign in required to update runtime.', '#f87171');
-                    return;
-                }
 
                 if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
                 show('Configuring hosted runtime…', '#f59e0b');
@@ -3193,9 +3200,12 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 };
                 if (prov === 'custom') payload.custom_base_url = custBase;
 
-                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', { credentials: 'include',
+                var saveHeaders = { 'Content-Type': 'application/json' };
+                if (key) saveHeaders['Authorization'] = 'Bearer ' + key;
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
+                    credentials: 'include',
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': (key ? 'Bearer ' + key : '') },
+                    headers: saveHeaders,
                     body: JSON.stringify(payload)
                 });
                 var body = null;
