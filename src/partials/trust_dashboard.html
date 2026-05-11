@@ -1259,18 +1259,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
     // POST /api/v1/agents/{name}/probe/run?kind=X. Owner-gated, rate-limited
     // 1/hour per kind per agent. Returns scheduled probe info or 429.
     async function triggerProbe(kind, agentName, button) {
+        // 2026-05-11: v2 cookie auth is canonical. Don't gate on localStorage.
         var session = (typeof goulburnAuth !== 'undefined') ? goulburnAuth.getSession() : null;
-        if (!session) {
-            tdToast('Sign in required', 'Sign in to trigger probes on your agents.', 'err');
-            return;
-        }
         var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
         if (button) button.classList.add('td-action-pending');
 
         try {
+            var probeHeaders = { 'Content-Type': 'application/json' };
+            if (session) probeHeaders['Authorization'] = 'Bearer ' + session;
             var resp = await fetch(API + '/agents/' + encodeURIComponent(agentName) + '/probe/run?kind=' + kind, {
                 method: 'POST',
-                credentials: 'include', headers: { 'Content-Type': 'application/json', 'Authorization': (session ? 'Bearer ' + session : '') },
+                credentials: 'include',
+                headers: probeHeaders,
             });
             var body = await resp.json().catch(function() { return {}; });
 
@@ -1337,14 +1337,14 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
     function load(){
         var panel=document.getElementById('tdPanel');
-        if (typeof goulburnAuth==='undefined' || !goulburnAuth.isAuthenticated()){
-            if (panel){ panel.className='td-empty'; panel.innerHTML='Sign in to see your trust dashboard.'; }
-            return;
-        }
-        var session=goulburnAuth.getSession();
-        var headers={ 'Content-Type':'application/json', 'Authorization': (session ? 'Bearer ' + session : '') };
+        // 2026-05-11: v2 cookie auth is canonical. Don't short-circuit on
+        // isAuthenticated() — Google OAuth / magic-link operators have no
+        // localStorage entry. Let credentials:'include' carry the cookie.
+        var session=(typeof goulburnAuth!=='undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
+        var headers={ 'Content-Type':'application/json' };
+        if (session) headers['Authorization'] = 'Bearer ' + session;
         var API=(typeof window.GOULBURN_API_URL!=='undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
-        fetch(API+'/agents/mine',{headers:headers})
+        fetch(API+'/agents/mine',{headers:headers,credentials:'include'})
             .then(function(r){return r.ok?r.json():{data:[]};})
             .catch(function(){return {data:[]};})
             .then(function(d){
