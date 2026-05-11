@@ -2944,6 +2944,28 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     '</div>';
                 }).join('');
 
+                // 2026-05-11 P3 polish: an action card and the corresponding
+                // layer-chip CTA both point at the same fix (e.g., Capability
+                // chip → "Submit endpoint for probing" + action card → "Run a
+                // live capability probe"). Two CTAs in different places for the
+                // same thing is noisy. When a card exists for a given layer,
+                // demote that layer's chip to a quiet "See action below"
+                // pointer that scrolls to the card cluster instead of duplicating
+                // the action.
+                try {
+                    var _layersWithCards = new Set(actions.map(function(a){return (a.layer||'').toLowerCase();}));
+                    document.querySelectorAll('.td-layer-action[data-td-action]').forEach(function(btn){
+                        var layer = (btn.dataset.tdAction || '').toLowerCase();
+                        if (_layersWithCards.has(layer)) {
+                            btn.style.display = 'none';
+                            // Mark the parent layer body so future renders can detect
+                            // (defensive — also lets CSS show a quiet "see below" pill).
+                            var parent = btn.closest('.td-layer-d');
+                            if (parent) parent.dataset.hasActionCard = 'true';
+                        }
+                    });
+                } catch (_e) { /* defensive: dedup is polish, not load-bearing */ }
+
                 // Start the cooldown ticker. One global interval handles all cards.
                 if (window.__tdCooldownTimer) { clearInterval(window.__tdCooldownTimer); }
                 window.__tdCooldownTimer = setInterval(function() {
