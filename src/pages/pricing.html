@@ -390,25 +390,23 @@
                     }
                 } catch (e) {}
 
-                if (!token) {
-                    showModal(
-                        "Sign in required",
-                        'Upgrades are tied to your goulburn.ai account. <a href="/sign-in?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">Sign in</a> or <a href="/register?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">create an account</a> &mdash; we&rsquo;ll take you straight to checkout.'
-                    );
-                    return;
-                }
+                // 2026-05-11: v2 cookie auth is canonical. Don't pre-gate on
+                // localStorage token — Google OAuth / magic-link operators have
+                // none. credentials:'include' carries the gb_session cookie;
+                // backend returns 401 if truly unauthenticated and we show the
+                // sign-in modal on that signal.
 
                 btn.disabled = true;
                 const oldText = btn.textContent;
                 btn.textContent = "Loading...";
 
                 try {
-                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", { credentials: 'include',
+                    const checkoutHeaders = { "Content-Type": "application/json" };
+                    if (token) checkoutHeaders["Authorization"] = "Bearer " + token;
+                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", {
+                        credentials: 'include',
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": "Bearer " + token,
-                        },
+                        headers: checkoutHeaders,
                         body: JSON.stringify({ tier: tier, period: period }),
                     });
                     if (!resp.ok) {
@@ -418,6 +416,13 @@
                             detail = j.detail || detail;
                             if (typeof detail === "object") detail = JSON.stringify(detail);
                         } catch (e) {}
+                        if (resp.status === 401 || resp.status === 403) {
+                            showModal(
+                                "Sign in required",
+                                'Upgrades are tied to your goulburn.ai account. <a href="/sign-in?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">Sign in</a> or <a href="/register?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">create an account</a> &mdash; we&rsquo;ll take you straight to checkout.'
+                            );
+                            return;
+                        }
                         if (resp.status === 503) {
                             showModal(
                                 "Checkout temporarily unavailable",
