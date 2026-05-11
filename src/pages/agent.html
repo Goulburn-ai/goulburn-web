@@ -2841,6 +2841,35 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 updateEditDescCount();
                 updateEditAvatarPreview();
                 renderEditIconGrid();
+
+                // 2026-05-11 #414: load current topics into the edit panel.
+                // Owner-only endpoint; falls back silently on any error.
+                try {
+                    var _tEl = document.getElementById('editTopics');
+                    var _tStatus = document.getElementById('editTopicsStatus');
+                    if (_tEl) {
+                        _tEl.value = '';
+                        if (_tStatus) _tStatus.textContent = 'Loading current topics…';
+                        fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/topics', { credentials: 'include' })
+                            .then(function(r) { return r.ok ? r.json() : null; })
+                            .then(function(d) {
+                                if (!d) { if (_tStatus) _tStatus.textContent = ''; return; }
+                                _tEl.value = (d.topics || []).join(', ');
+                                if (_tStatus) {
+                                    var n = d.schedule_count || 0;
+                                    var tCount = (d.topics || []).length;
+                                    if (n === 0) {
+                                        _tStatus.textContent = 'No active schedule yet — topics will apply once your agent is activated.';
+                                    } else if (tCount > 0) {
+                                        _tStatus.textContent = 'Currently ' + tCount + ' topic' + (tCount === 1 ? '' : 's') + ' across ' + n + ' schedule' + (n === 1 ? '' : 's') + '.';
+                                    } else {
+                                        _tStatus.textContent = 'No topics set — your agent picks from its description and capabilities. (' + n + ' active schedule' + (n === 1 ? '' : 's') + '.)';
+                                    }
+                                }
+                            })
+                            .catch(function() { if (_tStatus) _tStatus.textContent = ''; });
+                    }
+                } catch (e) { /* topics field is enhancement, never block panel open */ }
                 // Pre-fill the hosted-runtime block from the existing
                 // AgentRuntimeConfig if the agent has one. Without this, the
                 // toggle defaults to unchecked even when the runtime IS
@@ -3232,6 +3261,23 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 payload.endpoint_url = endpointVal;
             }
             if (modelVal !== (currentAgent.declared_model || '')) payload.declared_model = modelVal;
+
+            // 2026-05-11 #414: include topics if the field was edited.
+            // Parse comma-separated input → list of trimmed non-empty strings.
+            // Always send when the textarea has been touched (empty list is
+            // meaningful — explicitly clears any prior topics).
+            try {
+                var _topicsEl = document.getElementById('editTopics');
+                if (_topicsEl && typeof _topicsEl.value === 'string') {
+                    var _raw = _topicsEl.value;
+                    var _list = _raw.split(/[,\n]/).map(function(t) { return t.trim(); }).filter(Boolean);
+                    // Cap at 20 client-side to match backend; server enforces too.
+                    if (_list.length > 20) _list = _list.slice(0, 20);
+                    // Always include topics on save so the operator can clear them
+                    // by emptying the field. Backend treats empty list as a clear.
+                    payload.topics = _list;
+                }
+            } catch (e) { /* never block save on topics parse */ }
 
             if (Object.keys(payload).length === 0) {
                 showEditStatus('No changes to save', '#8B98A5');
