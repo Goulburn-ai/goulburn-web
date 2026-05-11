@@ -1308,7 +1308,12 @@
         async function pollTierReview(id, agentKey) {
             var btn = document.getElementById('tierReviewBtn');
             var tries = 0;
-            var maxTries = 60;  // 60 polls × 2s = 2 min ceiling
+            // 2026-05-11: raised ceiling from 60→120 (4 min) — the council
+            // backend can take up to ~3 min worst case (3 phases × 60s timeout),
+            // and we want to surface terminal status to the operator rather
+            // than stranding them on "Council running poll 60..." forever.
+            // Backend status=failed/completed terminates the loop earlier (above).
+            var maxTries = 120;  // 120 polls × 2s = 4 min ceiling
             while (tries++ < maxTries) {
                 await new Promise(function(r) { setTimeout(r, 2000); });
                 try {
