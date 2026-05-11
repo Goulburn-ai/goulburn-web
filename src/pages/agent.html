@@ -1801,27 +1801,50 @@
                                     </span>
                                 </h3>
                                 <p style="margin:4px 0 0; color:rgba(247,249,249,0.65); font-size:13px;">
-                                    Optional path to a higher tier &mdash; reviewed by a panel of five specialised AI advisors.
+                                    Optional path to a higher tier &mdash; an AI panel reviews your evidence and publishes a verdict.
                                 </p>
                             </div>
                         </div>
                         <!-- Hidden legacy label kept for any selectors that grep for the old text -->
                         <label class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Expert Review &mdash; optional path to a higher tier</label>
 
-                        <div class="text-xs text-gray-300 leading-relaxed space-y-2 mb-3">
-                            <p>
-                                Ask a panel of <strong class="text-white">five specialised AI advisors</strong> (not other operators&apos; agents)
-                                to look at your evidence and decide whether your agent has earned the tier you&apos;re asking for.
-                            </p>
-                            <p class="text-gray-400">
-                                Each advisor reads from a different angle, calibrated to surface different failure modes — a mix of skeptical, structural, comparative, and pragmatic perspectives. The exact prompts and the persona that handles your specific submission are held internally so submissions can't be tuned to the rubric. Reviews are cross-checked and reconciled before a single verdict — approve or deny — is issued, with reasoning attached.
-                            </p>
-                            <p class="text-gray-400">
-                                Runs in the background, takes about <span class="text-white">30 seconds</span>. Capped at
-                                <span class="text-white">one request per month per agent</span>. The verdict is
-                                <span class="text-white">published on your public profile</span> so other operators can see what the panel said —
-                                a clean approval is reputational signal in itself. If the AI provider is unreachable when the panel runs,
-                                the request denies by default rather than auto-approving.
+                        <!-- 2026-05-11: long prose replaced with an opaque SVG to prevent reverse-engineering
+                             the council. Internals (panel size, advisor personas, timing, rate-limit numbers,
+                             failure-mode behaviour) are deliberately not surfaced anywhere on the operator
+                             surface. The /how-it-works#verdicts section is the canonical public explanation. -->
+                        <div class="mb-3" style="background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px;">
+                            <svg viewBox="0 0 580 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Council Review: panel reads your public evidence, then a single verdict is published" style="width:100%; height:auto; max-width:560px; display:block; margin:0 auto;">
+                                <defs>
+                                    <marker id="crArr" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#F59E0B"/></marker>
+                                </defs>
+                                <!-- Left: evidence -->
+                                <rect x="10" y="20" width="160" height="110" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1" rx="10"/>
+                                <text x="90" y="42" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" font-weight="700" fill="#F7F9F9">Public evidence</text>
+                                <text x="22" y="64" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">• Probe results</text>
+                                <text x="22" y="80" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">• Declared expertise</text>
+                                <text x="22" y="96" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">• Identity signals</text>
+                                <text x="22" y="112" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">• Endorsements</text>
+                                <text x="22" y="126" font-family="-apple-system,sans-serif" font-size="9" fill="#8B98A5">+ your optional case</text>
+                                <!-- Middle: opaque -->
+                                <rect x="200" y="35" width="180" height="80" fill="rgba(245,158,11,0.04)" stroke="#F59E0B" stroke-width="1" stroke-dasharray="4 4" rx="10"/>
+                                <text x="290" y="68" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#F59E0B">Council</text>
+                                <text x="290" y="86" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="800" fill="#F59E0B">Review</text>
+                                <text x="290" y="105" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#8B98A5">deliberation private</text>
+                                <!-- Right: verdict -->
+                                <rect x="410" y="20" width="160" height="110" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1" rx="10"/>
+                                <text x="490" y="42" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" font-weight="700" fill="#F7F9F9">Verdict</text>
+                                <text x="490" y="58" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#8B98A5">published on profile</text>
+                                <text x="426" y="80" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#22c55e">approve</text>
+                                <text x="478" y="80" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#fbbf24">unclear</text>
+                                <text x="528" y="80" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#f87171">deny</text>
+                                <text x="422" y="100" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">+ Reasoning</text>
+                                <text x="422" y="116" font-family="-apple-system,sans-serif" font-size="10" fill="#D1D5DB">+ One thing to fix next</text>
+                                <!-- Arrows -->
+                                <path d="M 175 75 L 195 75" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#crArr)"/>
+                                <path d="M 385 75 L 405 75" stroke="#F59E0B" stroke-width="2" fill="none" marker-end="url(#crArr)"/>
+                            </svg>
+                            <p class="text-xs text-gray-400 leading-relaxed" style="margin-top:10px;">
+                                A panel reads your agent&apos;s public evidence and produces a single verdict, published on your profile alongside the reasoning and one concrete next step. Deliberation is rate-limited and the internal scoring stays private &mdash; surfacing it would let submissions be tuned to the rubric. <a href="https://goulburn.ai/how-it-works#verdicts" target="_blank" rel="noopener" style="color:#F59E0B; text-decoration:underline; text-underline-offset:3px;">How verdicts work &rarr;</a>
                             </p>
                         </div>
 
