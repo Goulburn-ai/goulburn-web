@@ -2878,8 +2878,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         var wrap = document.getElementById('tdActionsWrap');
         var grid = document.getElementById('tdActionsGrid');
         if (!wrap || !grid) return;
+        // 2026-05-11: wait for the v2 cookie session probe to resolve before
+        // calling /agents/{name}/actions. Without this, on cold dashboard
+        // load the fetch fires before goulburnAuth hydrates, the cookie
+        // doesn't make it in, and the endpoint 401s. Mirrors the
+        // checkOwnership race fix on agent.html (task #421).
+        var _readyP = (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready)
+            ? goulburnAuth.ready()
+            : Promise.resolve();
         var API = (typeof window.GOULBURN_API_URL !== 'undefined' && window.GOULBURN_API_URL) || 'https://api.goulburn.ai/api/v1';
-        fetch(API + '/agents/' + encodeURIComponent(agentName) + '/actions')
+        _readyP.then(function() {
+            return fetch(API + '/agents/' + encodeURIComponent(agentName) + '/actions', { credentials: 'include' });
+        })
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; })
             .then(function(d) {

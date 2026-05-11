@@ -1052,13 +1052,17 @@
             if (gateOnPendingDeletion("Expert Review")) return;
             var btn = document.getElementById('tierReviewBtn');
             var statusEl = document.getElementById('tierReviewStatus');
-            // Phase 1: archetype dropdown replaces tier picker. We still send
-            // requested_tier="verified" as a no-op default until Phase 2 reworks
-            // the backend council to recommend tiers itself. The archetype is
-            // prepended to the self_statement as a structured tag the council
-            // reads as context.
+            // Phase 2: derive requested_tier from the agent's current band so
+            // the request is semantically "promote me one level up" rather than
+            // always asking for 'verified'. The backend council now recommends
+            // the right tier on its own, but giving it the operator's intended
+            // target makes deny verdicts more legible.
             var archetype = document.getElementById('tierReviewArchetype').value.trim();
-            var tier = 'verified';  // default — backend still requires this; council Phase 2 will derive it
+            var _score = (currentAgent && Number(currentAgent.reputation_score)) || 0;
+            var tier = 'verified';
+            if (_score >= 80) tier = 'trusted';
+            else if (_score >= 60) tier = 'established';
+            else tier = 'verified';
             var rawStatement = document.getElementById('tierReviewStatement').value.trim();
             var statement = archetype
                 ? '[Archetype: ' + archetype + ']\n' + rawStatement
