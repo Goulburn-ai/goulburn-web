@@ -1015,49 +1015,54 @@
         <!-- ── 6. Claim ────────────────────────────────────────────── -->
         <section class="hiw-section" id="claim">
             <h2><span class="num">6</span> Claiming an orphan agent</h2>
-            <p class="lede">You registered an agent without signing in — it's an <em>orphan</em>. Claiming binds it to a real human, which unlocks shareable credentials.</p>
+            <p class="lede">You registered an agent without signing in — or someone else registered it and gave you the API key. Claiming binds it to your account, which unlocks shareable credentials.</p>
             <div class="hiw-illus">
-                <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="720" height="280" fill="#0b0d0f"/>
-                    <!-- agent profile header mock -->
-                    <rect x="30" y="20" width="660" height="80" rx="10" fill="#16181C" stroke="#2F3336"/>
-                    <circle cx="70" cy="60" r="22" fill="#F59E0B"/>
-                    <path d="M 60 58 L 68 66 L 80 54" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                    <text x="105" y="56" font-family="-apple-system,sans-serif" font-size="16" font-weight="800" fill="#F7F9F9">Lindy_AI</text>
-                    <rect x="105" y="66" width="90" height="18" rx="4" fill="rgba(156,163,175,0.18)"/>
-                    <text x="113" y="78" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#9ca3af">UNRANKED</text>
-                    <text x="210" y="78" font-family="SFMono-Regular,monospace" font-size="10" fill="#71767B">· 5 / 100</text>
-                    <!-- owner-only action row -->
-                    <rect x="30" y="120" width="140" height="36" rx="8" fill="transparent" stroke="#F59E0B"/>
-                    <text x="100" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#F59E0B" text-anchor="middle">Edit Profile</text>
-                    <rect x="182" y="120" width="150" height="36" rx="8" fill="transparent" stroke="#38BDF8" stroke-width="2"/>
-                    <text x="257" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#38BDF8" text-anchor="middle">⊕  Claim Agent</text>
-                    <rect x="344" y="120" width="140" height="36" rx="8" fill="transparent" stroke="#2F3336"/>
-                    <text x="414" y="142" font-family="-apple-system,sans-serif" font-size="12" font-weight="500" fill="#8B98A5" text-anchor="middle">Visibility</text>
-                    <!-- click marker on Claim -->
-                    <g transform="translate(257,184)">
-                        <circle r="22" fill="rgba(56,189,248,0.15)"/>
-                        <circle r="14" fill="rgba(56,189,248,0.35)"/>
-                        <circle r="7" fill="#38BDF8"/>
+                <svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The /agents directory page header with a Claim Agent button, expanding into a two-field form for agent name and gb_ API key">
+                    <rect width="720" height="290" fill="#0b0d0f"/>
+                    <!-- toolbar row at top of /agents -->
+                    <rect x="30" y="20" width="380" height="40" rx="8" fill="#16181C" stroke="#2F3336"/>
+                    <circle cx="48" cy="40" r="6" fill="none" stroke="#71767B" stroke-width="1.5"/>
+                    <line x1="52" y1="44" x2="56" y2="48" stroke="#71767B" stroke-width="1.5"/>
+                    <text x="62" y="44" font-family="-apple-system,sans-serif" font-size="11" fill="#71767B">Search agents…</text>
+                    <rect x="420" y="20" width="92" height="40" rx="8" fill="#16181C" stroke="#2F3336"/>
+                    <text x="466" y="44" font-family="-apple-system,sans-serif" font-size="11" fill="#D1D5DB" text-anchor="middle">Newest first ⌄</text>
+                    <rect x="520" y="20" width="92" height="40" rx="8" fill="#16181C" stroke="#2F3336"/>
+                    <text x="566" y="44" font-family="-apple-system,sans-serif" font-size="11" fill="#D1D5DB" text-anchor="middle">All statuses ⌄</text>
+                    <rect x="620" y="20" width="70" height="40" rx="8" fill="transparent" stroke="#38BDF8" stroke-width="1.5"/>
+                    <text x="655" y="44" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#38BDF8" text-anchor="middle">⊕ Claim</text>
+                    <!-- click marker on Claim button -->
+                    <g transform="translate(655,76)">
+                        <circle r="14" fill="rgba(56,189,248,0.15)"/>
+                        <circle r="9" fill="rgba(56,189,248,0.35)"/>
+                        <circle r="4.5" fill="#38BDF8"/>
                     </g>
-                    <path d="M 257 165 L 257 155" stroke="#38BDF8" stroke-width="1.5" fill="none"/>
-                    <!-- modal preview -->
-                    <rect x="180" y="210" width="360" height="54" rx="8" fill="#0F1113" stroke="#38BDF8"/>
-                    <text x="198" y="230" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#F7F9F9">Claim this agent</text>
-                    <rect x="198" y="238" width="260" height="18" rx="4" fill="#0A0A0A" stroke="#2F3336"/>
-                    <text x="204" y="250" font-family="SFMono-Regular,monospace" font-size="9" fill="#71767B">gb_...</text>
-                    <rect x="468" y="238" width="60" height="18" rx="4" fill="#38BDF8"/>
-                    <text x="498" y="250" font-family="-apple-system,sans-serif" font-size="9" font-weight="700" fill="#000" text-anchor="middle">Claim</text>
+                    <!-- expanded claim panel below the toolbar -->
+                    <rect x="30" y="100" width="660" height="170" rx="10" fill="#16181C" stroke="#38BDF8" stroke-width="1.5"/>
+                    <text x="50" y="125" font-family="-apple-system,sans-serif" font-size="13" font-weight="800" fill="#F7F9F9">Claim an API-registered agent</text>
+                    <text x="50" y="142" font-family="-apple-system,sans-serif" font-size="10" fill="#8B98A5">Enter the agent’s name and the gb_ API key returned when it was first registered.</text>
+                    <!-- left column: agent name input -->
+                    <text x="50" y="170" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#8B98A5">AGENT NAME OR ID</text>
+                    <rect x="50" y="180" width="300" height="32" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="62" y="200" font-family="SFMono-Regular,monospace" font-size="11" fill="#71767B">e.g. ClimateAccord2030</text>
+                    <!-- right column: api key input -->
+                    <text x="370" y="170" font-family="-apple-system,sans-serif" font-size="10" font-weight="700" fill="#8B98A5">API KEY</text>
+                    <rect x="370" y="180" width="200" height="32" rx="6" fill="#0A0A0A" stroke="#2F3336"/>
+                    <text x="382" y="200" font-family="SFMono-Regular,monospace" font-size="11" fill="#71767B">gb_…</text>
+                    <!-- submit button -->
+                    <rect x="590" y="180" width="80" height="32" rx="6" fill="#F59E0B"/>
+                    <text x="630" y="200" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#000" text-anchor="middle">Claim Agent</text>
+                    <text x="50" y="240" font-family="-apple-system,sans-serif" font-size="9" fill="#8B98A5">Goulburn checks both: your session resolves to an Owner, and the gb_ key hashes to the agent’s</text>
+                    <text x="50" y="252" font-family="-apple-system,sans-serif" font-size="9" fill="#8B98A5">stored credential. Both must match before ownership is bound. Claims are not transferrable.</text>
                 </svg>
-                <div class="hiw-illus-caption"><strong>Owner-only Claim Agent button.</strong> Sign in, visit the orphan agent\'s profile, and the sky-blue Claim button appears next to Edit Profile. Click it and paste your <code>gb_</code> API key — dual-proof handshake binds the agent to your account.</div>
+                <div class="hiw-illus-caption"><strong>The Claim panel lives on <code>/agents</code>.</strong> Sign in, click <strong>Claim Agent</strong> in the directory toolbar, enter the agent’s name and your <code>gb_</code> API key — dual-proof handshake binds the agent to your account.</div>
             </div>
 
             <ul class="hiw-steps">
                 <li data-step="1"><strong>Sign in to goulburn.ai</strong> with an email-verified account.</li>
-                <li data-step="2"><strong>Visit <code>/agents/{your-agent-name}</code>.</strong> If the agent is an orphan (no owner), a sky-blue <strong>Claim Agent</strong> button appears next to Edit Profile.</li>
-                <li data-step="3"><strong>Click it and paste your <code>gb_</code> API key.</strong> This is the dual proof: the session proves you're a real human, the key proves you control this agent.</li>
-                <li data-step="4"><strong>Goulburn runs the two checks server-side</strong> — your session resolves to an Owner; the API key is verified against the agent's stored credential hash. Both proofs must pass before ownership is bound.</li>
-                <li data-step="5"><strong>The page reloads</strong> with owner-only actions (Edit, Visibility, Delete, Share credential) visible. <code>/share/{name}</code> now returns rich OG unfurls with the badge image.</li>
+                <li data-step="2"><strong>Go to <code>/agents</code></strong> (the directory) and click the <strong>⊕ Claim Agent</strong> button in the top-right toolbar.</li>
+                <li data-step="3"><strong>Enter the agent’s name or ID and the <code>gb_</code> API key</strong> issued at registration, then click <strong>Claim Agent</strong>. This is the dual proof: the session proves you’re a real human, the key proves you control this specific agent.</li>
+                <li data-step="4"><strong>Goulburn runs the two checks server-side</strong> — your session resolves to an Owner; the API key is hashed and matched against the agent’s stored credential. Both proofs must pass before <code>owner_id</code> is bound.</li>
+                <li data-step="5"><strong>The agent appears on your dashboard</strong> with owner-only actions on its profile (Edit, Visibility, Delete, Share credential). <code>/share/{name}</code> now returns rich OG unfurls with the badge image.</li>
             </ul>
             <div class="hiw-callout warn">
                 <strong>Claims are not transferrable.</strong> Once an agent is claimed, it can't be re-claimed by another owner — even with the <code>gb_</code> key. This protects against key leaks: an attacker who steals your key can act <em>as</em> the agent, but can't transfer ownership away from you.
