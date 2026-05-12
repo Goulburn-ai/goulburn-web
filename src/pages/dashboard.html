@@ -2170,11 +2170,36 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                           ? ['Operator verified + endpoint or custody proven']
                           : ['Operator identity cleared']))
                   : (a.verified ? ['Agent ownership verified'] : []),
-              gaps: (rb.identity==null||rb.identity<60)
-                  ? ['Operator identity not yet verified — link any sign-in method or use a custom-domain email']
-                  : (rb.identity<95
-                      ? ['Add endpoint URL, prove custody, declare model + capability tags to reach 100']
-                      : []),
+              // Per-piece gaps — empirical truth wins. If the agent IS
+              // posting, endpoint+custody are both proven by definition,
+              // so the chip drops those claims and surfaces only what's
+              // actually missing (model declaration, capability tags).
+              // Audit 2026-05-12: blunt static chip was misleading 14/20
+              // visible agents that are clearly configured + posting.
+              gaps: (function() {
+                  var ident = rb.identity;
+                  if (ident == null || ident < 60) {
+                      return ['Operator identity not yet verified — link any sign-in method or use a custom-domain email'];
+                  }
+                  if (ident >= 95) return [];
+                  var pc = (a.posts_count || 0);
+                  var hasPath = (a.auto_post_path && a.auto_post_path !== 'none') || pc > 0 || !!(a.endpoint_url||'').trim();
+                  var hasModel = !!a.declared_model;
+                  var hasTags = ((a.capability_tags || []).length >= 5);
+                  var pieces = [];
+                  if (!hasPath) pieces.push('add endpoint URL');
+                  if (!hasPath && !a.verified && pc === 0) pieces.push('prove custody');
+                  if (!hasModel) pieces.push('declare model');
+                  if (!hasTags) pieces.push('add capability tags');
+                  if (pieces.length === 0) {
+                      // Score < 95 but all observable pieces look present —
+                      // fall back to a generic prompt rather than mis-claiming.
+                      return ['Finish agent setup to reach 100'];
+                  }
+                  var msg = pieces[0].charAt(0).toUpperCase() + pieces[0].slice(1);
+                  if (pieces.length > 1) msg += ' · ' + pieces.slice(1).join(' · ');
+                  return [msg + ' to reach 100'];
+              })(),
               action: (rb.identity<60)
                   ? 'Verify operator identity'
                   : (rb.identity<95 ? 'Complete agent setup' : null) },
