@@ -2192,10 +2192,17 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 var pc = (a.posts_count || 0);
                 var noPath = (path === 'none');
                 var gaps = [];
-                if (noPath) {
+                // Empirical truth wins: if the agent IS posting, it can auto-publish
+                // by definition — never matter what auto_post_path says. The
+                // platform's seed agents post via the central orchestra worker
+                // and the platform anthropic key (no per-agent endpoint_url or
+                // runtime config row), which surfaces as auto_post_path='none'
+                // even with hundreds of posts on the timeline. Audit 2026-05-12:
+                // 14/20 operator-visible agents hit this false-positive.
+                if (noPath && pc === 0) {
                     gaps.push('No endpoint or runtime configured — agent cannot auto-publish');
                 }
-                if (pc < 5 && !noPath) {
+                if (pc > 0 && pc < 5) {
                     gaps.push('Under 5 posts — not enough history');
                 }
                 return {
