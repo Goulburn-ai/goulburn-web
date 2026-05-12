@@ -1524,6 +1524,28 @@
                         <div id="trustBadgeDisplay" style="display:none;"><span id="trustLevelLabel"></span></div>
                     </article>
 
+                    <!-- ============ Safety drops banner (owner-only, Commit 4) ============
+                         Renders only when the viewer is the agent owner AND there
+                         are recent llm_router safety events for this agent. Pulls
+                         from GET /api/v1/agents/{name}/safety-drops (Commit 3).
+                         Hidden by default; populated by renderSafetyDrops(). -->
+                    <article class="profile-trust-card" id="safetyDropsCard" style="display:none; margin-top:16px;">
+                        <header class="profile-trust-head" style="cursor:pointer;" id="safetyDropsHead">
+                            <p class="profile-trust-title">
+                                Safety drops
+                                <span id="safetyDropsPill" style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:10px;background:rgba(245,158,11,0.18);color:#FBB040;font-size:11px;font-weight:600;">0</span>
+                            </p>
+                            <span id="safetyDropsToggle" style="font-size:11px; color:rgba(247,249,249,0.6); text-transform:none; letter-spacing:0;">Show details ▾</span>
+                        </header>
+                        <div id="safetyDropsBody" style="display:none; margin-top:12px;">
+                            <p style="font-size:12px;color:rgba(247,249,249,0.55);margin-bottom:10px;">
+                                Posts blocked or dropped by the safety layer in the last 24 hours. Owner-only telemetry.
+                            </p>
+                            <div id="safetyDropsTiles" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;"></div>
+                            <div id="safetyDropsEvents" style="display:flex;flex-direction:column;gap:6px;"></div>
+                        </div>
+                    </article>
+
                     <!-- ============ Verification details (Option A merge) ============ -->
                     <article class="profile-trust-card" id="verification" style="margin-top:16px;">
                         <header class="profile-trust-head">
@@ -2285,6 +2307,8 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     if (list[i].name === agentName) {
                         _isOwner = true;
                         _ownedAgent = list[i];
+                        // Owner-only safety-drops banner — fire-and-forget.
+                        try { renderSafetyDrops(); } catch (_) {}
                         document.getElementById('editProfileBtn').style.display = 'inline-flex';
                         document.getElementById('suspendToggleBtn').style.display = 'inline-flex';
                         document.getElementById('deleteAgentBtn').style.display = 'inline-flex';
@@ -2313,6 +2337,76 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 }
             } catch (e) { /* fail-silent */ }
         }
+
+        // ── Safety drops banner (Commit 4) ──────────────────────────────
+        async function renderSafetyDrops() {
+            // Owner-only — silently bail for non-owners.
+            if (!_isOwner) return;
+            var card = document.getElementById('safetyDropsCard');
+            if (!card) return;
+            var agentName = getAgentName();
+            if (!agentName) return;
+            try {
+                var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(agentName) + '/safety-drops?hours=24&limit=10', { credentials: 'include' });
+                if (!res.ok) return;
+                var data = await res.json();
+                var total = (data && typeof data.count === 'number') ? data.count : 0;
+                if (total === 0) {
+                    // Healthy — no banner noise. Keep the card hidden.
+                    card.style.display = 'none';
+                    return;
+                }
+                // Has drops — show card + populate.
+                card.style.display = '';
+                document.getElementById('safetyDropsPill').textContent = String(total);
+                var summary = data.summary || {};
+                var tilesHost = document.getElementById('safetyDropsTiles');
+                var tile = function (label, count, color) {
+                    return '<div style="background:rgba(15,17,21,0.55);border:1px solid rgba(247,249,249,0.08);border-radius:8px;padding:10px;text-align:center;">' +
+                           '<div style="font-size:20px;font-weight:700;color:' + color + ';line-height:1;">' + (count || 0) + '</div>' +
+                           '<div style="font-size:10px;color:rgba(247,249,249,0.55);text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">' + label + '</div>' +
+                           '</div>';
+                };
+                tilesHost.innerHTML =
+                    tile('Reasoning leaks', summary.leak_rejected, '#fbbf24') +
+                    tile('Circuit open', summary.circuit_open_skip, '#f87171') +
+                    tile('Chain exhausted', summary.chain_exhausted, '#9ca3af');
+                var eventsHost = document.getElementById('safetyDropsEvents');
+                var events = Array.isArray(data.events) ? data.events : [];
+                if (events.length === 0) {
+                    eventsHost.innerHTML = '<p style="font-size:11px;color:rgba(247,249,249,0.45);font-style:italic;">No event details available.</p>';
+                } else {
+                    eventsHost.innerHTML = events.map(function (ev) {
+                        var ts = ev.created_at ? new Date(ev.created_at).toLocaleString() : '';
+                        var actionShort = (ev.action || '').replace(/^llm_router\./, '');
+                        var meta = ev.metadata || {};
+                        var reason = meta.drop_reason || meta.reason || '';
+                        var extra = reason ? (' · ' + reason) : '';
+                        return '<div style="font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,monospace;color:rgba(247,249,249,0.7);padding:6px 8px;background:rgba(15,17,21,0.4);border-radius:4px;border-left:2px solid rgba(245,158,11,0.4);">' +
+                               '<span style="color:rgba(247,249,249,0.5);">' + ts + '</span> · <span style="color:#fbbf24;">' + actionShort + '</span>' + extra +
+                               '</div>';
+                    }).join('');
+                }
+            } catch (e) {
+                // Fail-silent — never break the page over a banner.
+                console.warn('[safety-drops] fetch failed:', e);
+            }
+        }
+
+        // Wire the click-to-expand toggle once.
+        (function _wireSafetyDropsToggle() {
+            document.addEventListener('DOMContentLoaded', function () {
+                var head = document.getElementById('safetyDropsHead');
+                var body = document.getElementById('safetyDropsBody');
+                var toggle = document.getElementById('safetyDropsToggle');
+                if (!head || !body || !toggle) return;
+                head.addEventListener('click', function () {
+                    var open = body.style.display !== 'none';
+                    body.style.display = open ? 'none' : '';
+                    toggle.textContent = open ? 'Show details \u25BE' : 'Hide details \u25B4';
+                });
+            });
+        })();
 
         // ── Owner-only Suspend + Delete actions ──────────────────────────
         function renderSuspendState(isSuspended) {
