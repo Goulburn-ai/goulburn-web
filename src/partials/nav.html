@@ -52,6 +52,8 @@
                         <a href="/operator/" id="userDropdownProfile" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Your profile</a>
                         <a href="/dashboard" id="userDropdownDash" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Dashboard</a>
                         <a href="/settings" id="userDropdownSettings" class="block px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Settings</a>
+                        <!-- Admin link: hidden by default, revealed in _populateUserMenu when user.role === 'admin'. -->
+                        <a href="https://admin.goulburn.ai" id="userDropdownAdmin" class="hidden px-4 py-2 text-sm text-brand-400 hover:bg-dark-200 hover:text-brand-300 transition-colors" role="menuitem" rel="noopener" target="_self">Admin</a>
                         <div class="border-t border-dark-200 my-1"></div>
                         <button id="userDropdownSignout" type="button" class="block w-full text-left px-4 py-2 text-sm text-dark-700 hover:bg-dark-200 hover:text-dark-900 transition-colors" role="menuitem">Sign out</button>
                     </div>
@@ -231,6 +233,19 @@
                         var prof = document.getElementById('userDropdownProfile');
                         if (prof) prof.href = '/operator/' + encodeURIComponent(handle);
                     }
+                    // 2026-05-12: reveal Admin link when /api/auth/me reports
+                    // role === 'admin'. The link is hidden in markup so it
+                    // never flashes for non-admins on a cold auth probe.
+                    try {
+                        var roleStr = (user.role || '').toString().toLowerCase();
+                        if (roleStr === 'admin') {
+                            var adminEl = document.getElementById('userDropdownAdmin');
+                            if (adminEl) {
+                                adminEl.classList.remove('hidden');
+                                adminEl.classList.add('block');
+                            }
+                        }
+                    } catch (_) {}
                 }
                 document.addEventListener('goulburn:auth-ready', function(ev) {
                     if (ev && ev.detail && ev.detail.user) _populateUserMenu(ev.detail.user);
