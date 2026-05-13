@@ -2801,10 +2801,16 @@ case 3:
                 $('ownerEmailDoneAddr').textContent = email;
                 $('ownerEmailVerifiedToken').value = token || '';
                 $('emailVerifyDone').style.display = 'block';
-                // Persist for survival across registration flow
+                // Persist for survival across registration flow + ACROSS TABS.
+                // localStorage (not sessionStorage) so a tab that completed verification
+                // can notify the original tab via storage events. Daniel 2026-05-14: bug
+                // where user typed "Iran2026" in tab A, verified in tab B, lost form state.
                 try {
-                    sessionStorage.setItem('goulburn_owner_email', email);
-                    sessionStorage.setItem('goulburn_owner_email_token', token || '');
+                    var _stamp = JSON.stringify({ v: 1, email: email, token: token || '', t: Date.now() });
+                    localStorage.setItem('goulburn_owner_email_verified', _stamp);
+                    // Drop the old sessionStorage keys so we don't read stale per-tab state.
+                    sessionStorage.removeItem('goulburn_owner_email');
+                    sessionStorage.removeItem('goulburn_owner_email_token');
                 } catch(_){}
             }
             function setFormState() {
@@ -2813,6 +2819,7 @@ case 3:
                 $('emailVerifyForm').style.display = 'block';
                 $('ownerEmailVerifiedToken').value = '';
                 try {
+                    localStorage.removeItem('goulburn_owner_email_verified');
                     sessionStorage.removeItem('goulburn_owner_email');
                     sessionStorage.removeItem('goulburn_owner_email_token');
                 } catch(_){}
@@ -2901,15 +2908,113 @@ case 3:
                         window.history.replaceState({}, document.title, clean);
                     } catch(_){}
                 } else {
-                    // Restore from session if operator has a verified email already
-                    var stashedEmail = sessionStorage.getItem('goulburn_owner_email');
-                    var stashedToken = sessionStorage.getItem('goulburn_owner_email_token');
-                    if (stashedEmail && stashedToken) setDoneState(stashedEmail, stashedToken);
+                    // Restore from localStorage if the operator already verified
+                    // (cross-tab survival: another tab may have completed it).
+                    try {
+                        var _raw = localStorage.getItem('goulburn_owner_email_verified');
+                        if (_raw) {
+                            var _parsed = JSON.parse(_raw);
+                            // Honour a 24h freshness window — past that we make them re-verify.
+                            if (_parsed && _parsed.email && _parsed.token
+                                && _parsed.t && (Date.now() - _parsed.t) < 24*60*60*1000) {
+                                setDoneState(_parsed.email, _parsed.token);
+                            } else if (_parsed) {
+                                // Stale — clear it so we don't re-show a 2-day-old verified state.
+                                localStorage.removeItem('goulburn_owner_email_verified');
+                            }
+                        } else {
+                            // Last-resort migration path: legacy sessionStorage keys from
+                            // before this fix. Promote to localStorage on first sight.
+                            var _legacyE = sessionStorage.getItem('goulburn_owner_email');
+                            var _legacyT = sessionStorage.getItem('goulburn_owner_email_token');
+                            if (_legacyE && _legacyT) setDoneState(_legacyE, _legacyT);
+                        }
+                    } catch(_){}
                 }
+            } catch(_){}
+
+            // Cross-tab sync: if tab B completes verification, tab A reacts immediately
+            // (storage events only fire in OTHER tabs of the same origin, not the writer).
+            try {
+                window.addEventListener('storage', function(ev) {
+                    if (ev.key !== 'goulburn_owner_email_verified') return;
+                    if (!ev.newValue) {
+                        // Another tab cleared it (e.g. user changed email). Reset form state here too.
+                        try { setFormState(); } catch(_){}
+                        return;
+                    }
+                    try {
+                        var p = JSON.parse(ev.newValue);
+                        if (p && p.email && p.token) setDoneState(p.email, p.token);
+                    } catch(_){}
+                });
             } catch(_){}
 
             // Expose helpers for Step 3 wire-up + debugging
             window.emailVerifyUI = { setSentState: setSentState, setDoneState: setDoneState, setFormState: setFormState };
+
+            // ── Form-field persistence (Daniel 2026-05-14 fix) ────────────────────
+            // Persist agent_name + description + endpoint URL + declared model to
+            // localStorage on every input change so a user who hit the verify-email
+            // link in a new tab still sees the fields they typed in the original tab.
+            // Cleared when registration succeeds (see submit handler).
+            try {
+                var FORM_LS_KEY = 'goulburn_register_form_v1';
+                var FIELDS = [
+                    'agentName', 'agentDescription', 'agentCapabilities',
+                    'agentEndpointUrl', 'agentDeclaredModel', 'ownerEmailInput',
+                ];
+                function _persistForm() {
+                    try {
+                        var snap = { t: Date.now(), v: 1 };
+                        FIELDS.forEach(function(id) {
+                            var el = document.getElementById(id);
+                            if (el && el.value) snap[id] = el.value;
+                        });
+                        if (Object.keys(snap).length > 2) {
+                            localStorage.setItem(FORM_LS_KEY, JSON.stringify(snap));
+                        }
+                    } catch(_){}
+                }
+                function _restoreForm() {
+                    try {
+                        var raw = localStorage.getItem(FORM_LS_KEY);
+                        if (!raw) return;
+                        var snap = JSON.parse(raw);
+                        // 24h freshness
+                        if (!snap || !snap.t || (Date.now() - snap.t) >= 24*60*60*1000) {
+                            localStorage.removeItem(FORM_LS_KEY);
+                            return;
+                        }
+                        FIELDS.forEach(function(id) {
+                            var el = document.getElementById(id);
+                            if (el && !el.value && snap[id]) {
+                                el.value = snap[id];
+                                // Trigger any change-listeners that depend on the value
+                                try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch(_){}
+                            }
+                        });
+                    } catch(_){}
+                }
+                // Wire input listeners + restore on first paint
+                function _wireFormPersistence() {
+                    _restoreForm();
+                    FIELDS.forEach(function(id) {
+                        var el = document.getElementById(id);
+                        if (el) el.addEventListener('input', _persistForm);
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', _wireFormPersistence);
+                } else {
+                    _wireFormPersistence();
+                }
+                // Expose the clear helper so the submit success handler can call it
+                window._goulburnClearRegisterForm = function() {
+                    try { localStorage.removeItem(FORM_LS_KEY); } catch(_){}
+                    try { localStorage.removeItem('goulburn_owner_email_verified'); } catch(_){}
+                };
+            } catch(_){}
         })();
 
         // ── Submit Registration ──
@@ -3520,8 +3625,9 @@ case 3:
       });
       btn.addEventListener('click', function(){
         if (btn.disabled) return;
-        // Clear sessionStorage now that user has confirmed (defensive cleanup).
+        // Clear sessionStorage + localStorage now that user has confirmed (defensive cleanup).
         try { sessionStorage.removeItem('goulburn_new_agent_key'); } catch(e){}
+        try { if (window._goulburnClearRegisterForm) window._goulburnClearRegisterForm(); } catch(e){}
         // Same routing logic as before, but only after explicit confirmation.
         var hasHumanSession = false;
         try { hasHumanSession = !!(window.goulburnAuth && goulburnAuth.isAuthenticated && goulburnAuth.isAuthenticated()); } catch(e){}
