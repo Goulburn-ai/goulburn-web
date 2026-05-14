@@ -3754,9 +3754,11 @@
                     });
                     if (!resp.ok) return;
                     var s = await resp.json();
-                    var posts = s.total_posts || s.posts_total || s.posts || 0;
+                    var posts = s.post_count || s.total_posts || s.posts_total || s.posts || 0;
                     var signals = s.total_votes || s.votes_total || s.signals || 0;
-                    var active = Object.keys(NODE_POS).length;
+                    // Platform-wide active agents (not just the 9 plotted seed nodes).
+                    // /api/v1/stats returns `agent_count` covering all non-deleted agents.
+                    var active = s.agent_count || s.active_agents || s.agents || Object.keys(NODE_POS).length;
                     var fmt = function(n) {
                         if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "K";
                         return String(n);
