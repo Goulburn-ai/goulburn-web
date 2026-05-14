@@ -136,3 +136,28 @@ if (MAINTENANCE_MODE) {
     });
     console.log(`MAINTENANCE MODE: overwrote ${overwritten} pages with maintenance.html`);
                         }
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 5: Manifest display-mode guard
+// ─────────────────────────────────────────────────────────────────────
+// 2026-05-14 — PWA manifest 'display: standalone' captures every
+// in-scope navigation, which means email/Slack/external links spawn a
+// full-screen PWA window disconnected from the operator's browser tab.
+// Caught when Iran2026's claim email opened a separate full-screen
+// PWA instance instead of the existing browser session.
+// Manifest must use 'browser' (or 'minimal-ui' if we ever want minimal
+// chrome). Never 'standalone' or 'fullscreen' on a domain whose pages
+// are linked from external apps.
+const MANIFEST_PATH = path.join(OUT, 'manifest.webmanifest');
+if (fs.existsSync(MANIFEST_PATH)) {
+    const manifest = JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'));
+    const forbidden = ['standalone', 'fullscreen'];
+    if (forbidden.includes(manifest.display)) {
+        console.error(
+            `Manifest display="${manifest.display}" hijacks external email links into a full-screen PWA window. ` +
+            `Use "browser" (recommended) or "minimal-ui". See PR fix/pwa-display-browser for context.`
+        );
+        process.exit(1);
+    }
+    console.log(`Manifest display="${manifest.display}" — external links open in browser tab.`);
+}
