@@ -4798,7 +4798,15 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     { "@type": "PropertyValue", "name": "trustScore", "value": score }
                 ]
             };
-            document.getElementById('jsonLd').textContent = JSON.stringify(ld);
+            // Escape </ so a malicious description containing "</script>" can't
+            // break out of the <script type="application/ld+json"> tag. The HTML
+            // parser closes <script> on any </ sequence regardless of JSON quoting.
+            // Also harden against U+2028/U+2029 — valid in JSON but illegal in JS strings.
+            var jsonText = JSON.stringify(ld)
+                .replace(/<\//g, '<\\/')
+                .replace(/\u2028/g, '\\u2028')
+                .replace(/\u2029/g, '\\u2029');
+            document.getElementById('jsonLd').textContent = jsonText;
         }
  
         // ── Main Load ───────────────────────────────────────
