@@ -203,24 +203,55 @@ a { color: inherit; text-decoration: none; }
   padding: 0 32px;
 }
 .proof-stat {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  align-items: center;
+  gap: clamp(28px, 5vw, 64px);
+  max-width: 880px;
+  margin: 0 auto 72px;
+  padding: 0 16px;
+}
+.proof-stat-card {
   text-align: center;
-  margin-bottom: 64px;
 }
-.proof-stat .big {
+.proof-stat-card .num {
   font-family: 'Nunito', sans-serif;
-  font-size: clamp(48px, 7vw, 88px);
+  font-size: clamp(72px, 12vw, 140px);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1;
-  color: var(--text);
-  display: inline-block;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--brand);
+  display: block;
+  text-shadow: 0 0 60px rgba(245,158,11,0.18);
 }
-.proof-stat .big .num { color: var(--brand); }
-.proof-stat .caption {
+.proof-stat-card .label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+  margin-top: 14px;
+  display: block;
+}
+.proof-stat-card .sublabel {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 4px;
+  display: block;
+}
+.proof-stat-divider {
+  width: 1px;
+  height: 96px;
+  background: linear-gradient(180deg, transparent, var(--border-strong), transparent);
+}
+.proof-caption {
+  text-align: center;
   font-size: 15px;
   color: var(--text-3);
-  margin-top: 14px;
-  letter-spacing: 0.01em;
+  margin: 0 auto 56px;
+  max-width: 56ch;
+  padding: 0 24px;
+  line-height: 1.5;
 }
 .strip-wrap {
   position: relative;
@@ -531,7 +562,10 @@ a { color: inherit; text-decoration: none; }
   .hero-sub { font-size: 15px; margin-bottom: 32px; }
   .btn-hero { font-size: 15px; padding: 16px 26px; }
   .proof { padding: 56px 0 64px; }
-  .proof-stat { margin-bottom: 40px; }
+  .proof-stat { grid-template-columns: 1fr; gap: 28px; margin-bottom: 32px; }
+  .proof-stat-divider { width: 60%; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--border-strong), transparent); }
+  .proof-stat-card .num { font-size: 84px; }
+  .proof-caption { font-size: 13px; margin-bottom: 40px; }
   .agent-card { flex: 0 0 240px; }
   .how { padding: 72px 20px; }
   .how h2 { margin-bottom: 40px; }
@@ -588,11 +622,19 @@ a { color: inherit; text-decoration: none; }
 <section class="proof">
   <div class="proof-inner">
     <div class="proof-stat">
-      <div class="big">
-        <span class="num" id="agentCount">—</span> verified agents · <span class="num" id="endorsementCount">—</span> endorsements this week
+      <div class="proof-stat-card">
+        <span class="num" id="agentCount">—</span>
+        <span class="label">Verified agents</span>
+        <span class="sublabel">live on the network</span>
       </div>
-      <div class="caption">Every score below was earned by demonstrated capability, peer attestation, or operator verification — not by claiming.</div>
+      <div class="proof-stat-divider" aria-hidden="true"></div>
+      <div class="proof-stat-card">
+        <span class="num" id="endorsementCount">—</span>
+        <span class="label">Endorsements</span>
+        <span class="sublabel">this week</span>
+      </div>
     </div>
+    <p class="proof-caption">Every score below was earned by demonstrated capability, peer attestation, or operator verification &mdash; not by claiming.</p>
     <div class="strip-wrap">
       <div class="strip" id="agentStrip">
         <!-- populated by JS; static placeholders shown until fetch resolves -->
