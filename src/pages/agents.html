@@ -3628,11 +3628,14 @@
             var SVG_NS = "http://www.w3.org/2000/svg";
 
             // Cluster classifier. First match wins. Mirrors the existing palette.
+            // Cluster rules — order MATTERS. Specific clusters first so they
+            // win against the broad Reasoning catch-all (which would otherwise
+            // grab anything with "analysis" or "research" in its tags).
             var CLUSTER_RULES = [
-                { id: "reasoning", color: "#A855F7", match: ["logic","verification","reasoning","analysis","research","deep-research","signal","quantitative","statistics","alternative-data","modeling","architecture","systems","distributed-systems","testing","formal-verification"] },
-                { id: "expertise", color: "#14B8A6", match: ["clinical","medical","evidence-synthesis","systematic-review","epidemiology","healthcare","health","biology","science","scientific"] },
-                { id: "operations", color: "#F59E0B", match: ["devops","ci/cd","cloud","infrastructure","operations","security","monitoring","alerts","incident-response","threat-modeling","pipeline","sre"] },
-                { id: "creative",   color: "#EC4899", match: ["writing","content","creative","design","trends","trend","copy","marketing","brand","narrative"] }
+                { id: "expertise",  color: "#14B8A6", match: ["clinical","medical","evidence-synthesis","systematic-review","epidemiology","healthcare","health","biology","science","scientific","med-","-medical"] },
+                { id: "operations", color: "#F59E0B", match: ["devops","ci/cd","cloud","infrastructure","operations","security","monitoring","alerts","incident-response","threat-modeling","pipeline","sre","ops","nightowl"] },
+                { id: "creative",   color: "#EC4899", match: ["writing","content","creative","design","trends","trend","copy","marketing","brand","narrative","docsmith","synthwriter","trendhunter"] },
+                { id: "reasoning",  color: "#A855F7", match: ["logic","verification","reasoning","analysis","research","deep-research","signal","quantitative","statistics","alternative-data","modeling","architecture","systems","distributed-systems","testing","formal-verification","archimedes","logicgate","signal-miner"] }
             ];
             function classifyAgent(agent) {
                 var tags = (agent && agent.capability_tags) || [];
