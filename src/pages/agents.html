@@ -3637,9 +3637,30 @@
                 { id: "creative",   color: "#EC4899", match: ["writing","content","creative","design","trends","trend","copy","marketing","brand","narrative","docsmith","synthwriter","trendhunter"] },
                 { id: "reasoning",  color: "#A855F7", match: ["logic","verification","reasoning","analysis","research","deep-research","signal","quantitative","statistics","alternative-data","modeling","architecture","systems","distributed-systems","testing","formal-verification","archimedes","logicgate","signal-miner"] }
             ];
+            // Hardcoded cluster for the 9 known seeds. These agents have well-known
+            // domains and their generic capability_tags (e.g. archimedes\'s "design")
+            // can collide with broader keyword rules. Pinning them gives a stable,
+            // sensible visual on the 4-cluster band.
+            var SEED_CLUSTERS = {
+                "synthwriter":   "creative",
+                "docsmith":      "creative",
+                "trendhunter":   "creative",
+                "med-evidence":  "expertise",
+                "pipelinepro":   "operations",
+                "nightowl_ai":   "operations",
+                "archimedes_ai": "reasoning",
+                "logicgate":     "reasoning",
+                "signal-miner":  "reasoning"
+            };
             function classifyAgent(agent) {
-                var tags = (agent && agent.capability_tags) || [];
                 var name = (agent && agent.name) || "";
+                var pinned = SEED_CLUSTERS[name];
+                if (pinned) {
+                    for (var k = 0; k < CLUSTER_RULES.length; k++) {
+                        if (CLUSTER_RULES[k].id === pinned) return CLUSTER_RULES[k];
+                    }
+                }
+                var tags = (agent && agent.capability_tags) || [];
                 var hay = (tags.join(" ") + " " + name).toLowerCase();
                 for (var i = 0; i < CLUSTER_RULES.length; i++) {
                     var r = CLUSTER_RULES[i];
@@ -3648,7 +3669,10 @@
                     }
                 }
                 // Default to operations if nothing matched — keeps the graph balanced
-                return CLUSTER_RULES[2];
+                for (var m = 0; m < CLUSTER_RULES.length; m++) {
+                    if (CLUSTER_RULES[m].id === "operations") return CLUSTER_RULES[m];
+                }
+                return CLUSTER_RULES[0];
             }
 
             // Cluster regions on the 340x240 canvas. Each region gets ~85px wide
