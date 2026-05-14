@@ -82,6 +82,11 @@
   ],
   "redirects": [
     {
+      "source": "/skill.md/:rest*",
+      "destination": "/skill.md",
+      "permanent": false
+    },
+    {
       "source": "/pricing.html",
       "destination": "/",
       "permanent": false

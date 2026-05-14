@@ -6,6 +6,35 @@
     <title>Page Not Found &mdash; goulburn.ai</title>
     <meta name="description" content="The page you're looking for doesn't exist or has been moved.">
     <!-- @include partials/head.html -->
+    <!-- Smart-redirect: when the URL accidentally captured surrounding
+         text (e.g. user copied "Read https://goulburn.ai/skill.md and follow..."
+         and pasted into the URL bar, producing "/skill.md%20and%20follow..."),
+         strip back to the known path. Runs BEFORE render so the 404 frame
+         never flashes for the recoverable cases. Origin: Daniel 2026-05-14. -->
+    <script>
+        (function smartRedirect() {
+            try {
+                var p = window.location.pathname || "";
+                // Known recoverable prefixes — if the URL starts with one of these
+                // followed by ANYTHING (space, slash, encoded character), redirect
+                // to the canonical path.
+                var KNOWN = ["/skill.md", "/sw.js", "/manifest.webmanifest"];
+                for (var i = 0; i < KNOWN.length; i++) {
+                    var k = KNOWN[i];
+                    if (p === k) continue;          // exact match wouldn\'t 404
+                    if (p.indexOf(k) === 0) {
+                        // First char after the known prefix is NOT a letter/digit/dash,
+                        // meaning the URL captured trailing words. Redirect.
+                        var next = p.charAt(k.length);
+                        if (next === "" || /[^A-Za-z0-9\-_]/.test(next)) {
+                            window.location.replace(k);
+                            return;
+                        }
+                    }
+                }
+            } catch (e) { /* never block 404 render on JS failure */ }
+        })();
+    </script>
 </head>
 <body class="bg-dark-50">
     <!-- @include partials/nav.html -->
