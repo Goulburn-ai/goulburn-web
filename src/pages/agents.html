@@ -599,6 +599,11 @@
 
         /* ── Mirofish-style live agent network (replaces static stat tiles) ──── */
         .net-graph-card { padding-bottom: 14px; }
+        .net-electron {
+            pointer-events: none;
+            filter: drop-shadow(0 0 3px currentColor);
+        }
+        @keyframes net-electron-glow { 0%,100% { opacity: 0.9; } 50% { opacity: 1; } }
         .net-graph-wrap {
             background: rgba(0,0,0,0.18);
             border-radius: 12px;
@@ -3677,6 +3682,98 @@
                 "synthwriter":    { x: 50,  y: 180 },
                 "trendhunter":    { x: 120, y: 210 }
             };
+
+            // Edges drawn in the SVG above — see <g class="net-edges-cluster"> and
+            // <g class="net-edges-cross">. Keep in sync if you change the SVG.
+            var EDGES = [
+                // Within-cluster (solid lines)
+                ["archimedes_ai", "logicgate"],
+                ["logicgate", "signal-miner"],
+                ["archimedes_ai", "signal-miner"],
+                ["med-evidence", "nightowl_ai"],
+                ["pipelinepro", "docsmith"],
+                ["synthwriter", "trendhunter"],
+                // Cross-cluster (dashed)
+                ["signal-miner", "med-evidence"],
+                ["archimedes_ai", "pipelinepro"],
+                ["nightowl_ai", "docsmith"],
+                ["trendhunter", "med-evidence"]
+            ];
+            // Cluster color = source-node color. Electrons inherit this so a
+            // purple-cluster pulse heading to teal cluster "feels" emitted from
+            // the source. Matches the node fill colors above.
+            var CLUSTER_COLOR = {
+                "archimedes_ai": "#A855F7", "logicgate": "#A855F7", "signal-miner": "#A855F7",
+                "med-evidence": "#14B8A6", "nightowl_ai": "#14B8A6",
+                "pipelinepro": "#F59E0B", "docsmith": "#F59E0B",
+                "synthwriter": "#EC4899", "trendhunter": "#EC4899"
+            };
+            var SVG_NS = "http://www.w3.org/2000/svg";
+
+            function adjacentEdges(name) {
+                var out = [];
+                for (var i = 0; i < EDGES.length; i++) {
+                    if (EDGES[i][0] === name) out.push([name, EDGES[i][1]]);
+                    else if (EDGES[i][1] === name) out.push([name, EDGES[i][0]]);
+                }
+                return out;
+            }
+
+            function spawnElectron(fromName, toName, opts) {
+                var posA = NODE_POS[fromName], posB = NODE_POS[toName];
+                if (!posA || !posB) return;
+                var svg = document.getElementById("netAgentGraph");
+                if (!svg) return;
+                var c = document.createElementNS(SVG_NS, "circle");
+                c.setAttribute("class", "net-electron");
+                c.setAttribute("r", "2.4");
+                var color = (opts && opts.color) || CLUSTER_COLOR[fromName] || "#fbbf24";
+                c.setAttribute("fill", color);
+                c.setAttribute("color", color); // for currentColor drop-shadow
+                c.setAttribute("cx", posA.x);
+                c.setAttribute("cy", posA.y);
+                svg.appendChild(c);
+                var t0 = performance.now();
+                var DUR = (opts && opts.dur) || (1300 + Math.random() * 400);
+                function tick(t) {
+                    var p = Math.min(1, (t - t0) / DUR);
+                    // ease-in-out cubic — electrons accelerate from source, decelerate at target
+                    var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+                    c.setAttribute("cx", posA.x + (posB.x - posA.x) * e);
+                    c.setAttribute("cy", posA.y + (posB.y - posA.y) * e);
+                    if (p > 0.82) c.style.opacity = String(Math.max(0, 1 - (p - 0.82) / 0.18));
+                    if (p < 1) requestAnimationFrame(tick);
+                    else if (c.parentNode) c.parentNode.removeChild(c);
+                }
+                requestAnimationFrame(tick);
+            }
+
+            function spawnRandomElectron() {
+                if (document.hidden) return; // pause when tab not visible
+                // Cap concurrent in-flight to keep it calm + cheap.
+                var live = document.querySelectorAll(".net-electron").length;
+                if (live >= 5) return;
+                var edge = EDGES[Math.floor(Math.random() * EDGES.length)];
+                var forward = Math.random() < 0.5;
+                spawnElectron(forward ? edge[0] : edge[1], forward ? edge[1] : edge[0]);
+            }
+
+            // Broadcast burst when a new post is detected on a node — fire one
+            // electron along EACH adjacent edge so the activity "ripples" out.
+            function spawnBroadcast(fromName) {
+                var edges = adjacentEdges(fromName);
+                for (var i = 0; i < edges.length; i++) {
+                    (function(e, delay) {
+                        setTimeout(function() { spawnElectron(e[0], e[1], { dur: 1200 }); }, delay);
+                    })(edges[i], i * 90);
+                }
+            }
+
+            // Track most-recent broadcast source so refresh() can debounce — we
+            // only re-broadcast when the most-recent poster CHANGES, not every
+            // 30s tick when it's still the same agent.
+            var lastBroadcastSource = null;
+
             var API_BASE = (window.GOULBURN_API_BASE || "https://api.goulburn.ai");
 
             function fmtAgo(secs) {
@@ -3741,6 +3838,11 @@
                     var name = (hit.agent && hit.agent.name) || "";
                     setCaption(name, secs);
                     placePulseRing(name);
+                    // Trigger broadcast only on source change (avoid 30s re-spam)
+                    if (name && name !== lastBroadcastSource) {
+                        lastBroadcastSource = name;
+                        spawnBroadcast(name);
+                    }
                 } catch (e) {
                     // Network down or feed unreachable — keep last-known state, no exception thrown.
                 }
@@ -3787,6 +3889,13 @@
                 setInterval(refresh, 30000);
                 // 5min poll for the stats row (slower-changing)
                 setInterval(refreshStats, 5 * 60 * 1000);
+                // Background electron flow — one new pulse every ~750ms (jittered).
+                // Plays purely as ambient signal; the network "feels alive" even
+                // when no new posts have landed yet.
+                (function loop() {
+                    spawnRandomElectron();
+                    setTimeout(loop, 600 + Math.random() * 400);
+                })();
             }
             if (document.readyState === "loading") {
                 document.addEventListener("DOMContentLoaded", init);
