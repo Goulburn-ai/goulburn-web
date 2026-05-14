@@ -3783,7 +3783,19 @@
                     var ag = picked[k];
                     var rule = classifyAgent(ag);
                     var pos = posInRegion(CLUSTER_REGIONS[rule.id], ag.name);
-                    NODE_POS[ag.name] = { x: pos.x, y: pos.y, color: rule.color, cluster: rule.id };
+                    // Store baseX/baseY as the anchor; x/y get jiggled by the
+                    // bounce loop, but we always offset from base so the cluster
+                    // layout never drifts permanently.
+                    NODE_POS[ag.name] = {
+                        x: pos.x, y: pos.y,
+                        baseX: pos.x, baseY: pos.y,
+                        color: rule.color, cluster: rule.id,
+                        phase: ((hash32(ag.name) % 1000) / 1000) * Math.PI * 2,
+                        freqX: 0.18 + ((hash32(ag.name) % 70) / 1000),
+                        freqY: 0.22 + ((hash32(ag.name + ".y") % 70) / 1000),
+                        ampX: 2.2 + ((hash32(ag.name) % 100) / 100),
+                        ampY: 1.8 + ((hash32(ag.name + ".a") % 100) / 100)
+                    };
                     byCluster[rule.id].push(ag.name);
                 }
 
@@ -3858,7 +3870,9 @@
                     var line = document.createElementNS(SVG_NS, "line");
                     line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
                     line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
-                    // Cross-cluster edges are dashed and thinner
+                    // Stash from/to on the element so the bounce loop can update endpoints
+                    line.setAttribute("data-from", EDGES[i][0]);
+                    line.setAttribute("data-to", EDGES[i][1]);
                     var sameCluster = a.cluster === b.cluster;
                     line.setAttribute("stroke", sameCluster ? a.color : "rgba(255,255,255,0.16)");
                     if (!sameCluster) line.setAttribute("stroke-dasharray", "2,3");
@@ -3989,24 +4003,28 @@
                 return out;
             }
             function spawnElectron(fromName, toName, opts) {
-                var posA = NODE_POS[fromName], posB = NODE_POS[toName];
-                if (!posA || !posB) return;
+                var posA0 = NODE_POS[fromName], posB0 = NODE_POS[toName];
+                if (!posA0 || !posB0) return;
                 var svg = document.getElementById("netAgentGraph");
                 if (!svg) return;
                 var c = document.createElementNS(SVG_NS, "circle");
                 c.setAttribute("class", "net-electron");
                 c.setAttribute("r", "2.4");
-                var color = (opts && opts.color) || posA.color || "#fbbf24";
+                var color = (opts && opts.color) || posA0.color || "#fbbf24";
                 c.setAttribute("fill", color);
                 c.setAttribute("color", color);
-                c.setAttribute("cx", posA.x);
-                c.setAttribute("cy", posA.y);
+                c.setAttribute("cx", posA0.x);
+                c.setAttribute("cy", posA0.y);
                 svg.appendChild(c);
                 var t0 = performance.now();
                 var DUR = (opts && opts.dur) || (1300 + Math.random() * 400);
                 function tick(t) {
                     var p = Math.min(1, (t - t0) / DUR);
                     var e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+                    // Re-read NODE_POS every frame so the electron tracks the
+                    // bouncing source/target instead of locking to spawn-time coords.
+                    var posA = NODE_POS[fromName] || posA0;
+                    var posB = NODE_POS[toName] || posB0;
                     c.setAttribute("cx", posA.x + (posB.x - posA.x) * e);
                     c.setAttribute("cy", posA.y + (posB.y - posA.y) * e);
                     if (p > 0.82) c.style.opacity = String(Math.max(0, 1 - (p - 0.82) / 0.18));
@@ -4065,12 +4083,72 @@
                 pulse.title = "Live — updates every 30s";
             }
 
+            // Subtle bounce loop. Each node oscillates ~2-3px around its anchor.
+            // Edge lines + pulse ring follow on every frame; electrons re-read
+            // NODE_POS in their own tick. Pauses when the tab is hidden.
+            function startNodeBounce() {
+                var t0 = performance.now();
+                function tick() {
+                    if (document.hidden) { requestAnimationFrame(tick); return; }
+                    var now = performance.now();
+                    var t = (now - t0) / 1000;
+                    // 1. Update each node's x/y from its base + sinusoidal jitter
+                    var names = Object.keys(NODE_POS);
+                    for (var i = 0; i < names.length; i++) {
+                        var p = NODE_POS[names[i]];
+                        if (typeof p.baseX !== "number") { p.baseX = p.x; p.baseY = p.y; }
+                        p.x = p.baseX + (p.ampX || 2.5) * Math.sin(t * (p.freqX || 0.22) * 2 * Math.PI + (p.phase || 0));
+                        p.y = p.baseY + (p.ampY || 2.0) * Math.cos(t * (p.freqY || 0.27) * 2 * Math.PI + (p.phase || 0) * 1.3);
+                    }
+                    // 2. Update node circle + text positions
+                    var nodeGs = document.querySelectorAll("#netDynNodes .net-node");
+                    for (var n = 0; n < nodeGs.length; n++) {
+                        var g = nodeGs[n];
+                        var name = g.getAttribute("data-agent");
+                        var pp = NODE_POS[name];
+                        if (!pp) continue;
+                        var circle = g.querySelector("circle");
+                        if (circle) { circle.setAttribute("cx", pp.x); circle.setAttribute("cy", pp.y); }
+                        var text = g.querySelector("text");
+                        if (text) {
+                            text.setAttribute("x", pp.x);
+                            var labelAbove = (pp.cluster === "reasoning" || pp.cluster === "expertise") && pp.baseY < 90;
+                            text.setAttribute("y", labelAbove ? (pp.y - 11) : (pp.y + 17));
+                        }
+                    }
+                    // 3. Update edge endpoints
+                    var lines = document.querySelectorAll("#netDynEdges line");
+                    for (var m = 0; m < lines.length; m++) {
+                        var fr = lines[m].getAttribute("data-from");
+                        var to = lines[m].getAttribute("data-to");
+                        var a = NODE_POS[fr], b = NODE_POS[to];
+                        if (!a || !b) continue;
+                        lines[m].setAttribute("x1", a.x);
+                        lines[m].setAttribute("y1", a.y);
+                        lines[m].setAttribute("x2", b.x);
+                        lines[m].setAttribute("y2", b.y);
+                    }
+                    // 4. Update pulse ring position
+                    if (lastBroadcastSource) {
+                        var ring = document.getElementById("netPulseRing");
+                        var rp = NODE_POS[lastBroadcastSource];
+                        if (ring && rp && ring.style.display !== "none") {
+                            ring.setAttribute("transform", "translate(" + rp.x + "," + rp.y + ")");
+                        }
+                    }
+                    requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            }
+
             async function init() {
                 wirePulse();
                 // Build the node set FIRST — refresh() depends on NODE_POS
                 await buildNodes();
                 refresh();
                 refreshStats();
+                // Start the bounce loop now that nodes exist
+                startNodeBounce();
                 // 30s poll for the live pulse + caption
                 setInterval(refresh, 30000);
                 // 5min poll for the stats row (slower-changing)
