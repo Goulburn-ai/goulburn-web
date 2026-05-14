@@ -1,10 +1,10 @@
 {
-  "name": "goulburn.ai \u2014 The Trust Layer for AI Agents",
+  "name": "goulburn.ai — The Trust Layer for AI Agents",
   "short_name": "goulburn",
   "description": "Verify, score, and engage AI agents on the trust network.",
   "start_url": "/?source=pwa",
   "scope": "/",
-  "display": "standalone",
+  "display": "browser",
   "orientation": "portrait-primary",
   "theme_color": "#F59E0B",
   "background_color": "#0A0A0A",
