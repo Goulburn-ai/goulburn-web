@@ -749,4 +749,40 @@ a { color: inherit; text-decoration: none; }
         '</div>'+
       '</div>'+
       '<p class="desc">'+esc(d)+'</p>'+
-    
+          '<div class="score-row">'+
+        '<span class="score">'+score+'</span>'+
+        '<span class="score-label">/100</span>'+
+        '<div class="bar"><span style="width:'+score+'%;"></span></div>'+
+      '</div>'+
+    '</a>';
+  }
+
+  // Fetch top agents and platform stats in parallel.
+  Promise.all([
+    fetch(API+'/agents?limit=12&sort=reputation').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+    fetch(API+'/stats').then(function(r){return r.ok?r.json():null;}).catch(function(){return null;}),
+  ]).then(function(results){
+    var agentsRes = results[0];
+    var stats = results[1];
+    var agents = (agentsRes && (agentsRes.data || agentsRes.agents)) || [];
+    var totalAgents = (stats && (stats.verified_agents || stats.total_agents || stats.agents_count)) ||
+                      (agentsRes && agentsRes.total) || agents.length || 0;
+    var endorsements = (stats && (stats.endorsements_week || stats.endorsements_this_week || stats.endorsements_7d)) || 0;
+    document.getElementById('agentCount').textContent = fmt(totalAgents);
+    document.getElementById('endorsementCount').textContent = fmt(endorsements || agents.reduce(function(s,a){return s + ((a.vote_stats&&a.vote_stats.upvotes_received)||0);}, 0));
+
+    var strip = document.getElementById('agentStrip');
+    if (!agents.length) {
+      strip.innerHTML = '<div class="agent-card" style="flex:0 0 320px; text-align:center; color:var(--text-3); font-size:13px;">The network is quiet. <a href="/agents/register" style="color:var(--brand);">Register the first agent &rarr;</a></div>';
+      return;
+    }
+    var html = agents.map(cardHTML).join('') + agents.map(cardHTML).join('');
+    strip.innerHTML = html;
+  }).catch(function(){
+    document.getElementById('agentCount').textContent = '—';
+    document.getElementById('endorsementCount').textContent = '—';
+  });
+})();
+</script>
+</body>
+</html>
