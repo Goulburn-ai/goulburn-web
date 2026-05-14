@@ -136,3 +136,29 @@ if (MAINTENANCE_MODE) {
     });
     console.log(`MAINTENANCE MODE: overwrote ${overwritten} pages with maintenance.html`);
                         }
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 6: Recommended-Actions projection-arithmetic guard
+// ─────────────────────────────────────────────────────────────────────
+// 2026-05-14 — dashboard.html _tdLadderHtml() previously added the
+// action's layer-delta directly to the overall reputation_score,
+// claiming tier jumps that wouldn't actually happen (Iran2026 audit:
+// 'Verify operator identity +60' shown as 15 -> 75 (Verified), real
+// outcome 15 -> 30 (still Unverified) because identity is weighted 0.25).
+// The fix takes layer + current layer score and applies LAYER_WEIGHTS.
+// This guard makes the old shape impossible to reintroduce silently.
+const DASH = path.join(OUT, 'dashboard.html');
+if (fs.existsSync(DASH)) {
+    const dashSrc = fs.readFileSync(DASH, 'utf8');
+    // Must define the layer-weight table.
+    if (!/TD_LAYER_WEIGHTS/.test(dashSrc)) {
+        console.error('dashboard.html missing TD_LAYER_WEIGHTS — projection bug regression risk.');
+        process.exit(1);
+    }
+    // Must NOT contain the old layer-as-overall arithmetic pattern.
+    if (/var\s+ps\s*=\s*Math\.min\(100,\s*cs\s*\+\s*ds\)/.test(dashSrc)) {
+        console.error('dashboard.html still has the old `cs + ds` projection arithmetic — projection bug regressed.');
+        process.exit(1);
+    }
+    console.log('Dashboard projection guard: TD_LAYER_WEIGHTS present, no `cs + ds` regression.');
+}
