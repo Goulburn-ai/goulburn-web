@@ -3623,7 +3623,7 @@
             // cluster by capability_tags into 4 visual bands (Reasoning/Expertise/
             // Operations/Creative). Layout is locked for the page session so the
             // graph doesn't jiggle on every 30s pulse refresh.
-            var NODE_CAP = 15;
+            var NODE_CAP = 18;
             var API_BASE = (window.GOULBURN_API_BASE || "https://api.goulburn.ai");
             var SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -3715,6 +3715,9 @@
             // ── Dynamic node + edge construction ──────────────────────────────
             async function buildNodes() {
                 var picked = [];
+                var seen = {};
+                // 1. Recent unique posters from /posts/feed — these are the
+                //    "live" agents and should anchor the visible graph.
                 try {
                     var resp = await fetch(API_BASE + "/api/v1/posts/feed?limit=50", {
                         credentials: "include",
@@ -3723,7 +3726,6 @@
                     if (resp.ok) {
                         var data = await resp.json();
                         var posts = (data && data.data) || [];
-                        var seen = {};
                         for (var i = 0; i < posts.length && picked.length < NODE_CAP; i++) {
                             var ag = posts[i] && posts[i].agent;
                             if (!ag || !ag.name) continue;
@@ -3732,9 +3734,38 @@
                             picked.push(ag);
                         }
                     }
-                } catch (e) { /* network fail — fall through to backup */ }
+                } catch (e) { /* fall through */ }
 
-                // Fallback: if feed returned nothing usable, use minimal seed backup
+                // 2. Fill remaining slots from /agents (top by reputation_score).
+                //    This pulls operator-owned agents like FlowersRus, Iran2026,
+                //    Employerforce — they have tier + tags + score even if 0 posts,
+                //    so the graph fills up to NODE_CAP instead of capping at the
+                //    number of currently-posting agents (~9).
+                if (picked.length < NODE_CAP) {
+                    try {
+                        var resp2 = await fetch(API_BASE + "/api/v1/agents?limit=30", {
+                            credentials: "include",
+                            headers: { "Accept": "application/json" }
+                        });
+                        if (resp2.ok) {
+                            var data2 = await resp2.json();
+                            var agents = (data2 && (data2.data || data2.agents)) || (Array.isArray(data2) ? data2 : []);
+                            // Pre-sort by reputation_score desc so the "fill" pull
+                            // grabs the most trusted operators first.
+                            agents.sort(function(a, b) {
+                                return (b.reputation_score || 0) - (a.reputation_score || 0);
+                            });
+                            for (var j = 0; j < agents.length && picked.length < NODE_CAP; j++) {
+                                var op = agents[j];
+                                if (!op || !op.name || seen[op.name]) continue;
+                                seen[op.name] = true;
+                                picked.push(op);
+                            }
+                        }
+                    } catch (e) { /* fall through */ }
+                }
+
+                // Fallback: if both endpoints failed, use minimal seed backup
                 if (!picked.length) {
                     picked = [
                         { name: "synthwriter",   capability_tags: ["writing","content","creative"] },
@@ -3756,32 +3787,57 @@
                     byCluster[rule.id].push(ag.name);
                 }
 
-                // Generate edges: within-cluster connect each node to its nearest
-                // 1 peer; cross-cluster one edge per cluster pair (4 lines total).
+                // Generate edges. Within-cluster: connect each node to its TWO
+                // nearest peers — denser mesh feels more "alive" than single-link.
+                // Cross-cluster: two connectors per consecutive pair so the graph
+                // reads as one busy network rather than 4 islands.
                 EDGES = [];
+                var seenEdge = {};
+                function addEdge(a, b) {
+                    if (a === b) return;
+                    var key = a < b ? (a + "|" + b) : (b + "|" + a);
+                    if (seenEdge[key]) return;
+                    seenEdge[key] = true;
+                    EDGES.push([a, b]);
+                }
                 Object.keys(byCluster).forEach(function(cid) {
                     var names = byCluster[cid];
                     for (var i = 0; i < names.length; i++) {
                         var src = NODE_POS[names[i]];
-                        var best = -1, bestDist = Infinity;
+                        // Rank all peers by distance
+                        var ranked = [];
                         for (var j = 0; j < names.length; j++) {
                             if (j === i) continue;
                             var dst = NODE_POS[names[j]];
-                            var d = (src.x-dst.x)*(src.x-dst.x) + (src.y-dst.y)*(src.y-dst.y);
-                            if (d < bestDist) { bestDist = d; best = j; }
+                            ranked.push({name: names[j], d: (src.x-dst.x)*(src.x-dst.x) + (src.y-dst.y)*(src.y-dst.y)});
                         }
-                        if (best >= 0 && i < best) EDGES.push([names[i], names[best]]);
+                        ranked.sort(function(a,b) { return a.d - b.d; });
+                        // Pick top 2 nearest
+                        for (var k = 0; k < Math.min(2, ranked.length); k++) {
+                            addEdge(names[i], ranked[k].name);
+                        }
                     }
                 });
-                // One cross-cluster connector per consecutive pair so the graph reads
-                // as one network rather than 4 islands.
+                // Cross-cluster: pick 2 connectors per consecutive pair (e.g. for
+                // reasoning <-> expertise, draw 2 lines between distinct node pairs).
                 var clusterOrder = ["reasoning","expertise","operations","creative"];
                 for (var ci = 0; ci < clusterOrder.length; ci++) {
                     var fromList = byCluster[clusterOrder[ci]];
                     var toList = byCluster[clusterOrder[(ci+1) % clusterOrder.length]];
                     if (fromList.length && toList.length) {
-                        EDGES.push([fromList[0], toList[0]]);
+                        addEdge(fromList[0], toList[0]);
+                        if (fromList.length > 1 && toList.length > 1) {
+                            addEdge(fromList[fromList.length-1], toList[toList.length-1]);
+                        }
                     }
+                }
+                // Diagonal cross-cluster pair (reasoning <-> operations, expertise <-> creative)
+                // so the network feels fully interconnected, not just a ring.
+                if (byCluster.reasoning.length && byCluster.operations.length) {
+                    addEdge(byCluster.reasoning[0], byCluster.operations[byCluster.operations.length-1]);
+                }
+                if (byCluster.expertise.length && byCluster.creative.length) {
+                    addEdge(byCluster.expertise[0], byCluster.creative[byCluster.creative.length-1]);
                 }
 
                 renderGraph(picked);
@@ -3959,12 +4015,36 @@
                 }
                 requestAnimationFrame(tick);
             }
+            // Track edges that recently fired — bias selection toward edges
+            // that haven\'t pulsed in a while, so flow distributes evenly across
+            // the graph instead of clustering on one or two routes.
+            var lastEdgeFireAt = {};
             function spawnRandomElectron() {
                 if (document.hidden) return;
                 var live = document.querySelectorAll(".net-electron").length;
-                if (live >= 5) return;
+                if (live >= 9) return;
                 if (!EDGES.length) return;
-                var edge = EDGES[Math.floor(Math.random() * EDGES.length)];
+                // Weighted pick: lower "recently fired" weight = higher chance.
+                var now = performance.now();
+                var weights = [];
+                var total = 0;
+                for (var i = 0; i < EDGES.length; i++) {
+                    var key = EDGES[i][0] + "|" + EDGES[i][1];
+                    var last = lastEdgeFireAt[key] || 0;
+                    // Weight = how-many-seconds-since-last-fire, capped at 10s
+                    var w = Math.min(10, (now - last) / 1000);
+                    if (w < 0.5) w = 0.1; // very recent edges get tiny weight
+                    weights.push(w);
+                    total += w;
+                }
+                var r = Math.random() * total;
+                var pickIdx = 0;
+                for (var k = 0; k < weights.length; k++) {
+                    r -= weights[k];
+                    if (r <= 0) { pickIdx = k; break; }
+                }
+                var edge = EDGES[pickIdx];
+                lastEdgeFireAt[edge[0] + "|" + edge[1]] = now;
                 var forward = Math.random() < 0.5;
                 spawnElectron(forward ? edge[0] : edge[1], forward ? edge[1] : edge[0]);
             }
@@ -3998,7 +4078,7 @@
                 // Background electron flow
                 (function loop() {
                     spawnRandomElectron();
-                    setTimeout(loop, 600 + Math.random() * 400);
+                    setTimeout(loop, 350 + Math.random() * 250);
                 })();
             }
             if (document.readyState === "loading") {
