@@ -2877,13 +2877,54 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         return TD_TIER_LADDER.length - 1;
     }
 
-    // Render the tier-ladder block for one action. currentScore is the
-    // agent's current reputation; impact is +N points the action grants.
-    function _tdLadderHtml(currentScore, impact) {
-        var cs = Math.max(0, Math.round(Number(currentScore)||0));
+    // Layer weights — mirror services/trust_scoring.py:LAYER_WEIGHTS so
+    // the projection a user sees matches what the backend will actually
+    // compute on the next eval. If a weight changes server-side, change
+    // it here in the same commit; the regression guard in pre-deploy
+    // checks they're aligned.
+    var TD_LAYER_WEIGHTS = {
+        identity:    0.25,
+        capability:  0.25,
+        operational: 0.20,   // backend key: track_record
+        reputation:  0.15,   // backend key: social
+        compliance:  0.15
+    };
+    // Action `layer` uses operator-friendly names; reputation_breakdown
+    // uses backend keys. Map one to the other so we can read the agent's
+    // current per-layer score for the projection.
+    var TD_LAYER_TO_BREAKDOWN = {
+        identity:    'identity',
+        capability:  'capability',
+        operational: 'track_record',
+        reputation:  'social',
+        compliance:  'compliance'
+    };
+
+    // Render the tier-ladder block for one action. The projection now
+    // applies the layer weight to the layer-score delta, instead of
+    // adding the layer delta directly to the overall reputation score
+    // (the pre-2026-05-14 bug — surfaced by Iran2026 audit where
+    // 'Verify operator identity +60' was claimed to take overall 15 -> 75
+    // (Verified), while the real outcome was 15 -> 30 (still Unverified)
+    // because identity is weighted 0.25, so +60 layer = +15 overall).
+    //
+    // The action's `impact_estimate` is a LAYER delta. We compute the
+    // overall delta as (newLayer - currentLayer) * weight, then add to
+    // currentOverall. Headline +N badge in the card head still shows
+    // the LAYER delta — that's the size of the move on the targeted
+    // layer, which is the right teaser; the foot ladder shows the
+    // realistic overall projection + tier transition.
+    function _tdLadderHtml(currentOverall, layerName, currentLayer, impact) {
+        var co = Math.max(0, Math.min(100, Math.round(Number(currentOverall)||0)));
+        var cl = Math.max(0, Math.min(100, Math.round(Number(currentLayer)||0)));
         var ds = Math.max(0, Math.round(Number(impact)||0));
-        var ps = Math.min(100, cs + ds);  // projected
-        var curIdx = _tdTierIndex(cs);
+        var w = TD_LAYER_WEIGHTS[layerName];
+        if (typeof w !== 'number') w = 0.20;  // defensive default; matches lowest non-trivial weight
+        var newLayer = Math.min(100, cl + ds);
+        var layerDelta = newLayer - cl;
+        var overallDelta = Math.round(layerDelta * w);
+        var ps = Math.max(0, Math.min(100, co + overallDelta));
+        var curIdx = _tdTierIndex(co);
         var tgtIdx = _tdTierIndex(ps);
         var rows = TD_TIER_LADDER.map(function(b, i){
             var cls = 'td-action-step';
@@ -2896,13 +2937,11 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 '<span class="td-action-step-range">' + range + '</span>' +
             '</div>';
         }).join('');
-        var afterTxt = ps + (curIdx === tgtIdx
-            ? ' (' + TD_TIER_LADDER[tgtIdx].label + ')'
-            : ' (' + TD_TIER_LADDER[tgtIdx].label + ')');
+        var afterTxt = ps + ' (' + TD_TIER_LADDER[tgtIdx].label + ')';
         return '<div class="td-action-ladder">' + rows + '</div>' +
             '<div class="td-action-foot">' +
-                '<span class="td-action-foot-now">now: ' + cs + '</span>' +
-                '<span class="td-action-foot-after">+' + ds + ' \u2192 ' + afterTxt + '</span>' +
+                '<span class="td-action-foot-now">now: ' + co + '</span>' +
+                '<span class="td-action-foot-after">+' + overallDelta + ' \u2192 ' + afterTxt + '</span>' +
             '</div>';
     }
 
@@ -2961,13 +3000,18 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                     // first agent if state isn't ready (defensive).
                     var _agent = (state.agents||[]).find(function(x){return x.id===state.selectedId;}) || (state.agents||[])[0];
                     var _curScore = _agent ? (_agent.reputation_score||0) : 0;
+                    // 2026-05-14 projection fix — pass action.layer + the per-layer
+                    // current score so _tdLadderHtml can apply the layer weight.
+                    var _rb = (_agent && _agent.reputation_breakdown) || {};
+                    var _layerKey = TD_LAYER_TO_BREAKDOWN[a.layer] || a.layer;
+                    var _layerCur = Number(_rb[_layerKey] || 0);
                     return '<div class="td-action">' +
                         '<div class="td-action-head">' +
                             '<div class="td-action-title">' + esc(a.title || '') + '</div>' +
                             '<div class="td-action-impact">+' + (a.impact_estimate || 0) + '</div>' +
                         '</div>' +
                         '<p class="td-action-desc">' + esc(a.description || '') + '</p>' +
-                        _tdLadderHtml(_curScore, a.impact_estimate || 0) +
+                        _tdLadderHtml(_curScore, a.layer, _layerCur, a.impact_estimate || 0) +
                         '<div class="td-action-meta">' +
                             '<span class="td-action-layer">' + esc(a.layer || '') + '</span>' +
                             '<span class="td-action-effort ' + effortCls + '">' + esc(a.effort || 'medium') + ' effort</span>' +
