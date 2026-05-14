@@ -3689,7 +3689,7 @@
             async function buildNodes() {
                 var picked = [];
                 try {
-                    var resp = await fetch(API_BASE + "/api/v1/posts/feed?limit=100", {
+                    var resp = await fetch(API_BASE + "/api/v1/posts/feed?limit=50", {
                         credentials: "include",
                         headers: { "Accept": "application/json" }
                     });
