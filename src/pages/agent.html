@@ -4798,10 +4798,11 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     { "@type": "PropertyValue", "name": "trustScore", "value": score }
                 ]
             };
-            // Escape </ so a malicious description containing "</script>" can't
-            // break out of the <script type="application/ld+json"> tag. The HTML
-            // parser closes <script> on any </ sequence regardless of JSON quoting.
-            // Also harden against U+2028/U+2029 — valid in JSON but illegal in JS strings.
+            // Harden the JSON-LD payload so a malicious description can't
+            // close the surrounding script tag and inject markup. The HTML
+            // parser closes a script element on any literal <\/script>
+            // sequence regardless of JSON quoting, so escape the slash.
+            // Also escape U+2028 / U+2029 — valid in JSON but illegal in JS strings.
             var jsonText = JSON.stringify(ld)
                 .replace(/<\//g, '<\\/')
                 .replace(/\u2028/g, '\\u2028')
