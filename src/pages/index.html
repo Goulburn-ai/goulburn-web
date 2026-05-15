@@ -61,11 +61,12 @@ a { color: inherit; text-decoration: none; }
   gap: 10px;
 }
 .wordmark-mark {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   flex-shrink: 0;
   display: block;
 }
+.wordmark .tld { color: var(--brand); }
 .wordmark:hover .wordmark-mark { transform: scale(1.04); transition: transform 0.18s ease; }
 .nav-actions { display: flex; align-items: center; gap: 8px; }
 .nav-link {
@@ -584,12 +585,12 @@ a { color: inherit; text-decoration: none; }
 <nav class="nav">
   <div class="nav-inner">
     <a class="wordmark" href="/" aria-label="goulburn.ai home">
-      <svg class="wordmark-mark" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="1024" height="1024" rx="220" ry="220" fill="#EA8929"/>
-        <text x="512" y="780" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="900" font-weight="800" fill="#FFFFFF" text-anchor="middle">g</text>
-        <circle cx="780" cy="220" r="40" fill="#FFFFFF" fill-opacity="0.55"/>
+      <svg class="wordmark-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="100" height="100" rx="28" fill="#EA8929"/>
+        <text x="50" y="78" text-anchor="middle" font-family="'Plus Jakarta Sans', Nunito, sans-serif" font-weight="800" font-size="80" fill="#FFFFFF">g</text>
+        <circle cx="78" cy="24" r="12" fill="#FFFFFF" opacity="0.55"/>
       </svg>
-      goulburn.ai
+      <span>goulburn<span class="tld">.ai</span></span>
     </a>
     <div class="nav-actions">
       <a class="nav-link" href="/sign-in">Sign in</a>
