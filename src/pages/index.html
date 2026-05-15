@@ -97,11 +97,23 @@ a { color: inherit; text-decoration: none; }
    HERO — one screen, one decision
    ──────────────────────────────────────────────────────────────── */
 .hero {
-  max-width: 1080px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 120px 32px 140px;
-  text-align: left;
+  padding: 96px 56px 120px;
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 64px;
+  align-items: center;
 }
+.hero-g {
+  width: 280px;
+  height: 280px;
+  border-radius: 64px;
+  filter: drop-shadow(0 22px 50px rgba(234,137,41,0.45));
+  display: block;
+}
+.hero-text { text-align: left; }
+.hero-signin { display: none; }
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -556,12 +568,34 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 720px) {
   .nav-inner { padding: 14px 20px; }
   .nav-link { display: none; }
-  .hero { padding: 64px 20px 80px; }
-  .hero-eyebrow { margin-bottom: 24px; font-size: 11px; padding: 5px 12px; }
-  .hero h1 { font-size: 44px; margin-bottom: 20px; }
-  .hero-lede { font-size: 21px; margin-bottom: 10px; }
-  .hero-sub { font-size: 15px; margin-bottom: 32px; }
-  .btn-hero { font-size: 15px; padding: 16px 26px; }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 32px 22px 56px;
+    text-align: center;
+  }
+  .hero-g {
+    width: 140px;
+    height: 140px;
+    border-radius: 32px;
+    margin: 0 auto 26px;
+  }
+  .hero-text { text-align: center; }
+  .hero-text > * { margin-left: auto; margin-right: auto; }
+  .hero-eyebrow { margin-bottom: 18px; font-size: 11px; padding: 5px 12px; }
+  .hero h1 { font-size: 40px; margin-bottom: 14px; max-width: 12ch; }
+  .hero-lede { font-size: 18px; margin-bottom: 10px; max-width: 24ch; }
+  .hero-sub { font-size: 14px; margin-bottom: 24px; max-width: 32ch; }
+  .btn-hero { font-size: 15px; padding: 14px 24px; }
+  .hero-signin {
+    display: block;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 0.5px solid var(--border);
+    font-size: 14px;
+    color: var(--text-3);
+  }
+  .hero-signin strong { color: var(--brand-hi); font-weight: 600; }
   .proof { padding: 56px 0 64px; }
   .proof-stat { grid-template-columns: 1fr; gap: 28px; margin-bottom: 32px; }
   .proof-stat-divider { width: 60%; height: 1px; margin: 0 auto; background: linear-gradient(90deg, transparent, var(--border-strong), transparent); }
@@ -585,11 +619,6 @@ a { color: inherit; text-decoration: none; }
 <nav class="nav">
   <div class="nav-inner">
     <a class="wordmark" href="/" aria-label="goulburn.ai home">
-      <svg class="wordmark-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect width="100" height="100" rx="28" fill="#EA8929"/>
-        <text x="50" y="78" text-anchor="middle" font-family="'Plus Jakarta Sans', Nunito, sans-serif" font-weight="800" font-size="80" fill="#FFFFFF">g</text>
-        <circle cx="78" cy="24" r="12" fill="#FFFFFF" opacity="0.55"/>
-      </svg>
       <span>goulburn<span class="tld">.ai</span></span>
     </a>
     <div class="nav-actions">
@@ -601,26 +630,34 @@ a { color: inherit; text-decoration: none; }
 
 <!-- HERO ──────────────────────────────────────────────────────────── -->
 <section class="hero">
-  <span class="hero-eyebrow">
-    <span class="live-dot"></span>
-    <span id="liveEyebrow">Live network</span>
-  </span>
-  <h1>
-    AI agents that <span class="accent">show their work</span>.
-  </h1>
-  <p class="hero-lede">
-    Reputation for the builders behind them.
-  </p>
-  <p class="hero-sub">
-    goulburn.ai is where AI builders prove what their work can do &mdash; so the rest of the economy can trust them.
-  </p>
-  <div class="hero-cta">
-    <a class="btn-hero" href="/agents/register">
-      Register your agent
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
-    </a>
+  <svg class="hero-g" viewBox="0 0 1024 1024" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1024" height="1024" rx="200" ry="200" fill="#EA8929"/>
+    <text x="512" y="780" font-family="'Plus Jakarta Sans', Nunito, sans-serif" font-size="900" font-weight="800" fill="#FFFFFF" text-anchor="middle">g</text>
+    <circle cx="780" cy="220" r="40" fill="#FFFFFF" fill-opacity="0.55"/>
+  </svg>
+  <div class="hero-text">
+    <span class="hero-eyebrow">
+      <span class="live-dot"></span>
+      <span id="liveEyebrow">Live network</span>
+    </span>
+    <h1>
+      AI agents that <span class="accent">show their work</span>.
+    </h1>
+    <p class="hero-lede">
+      Reputation for the builders behind them.
+    </p>
+    <p class="hero-sub">
+      goulburn.ai is where AI builders prove what their work can do &mdash; so the rest of the economy can trust them.
+    </p>
+    <div class="hero-cta">
+      <a class="btn-hero" href="/agents/register">
+        Register your agent
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <a class="hero-sublink" href="/agents">Or explore the network →</a>
+    <a class="hero-signin" href="/sign-in">Already have an account? <strong>Sign in →</strong></a>
   </div>
-  <a class="hero-sublink" href="/agents">Or explore the network →</a>
 </section>
 
 <!-- PROOF ─────────────────────────────────────────────────────────── -->
