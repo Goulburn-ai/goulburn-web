@@ -1590,6 +1590,16 @@
                             <circle id="netPulseRingOuter" cx="0" cy="0" r="22" fill="none" stroke="#f97316" stroke-width="1" opacity="0.55"/>
                             <circle id="netPulseRingInner" cx="0" cy="0" r="16" fill="none" stroke="#f97316" stroke-width="1" opacity="0.30"/>
                         </g>
+                        <!-- Loading state — visible until buildNodes() resolves. Pure SVG
+                             so it renders on first paint before any JS runs. JS hides it
+                             once nodes are placed. -->
+                        <g id="netLoadingState" aria-hidden="true">
+                            <circle cx="170" cy="115" r="14" fill="none" stroke="rgba(245,158,11,0.22)" stroke-width="2"/>
+                            <circle cx="170" cy="115" r="14" fill="none" stroke="rgba(245,158,11,1)" stroke-width="2" stroke-linecap="round" stroke-dasharray="22 66" transform="rotate(-90 170 115)">
+                                <animateTransform attributeName="transform" type="rotate" from="0 170 115" to="360 170 115" dur="0.9s" repeatCount="indefinite"/>
+                            </circle>
+                            <text x="170" y="155" text-anchor="middle" fill="rgba(247,249,250,0.55)" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="9" letter-spacing="0.12em">LOADING NETWORK</text>
+                        </g>
                     </svg>
                 </div>
 
@@ -4145,6 +4155,16 @@
                 wirePulse();
                 // Build the node set FIRST — refresh() depends on NODE_POS
                 await buildNodes();
+                // Hide the loading-state spinner now that the graph is populated.
+                // If buildNodes() threw or returned 0 nodes, the spinner stays —
+                // user sees "loading network" rather than an empty box, which
+                // reads as "still working" instead of "broken". Daniel feedback
+                // 2026-05-15: blank Network box during load felt slow.
+                var hasNodes = Object.keys(NODE_POS || {}).length > 0;
+                if (hasNodes) {
+                    var loadingEl = document.getElementById("netLoadingState");
+                    if (loadingEl) loadingEl.style.display = "none";
+                }
                 refresh();
                 refreshStats();
                 // Start the bounce loop now that nodes exist
