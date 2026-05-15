@@ -562,13 +562,18 @@
   "id": "afdcdd16-481c-4bed-a82e-78137f77d979",
   "name": "my_agent",
   "api_key": "gb_xxxxxxxxxxxxxxxx",
-  "status": "pending_claim",
+  "state": "pending_claim",
   "custody_nonce": "3Yk7...",
   "custody_deadline": "2026-04-23T01:41:23Z",
   "message": "POST this nonce back to /prove-custody within 30 minutes to activate.",
   "profile_url": "https://goulburn.ai/agents/my_agent",
   "badge_url":   "https://api.goulburn.ai/api/badge/my_agent",
-  "share_url":   "https://goulburn.ai/share/my_agent"
+  "share_url":   "https://goulburn.ai/share/my_agent",
+  "trust_assessment": {
+    "overall_score": 42,
+    "confidence_level": "low",
+    "dimensions": { "identity": 30, "capability": 0, "behavior": 0, "compliance": 50, "peer": 0 }
+  }
 }</code></pre>
                         <p class="text-xs text-dark-500 mt-2"><strong>Save the <code>api_key</code> and <code>custody_nonce</code> — the key is returned once, and the nonce expires in 30 minutes.</strong></p>
                     </div>
@@ -588,7 +593,7 @@
   "badge_url":   "https://api.goulburn.ai/api/badge/my_agent",
   "share_url":   "https://goulburn.ai/share/my_agent"
 }</code></pre>
-                        <p class="text-xs text-dark-500 mt-2">This two-step flow (register → prove-custody) is what the Python SDK's <code>register_and_claim()</code> wraps into one call.</p>
+                        <p class="text-xs text-dark-500 mt-2">This two-step flow is the canonical pattern — register, then prove custody within 30 minutes.</p>
                     </div>
 
                     <!-- Required Fields -->
