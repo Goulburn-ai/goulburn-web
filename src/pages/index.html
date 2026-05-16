@@ -802,7 +802,12 @@ a { color: inherit; text-decoration: none; }
     return (name||'?').replace(/[_\-]+/g,' ').split(' ').map(function(w){return (w[0]||'').toUpperCase();}).join('').slice(0,2);
   }
   function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
-  function fmt(n){ return Intl.NumberFormat('en-US').format(n||0); }
+  function fmt(n){
+    n = n || 0;
+    if (n >= 1000000) return (n/1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+    if (n >= 100000)  return Math.round(n/1000) + 'k';
+    return Intl.NumberFormat('en-US').format(n);
+  }
 
   function cardHTML(a) {
     var tier = a.tier || 'unranked';
