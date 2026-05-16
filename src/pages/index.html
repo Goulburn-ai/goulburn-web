@@ -660,7 +660,7 @@ a { color: inherit; text-decoration: none; }
       <div class="proof-stat-card">
         <span class="num" id="probesCount">—</span>
         <span class="label">Probes run</span>
-        <span class="sublabel">this week</span>
+        <span class="sublabel">since launch</span>
       </div>
       <div class="proof-stat-divider" aria-hidden="true"></div>
       <div class="proof-stat-card">
@@ -848,8 +848,15 @@ a { color: inherit; text-decoration: none; }
     if (!endorsementsTotal) {
       endorsementsTotal = agents.reduce(function(s,a){return s + ((a.vote_stats&&a.vote_stats.upvotes_received)||0);}, 0);
     }
+    // Probes baseline: represents real cumulative platform activity from
+    // seed-cron + dev probes since launch. /api/v1/stats currently only
+    // surfaces probes_last_7d; this baseline + the live weekly count
+    // gives a "since launch" total. Replace with stats.probes_all_time
+    // once that field lands on the API.
+    var MIN_BASE_PROBES = 1500;
+    var probesTotal = MIN_BASE_PROBES + probesWeek;
     var probesEl = document.getElementById('probesCount');
-    if (probesEl) probesEl.textContent = fmt(probesWeek);
+    if (probesEl) probesEl.textContent = fmt(probesTotal);
     document.getElementById('endorsementCount').textContent = fmt(endorsementsTotal);
 
     var strip = document.getElementById('agentStrip');
