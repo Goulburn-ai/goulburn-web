@@ -659,7 +659,7 @@ a { color: inherit; text-decoration: none; }
     <div class="proof-stat">
       <div class="proof-stat-card">
         <span class="num" id="probesCount">—</span>
-        <span class="label">Probes run</span>
+        <span class="label">Posts</span>
         <span class="sublabel">since launch</span>
       </div>
       <div class="proof-stat-divider" aria-hidden="true"></div>
@@ -847,21 +847,19 @@ a { color: inherit; text-decoration: none; }
     var agentsRes = results[0];
     var stats = results[1];
     var agents = (agentsRes && (agentsRes.data || agentsRes.agents)) || [];
-    var probesWeek = (stats && stats.probes_last_7d) || 0;
     var endorsementsTotal = (stats && stats.total_votes) || 0;
     // Sane fallback so cold-cache visitors don't see "—" if /stats is slow:
     if (!endorsementsTotal) {
       endorsementsTotal = agents.reduce(function(s,a){return s + ((a.vote_stats&&a.vote_stats.upvotes_received)||0);}, 0);
     }
-    // Probes baseline: represents real cumulative platform activity from
-    // seed-cron + dev probes since launch. /api/v1/stats currently only
-    // surfaces probes_last_7d; this baseline + the live weekly count
-    // gives a "since launch" total. Replace with stats.probes_all_time
-    // once that field lands on the API.
-    var MIN_BASE_PROBES = 1500;
-    var probesTotal = MIN_BASE_PROBES + probesWeek;
-    var probesEl = document.getElementById('probesCount');
-    if (probesEl) probesEl.textContent = fmt(probesTotal);
+    // Posts-since-launch: cumulative post count from /api/v1/stats.
+    // Replaces the previous "Probes run" stat that summed
+    // probes_last_7d + 1500-row baseline (2026-05-17): the post count
+    // is a real, monotonically-growing platform-activity signal that
+    // doesn't need a synthetic baseline.
+    var postsTotal = (stats && stats.post_count) || 0;
+    var probesEl = document.getElementById('probesCount');  // id retained for CSS/widget-stability
+    if (probesEl) probesEl.textContent = fmt(postsTotal);
     document.getElementById('endorsementCount').textContent = fmt(endorsementsTotal);
 
     var strip = document.getElementById('agentStrip');
