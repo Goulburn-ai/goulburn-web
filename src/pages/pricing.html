@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pricing &mdash; goulburn.ai</title>
-    <meta name="description" content="goulburn.ai pricing. Free during launch — every tier available to every builder. Reputation is earned, never bought.">
+    <meta name="description" content="goulburn.ai pricing. Free during launch — founding-member pricing for the first 100 Builders and first 50 Builder Pro subscribers.">
     <link rel="canonical" href="https://goulburn.ai/pricing">
     <meta property="og:title" content="Pricing &mdash; goulburn.ai">
-    <meta property="og:description" content="Free during launch. Reputation is never for sale.">
+    <meta property="og:description" content="Free during launch. Founding-member pricing for the first cohort.">
     <meta property="og:url" content="https://goulburn.ai/pricing">
     <!-- @include partials/head.html -->
 </head>
 <body class="bg-dark-50">
         <div style="max-width:932px; margin:0 auto;">
-            <div style="margin:88px 16px 0; padding:10px 14px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.3); border-radius:8px; color:#fbbf24; font-size:13px; line-height:1.45; text-align:left;">
-                <strong style="color:#fef3c7; font-weight:600;">Start on Free today.</strong>
-                <span>Builder, Studio, and Pro+ unlock as you scale &mdash; we&rsquo;re onboarding the first cohort.</span>
-                <a href="mailto:contact@goulburn.ai?subject=Notify%20me%20when%20paid%20plans%20launch" style="display:inline-block; margin-top:4px; padding:3px 10px; background:rgba(254,243,199,0.12); color:#fef3c7; text-decoration:none; border-radius:6px; white-space:nowrap;">Get notified &rarr;</a>
+            <!-- Founding-member alert banner (Item 0) -->
+            <div style="margin:88px 16px 0; padding:12px 14px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.35); border-radius:8px; color:#fde68a; font-size:13px; line-height:1.5; text-align:left;">
+                <strong style="color:#fef3c7; font-weight:600;">Founding-member pricing is open.</strong>
+                <span>The first 100 Builders and first 50 Builder Pro subscribers lock in their price for life. Free is open today &mdash; pick a paid tier card below to reserve a founding spot before checkout opens.</span>
             </div>
         </div>
 
@@ -29,7 +29,7 @@
                 Upgrade
             </h1>
             <p class="text-lg text-dark-600 leading-relaxed max-w-2xl mx-auto mb-8">
-                Free for hobbyists, paid plans for builders shipping real work. Reputation is earned through evidence — never for sale.
+                Free for hobbyists, paid plans for builders shipping real work. Reputation is earned through evidence &mdash; never for sale.
             </p>
 
             <!-- Monthly / Yearly toggle -->
@@ -71,100 +71,85 @@
                     </a>
                 </div>
 
-                <!-- Builder (ghosted — paid tiers gated on Stripe activation) -->
-                <div class="rounded-xl border-2 border-brand-500 p-5 md:p-7 flex flex-col relative" style="background:#16181C; opacity:0.7; filter:grayscale(0.6);">
-                    <span style="position:absolute; top:10px; right:10px; padding:4px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.22); color:#fde68a; border:1px solid rgba(245,158,11,0.5); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
-                    <!-- MOST POPULAR badge hidden while paid tiers are ghosted -->
+                <!-- Wallet (prepaid usage, uncapped notification list) -->
+                <div class="rounded-xl border border-dark-200 p-5 md:p-7 flex flex-col" style="background:#16181C;">
+                    <div class="mb-5">
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Wallet</h2>
+                        <p class="text-xs text-dark-500">Pay-as-you-go on top of Free</p>
+                    </div>
+                    <div class="mb-5">
+                        <span class="text-4xl font-bold text-dark-900">Prepaid</span>
+                        <span class="text-sm text-dark-500 ml-1">credits</span>
+                        <div class="text-xs text-dark-500 mt-1">No subscription, no cap on signups</div>
+                    </div>
+                    <ul class="space-y-3 mb-7 flex-1">
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Everything in Free</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Top up credits, spend on extra probes</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Per-call billing on premium evaluators</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>No expiry, no auto-renew</span></li>
+                    </ul>
+                    <button type="button" class="founding-btn" data-tier="wallet" data-tier-name="Wallet" style="display:block; width:100%; text-align:center; margin-top:0; padding:10px 8px; font-size:14px; color:#fef3c7; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.35); border-radius:8px; cursor:pointer; font-weight:600;">Notify me when Wallet opens</button>
+                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="wallet">&nbsp;</div>
+                </div>
+
+                <!-- Builder (founding-member capture) -->
+                <div class="rounded-xl border-2 border-brand-500 p-5 md:p-7 flex flex-col relative" style="background:#16181C;">
+                    <span style="position:absolute; top:10px; right:10px; padding:4px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.22); color:#fde68a; border:1px solid rgba(245,158,11,0.5); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Founding member</span>
                     <div class="mb-5">
                         <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Builder</h2>
                         <p class="text-xs text-dark-500">Solo freelancers, indie operators</p>
-                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q2 2026</p>
                     </div>
                     <div class="mb-5">
-                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
+                        <span class="text-4xl font-bold text-dark-900">$<span class="price-display" data-monthly="19.95" data-yearly="16.62">19.95</span></span>
                         <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
-                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">Free during launch</div>
+                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">$199 billed yearly</div>
+                        <div class="text-xs mt-2" style="color:#fde68a;">Locked in for life as a founding member</div>
                     </div>
                     <ul class="space-y-3 mb-7 flex-1">
-                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>10 active agents</strong></span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>300 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Everything in Free</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>25 active agents</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>1,000 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>CI gate webhook</span></li>
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Builder Operator badge on agents</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority probe queue (1h vs 12h)</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Full evidence trail</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Badge without "powered by goulburn"</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority support</span></li>
                     </ul>
-                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <button type="button" class="waitlist-btn" data-tier="builder" data-tier-name="Builder" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Builder launches</button>
+                    <button type="button" class="founding-btn" data-tier="builder" data-tier-name="Builder" style="display:block; width:100%; text-align:center; margin-top:0; padding:12px 8px; font-size:14px; color:#fff; background:var(--brand-500, #f59e0b); border:0; border-radius:8px; cursor:pointer; font-weight:600;">Reserve founding spot</button>
+                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="builder">Loading&hellip;</div>
                 </div>
 
-                <!-- Studio (ghosted) -->
-                <div class="rounded-xl border border-dark-200 p-5 md:p-7 flex flex-col" style="background:#16181C; opacity:0.7; filter:grayscale(0.6); position:relative;">
-                    <span style="position:absolute; top:10px; right:10px; padding:4px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.22); color:#fde68a; border:1px solid rgba(245,158,11,0.5); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
+                <!-- Builder Pro (featured founding-member capture) -->
+                <div class="rounded-xl border-2 p-5 md:p-7 flex flex-col relative" style="background:#16181C; border-color:#fde68a;">
+                    <span style="position:absolute; top:10px; right:10px; padding:4px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.35); color:#fef3c7; border:1px solid rgba(245,158,11,0.65); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Founding · 50 only</span>
                     <div class="mb-5">
-                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Studio</h2>
-                        <p class="text-xs text-dark-500">Small teams, multi-agent operations</p>
-                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q2 2026</p>
+                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Builder Pro</h2>
+                        <p class="text-xs text-dark-500">Small teams shipping multiple agents</p>
                     </div>
                     <div class="mb-5">
-                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
+                        <span class="text-4xl font-bold text-dark-900">$<span class="price-display" data-monthly="49.95" data-yearly="41.62">49.95</span></span>
                         <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
-                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">Free during launch</div>
+                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">$499 billed yearly</div>
+                        <div class="text-xs mt-2" style="color:#fde68a;">Locked in for life as a founding member</div>
                     </div>
                     <ul class="space-y-3 mb-7 flex-1">
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>25 active agents</strong></span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>1,000 probes/day</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Studio Operator badge + team operator profile</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Branded operator directory page</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Custom-domain badge embeds</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on tier changes</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Everything in Builder</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>100 active agents</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>10,000 probes/day</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Terraform provider</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Self-hosted runner option</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhook payload signing</span></li>
+                        <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Builder Pro badge on agents</span></li>
                     </ul>
-                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <button type="button" class="waitlist-btn" data-tier="studio" data-tier-name="Studio" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Studio launches</button>
-                </div>
-
-                <!-- Pro+ (ghosted) -->
-                <div class="rounded-xl border border-dark-200 p-5 md:p-7 flex flex-col" style="background:#16181C; opacity:0.7; filter:grayscale(0.6); position:relative;">
-                    <span style="position:absolute; top:10px; right:10px; padding:4px 10px; font-size:11px; font-weight:700; background:rgba(245,158,11,0.22); color:#fde68a; border:1px solid rgba(245,158,11,0.5); border-radius:9999px; letter-spacing:0.04em; text-transform:uppercase;">Coming soon</span>
-                    <div class="mb-5">
-                        <h2 class="text-xl font-display font-bold text-dark-900 mb-1">Pro+</h2>
-                        <p class="text-xs text-dark-500">Production deployments at scale</p>
-                        <p class="text-xs mt-1" style="color:rgba(245,158,11,0.7);">Available Q3 2026</p>
-                    </div>
-                    <div class="mb-5">
-                        <span class="text-4xl font-bold text-dark-900 price-display" data-monthly="0" data-yearly="0">$0</span>
-                        <span class="text-sm text-dark-500 ml-1 period-label">/month</span>
-                        <div class="text-xs text-dark-500 mt-1 yearly-note hidden">Free during launch</div>
-                    </div>
-                    <ul class="space-y-3 mb-7 flex-1">
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span><strong>Unlimited agents</strong></span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>5,000 probes/day</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Pro Operator badge across all agents</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Webhooks on trust events</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>SOC 2-ready evidence reports</span></li>
-                        <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority email support</span></li>
-                    </ul>
-                    <button type="button" disabled aria-disabled="true" class="block w-full text-center px-5 py-3 rounded-lg font-semibold" style="background:rgba(255,255,255,0.06); color:rgba(247,249,249,0.45); border:1px solid rgba(255,255,255,0.10); cursor:not-allowed;">Available soon</button>
-                    <button type="button" class="waitlist-btn" data-tier="proplus" data-tier-name="Pro+" style="display:block; width:100%; text-align:center; margin-top:14px; padding:10px 8px; font-size:14px; color:rgba(247,249,249,0.75); background:transparent; border:0; border-radius:8px; cursor:pointer; text-decoration:underline; text-underline-offset:3px;">Email me when Pro+ launches</button>
+                    <button type="button" class="founding-btn" data-tier="builder_pro" data-tier-name="Builder Pro" style="display:block; width:100%; text-align:center; margin-top:0; padding:12px 8px; font-size:14px; color:#0a0a0a; background:#fde68a; border:0; border-radius:8px; cursor:pointer; font-weight:700;">Reserve founding spot</button>
+                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="builder_pro">Loading&hellip;</div>
                 </div>
 
             </div>
 
-            <!-- Enterprise (full-width below) -->
-            <div class="mt-8 rounded-xl border border-dark-200 p-5 md:p-7 md:flex md:items-center md:justify-between gap-8" style="background:#16181C;">
-                <div class="md:flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <h2 class="text-xl font-display font-bold text-dark-900">Enterprise</h2>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-dark-200 text-dark-700">Custom</span>
-                    </div>
-                    <p class="text-sm text-dark-600 leading-relaxed mb-3 md:mb-0 max-w-2xl">
-                        Custom probe contracts, SOC 2 attestation, dedicated CSM, SSO/SAML, custom retention windows, contractual SLAs. For platforms deploying agents into regulated environments.
-                    </p>
-                </div>
-                <div class="md:flex-shrink-0">
-                    <a href="mailto:contact@goulburn.ai?subject=Enterprise%20Sales" class="block w-full md:w-auto md:inline-block text-center px-6 py-3 border-2 border-brand-400 text-brand-500 font-semibold rounded-lg hover:bg-brand-500 hover:text-white transition-colors">
-                        Contact sales
-                    </a>
-                </div>
+            <!-- Enterprise CTA below grid -->
+            <div class="mt-10 max-w-3xl mx-auto rounded-xl border border-dark-200 p-6 text-center" style="background:#16181C;">
+                <h3 class="text-lg font-display font-bold text-dark-900 mb-2">Need more than Builder Pro?</h3>
+                <p class="text-sm text-dark-600 mb-4">Custom seat counts, SSO, dedicated runtime, signed BAA. We&rsquo;ll scope a plan around your fleet.</p>
+                <a href="mailto:contact@goulburn.ai?subject=Enterprise%20inquiry" class="inline-block px-5 py-2.5 border border-dark-300 text-dark-800 font-semibold rounded-lg hover:bg-dark-100 transition-colors text-sm">Contact us</a>
             </div>
         </div>
     </section>
@@ -175,10 +160,10 @@
             <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
                 <h2 class="text-2xl font-display font-bold text-dark-900 mb-4">Why Free is generous</h2>
                 <p class="text-sm text-dark-600 leading-relaxed mb-4">
-                    We don&rsquo;t pay-gate the credential. Every Free agent gets the full reputation breakdown, the public profile, the embeddable badge, and real probes — the same machinery a Builder or Studio agent runs through. Trust is the product. Charging to access it would corrupt the signal.
+                    We don&rsquo;t pay-gate the credential. Every Free agent gets the full reputation breakdown, the public profile, the embeddable badge, and real probes &mdash; the same machinery a Builder or Builder Pro agent runs through. Trust is the product. Charging to access it would corrupt the signal.
                 </p>
                 <p class="text-sm text-dark-600 leading-relaxed mb-4">
-                    Paid plans unlock <strong class="text-dark-900">capacity</strong> (more agents, more probes, fleet APIs), <strong class="text-dark-900">visibility</strong> (custom branded badges, analytics), and <strong class="text-dark-900">team tooling</strong> &mdash; not reputation movement. A solo builder on Free and a studio on Pro+ build reputation from the same evidence sources.
+                    Paid plans unlock <strong class="text-dark-900">capacity</strong> (more agents, more probes, fleet APIs), <strong class="text-dark-900">visibility</strong> (custom branded badges, analytics), and <strong class="text-dark-900">team tooling</strong> &mdash; not reputation movement. A solo builder on Free and a team on Builder Pro build reputation from the same evidence sources.
                 </p>
                 <p class="text-sm text-dark-500 italic leading-relaxed mb-0" style="border-left:2px solid rgba(245,158,11,0.4); padding-left:14px;">
                     Long-term, goulburn&rsquo;s revenue comes from platforms querying the verified-supply network &mdash; not from builders paying for their own reputation. The supply side stays free; the demand side pays for queries against verified signals.
@@ -191,14 +176,14 @@
     <section class="py-16 px-6" style="background:#000;">
         <div class="max-w-4xl mx-auto">
             <div class="rounded-xl border border-dark-200 p-8" style="background:#16181C;">
-                <h2 class="text-2xl font-display font-bold text-dark-900 mb-4">What pricing doesn’t change</h2>
+                <h2 class="text-2xl font-display font-bold text-dark-900 mb-4">What pricing doesn&rsquo;t change</h2>
                 <p class="text-sm text-dark-600 leading-relaxed mb-6">
                     Pricing buys capacity, visibility, and tooling. A few things stay the same regardless of plan:
                 </p>
                 <ul class="space-y-3">
                     <li class="flex items-start gap-3 text-sm text-dark-700">
                         <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
-                        <span><strong class="text-dark-900">Reputation isn’t a paid tier.</strong> Every tier &mdash; Identified, Verified, Established, Trusted &mdash; is earned through probes, evidence, and time. Available to every plan.</span>
+                        <span><strong class="text-dark-900">Reputation isn&rsquo;t a paid tier.</strong> Every tier &mdash; Identified, Verified, Established, Trusted &mdash; is earned through probes, evidence, and time. Available to every plan.</span>
                     </li>
                     <li class="flex items-start gap-3 text-sm text-dark-700">
                         <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
@@ -206,7 +191,7 @@
                     </li>
                     <li class="flex items-start gap-3 text-sm text-dark-700">
                         <span class="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center font-bold">&#10005;</span>
-                        <span><strong class="text-dark-900">Trusted tier is evidence-only.</strong> Reserved for agents with sustained, audit-grade evidence on file. Plan size doesn’t shortcut it.</span>
+                        <span><strong class="text-dark-900">Trusted tier is evidence-only.</strong> Reserved for agents with sustained, audit-grade evidence on file. Plan size doesn&rsquo;t shortcut it.</span>
                     </li>
                 </ul>
             </div>
@@ -220,61 +205,66 @@
             <div class="space-y-4">
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
+                    <summary class="cursor-pointer font-semibold text-dark-900">What does &ldquo;founding member&rdquo; actually buy me?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">The price you reserve today is locked for the life of your subscription &mdash; it never goes up, even when the regular price does. The first 100 Builders and first 50 Builder Pro subscribers get this lock. You don&rsquo;t pay anything yet; you reserve a spot now and get a signup link by email when checkout opens (target: 6 weeks).</p>
+                </details>
+
+                <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
                     <summary class="cursor-pointer font-semibold text-dark-900">Can I switch plans later?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes — upgrade or downgrade any time from your dashboard. Upgrades apply immediately, downgrades take effect at your next billing cycle so you keep what you paid for.</p>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes &mdash; upgrade or downgrade any time from your dashboard. Upgrades apply immediately, downgrades take effect at your next billing cycle so you keep what you paid for.</p>
                 </details>
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
                     <summary class="cursor-pointer font-semibold text-dark-900">What happens if I cancel?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Your subscription stays active through the end of your current billing period. After that, your account drops to Free tier limits — agents above your free cap are auto-suspended (not deleted) and can be reactivated by upgrading again.</p>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Your subscription stays active through the end of your current billing period. After that, your account drops to Free tier limits &mdash; agents above your free cap are auto-suspended (not deleted) and can be reactivated by upgrading again.</p>
                 </details>
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
                     <summary class="cursor-pointer font-semibold text-dark-900">Do you offer refunds?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes — full refund within 14 days of your first payment, no questions asked. Email contact@goulburn.ai with your account email.</p>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes &mdash; full refund within 14 days of your first payment, no questions asked. Email contact@goulburn.ai with your account email.</p>
                 </details>
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
-                    <summary class="cursor-pointer font-semibold text-dark-900">How is "agent" counted toward the cap?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Each registered agent profile counts as one slot, whether or not it's actively running probes. Suspended and pending-deletion agents still occupy slots until permanently deleted (after the 48-hour grace window).</p>
+                    <summary class="cursor-pointer font-semibold text-dark-900">How is &ldquo;agent&rdquo; counted toward the cap?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Each registered agent profile counts as one slot, whether or not it&rsquo;s actively running probes. Suspended and pending-deletion agents still occupy slots until permanently deleted (after the 48-hour grace window).</p>
                 </details>
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
                     <summary class="cursor-pointer font-semibold text-dark-900">Can I bring my own LLM key (BYOK)?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes, on every tier including Free. The hosted runtime accepts keys from Anthropic, OpenAI, Google, Mistral, xAI, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint. We proxy probes to your provider on your key — your provider bills you directly. We never log or pay for tokens.</p>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Yes, on every tier including Free. The hosted runtime accepts keys from Anthropic, OpenAI, Google, Mistral, xAI, DeepSeek, OpenRouter, or any OpenAI-compatible endpoint. We proxy probes to your provider on your key &mdash; your provider bills you directly. We never log or pay for tokens.</p>
                 </details>
 
                 <details class="rounded-xl border border-dark-200 p-5" style="background:#16181C;">
-                    <summary class="cursor-pointer font-semibold text-dark-900">Can I gift Builder/Studio to another developer?</summary>
-                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Not at MVP — each subscription is tied to one Owner account. Coming in a future release.</p>
+                    <summary class="cursor-pointer font-semibold text-dark-900">Can I gift Builder or Builder Pro to another developer?</summary>
+                    <p class="mt-3 text-sm text-dark-600 leading-relaxed">Not at MVP &mdash; each subscription is tied to one Owner account. Coming in a future release.</p>
                 </details>
 
             </div>
         </div>
     </section>
 
-    <!-- Waitlist signup modal -->
+    <!-- Founding-member reservation modal -->
     <div id="waitlist-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.7);">
         <div class="rounded-xl border border-dark-200 max-w-md w-full p-6" style="background:#16181C;">
-            <h3 class="text-lg font-display font-bold text-dark-900 mb-2" id="waitlist-title">Join the waitlist</h3>
-            <p class="text-sm text-dark-600 mb-4" id="waitlist-body">We'll email you the moment <span id="waitlist-tier-label">Builder</span> launches. No follow-ups, no spam.</p>
+            <h3 class="text-lg font-display font-bold text-dark-900 mb-2" id="waitlist-title">Reserve your founding spot</h3>
+            <p class="text-sm text-dark-600 mb-4" id="waitlist-body">Lock in the founding-member price for <span id="waitlist-tier-label">Builder</span>. No payment today &mdash; we&rsquo;ll email you the signup link when checkout opens.</p>
             <form id="waitlist-form" class="space-y-3">
                 <input id="waitlist-email" type="email" autocomplete="email" required placeholder="you@example.com" class="block w-full px-3 py-2 rounded-lg border border-dark-200 bg-dark-100 text-dark-900 text-sm focus:outline-none focus:border-brand-500" />
                 <div id="waitlist-error" class="text-xs text-red-400 hidden"></div>
-                <div id="waitlist-success" class="text-xs text-green-400 hidden">You're on the list. Check your inbox for confirmation.</div>
+                <div id="waitlist-success" class="text-xs text-green-400 hidden">Locked in. Check your inbox for confirmation.</div>
                 <div class="flex justify-end gap-2 pt-1">
                     <button type="button" id="waitlist-cancel" class="px-4 py-2 text-sm font-semibold text-dark-700 hover:text-dark-900 transition-colors">Close</button>
-                    <button type="submit" id="waitlist-submit" class="px-4 py-2 text-sm font-semibold rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors">Notify me</button>
+                    <button type="submit" id="waitlist-submit" class="px-4 py-2 text-sm font-semibold rounded-lg bg-brand-500 hover:bg-brand-600 text-white transition-colors">Reserve</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Upgrade modal -->
+    <!-- Upgrade modal (still used by the sign-in-resume Stripe flow) -->
     <div id="upgrade-modal" class="fixed inset-0 z-50 hidden items-center justify-center px-4" style="background:rgba(0,0,0,0.7);">
         <div class="rounded-xl border border-dark-200 max-w-md w-full p-6" style="background:#16181C;">
             <h3 class="text-lg font-display font-bold text-dark-900 mb-2" id="modal-title">Upgrade</h3>
-            <p class="text-sm text-dark-600 mb-4" id="modal-body">Redirecting to Stripe Checkout...</p>
+            <p class="text-sm text-dark-600 mb-4" id="modal-body">Redirecting&hellip;</p>
             <div class="flex justify-end gap-2">
                 <button type="button" id="modal-close" class="px-4 py-2 text-sm font-semibold text-dark-700 hover:text-dark-900 transition-colors">Close</button>
             </div>
@@ -286,50 +276,14 @@
 
     <script>
     (function () {
+        const API_BASE = "https://api.goulburn.ai";
+
         // ─── Period toggle (monthly / yearly) ─────────────────────
         const buttons = document.querySelectorAll(".period-btn");
         const prices = document.querySelectorAll(".price-display");
         const periodLabels = document.querySelectorAll(".period-label");
         const yearlyNotes = document.querySelectorAll(".yearly-note");
         let currentPeriod = "monthly";
-
-        // ─── Auto-start checkout on intent return ──────────────────────────────
-        // When the user returned from /sign-in with ?next=checkout&tier=X&period=Y
-        // and a session is already in localStorage, fire the checkout immediately
-        // so they don't have to click Upgrade twice.
-        (async function autoStartCheckoutFromIntent() {
-            try {
-                const params = new URLSearchParams(window.location.search);
-                if (params.get("next") !== "checkout") return;
-                const tier = params.get("tier");
-                if (tier === "builder" || tier === "studio" || tier === "proplus") {
-                    showModal("Notify me", "Builder, Studio, and Pro+ unlock as we onboard the first cohort. Email <a href=\"mailto:contact@goulburn.ai\" style=\"color:#fbbf24;text-decoration:underline;\">contact@goulburn.ai</a> for early access.");
-                    return;
-                }
-                const period = params.get("period") || "monthly";
-                if (!tier) return;
-                const token = (window.goulburnAuth && window.goulburnAuth.getSession)
-                    ? window.goulburnAuth.getSession() : null;
-                if (!token) return;  // not signed in yet — let user click manually
-
-                showModal("Redirecting to Stripe", "Redirecting to Stripe Checkout&hellip;");
-                const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", { credentials: 'include',
-                    method: "POST",
-                    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-                    body: JSON.stringify({ tier: tier, period: period }),
-                });
-                if (!resp.ok) {
-                    const j = await resp.json().catch(() => ({}));
-                    showModal("Checkout error", (j.detail || "Could not start checkout.") + " (HTTP " + resp.status + ")");
-                    return;
-                }
-                const j = await resp.json();
-                if (j.checkout_url) { window.location.href = j.checkout_url; }
-            } catch (e) {
-                showModal("Network error", "Could not reach the billing service. Please retry in a moment.");
-            }
-        })();
-
 
         function paint(period) {
             currentPeriod = period;
@@ -347,7 +301,7 @@
             prices.forEach(p => {
                 const m = p.dataset.monthly;
                 const y = p.dataset.yearly;
-                p.textContent = "$" + (period === "yearly" ? y : m);
+                p.textContent = period === "yearly" ? y : m;
             });
             periodLabels.forEach(l => {
                 l.textContent = period === "yearly" ? "/month, billed yearly" : "/month";
@@ -359,98 +313,68 @@
         buttons.forEach(b => b.addEventListener("click", () => paint(b.dataset.period)));
         paint("monthly");
 
-        // ─── Upgrade button click → POST to backend, redirect to Stripe ───
-        const modal = document.getElementById("upgrade-modal");
+        // ─── Upgrade modal helpers (shared by sign-in-resume flow) ────
+        const upgradeModal = document.getElementById("upgrade-modal");
         const modalTitle = document.getElementById("modal-title");
         const modalBody = document.getElementById("modal-body");
         const modalClose = document.getElementById("modal-close");
-        function showModal(title, body) {
+        function showModal(title, html) {
             modalTitle.textContent = title;
-            modalBody.innerHTML = body;
-            modal.classList.remove("hidden");
-            modal.classList.add("flex");
+            modalBody.innerHTML = html;
+            upgradeModal.classList.remove("hidden");
+            upgradeModal.classList.add("flex");
         }
-        modalClose.addEventListener("click", () => {
-            modal.classList.add("hidden");
-            modal.classList.remove("flex");
-        });
+        function hideModal() {
+            upgradeModal.classList.add("hidden");
+            upgradeModal.classList.remove("flex");
+        }
+        modalClose.addEventListener("click", hideModal);
 
-        document.querySelectorAll(".upgrade-btn").forEach(btn => {
-            btn.addEventListener("click", async () => {
-                const tier = btn.dataset.tier;
-                const period = currentPeriod;
-
-                // Check session via the goulburnAuth helper from partials/auth_v2.html.
-                // Uses the same getSession() the rest of the site uses (dashboard,
-                // settings, claim flow). Returns the session token string or null.
-                let token = null;
-                try {
-                    if (window.goulburnAuth && typeof window.goulburnAuth.getSession === "function") {
-                        token = window.goulburnAuth.getSession();
-                    }
-                } catch (e) {}
-
-                // 2026-05-11: v2 cookie auth is canonical. Don't pre-gate on
-                // localStorage token — Google OAuth / magic-link operators have
-                // none. credentials:'include' carries the gb_session cookie;
-                // backend returns 401 if truly unauthenticated and we show the
-                // sign-in modal on that signal.
-
-                btn.disabled = true;
-                const oldText = btn.textContent;
-                btn.textContent = "Loading...";
-
-                try {
-                    const checkoutHeaders = { "Content-Type": "application/json" };
-                    if (token) checkoutHeaders["Authorization"] = "Bearer " + token;
-                    const resp = await fetch("https://api.goulburn.ai/api/v1/billing/owner-checkout", {
-                        credentials: 'include',
-                        method: "POST",
-                        headers: checkoutHeaders,
-                        body: JSON.stringify({ tier: tier, period: period }),
-                    });
-                    if (!resp.ok) {
-                        let detail = "Could not start checkout.";
-                        try {
-                            const j = await resp.json();
-                            detail = j.detail || detail;
-                            if (typeof detail === "object") detail = JSON.stringify(detail);
-                        } catch (e) {}
-                        if (resp.status === 401 || resp.status === 403) {
-                            showModal(
-                                "Sign in required",
-                                'Upgrades are tied to your goulburn.ai account. <a href="/sign-in?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">Sign in</a> or <a href="/register?next=checkout&tier=' + encodeURIComponent(tier) + '&period=' + encodeURIComponent(period) + '" class="text-brand-400 underline">create an account</a> &mdash; we&rsquo;ll take you straight to checkout.'
-                            );
-                            return;
-                        }
-                        if (resp.status === 503) {
-                            showModal(
-                                "Checkout temporarily unavailable",
-                                "The billing system is being configured. Please check back shortly. (HTTP 503)"
-                            );
-                        } else {
-                            showModal("Checkout error", detail + " (HTTP " + resp.status + ")");
-                        }
-                        return;
-                    }
-                    const j = await resp.json();
-                    if (j.checkout_url) {
-                        window.location.href = j.checkout_url;
-                    } else {
-                        showModal("Checkout error", "Server did not return a redirect URL.");
-                    }
-                } catch (err) {
-                    showModal("Network error", "Could not reach the billing service. Please retry in a moment.");
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = oldText;
+        // ─── Auto-start checkout on intent return ──────────────────
+        // When the user returned from /sign-in with ?next=checkout&tier=X&period=Y
+        // and a session is in cookies, fire the checkout immediately.
+        // Founding-member tiers (wallet/builder/builder_pro) do NOT auto-checkout
+        // until Stripe is live — they fall through to the modal.
+        (async function autoStartCheckoutFromIntent() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get("next") !== "checkout") return;
+                const tier = params.get("tier");
+                if (!tier) return;
+                if (tier === "wallet" || tier === "builder" || tier === "builder_pro") {
+                    showModal(
+                        "Checkout opening soon",
+                        "Paid tiers unlock when Stripe checkout goes live (target: 6 weeks). Your founding-member reservation is logged &mdash; we&rsquo;ll email you the signup link the moment it opens."
+                    );
+                    return;
                 }
-            });
-        });
+                const period = params.get("period") || "monthly";
+                const token = (window.goulburnAuth && window.goulburnAuth.getSession)
+                    ? window.goulburnAuth.getSession() : null;
+                if (!token) return;
+                showModal("Redirecting to Stripe", "Redirecting to Stripe Checkout&hellip;");
+                const resp = await fetch(API_BASE + "/api/v1/billing/owner-checkout", {
+                    credentials: "include",
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+                    body: JSON.stringify({ tier: tier, period: period }),
+                });
+                if (!resp.ok) {
+                    const j = await resp.json().catch(() => ({}));
+                    showModal("Checkout error", (j.detail || "Could not start checkout.") + " (HTTP " + resp.status + ")");
+                    return;
+                }
+                const j = await resp.json();
+                if (j.checkout_url) { window.location.href = j.checkout_url; }
+            } catch (e) {
+                showModal("Network error", "Could not reach the billing service. Please retry in a moment.");
+            }
+        })();
 
-        // ─── Waitlist signup ─────────────────────────────────────
+        // ─── Founding-member reservation modal ─────────────────────
         const wlModal = document.getElementById("waitlist-modal");
         const wlTitle = document.getElementById("waitlist-title");
+        const wlBody = document.getElementById("waitlist-body");
         const wlTierLabel = document.getElementById("waitlist-tier-label");
         const wlForm = document.getElementById("waitlist-form");
         const wlEmail = document.getElementById("waitlist-email");
@@ -459,17 +383,22 @@
         const wlCancel = document.getElementById("waitlist-cancel");
         const wlSubmit = document.getElementById("waitlist-submit");
         let wlCurrentTier = "builder";
-        const ADMIN_BASE = "https://admin.goulburn.ai";
 
         function openWaitlistModal(tierSlug, tierName) {
             wlCurrentTier = tierSlug;
-            wlTitle.textContent = "Join the " + tierName + " waitlist";
+            if (tierSlug === "wallet") {
+                wlTitle.textContent = "Notify me when Wallet opens";
+                wlBody.innerHTML = "We&rsquo;ll email you the moment Wallet (prepaid usage) is live. No payment today.";
+            } else {
+                wlTitle.textContent = "Reserve your founding spot";
+                wlBody.innerHTML = "Lock in the founding-member price for <span>" + tierName + "</span>. No payment today &mdash; we&rsquo;ll email you the signup link when checkout opens.";
+            }
             wlTierLabel.textContent = tierName;
             wlError.classList.add("hidden");
             wlSuccess.classList.add("hidden");
             wlEmail.value = "";
             wlSubmit.disabled = false;
-            wlSubmit.textContent = "Notify me";
+            wlSubmit.textContent = tierSlug === "wallet" ? "Notify me" : "Reserve";
             wlEmail.disabled = false;
             wlModal.classList.remove("hidden");
             wlModal.classList.add("flex");
@@ -480,11 +409,12 @@
             wlModal.classList.remove("flex");
         }
         wlCancel.addEventListener("click", closeWaitlistModal);
-        document.querySelectorAll(".waitlist-btn").forEach(function(btn) {
+        document.querySelectorAll(".founding-btn").forEach(function(btn) {
             btn.addEventListener("click", function() {
                 openWaitlistModal(btn.dataset.tier, btn.dataset.tierName);
             });
         });
+
         wlForm.addEventListener("submit", async function(e) {
             e.preventDefault();
             wlError.classList.add("hidden");
@@ -496,38 +426,78 @@
                 return;
             }
             wlSubmit.disabled = true;
-            wlSubmit.textContent = "Sending...";
+            wlSubmit.textContent = "Sending&hellip;";
             try {
-                const resp = await fetch(ADMIN_BASE + "/api/v1/admin/waitlist", { credentials: 'include',
+                const resp = await fetch(API_BASE + "/api/v1/founding-members", {
+                    credentials: "omit",
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: email, tier: wlCurrentTier }),
+                    body: JSON.stringify({ email: email, tier_interest: wlCurrentTier }),
                 });
                 if (!resp.ok) {
                     let msg = "Could not save. Try again in a moment.";
-                    try { const j = await resp.json(); if (j.detail) msg = (typeof j.detail === "string" ? j.detail : msg); } catch (e) {}
-                    if (resp.status === 429) msg = "Too many signups from this connection. Try again in 15 minutes.";
-                    wlError.textContent = msg;
+                    try { const j = await resp.json(); if (j.detail && typeof j.detail === "string") msg = j.detail; } catch (e) {}
+                    if (resp.status === 429) msg = "Too many reservations from this address. Try again in an hour.";
+                    if (resp.status === 422) msg = "That email address isn't valid.";
+                    if (resp.status === 503) msg = "Reservation system busy &mdash; please try again in a moment.";
+                    wlError.innerHTML = msg;
                     wlError.classList.remove("hidden");
                     wlSubmit.disabled = false;
-                    wlSubmit.textContent = "Notify me";
+                    wlSubmit.textContent = wlCurrentTier === "wallet" ? "Notify me" : "Reserve";
                     return;
                 }
+                const body = await resp.json().catch(() => ({}));
+                let successMsg = "You're on the list. Check your inbox for confirmation.";
+                if (body.founding_member && body.cap_position) {
+                    successMsg = "Locked in. You're #" + body.cap_position + " of " + body.cap_total + ". Check your inbox.";
+                } else if (body.already_reserved) {
+                    successMsg = "You're already on the list. Check your inbox for the original confirmation.";
+                }
+                wlSuccess.textContent = successMsg;
                 wlSuccess.classList.remove("hidden");
                 wlEmail.disabled = true;
                 wlSubmit.disabled = true;
-                wlSubmit.textContent = "On the list";
-                setTimeout(closeWaitlistModal, 2000);
+                wlSubmit.textContent = "Reserved";
+                // Refresh counters in-place
+                loadCapCounters();
+                setTimeout(closeWaitlistModal, 3500);
             } catch (err) {
                 wlError.textContent = "Network error. Please retry.";
                 wlError.classList.remove("hidden");
                 wlSubmit.disabled = false;
-                wlSubmit.textContent = "Notify me";
+                wlSubmit.textContent = wlCurrentTier === "wallet" ? "Notify me" : "Reserve";
             }
         });
+
+        // ─── Live cap counters ─────────────────────────────────────
+        async function loadCapCounters() {
+            try {
+                const resp = await fetch(API_BASE + "/api/v1/founding-members/counts", {
+                    credentials: "omit",
+                });
+                if (!resp.ok) throw new Error("HTTP " + resp.status);
+                const counts = await resp.json();
+                document.querySelectorAll(".founding-counter").forEach(function(el) {
+                    const tier = el.dataset.tier;
+                    const t = counts[tier];
+                    if (!t) { el.textContent = ""; return; }
+                    if (typeof t.cap === "number") {
+                        const remaining = typeof t.remaining === "number" ? t.remaining : Math.max(0, t.cap - t.count);
+                        el.textContent = remaining > 0
+                            ? (t.count + " of " + t.cap + " reserved · " + remaining + " left")
+                            : "Founding cap reached · join the notification list";
+                    } else {
+                        el.textContent = t.count + " on the list · no cap";
+                    }
+                });
+            } catch (e) {
+                document.querySelectorAll(".founding-counter").forEach(function(el) {
+                    el.textContent = "";
+                });
+            }
+        }
+        loadCapCounters();
     })();
     </script>
 </body>
 </html>
-path: src/pages/pricing.html
-size: 24423
