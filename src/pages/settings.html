@@ -804,6 +804,28 @@
             </p>
         </div>
 
+        <!-- SDK & CLI keys (gbok_ Owner API keys for goulburn CLI / Python+TS SDKs) -->
+        <div class="settings-card" id="sdkKeysCard">
+            <h2>SDK &amp; CLI keys</h2>
+            <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
+                Long-lived keys for the goulburn CLI and the Python and TypeScript SDKs. Use these from your terminal, CI pipelines, or any developer tooling that needs to act on your fleet. Different from the Trust API key above &mdash; those are for external platforms querying public trust data.
+            </p>
+
+            <div class="warning-box">
+                <span class="warning-icon">&#9888;</span>
+                Keep these keys confidential. They authenticate as you. If a key leaks, revoke it immediately and create a new one.
+            </div>
+
+            <div id="sdkKeysList" style="margin: 1rem 0;">
+                <p style="color: var(--dark-500); font-size: 0.85rem;">Loading&hellip;</p>
+            </div>
+
+            <button class="btn btn-primary" type="button" onclick="openCreateSdkKeyModal()">Create new key</button>
+            <p style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.75rem;">
+                You can have up to 10 active keys. Plaintext is shown only once at creation &mdash; copy it before closing the dialog.
+            </p>
+        </div>
+
         <!-- BYOK Anthropic key — operator-wide -->
         <div class="settings-card" id="byokCard" style="margin-bottom: 1.5rem;">
             <h2>Bring your own Anthropic key</h2>
@@ -922,6 +944,39 @@
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
                 <button class="btn btn-danger" onclick="confirmDeleteAccount()">Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SDK & CLI key — create-key modal -->
+    <div class="modal" id="sdkKeyModal">
+        <div class="modal-content">
+            <h3 class="modal-header" id="sdkKeyModalTitle">Create new key</h3>
+            <div class="modal-body">
+                <div id="sdkKeyStepName">
+                    <p>Give the key a name so you remember what it's for (e.g. "Laptop CLI", "CI runner").</p>
+                    <input type="text" id="sdkKeyNameInput" class="form-input" placeholder="My CLI key" maxlength="100" autocomplete="off" style="margin-top: 0.5rem;">
+                    <p id="sdkKeyError" style="display: none; margin-top: 0.5rem; color: var(--red-600); font-size: 0.875rem;"></p>
+                </div>
+                <div id="sdkKeyStepShow" style="display: none;">
+                    <p>Copy this key now. You won't see it again &mdash; closing this dialog will permanently hide the plaintext.</p>
+                    <div class="api-key-display" style="margin: 0.75rem 0;">
+                        <div class="api-key-value">
+                            <code id="sdkKeyPlaintext" style="font-family: monospace; word-break: break-all; font-size: 0.85rem;">gbok_&hellip;</code>
+                        </div>
+                        <button class="btn btn-secondary" type="button" onclick="copySdkKeyPlaintext()">Copy</button>
+                    </div>
+                    <p style="color: var(--dark-500); font-size: 0.8rem;">Use it as: <code style="background: var(--dark-100); padding: 2px 6px; border-radius: 4px;">Authorization: Bearer gbok_&hellip;</code></p>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <div id="sdkKeyActionsName">
+                    <button class="btn btn-secondary" type="button" onclick="closeSdkKeyModal()" style="flex:1;">Cancel</button>
+                    <button class="btn btn-primary" type="button" onclick="submitSdkKeyCreate()" style="flex:1;">Create</button>
+                </div>
+                <div id="sdkKeyActionsShow" style="display: none; width: 100%;">
+                    <button class="btn btn-primary" type="button" onclick="closeSdkKeyModal()" style="width:100%;">I've saved it</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1914,6 +1969,188 @@
         });
     }
     window.saveWeeklyDigestPref = saveWeeklyDigestPref;
+
+
+    // ── SDK & CLI keys (Owner API keys, gbok_) ─────────────────────
+    // Manage the long-lived keys that the goulburn CLI + Python/TypeScript
+    // SDKs use to authenticate against the Trust API across this owner's
+    // full fleet. Phase 0 of the SDK roadmap; the keys themselves unlock
+    // get_owner_via_api_key on the backend.
+    var SDK_KEYS_API_BASE = 'https://api.goulburn.ai';
+
+    function _sdkKeysHeaders() {
+        var session = (typeof goulburnAuth !== 'undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
+        return {
+            'Authorization': session ? ('Bearer ' + session) : '',
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function _sdkEscapeHtml(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+        });
+    }
+
+    function _sdkFmtDate(s) {
+        if (!s) return '—';
+        try {
+            var d = new Date(s);
+            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        } catch (e) { return s; }
+    }
+
+    async function loadSdkKeys() {
+        var listEl = document.getElementById('sdkKeysList');
+        if (!listEl) return;
+        try {
+            var resp = await fetch(SDK_KEYS_API_BASE + '/api/v1/owner/api-keys', {
+                credentials: 'include',
+                headers: _sdkKeysHeaders()
+            });
+            if (resp.status === 401) {
+                listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">Sign in to manage SDK keys.</p>';
+                return;
+            }
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            var data = await resp.json();
+            renderSdkKeysList(data.data || []);
+        } catch (e) {
+            listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">Could not load keys. <a href="#" onclick="loadSdkKeys(); return false;">Retry</a></p>';
+        }
+    }
+
+    function renderSdkKeysList(keys) {
+        var listEl = document.getElementById('sdkKeysList');
+        if (!keys.length) {
+            listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">No keys yet. Create one to start using the goulburn CLI or SDKs.</p>';
+            return;
+        }
+        var rows = keys.map(function(k) {
+            var status = k.revoked_at
+                ? '<span style="color: var(--red-600); font-size: 0.75rem;">revoked</span>'
+                : '<span style="color: var(--brand-400, #f59e0b); font-size: 0.75rem;">active</span>';
+            var revokeBtn = k.revoked_at
+                ? ''
+                : '<button class="btn-link" style="background:none; border:none; color: var(--red-600); cursor: pointer; font-size: 0.85rem; padding: 0;" onclick="revokeSdkKey(' + k.id + ', \'' + (k.name||'').replace(/[\\\'"]/g, '') + '\')">Revoke</button>';
+            return [
+                '<div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--dark-200);">',
+                '  <div>',
+                '    <p style="margin: 0; font-weight: 500; font-size: 0.9rem; color: var(--dark-900);">' + _sdkEscapeHtml(k.name) + ' &nbsp; ' + status + '</p>',
+                '    <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 0.8rem; color: var(--dark-600);">' + _sdkEscapeHtml(k.key_prefix) + '</p>',
+                '    <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--dark-500);">Created ' + _sdkFmtDate(k.created_at) + ' &middot; Last used ' + _sdkFmtDate(k.last_used_at) + '</p>',
+                '  </div>',
+                '  <div>' + revokeBtn + '</div>',
+                '</div>'
+            ].join('');
+        });
+        listEl.innerHTML = rows.join('');
+    }
+
+    function openCreateSdkKeyModal() {
+        var modal = document.getElementById('sdkKeyModal');
+        document.getElementById('sdkKeyStepName').style.display = '';
+        document.getElementById('sdkKeyStepShow').style.display = 'none';
+        document.getElementById('sdkKeyActionsName').style.display = '';
+        document.getElementById('sdkKeyActionsShow').style.display = 'none';
+        document.getElementById('sdkKeyNameInput').value = '';
+        document.getElementById('sdkKeyError').style.display = 'none';
+        modal.classList.add('active');
+        setTimeout(function() {
+            var inp = document.getElementById('sdkKeyNameInput');
+            if (inp) inp.focus();
+        }, 30);
+    }
+
+    function closeSdkKeyModal() {
+        document.getElementById('sdkKeyModal').classList.remove('active');
+        loadSdkKeys();
+    }
+
+    async function submitSdkKeyCreate() {
+        var nameEl = document.getElementById('sdkKeyNameInput');
+        var errEl = document.getElementById('sdkKeyError');
+        var name = (nameEl.value || '').trim();
+        if (!name) {
+            errEl.textContent = 'Name is required.';
+            errEl.style.display = '';
+            return;
+        }
+        errEl.style.display = 'none';
+        try {
+            var resp = await fetch(SDK_KEYS_API_BASE + '/api/v1/owner/api-keys', {
+                method: 'POST',
+                credentials: 'include',
+                headers: _sdkKeysHeaders(),
+                body: JSON.stringify({ name: name })
+            });
+            if (!resp.ok) {
+                var body = await resp.json().catch(function() { return {}; });
+                errEl.textContent = body.detail || ('Error ' + resp.status);
+                errEl.style.display = '';
+                return;
+            }
+            var data = await resp.json();
+            document.getElementById('sdkKeyPlaintext').textContent = data.plaintext_key;
+            document.getElementById('sdkKeyStepName').style.display = 'none';
+            document.getElementById('sdkKeyStepShow').style.display = '';
+            document.getElementById('sdkKeyActionsName').style.display = 'none';
+            document.getElementById('sdkKeyActionsShow').style.display = 'block';
+        } catch (e) {
+            errEl.textContent = 'Network error. Try again.';
+            errEl.style.display = '';
+        }
+    }
+
+    function copySdkKeyPlaintext() {
+        var txt = document.getElementById('sdkKeyPlaintext').textContent;
+        try {
+            navigator.clipboard.writeText(txt);
+            var toast = document.getElementById('toast');
+            if (toast) {
+                toast.textContent = 'Copied to clipboard';
+                toast.classList.add('show');
+                setTimeout(function() { toast.classList.remove('show'); }, 1800);
+            }
+        } catch (e) { /* clipboard API may be unavailable; user can manually select+copy */ }
+    }
+
+    async function revokeSdkKey(keyId, name) {
+        if (!confirm('Revoke key "' + name + '"? Any CLI or SDK using this key will immediately fail with 401. This cannot be undone.')) return;
+        try {
+            var resp = await fetch(SDK_KEYS_API_BASE + '/api/v1/owner/api-keys/' + keyId, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: _sdkKeysHeaders()
+            });
+            if (resp.ok || resp.status === 204) {
+                loadSdkKeys();
+            } else {
+                alert('Could not revoke key — try again.');
+            }
+        } catch (e) {
+            alert('Network error — try again.');
+        }
+    }
+
+    // Expose on window for inline onclick handlers
+    window.openCreateSdkKeyModal = openCreateSdkKeyModal;
+    window.closeSdkKeyModal = closeSdkKeyModal;
+    window.submitSdkKeyCreate = submitSdkKeyCreate;
+    window.copySdkKeyPlaintext = copySdkKeyPlaintext;
+    window.revokeSdkKey = revokeSdkKey;
+    window.loadSdkKeys = loadSdkKeys;
+
+    // Slot the initial load into the existing auth-aware page bootstrap.
+    // loadSettingsData runs only after goulburnAuth.ready() resolves and
+    // the user is authenticated, so a small delay-then-load is safe.
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (typeof goulburnAuth !== 'undefined' && goulburnAuth.isAuthenticated && goulburnAuth.isAuthenticated()) {
+                loadSdkKeys();
+            }
+        }, 400);
+    });
 
 
     </script>
