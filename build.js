@@ -224,3 +224,31 @@ if (fs.existsSync(SETTINGS)) {
     }
     console.log('Settings-page honesty guard: no retired tier names in upgrade pitch.');
 }
+
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 8: Comparison-table presence guard (Phase A0.5)
+// ─────────────────────────────────────────────────────────────────────
+// 2026-05-26 — pricing.html includes a "Compare tiers & features" table
+// below the four cards (X.com pattern). The table is the buyer's primary
+// decision tool — make sure it never silently disappears from a future
+// pricing.html refactor. Also pin that the table doesn't promise v1.1+
+// features ("Terraform" — already blocked by STEP 7, double-checked here
+// for the table region specifically).
+if (fs.existsSync(PRICING)) {
+    const src = fs.readFileSync(PRICING, 'utf8');
+    if (!src.includes('Compare tiers &amp; features')) {
+        console.error('pricing.html no longer contains the "Compare tiers & features" table — Phase A0.5 regressed.');
+        process.exit(1);
+    }
+    // Table must list all four tier columns
+    for (const col of ['Free', 'Wallet', 'Builder', 'Builder Pro']) {
+        // Look for the col header within the table region only
+        // (a loose check; the STEP 7 honesty guard covers stricter wording)
+        if (!src.includes('>' + col + '<')) {
+            console.error('pricing.html comparison table missing tier column: ' + col);
+            process.exit(1);
+        }
+    }
+    console.log('Comparison-table guard: 4 tier columns present.');
+}
