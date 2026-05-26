@@ -2588,7 +2588,12 @@
             }).join('');
             listEl.innerHTML = rows;
         } catch (e) {
-            listEl.innerHTML = '<p style="color:#fca5a5; font-size: 0.85rem;">Could not load webhooks: ' + _whEscape(e.message) + '</p>';
+            var msg = String(e.message || '');
+            if (msg.indexOf('401') !== -1) {
+                listEl.innerHTML = '<p style="color:#fbbf24; font-size: 0.85rem;">Session expired. <a href="/sign-in" style="color:#86EFAC; text-decoration:underline;">Sign in again</a> to manage webhooks.</p>';
+            } else {
+                listEl.innerHTML = '<p style="color:#fca5a5; font-size: 0.85rem;">Could not load webhooks: ' + _whEscape(msg) + '</p>';
+            }
         }
     }
 
@@ -2739,7 +2744,14 @@
             }
             actionsEl.innerHTML = help + btns.join(' ');
         } catch (e) {
-            statusEl.innerHTML = '<span style="color:#fca5a5;">Could not load trial status: ' + _trialEscape(e.message) + '</span>';
+            // P2 UX 2026-05-26: detect 401 (session expired) and offer
+            // a sign-in link rather than a generic HTTP error string.
+            var msg = String(e.message || '');
+            if (msg.indexOf('401') !== -1) {
+                statusEl.innerHTML = '<span style="color:#fbbf24;">Session expired. <a href="/sign-in" style="color:#86EFAC; text-decoration:underline;">Sign in again</a> to see your trial.</span>';
+            } else {
+                statusEl.innerHTML = '<span style="color:#fca5a5;">Could not load trial status: ' + _trialEscape(msg) + '</span>';
+            }
             actionsEl.innerHTML = '';
         }
     }
