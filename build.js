@@ -200,8 +200,12 @@ if (fs.existsSync(DASH)) {
 const PRICING = path.join(OUT, 'pricing.html');
 if (fs.existsSync(PRICING)) {
     const src = fs.readFileSync(PRICING, 'utf8');
-    if (src.includes('>Terraform provider<')) {
-        console.error('pricing.html still promises "Terraform provider" — deferred to v1.1. Drop the bullet or mark it explicitly as v1.1.');
+    // STEP 7 (Phase A0): Terraform must not appear as a green-check
+    // bullet on a pricing card. Detection: <span>Terraform provider</span>
+    // is the card-bullet shape. The comparison-table row uses
+    // <td>Terraform provider</td> and carries a "Soon" badge — allowed.
+    if (/<span[^>]*>Terraform provider<\/span>/.test(src)) {
+        console.error('pricing.html card still promises "Terraform provider" as a green-check bullet — use a "Soon" badge in the comparison table instead.');
         process.exit(1);
     }
     if (/custom branded badges/i.test(src)) {

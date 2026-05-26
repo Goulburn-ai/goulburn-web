@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-05-26-02';  // bumped for counter + Enterprise CTA removal  // bumped for Phase A0.5 comparison table  // bumped for dashboard projection-arithmetic fix (rebased from #8)
+const VERSION = 'c-2026-05-26-03';  // bumped for A0.7 SDK Soon + Terraform Soon row  // bumped for counter + Enterprise CTA removal  // bumped for Phase A0.5 comparison table  // bumped for dashboard projection-arithmetic fix (rebased from #8)
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
