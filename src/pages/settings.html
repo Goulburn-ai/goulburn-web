@@ -826,6 +826,29 @@
             </p>
         </div>
 
+
+        <!-- Webhooks (Builder+ tier feature) -->
+        <div class="settings-card" id="webhooksCard">
+            <h2>Webhooks</h2>
+            <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
+                Subscribe to events that happen across your fleet &mdash; tier changes, trust score updates, badge promotions, and agent claims. We POST signed JSON to your URL with HMAC-SHA256 in the <code style="background:rgba(247,249,249,0.08); padding:1px 4px; border-radius:3px;">X-Goulburn-Signature</code> header. 4-attempt retry with backoff; exhausted deliveries land in your DLQ for replay.
+            </p>
+
+            <div class="warning-box">
+                <span class="warning-icon">&#9888;</span>
+                Endpoint signing secrets are shown only once at creation. Copy and store securely &mdash; rotate from the row action menu if a secret leaks.
+            </div>
+
+            <div id="webhooksList" style="margin: 1rem 0;">
+                <p style="color: var(--dark-500); font-size: 0.85rem;">Loading&hellip;</p>
+            </div>
+
+            <button class="btn btn-primary" type="button" onclick="openCreateWebhookModal()">Add endpoint</button>
+            <p style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.75rem;">
+                Builder Pro and Wallet tiers. URLs must be HTTPS; private and loopback hosts are rejected at the server.
+            </p>
+        </div>
+
         <!-- BYOK Anthropic key — operator-wide -->
         <div class="settings-card" id="byokCard" style="margin-bottom: 1.5rem;">
             <h2>Bring your own Anthropic key</h2>
@@ -2489,6 +2512,155 @@
             }).catch(function(){ /* non-fatal */ });
         } catch (e) { /* non-fatal */ }
     })();
+
+    // ── Webhooks (signed CI gate webhook events) ───────────────────
+    // List, create, test, rotate, delete operator webhook endpoints.
+    // Server-side at /api/v1/webhooks/* (full CRUD already shipped).
+    var WH_API_BASE = 'https://api.goulburn.ai';
+
+    function _whHeaders() {
+        var session = (typeof goulburnAuth !== 'undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
+        return {
+            'Authorization': session ? ('Bearer ' + session) : '',
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function _whEscape(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+        });
+    }
+
+    function _whFmtTime(s) {
+        if (!s) return '—';
+        try {
+            var d = new Date(s);
+            return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+        } catch (e) { return s; }
+    }
+
+    async function loadWebhooks() {
+        var listEl = document.getElementById('webhooksList');
+        if (!listEl) return;
+        try {
+            var resp = await fetch(WH_API_BASE + '/api/v1/webhooks', {
+                credentials: 'include',
+                headers: _whHeaders()
+            });
+            if (resp.status === 402) {
+                listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">Webhooks are a Builder Pro / Wallet tier feature. <a href="/pricing" style="color: var(--brand-400);">Upgrade</a> to subscribe to events.</p>';
+                return;
+            }
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            var data = await resp.json();
+            var endpoints = data.data || data.endpoints || data || [];
+            if (!endpoints.length) {
+                listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">No webhook endpoints yet. Click “Add endpoint” to create your first.</p>';
+                return;
+            }
+            var rows = endpoints.map(function(ep) {
+                var events = Array.isArray(ep.event_types) ? ep.event_types.join(', ') : '';
+                var status = ep.enabled === false ? '<span style="color:#ef4444;">Disabled</span>' : '<span style="color:#10b981;">Enabled</span>';
+                return '<div style="border:1px solid rgba(247,249,249,0.08); border-radius:8px; padding:0.75rem; margin-bottom:0.5rem;">' +
+                    '<div style="font-family: ui-monospace, monospace; font-size: 0.8125rem; word-break:break-all; color:#f1f5f5;">' + _whEscape(ep.url) + '</div>' +
+                    '<div style="font-size: 0.75rem; color: var(--dark-500); margin-top: 0.25rem;">Events: ' + _whEscape(events || '—') + ' • ' + status + ' • Created ' + _whFmtTime(ep.created_at) + '</div>' +
+                    '<div style="margin-top: 0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap;">' +
+                    '<button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="testWebhook(\'' + _whEscape(ep.id) + '\')">Test</button>' +
+                    '<button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="viewWebhookDeliveries(\'' + _whEscape(ep.id) + '\')">Deliveries</button>' +
+                    '<button class="btn btn-secondary" style="font-size:0.75rem; padding:4px 10px;" onclick="rotateWebhook(\'' + _whEscape(ep.id) + '\')">Rotate secret</button>' +
+                    '<button class="btn" style="font-size:0.75rem; padding:4px 10px; background:rgba(239,68,68,0.15); color:#fca5a5;" onclick="deleteWebhook(\'' + _whEscape(ep.id) + '\')">Delete</button>' +
+                    '</div></div>';
+            }).join('');
+            listEl.innerHTML = rows;
+        } catch (e) {
+            listEl.innerHTML = '<p style="color:#fca5a5; font-size: 0.85rem;">Could not load webhooks: ' + _whEscape(e.message) + '</p>';
+        }
+    }
+
+    function openCreateWebhookModal() {
+        var url = prompt('Endpoint URL (https://...):');
+        if (!url) return;
+        var allEvents = ['tier.changed','trust.score_updated','trust.tier_promoted','trust.tier_demoted','agent.claimed','agent.deleted','subscription.canceled','subscription.renewed'];
+        var picked = prompt('Comma-separated event types to subscribe to:\n\nAvailable:\n  ' + allEvents.join('\n  '), 'tier.changed,trust.score_updated,trust.tier_promoted');
+        if (!picked) return;
+        var event_types = picked.split(',').map(function(s){return s.trim();}).filter(Boolean);
+        if (!event_types.length) { alert('At least one event type required.'); return; }
+        var description = prompt('Optional description:', '') || null;
+        fetch(WH_API_BASE + '/api/v1/webhooks', {
+            method: 'POST',
+            credentials: 'include',
+            headers: _whHeaders(),
+            body: JSON.stringify({ url: url, event_types: event_types, description: description })
+        }).then(function(r) {
+            return r.json().then(function(j){ return { ok: r.ok, status: r.status, data: j }; });
+        }).then(function(res) {
+            if (!res.ok) {
+                alert('Could not create webhook: ' + (res.data.detail || JSON.stringify(res.data)));
+                return;
+            }
+            var secret = res.data.signing_secret || res.data.secret || '(no secret returned)';
+            alert('Webhook created. Copy this signing secret NOW — it will not be shown again:\n\n' + secret);
+            loadWebhooks();
+        }).catch(function(e) { alert('Network error: ' + e.message); });
+    }
+
+    function testWebhook(id) {
+        fetch(WH_API_BASE + '/api/v1/webhooks/' + id + '/test', {
+            method: 'POST', credentials: 'include', headers: _whHeaders()
+        }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, data: j }; }); })
+          .then(function(res) {
+            if (res.ok) alert('Test event dispatched. Check your endpoint for the delivery (' + (res.data.delivered || res.data.n || '?') + ').');
+            else alert('Test failed: ' + (res.data.detail || JSON.stringify(res.data)));
+        });
+    }
+
+    function deleteWebhook(id) {
+        if (!confirm('Delete this webhook endpoint? Existing deliveries are preserved in your DLQ but no new events will fan out.')) return;
+        fetch(WH_API_BASE + '/api/v1/webhooks/' + id, {
+            method: 'DELETE', credentials: 'include', headers: _whHeaders()
+        }).then(function(r){ if (r.ok || r.status === 204) loadWebhooks(); else r.json().then(function(j){ alert('Delete failed: ' + (j.detail || JSON.stringify(j))); }); });
+    }
+
+    function rotateWebhook(id) {
+        if (!confirm('Rotate the signing secret? A new plaintext secret will be shown ONCE — update your verification code afterwards.')) return;
+        fetch(WH_API_BASE + '/api/v1/webhooks/' + id + '/rotate', {
+            method: 'POST', credentials: 'include', headers: _whHeaders()
+        }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, data: j }; }); })
+          .then(function(res) {
+            if (res.ok) alert('New signing secret (copy NOW):\n\n' + (res.data.signing_secret || res.data.secret || '(none returned)'));
+            else alert('Rotate failed: ' + (res.data.detail || JSON.stringify(res.data)));
+        });
+    }
+
+    function viewWebhookDeliveries(id) {
+        fetch(WH_API_BASE + '/api/v1/webhooks/' + id + '/deliveries?limit=20', {
+            credentials: 'include', headers: _whHeaders()
+        }).then(function(r){ return r.json(); }).then(function(data) {
+            var rows = (data.data || data.deliveries || data || []).slice(0, 20);
+            if (!rows.length) { alert('No deliveries yet for this endpoint.'); return; }
+            var lines = rows.map(function(d) {
+                var s = d.response_status || d.status || '?';
+                var ms = d.duration_ms || 0;
+                return _whFmtTime(d.attempted_at || d.created_at) + '   ' + (d.event_type || '?') + '   HTTP ' + s + '   ' + ms + 'ms' + (d.dlq ? '   [DLQ]' : '');
+            });
+            alert('Recent deliveries (last 20):\n\n' + lines.join('\n'));
+        });
+    }
+
+    window.openCreateWebhookModal = openCreateWebhookModal;
+    window.testWebhook = testWebhook;
+    window.deleteWebhook = deleteWebhook;
+    window.rotateWebhook = rotateWebhook;
+    window.viewWebhookDeliveries = viewWebhookDeliveries;
+
+    // Auto-load when the section is visible.
+    (function() {
+        if (document.getElementById('webhooksCard')) {
+            try { loadWebhooks(); } catch (e) {}
+        }
+    })();
+
     </script>
 <script>
         // ─── BYOK Anthropic key (Daniel 2026-05-09) ───
