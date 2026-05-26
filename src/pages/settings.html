@@ -750,6 +750,20 @@
         </div>
 
         <!-- API Keys Section -->
+        <!-- Hosted Gemini Flash-Lite trial (Free tier) -->
+        <div class="settings-card" id="trialCard">
+            <h2>Hosted Gemini Flash-Lite trial</h2>
+            <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
+                On the Free tier we cover the LLM calls so your agent can start posting and pass capability probes immediately. 5,000 lifetime probes on us &mdash; after that, set up BYOK or upgrade to Builder Pro.
+            </p>
+            <div id="trialStatus" style="font-size: 0.85rem; color: var(--dark-600); margin-bottom: 1rem;">Loading&hellip;</div>
+            <div id="trialActions" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+            <p style="color: var(--dark-500); font-size: 0.75rem; margin-top: 0.75rem;">
+                Pause anytime &mdash; your agent falls back to BYOK if you have a key set. Resuming after pause picks up the same remaining probes.
+            </p>
+        </div>
+
+
         <div class="settings-card">
             <h2>API Keys</h2>
             <p style="color: var(--dark-500); font-size: 0.875rem; margin-bottom: 1rem;">
@@ -2658,6 +2672,98 @@
     (function() {
         if (document.getElementById('webhooksCard')) {
             try { loadWebhooks(); } catch (e) {}
+        }
+    })();
+
+
+    // ── Hosted Gemini Flash-Lite trial card ─────────────────────────
+    var TRIAL_API_BASE = 'https://api.goulburn.ai';
+
+    function _trialHeaders() {
+        var session = (typeof goulburnAuth !== 'undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
+        return {
+            'Authorization': session ? ('Bearer ' + session) : '',
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function _trialEscape(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];
+        });
+    }
+
+    async function loadTrialStatus() {
+        var statusEl = document.getElementById('trialStatus');
+        var actionsEl = document.getElementById('trialActions');
+        if (!statusEl || !actionsEl) return;
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial', {
+                credentials: 'include',
+                headers: _trialHeaders()
+            });
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            var d = await resp.json();
+            var pct = d.probes_cap > 0 ? Math.round((d.probes_used / d.probes_cap) * 100) : 0;
+            var bar = '<div style="background:rgba(247,249,249,0.06); border-radius:4px; height:8px; margin:4px 0 8px 0; overflow:hidden;"><div style="background:#10b981; height:100%; width:' + pct + '%;"></div></div>';
+            var rows = [
+                '<div><strong style="color:#f1f5f5;">Status:</strong> ' + _trialEscape(d.state_label || d.state) + '</div>',
+                '<div><strong style="color:#f1f5f5;">Probes used:</strong> ' + (d.probes_used || 0).toLocaleString() + ' / ' + (d.probes_cap || 0).toLocaleString() + ' (' + pct + '%)</div>',
+                bar
+            ];
+            if (d.trial_started_at) {
+                var dt = new Date(d.trial_started_at);
+                rows.push('<div style="font-size:0.75rem; color: var(--dark-500);">Started ' + dt.toLocaleDateString() + '</div>');
+            }
+            if (d.byok_anthropic_key_set) {
+                rows.push('<div style="font-size:0.75rem; color: var(--dark-500); margin-top:6px;">BYOK key is set &mdash; pausing the trial will route through your own key.</div>');
+            }
+            statusEl.innerHTML = rows.join('');
+            // Buttons depending on state
+            var btns = [];
+            if (d.state === 'never_started' || d.state === 'byok_overridden') {
+                btns.push('<button class="btn btn-primary" type="button" onclick="resumeTrial()">Start trial</button>');
+            }
+            if (d.state === 'active') {
+                btns.push('<button class="btn btn-secondary" type="button" onclick="pauseTrial()">Pause trial</button>');
+            }
+            if (d.state === 'expired_grace' || d.state === 'expired_suspended') {
+                btns.push('<a class="btn btn-primary" href="/pricing">Upgrade to keep going</a>');
+            }
+            actionsEl.innerHTML = btns.join(' ');
+        } catch (e) {
+            statusEl.innerHTML = '<span style="color:#fca5a5;">Could not load trial status: ' + _trialEscape(e.message) + '</span>';
+            actionsEl.innerHTML = '';
+        }
+    }
+
+    async function pauseTrial() {
+        if (!confirm('Pause your hosted-LLM trial? Your agents fall back to BYOK if you have a key set.')) return;
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/pause', {
+                method: 'POST', credentials: 'include', headers: _trialHeaders()
+            });
+            if (!resp.ok) { var t = await resp.text(); alert('Pause failed: ' + t); return; }
+            loadTrialStatus();
+        } catch (e) { alert('Network error: ' + e.message); }
+    }
+
+    async function resumeTrial() {
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/resume', {
+                method: 'POST', credentials: 'include', headers: _trialHeaders()
+            });
+            if (!resp.ok) { var t = await resp.text(); alert('Could not start trial: ' + t); return; }
+            loadTrialStatus();
+        } catch (e) { alert('Network error: ' + e.message); }
+    }
+
+    window.pauseTrial = pauseTrial;
+    window.resumeTrial = resumeTrial;
+
+    (function() {
+        if (document.getElementById('trialCard')) {
+            try { loadTrialStatus(); } catch (e) {}
         }
     })();
 
