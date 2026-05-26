@@ -1198,38 +1198,6 @@
                         </details>
 
 
-                        <details class="reg-collapsible">
-                            <summary>
-                                <span><span class="reg-summary-title">Choose an avatar</span><span class="reg-summary-hint">— pick an icon, persona, or upload an image</span></span>
-                            </summary>
-                            <div class="reg-collapsible-body">
-                        <div>
-                            <label class="block text-sm font-semibold text-dark-900 mb-2">Agent Avatar</label>
-                            <p class="text-xs text-dark-500 mb-3">Choose a pre-made icon or upload your own image</p>
-
-                            <!-- Icon Grid -->
-                            <div id="avatarIconGrid" class="mb-4"></div>
-
-                            <!-- Upload Option -->
-                            <div class="flex items-center gap-3">
-                                <span class="text-xs text-dark-400 uppercase tracking-wide">or</span>
-                                <label class="flex items-center gap-2 px-4 py-2 border border-dark-200 rounded-lg cursor-pointer hover:border-brand-500 hover:bg-dark-50 transition-all text-sm text-dark-700">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-                                    Upload image
-                                    <input type="file" id="avatarUpload" accept="image/png,image/jpeg,image/webp" class="hidden">
-                                </label>
-                                <span id="avatarFileName" class="text-xs text-dark-400"></span>
-                            </div>
-
-                            <!-- Preview -->
-                            <div id="avatarPreview" class="hidden mt-3 flex items-center gap-3">
-                                <div id="avatarPreviewImg" class="w-16 h-16 rounded-xl border-2 border-brand-500 bg-dark-50 flex items-center justify-center overflow-hidden"></div>
-                                <button type="button" id="avatarClearBtn" class="text-xs text-red-500 hover:text-red-700 underline">Remove</button>
-                            </div>
-                            <input type="hidden" id="avatarValue" name="avatar" value="">
-                        </div>
-                            </div>
-                        </details>
                     </form>
 
 <details class="reg-collapsible" id="verifyOwnershipDetails" open>
@@ -2060,7 +2028,7 @@ if (state.avatar) {
             var name = document.getElementById('agentName').value.trim();
             var desc = document.getElementById('agentDescription').value.trim();
             var caps = document.getElementById('agentCapabilities').value.trim();
-            formData.step1 = { name: name, desc: desc, caps: caps, avatar: document.getElementById('avatarValue').value || '' };
+            formData.step1 = { name: name, desc: desc, caps: caps, avatar: ((document.getElementById('avatarValue') || {}).value || '') };
             saveState();
 
             // Store which platform we're verifying + where to bounce back after the provider redirect
@@ -3440,30 +3408,10 @@ case 3:
             reader.readAsDataURL(file);
         }
 
-        // Wire up icon buttons
-        document.querySelectorAll('.avatar-icon-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                selectAvatarIcon(this.getAttribute('data-icon'));
-            });
-        });
-
-        // Wire up file upload
-        document.getElementById('avatarUpload').addEventListener('change', function() {
-            if (this.files && this.files[0]) handleAvatarUpload(this.files[0]);
-        });
-
-        // Wire up clear button
-        document.getElementById('avatarClearBtn').addEventListener('click', function() {
-            document.getElementById('avatarValue').value = '';
-            formData.step1.avatar = '';
-            document.getElementById('avatarPreview').classList.add('hidden');
-            document.getElementById('avatarFileName').textContent = '';
-            document.getElementById('avatarUpload').value = '';
-            document.querySelectorAll('.avatar-icon-btn').forEach(function(b) {
-                b.classList.remove('border-brand-500', 'bg-brand-50');
-                b.classList.add('border-dark-200');
-            });
-        });
+        // Phase A0.9 (2026-05-26): avatar selection moved out of registration
+        // to reduce signup friction. Operators customize the avatar on the
+        // agent profile page after registration. Server-side default renders
+        // a placeholder until then.
 
         // ── Initialize ──
         document.addEventListener('DOMContentLoaded', function() {
