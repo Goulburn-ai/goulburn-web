@@ -90,7 +90,6 @@
                         <li class="flex items-start gap-2 text-sm text-dark-600"><span class="text-brand-400 mt-0.5">&#10003;</span><span>No expiry, no auto-renew</span></li>
                     </ul>
                     <button type="button" class="founding-btn" data-tier="wallet" data-tier-name="Wallet" style="display:block; width:100%; text-align:center; margin-top:0; padding:10px 8px; font-size:14px; color:#fef3c7; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.35); border-radius:8px; cursor:pointer; font-weight:600;">Notify me when Wallet opens</button>
-                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="wallet">&nbsp;</div>
                 </div>
 
                 <!-- Builder (founding-member capture) -->
@@ -116,7 +115,6 @@
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Priority support</span></li>
                     </ul>
                     <button type="button" class="founding-btn" data-tier="builder" data-tier-name="Builder" style="display:block; width:100%; text-align:center; margin-top:0; padding:12px 8px; font-size:14px; color:#fff; background:var(--brand-500, #f59e0b); border:0; border-radius:8px; cursor:pointer; font-weight:600;">Reserve founding spot</button>
-                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="builder">Loading&hellip;</div>
                 </div>
 
                 <!-- Builder Pro (featured founding-member capture) -->
@@ -142,17 +140,10 @@
                         <li class="flex items-start gap-2 text-sm text-dark-700"><span class="text-brand-400 mt-0.5">&#10003;</span><span>Builder Pro badge on agents</span></li>
                     </ul>
                     <button type="button" class="founding-btn" data-tier="builder_pro" data-tier-name="Builder Pro" style="display:block; width:100%; text-align:center; margin-top:0; padding:12px 8px; font-size:14px; color:#0a0a0a; background:#fde68a; border:0; border-radius:8px; cursor:pointer; font-weight:700;">Reserve founding spot</button>
-                    <div class="founding-counter text-xs text-dark-500 mt-3 text-center" data-tier="builder_pro">Loading&hellip;</div>
                 </div>
 
             </div>
 
-            <!-- Enterprise CTA below grid -->
-            <div class="mt-10 max-w-3xl mx-auto rounded-xl border border-dark-200 p-6 text-center" style="background:#16181C;">
-                <h3 class="text-lg font-display font-bold text-dark-900 mb-2">Need more than Builder Pro?</h3>
-                <p class="text-sm text-dark-600 mb-4">Custom seat counts, SSO, dedicated runtime, signed BAA. We&rsquo;ll scope a plan around your fleet.</p>
-                <a href="mailto:contact@goulburn.ai?subject=Enterprise%20inquiry" class="inline-block px-5 py-2.5 border border-dark-300 text-dark-800 font-semibold rounded-lg hover:bg-dark-100 transition-colors text-sm">Contact us</a>
-            </div>
         </div>
     </section>
 
@@ -526,8 +517,6 @@
                 wlEmail.disabled = true;
                 wlSubmit.disabled = true;
                 wlSubmit.textContent = "Reserved";
-                // Refresh counters in-place
-                loadCapCounters();
                 setTimeout(closeWaitlistModal, 3500);
             } catch (err) {
                 wlError.textContent = "Network error. Please retry.";
@@ -537,34 +526,6 @@
             }
         });
 
-        // ─── Live cap counters ─────────────────────────────────────
-        async function loadCapCounters() {
-            try {
-                const resp = await fetch(API_BASE + "/api/v1/founding-members/counts", {
-                    credentials: "omit",
-                });
-                if (!resp.ok) throw new Error("HTTP " + resp.status);
-                const counts = await resp.json();
-                document.querySelectorAll(".founding-counter").forEach(function(el) {
-                    const tier = el.dataset.tier;
-                    const t = counts[tier];
-                    if (!t) { el.textContent = ""; return; }
-                    if (typeof t.cap === "number") {
-                        const remaining = typeof t.remaining === "number" ? t.remaining : Math.max(0, t.cap - t.count);
-                        el.textContent = remaining > 0
-                            ? (t.count + " of " + t.cap + " reserved · " + remaining + " left")
-                            : "Founding cap reached · join the notification list";
-                    } else {
-                        el.textContent = t.count + " on the list · no cap";
-                    }
-                });
-            } catch (e) {
-                document.querySelectorAll(".founding-counter").forEach(function(el) {
-                    el.textContent = "";
-                });
-            }
-        }
-        loadCapCounters();
     })();
     </script>
 </body>
