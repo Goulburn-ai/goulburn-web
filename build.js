@@ -138,7 +138,6 @@ if (MAINTENANCE_MODE) {
                         }
 
 // ─────────────────────────────────────────────────────────────────────
-<<<<<<< HEAD
 // STEP 5: Manifest display-mode guard
 // ─────────────────────────────────────────────────────────────────────
 // 2026-05-14 — PWA manifest 'display: standalone' captures every
@@ -161,7 +160,9 @@ if (fs.existsSync(MANIFEST_PATH)) {
         process.exit(1);
     }
     console.log(`Manifest display="${manifest.display}" — external links open in browser tab.`);
-=======
+}
+
+// ─────────────────────────────────────────────────────────────────────
 // STEP 6: Recommended-Actions projection-arithmetic guard
 // ─────────────────────────────────────────────────────────────────────
 // 2026-05-14 — dashboard.html _tdLadderHtml() previously added the
@@ -185,5 +186,41 @@ if (fs.existsSync(DASH)) {
         process.exit(1);
     }
     console.log('Dashboard projection guard: TD_LAYER_WEIGHTS present, no `cs + ds` regression.');
->>>>>>> 0dbe40e (fix(dashboard): apply layer weights to Recommended Actions projection)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 7: Pricing-copy honesty guard (Phase A0)
+// ─────────────────────────────────────────────────────────────────────
+// 2026-05-26 — paid pricing cards must not promise features that aren't
+// shipping in v1.0. Specifically blocked: "Terraform provider" bullet
+// and "custom branded badges" in the magnet copy. settings.html's stale
+// pitch ("Studio (", "Pro+") must not regress. If these strings reappear
+// after Phase A0, the build fails — better to fail-loud than ship
+// promises we can't keep.
+const PRICING = path.join(OUT, 'pricing.html');
+if (fs.existsSync(PRICING)) {
+    const src = fs.readFileSync(PRICING, 'utf8');
+    if (src.includes('>Terraform provider<')) {
+        console.error('pricing.html still promises "Terraform provider" — deferred to v1.1. Drop the bullet or mark it explicitly as v1.1.');
+        process.exit(1);
+    }
+    if (/custom branded badges/i.test(src)) {
+        console.error('pricing.html magnet copy still mentions "custom branded badges" — deferred to v1.1.');
+        process.exit(1);
+    }
+    console.log('Pricing-copy honesty guard: no v1.1-only promises on /pricing.');
+}
+const SETTINGS = path.join(OUT, 'settings.html');
+if (fs.existsSync(SETTINGS)) {
+    const src = fs.readFileSync(SETTINGS, 'utf8');
+    // Two retired tier names that must never reappear in operator-facing copy.
+    if (src.includes('Studio (')) {
+        console.error('settings.html mentions "Studio (...)" — legacy tier, must not be advertised.');
+        process.exit(1);
+    }
+    if (src.includes('Pro+ (')) {
+        console.error('settings.html mentions "Pro+ (...)" — renamed to Builder Pro in migration 049.');
+        process.exit(1);
+    }
+    console.log('Settings-page honesty guard: no retired tier names in upgrade pitch.');
 }
