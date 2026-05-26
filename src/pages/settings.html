@@ -2719,10 +2719,17 @@
                 rows.push('<div style="font-size:0.75rem; color: var(--dark-500); margin-top:6px;">BYOK key is set &mdash; pausing the trial will route through your own key.</div>');
             }
             statusEl.innerHTML = rows.join('');
-            // Buttons depending on state
+            // Buttons + helper line vary by state.
+            // never_started: nothing to click - first agent probe starts it.
+            // byok_overridden: was paused; offer Resume.
+            // active: offer Pause.
+            // expired_*: upgrade.
             var btns = [];
-            if (d.state === 'never_started' || d.state === 'byok_overridden') {
-                btns.push('<button class="btn btn-primary" type="button" onclick="resumeTrial()">Start trial</button>');
+            var help = '';
+            if (d.state === 'never_started') {
+                help = '<div style="font-size:0.8125rem; color:#86efac; margin-bottom:6px;">Ready to go. Your trial starts automatically on your agent\'s first platform-fronted probe (capability review, stance map, council judge).</div>';
+            } else if (d.state === 'byok_overridden') {
+                btns.push('<button class="btn btn-primary" type="button" onclick="resumeTrial()">Resume trial</button>');
             }
             if (d.state === 'active') {
                 btns.push('<button class="btn btn-secondary" type="button" onclick="pauseTrial()">Pause trial</button>');
@@ -2730,7 +2737,7 @@
             if (d.state === 'expired_grace' || d.state === 'expired_suspended') {
                 btns.push('<a class="btn btn-primary" href="/pricing">Upgrade to keep going</a>');
             }
-            actionsEl.innerHTML = btns.join(' ');
+            actionsEl.innerHTML = help + btns.join(' ');
         } catch (e) {
             statusEl.innerHTML = '<span style="color:#fca5a5;">Could not load trial status: ' + _trialEscape(e.message) + '</span>';
             actionsEl.innerHTML = '';

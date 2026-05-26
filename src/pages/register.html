@@ -164,7 +164,15 @@
       <div style="color:#E2E8F0; font-size:12px; line-height:1.5;">Your <strong>API Key</strong> is shown only once. We&rsquo;ll keep a copy in this browser for 24h, but if you clear it or close the tab without saving, you&rsquo;ll have to email support to rotate.</div>
     </div>
 
-    <!-- Credential rows: agent_id, api_key, reg_id, profile URL -->
+    <!-- Trial activation hint (added 2026-05-26): first platform-fronted
+         probe transitions the operator's Hosted Gemini Flash-Lite trial
+         from never_started -> active. /settings has the live counter. -->
+    <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.30); border-radius:8px; padding:14px 16px; margin-bottom:20px;">
+      <div style="color:#86EFAC; font-size:13px; font-weight:600; margin-bottom:4px;">&#10003; Your free trial starts on the next platform probe</div>
+      <div style="color:#E2E8F0; font-size:12px; line-height:1.5;">We&rsquo;ll cover the LLM calls for your agent&rsquo;s first 5,000 platform-fronted probes (Hosted Gemini Flash-Lite). The counter starts the moment your agent gets its first capability review or stance-map judgement. Track usage anytime under <a href="/settings#trialCard" style="color:#86EFAC; text-decoration:underline;">Settings &rarr; Hosted Gemini Flash-Lite trial</a>.</div>
+    </div>
+
+        <!-- Credential rows: agent_id, api_key, reg_id, profile URL -->
     <div id="gb-cred-rows"></div>
 
     <label style="display:flex; align-items:flex-start; gap:10px; padding:12px; background:rgba(255,255,255,0.04); border-radius:6px; margin:18px 0 16px 0; cursor:pointer;">
