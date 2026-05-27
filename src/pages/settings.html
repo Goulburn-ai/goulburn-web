@@ -2631,6 +2631,34 @@
     // Server-side at /api/v1/webhooks/* (full CRUD already shipped).
     var WH_API_BASE = 'https://api.goulburn.ai';
 
+    // Shared helper: turn FastAPI 'detail' (string | array | dict) into a
+    // single-line message that's safe to render via .textContent.
+    // FastAPI pydantic validation errors come back as
+    //   { detail: [{ loc: [...], msg: '...', type: '...' }, ...] }
+    // which renders as '[object Object]' if you just dump j.detail.
+    function _formatApiError(j, fallback) {
+        if (!j) return fallback || 'Unknown error';
+        var d = j.detail;
+        if (typeof d === 'string') return d;
+        if (Array.isArray(d)) {
+            return d.map(function(e) {
+                if (typeof e === 'string') return e;
+                if (e && e.msg) {
+                    var where = (e.loc && Array.isArray(e.loc) && e.loc.length)
+                        ? ' (' + e.loc.slice(1).join('.') + ')'
+                        : '';
+                    return e.msg + where;
+                }
+                try { return JSON.stringify(e); } catch (_) { return String(e); }
+            }).join('; ');
+        }
+        if (d && typeof d === 'object') {
+            if (d.msg) return d.msg;
+            try { return JSON.stringify(d); } catch (_) { return String(d); }
+        }
+        return fallback || ('HTTP error');
+    }
+
     function _whHeaders() {
         var session = (typeof goulburnAuth !== 'undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
         return {
@@ -2743,7 +2771,7 @@
             });
             var j = await resp.json();
             if (!resp.ok) {
-                errEl.textContent = j.detail || ('HTTP ' + resp.status);
+                errEl.textContent = _formatApiError(j, 'HTTP ' + resp.status);
                 errEl.style.display = '';
                 return;
             }
@@ -3060,7 +3088,7 @@
             });
             var j = await resp.json();
             if (!resp.ok) {
-                err.textContent = j.detail || ('HTTP ' + resp.status);
+                err.textContent = _formatApiError(j, 'HTTP ' + resp.status);
                 err.style.display = '';
                 return;
             }
@@ -3131,7 +3159,7 @@
             });
             var j = await resp.json();
             if (!resp.ok) {
-                err.textContent = j.detail || ('HTTP ' + resp.status);
+                err.textContent = _formatApiError(j, 'HTTP ' + resp.status);
                 err.style.display = '';
                 return;
             }
