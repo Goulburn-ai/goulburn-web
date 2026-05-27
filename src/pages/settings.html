@@ -2653,6 +2653,15 @@
             }).join('; ');
         }
         if (d && typeof d === 'object') {
+            // Tier-locked errors and other structured detail blocks return
+            // { code, event, message, upgrade_url } - prefer .message + tack
+            // on the upgrade_url so the operator gets a clickable path forward.
+            if (d.message) {
+                if (d.upgrade_url) {
+                    return d.message + '  See: ' + d.upgrade_url;
+                }
+                return d.message;
+            }
             if (d.msg) return d.msg;
             try { return JSON.stringify(d); } catch (_) { return String(d); }
         }
