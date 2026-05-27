@@ -1018,6 +1018,105 @@
         </div>
     </div>
 
+
+    <!-- Webhooks — create endpoint modal -->
+    <div class="modal" id="webhookCreateModal">
+        <div class="modal-content" style="max-width: 520px;">
+            <h3 class="modal-header">Add webhook endpoint</h3>
+            <div class="modal-body">
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.25rem;">URL <span style="color:var(--red-600);">*</span></label>
+                <input type="url" id="whcUrl" class="form-input" placeholder="https://your-app.example.com/goulburn-webhook" autocomplete="off">
+                <p style="color: var(--dark-500); font-size: 0.75rem; margin: 0.25rem 0 1rem 0;">HTTPS only. Private and loopback hosts are rejected.</p>
+
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.5rem;">Subscribe to events</label>
+                <div id="whcEventsGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:6px 12px; margin-bottom:1rem; font-size:0.85rem;">
+                    <label><input type="checkbox" value="tier.changed" checked> tier.changed</label>
+                    <label><input type="checkbox" value="trust.score_updated"> trust.score_updated</label>
+                    <label><input type="checkbox" value="trust.tier_promoted"> trust.tier_promoted</label>
+                    <label><input type="checkbox" value="trust.tier_demoted"> trust.tier_demoted</label>
+                    <label><input type="checkbox" value="agent.claimed"> agent.claimed</label>
+                    <label><input type="checkbox" value="agent.deleted"> agent.deleted</label>
+                    <label><input type="checkbox" value="subscription.renewed"> subscription.renewed</label>
+                    <label><input type="checkbox" value="subscription.canceled"> subscription.canceled</label>
+                </div>
+
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.25rem;">Description (optional)</label>
+                <input type="text" id="whcDescription" class="form-input" placeholder="What this endpoint is for" maxlength="255" autocomplete="off">
+
+                <p id="whcError" style="display:none; margin-top:0.5rem; color:var(--red-600); font-size:0.875rem;"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeWebhookCreateModal()" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" type="button" onclick="submitWebhookCreate()" style="flex:1;">Add endpoint</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhooks — secret reveal modal (shared by create + rotate) -->
+    <div class="modal" id="webhookSecretModal">
+        <div class="modal-content" style="max-width: 520px;">
+            <h3 class="modal-header" id="whsTitle">Signing secret</h3>
+            <div class="modal-body">
+                <p id="whsHint">Copy this signing secret now. You won&rsquo;t see it again &mdash; closing this dialog will permanently hide the plaintext. Store it in your password manager or secret store.</p>
+                <div class="api-key-display" style="margin: 0.75rem 0;">
+                    <div class="api-key-value">
+                        <code id="whsSecret" style="font-family: monospace; word-break: break-all; font-size: 0.85rem;">whsec_&hellip;</code>
+                    </div>
+                    <button class="btn btn-secondary" type="button" onclick="copyWebhookSecret()">Copy</button>
+                </div>
+                <p style="color: var(--dark-500); font-size: 0.8rem;">Verify deliveries by HMAC-SHA256-signing the body with this secret and comparing against the <code style="background: var(--dark-100); padding: 2px 6px; border-radius: 4px;">X-Goulburn-Signature</code> header.</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" type="button" onclick="closeWebhookSecretModal()" style="width:100%;">I&rsquo;ve saved it</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial — activate hosted runtime modal -->
+    <div class="modal" id="trialActivateModal">
+        <div class="modal-content" style="max-width: 560px;">
+            <h3 class="modal-header">Activate hosted Gemini Flash-Lite</h3>
+            <div class="modal-body">
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.25rem;">Agent <span style="color:var(--red-600);">*</span></label>
+                <select id="taAgent" class="form-input" style="width:100%;">
+                    <option value="">Loading your agents&hellip;</option>
+                </select>
+                <p style="color: var(--dark-500); font-size: 0.75rem; margin: 0.25rem 0 1rem 0;">Only one agent at a time. Free trial covers up to 5,000 LLM calls on this agent.</p>
+
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.25rem;">System prompt (optional)</label>
+                <textarea id="taSystemPrompt" class="form-input" rows="6" maxlength="4000" placeholder="Leave blank to auto-derive from the agent&rsquo;s description." style="resize:vertical; font-family: ui-monospace, monospace; font-size: 0.85rem;"></textarea>
+                <p style="color: var(--dark-500); font-size: 0.75rem; margin: 0.25rem 0;">Capped at 4,000 chars. You can edit it later by deactivating and reactivating.</p>
+
+                <p id="taError" style="display:none; margin-top:0.5rem; color:var(--red-600); font-size:0.875rem;"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeTrialActivateModal()" style="flex:1;">Cancel</button>
+                <button class="btn btn-primary" type="button" onclick="submitTrialActivate()" style="flex:1;">Activate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trial — deactivate hosted runtime modal -->
+    <div class="modal" id="trialDeactivateModal">
+        <div class="modal-content" style="max-width: 480px;">
+            <h3 class="modal-header">Deactivate hosted runtime</h3>
+            <div class="modal-body">
+                <label style="display:block; font-size:0.875rem; color:var(--dark-700); margin-bottom:0.25rem;">Agent</label>
+                <select id="tdAgent" class="form-input" style="width:100%;">
+                    <option value="">Loading&hellip;</option>
+                </select>
+                <p style="color: var(--dark-500); font-size: 0.8rem; margin-top: 0.75rem;">
+                    Removes goulburn-funded hosted runtime from the selected agent. Your trial counter stays where it is. BYOK runtimes (configured separately) are not affected.
+                </p>
+                <p id="tdError" style="display:none; margin-top:0.5rem; color:var(--red-600); font-size:0.875rem;"></p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" type="button" onclick="closeTrialDeactivateModal()" style="flex:1;">Cancel</button>
+                <button class="btn" type="button" onclick="submitTrialDeactivate()" style="flex:1; background:rgba(239,68,68,0.15); color:#fca5a5; border:1px solid rgba(239,68,68,0.40);">Deactivate</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
@@ -2598,30 +2697,90 @@
     }
 
     function openCreateWebhookModal() {
-        var url = prompt('Endpoint URL (https://...):');
-        if (!url) return;
-        var allEvents = ['tier.changed','trust.score_updated','trust.tier_promoted','trust.tier_demoted','agent.claimed','agent.deleted','subscription.canceled','subscription.renewed'];
-        var picked = prompt('Comma-separated event types to subscribe to:\n\nAvailable:\n  ' + allEvents.join('\n  '), 'tier.changed,trust.score_updated,trust.tier_promoted');
-        if (!picked) return;
-        var event_types = picked.split(',').map(function(s){return s.trim();}).filter(Boolean);
-        if (!event_types.length) { alert('At least one event type required.'); return; }
-        var description = prompt('Optional description:', '') || null;
-        fetch(WH_API_BASE + '/api/v1/webhooks', {
-            method: 'POST',
-            credentials: 'include',
-            headers: _whHeaders(),
-            body: JSON.stringify({ url: url, event_types: event_types, description: description })
-        }).then(function(r) {
-            return r.json().then(function(j){ return { ok: r.ok, status: r.status, data: j }; });
-        }).then(function(res) {
-            if (!res.ok) {
-                alert('Could not create webhook: ' + (res.data.detail || JSON.stringify(res.data)));
+        var m = document.getElementById('webhookCreateModal');
+        if (!m) return;
+        var urlEl = document.getElementById('whcUrl');
+        var descEl = document.getElementById('whcDescription');
+        var errEl = document.getElementById('whcError');
+        if (urlEl) urlEl.value = '';
+        if (descEl) descEl.value = '';
+        if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
+        var boxes = document.querySelectorAll('#whcEventsGrid input[type=checkbox]');
+        boxes.forEach(function(b){ b.checked = (b.value === 'tier.changed'); });
+        m.classList.add('active');
+        setTimeout(function(){ if (urlEl) urlEl.focus(); }, 30);
+    }
+
+    function closeWebhookCreateModal() {
+        var m = document.getElementById('webhookCreateModal');
+        if (m) m.classList.remove('active');
+    }
+
+    async function submitWebhookCreate() {
+        var url = (document.getElementById('whcUrl').value || '').trim();
+        var description = (document.getElementById('whcDescription').value || '').trim() || null;
+        var errEl = document.getElementById('whcError');
+        if (!url || !url.toLowerCase().startsWith('https://')) {
+            errEl.textContent = 'URL must use https://';
+            errEl.style.display = '';
+            return;
+        }
+        var events = [];
+        document.querySelectorAll('#whcEventsGrid input[type=checkbox]').forEach(function(b){
+            if (b.checked) events.push(b.value);
+        });
+        if (!events.length) {
+            errEl.textContent = 'Pick at least one event type.';
+            errEl.style.display = '';
+            return;
+        }
+        try {
+            var resp = await fetch(WH_API_BASE + '/api/v1/webhooks', {
+                method: 'POST',
+                credentials: 'include',
+                headers: _whHeaders(),
+                body: JSON.stringify({ url: url, event_types: events, description: description })
+            });
+            var j = await resp.json();
+            if (!resp.ok) {
+                errEl.textContent = j.detail || ('HTTP ' + resp.status);
+                errEl.style.display = '';
                 return;
             }
-            var secret = res.data.signing_secret || res.data.secret || '(no secret returned)';
-            alert('Webhook created. Copy this signing secret NOW — it will not be shown again:\n\n' + secret);
+            closeWebhookCreateModal();
+            var secret = j.signing_secret || j.secret || '';
+            if (secret) {
+                openWebhookSecretModal('New endpoint signing secret', secret, 'Copy this signing secret now. You won\'t see it again - closing this dialog will permanently hide the plaintext.');
+            }
             loadWebhooks();
-        }).catch(function(e) { alert('Network error: ' + e.message); });
+        } catch (e) {
+            errEl.textContent = 'Network error: ' + e.message;
+            errEl.style.display = '';
+        }
+    }
+
+    function openWebhookSecretModal(title, secret, hint) {
+        var m = document.getElementById('webhookSecretModal');
+        document.getElementById('whsTitle').textContent = title || 'Signing secret';
+        document.getElementById('whsSecret').textContent = secret;
+        if (hint) document.getElementById('whsHint').textContent = hint;
+        m.classList.add('active');
+    }
+    function closeWebhookSecretModal() {
+        document.getElementById('webhookSecretModal').classList.remove('active');
+    }
+    function copyWebhookSecret(ev) {
+        var v = document.getElementById('whsSecret').textContent || '';
+        if (!v) return;
+        try {
+            navigator.clipboard.writeText(v);
+            var btn = ev && ev.target;
+            if (btn && btn.textContent) {
+                var orig = btn.textContent;
+                btn.textContent = 'Copied!';
+                setTimeout(function(){ btn.textContent = orig; }, 1500);
+            }
+        } catch (e) { /* fall back: leave as-is */ }
     }
 
     function testWebhook(id) {
@@ -2641,15 +2800,25 @@
         }).then(function(r){ if (r.ok || r.status === 204) loadWebhooks(); else r.json().then(function(j){ alert('Delete failed: ' + (j.detail || JSON.stringify(j))); }); });
     }
 
-    function rotateWebhook(id) {
-        if (!confirm('Rotate the signing secret? A new plaintext secret will be shown ONCE — update your verification code afterwards.')) return;
-        fetch(WH_API_BASE + '/api/v1/webhooks/' + id + '/rotate', {
-            method: 'POST', credentials: 'include', headers: _whHeaders()
-        }).then(function(r){ return r.json().then(function(j){ return { ok: r.ok, data: j }; }); })
-          .then(function(res) {
-            if (res.ok) alert('New signing secret (copy NOW):\n\n' + (res.data.signing_secret || res.data.secret || '(none returned)'));
-            else alert('Rotate failed: ' + (res.data.detail || JSON.stringify(res.data)));
-        });
+    async function rotateWebhook(id) {
+        if (!confirm('Rotate the signing secret? You will be shown the new plaintext secret ONCE - update any code that verifies signatures.')) return;
+        try {
+            var resp = await fetch(WH_API_BASE + '/api/v1/webhooks/' + id + '/rotate', {
+                method: 'POST', credentials: 'include', headers: _whHeaders()
+            });
+            var j = await resp.json();
+            if (!resp.ok) {
+                alert('Rotate failed: ' + (j.detail || JSON.stringify(j)));
+                return;
+            }
+            var secret = j.signing_secret || j.secret || '';
+            if (secret) {
+                openWebhookSecretModal('Rotated signing secret', secret, 'Your new signing secret. Copy it now and update your verification code. The old secret keeps working for 7 days during the rotation overlap window.');
+            }
+            loadWebhooks();
+        } catch (e) {
+            alert('Network error: ' + e.message);
+        }
     }
 
     function viewWebhookDeliveries(id) {
@@ -2668,6 +2837,11 @@
     }
 
     window.openCreateWebhookModal = openCreateWebhookModal;
+    window.closeWebhookCreateModal = closeWebhookCreateModal;
+    window.submitWebhookCreate = submitWebhookCreate;
+    window.openWebhookSecretModal = openWebhookSecretModal;
+    window.closeWebhookSecretModal = closeWebhookSecretModal;
+    window.copyWebhookSecret = copyWebhookSecret;
     window.testWebhook = testWebhook;
     window.deleteWebhook = deleteWebhook;
     window.rotateWebhook = rotateWebhook;
@@ -2840,13 +3014,43 @@
     }
 
     async function openActivateRuntimeModal() {
-        var name = prompt('Which agent? Enter the agent name (case-sensitive).');
-        if (!name) return;
-        name = name.trim();
-        if (!name) return;
-        var customPrompt = prompt('Optional: paste a system prompt. Leave blank to auto-derive from the agent description.');
+        var m = document.getElementById('trialActivateModal');
+        var sel = document.getElementById('taAgent');
+        var sp = document.getElementById('taSystemPrompt');
+        var err = document.getElementById('taError');
+        if (sp) sp.value = '';
+        if (err) { err.style.display = 'none'; err.textContent = ''; }
+        sel.innerHTML = '<option value="">Loading your agents&hellip;</option>';
+        m.classList.add('active');
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/agents/mine', {
+                credentials: 'include',
+                headers: _trialHeaders(),
+            });
+            if (!resp.ok) { sel.innerHTML = '<option value="">Could not load agents (HTTP ' + resp.status + ')</option>'; return; }
+            var d = await resp.json();
+            var agents = (d.data || d.agents || d || []).filter(function(a){ return a && a.name && (a.status || '').toLowerCase() === 'active' && !a.deleted_at; });
+            if (!agents.length) {
+                sel.innerHTML = '<option value="">No active agents - register one first</option>';
+                return;
+            }
+            sel.innerHTML = '<option value="">Choose an agent&hellip;</option>' + agents.map(function(a){
+                return '<option value="' + _trialEscape(a.name) + '">' + _trialEscape(a.name) + '</option>';
+            }).join('');
+        } catch (e) {
+            sel.innerHTML = '<option value="">Network error - retry</option>';
+        }
+    }
+    function closeTrialActivateModal() {
+        document.getElementById('trialActivateModal').classList.remove('active');
+    }
+    async function submitTrialActivate() {
+        var name = (document.getElementById('taAgent').value || '').trim();
+        var prompt_text = (document.getElementById('taSystemPrompt').value || '').trim();
+        var err = document.getElementById('taError');
+        if (!name) { err.textContent = 'Pick an agent.'; err.style.display = ''; return; }
         var body = { agent_name: name };
-        if (customPrompt && customPrompt.trim()) body.system_prompt = customPrompt.trim();
+        if (prompt_text) body.system_prompt = prompt_text;
         try {
             var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/activate-runtime', {
                 method: 'POST',
@@ -2856,27 +3060,68 @@
             });
             var j = await resp.json();
             if (!resp.ok) {
-                alert('Could not activate: ' + (j.detail || JSON.stringify(j)));
+                err.textContent = j.detail || ('HTTP ' + resp.status);
+                err.style.display = '';
                 return;
             }
+            closeTrialActivateModal();
             if (j.already_activated) {
-                alert('Already active. ' + name + ' is already running on hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+                _trialToast(name + ' is already on hosted Gemini Flash-Lite.');
             } else {
-                alert('Activated. ' + name + ' is now using hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+                _trialToast(name + ' activated. The counter will tick on the next LLM call.');
             }
             loadTrialStatus();
         } catch (e) {
-            alert('Network error: ' + e.message);
+            err.textContent = 'Network error: ' + e.message;
+            err.style.display = '';
         }
+    }
+    function _trialToast(msg) {
+        var t = document.getElementById('toast');
+        if (!t) { alert(msg); return; }
+        t.textContent = msg;
+        t.classList.add('show');
+        setTimeout(function(){ t.classList.remove('show'); }, 4000);
     }
 
     window.openActivateRuntimeModal = openActivateRuntimeModal;
+    window.closeTrialActivateModal = closeTrialActivateModal;
+    window.submitTrialActivate = submitTrialActivate;
+    window.closeTrialDeactivateModal = closeTrialDeactivateModal;
+    window.submitTrialDeactivate = submitTrialDeactivate;
     async function openDeactivateRuntimeModal() {
-        var name = prompt('Which agent? Enter the agent name to deactivate hosted runtime.\n\nThis only removes goulburn-funded trial runtimes. BYOK runtimes you configured yourself must be removed from the agent edit page.');
-        if (!name) return;
-        name = name.trim();
-        if (!name) return;
-        if (!confirm('Deactivate hosted runtime for ' + name + '? You can re-activate any time.')) return;
+        var m = document.getElementById('trialDeactivateModal');
+        var sel = document.getElementById('tdAgent');
+        var err = document.getElementById('tdError');
+        if (err) { err.style.display = 'none'; err.textContent = ''; }
+        sel.innerHTML = '<option value="">Loading&hellip;</option>';
+        m.classList.add('active');
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/agents/mine', {
+                credentials: 'include',
+                headers: _trialHeaders(),
+            });
+            if (!resp.ok) { sel.innerHTML = '<option value="">Could not load agents (HTTP ' + resp.status + ')</option>'; return; }
+            var d = await resp.json();
+            var agents = (d.data || d.agents || d || []).filter(function(a){ return a && a.name && (a.status || '').toLowerCase() === 'active' && !a.deleted_at; });
+            if (!agents.length) {
+                sel.innerHTML = '<option value="">No active agents</option>';
+                return;
+            }
+            sel.innerHTML = '<option value="">Choose an agent&hellip;</option>' + agents.map(function(a){
+                return '<option value="' + _trialEscape(a.name) + '">' + _trialEscape(a.name) + '</option>';
+            }).join('');
+        } catch (e) {
+            sel.innerHTML = '<option value="">Network error</option>';
+        }
+    }
+    function closeTrialDeactivateModal() {
+        document.getElementById('trialDeactivateModal').classList.remove('active');
+    }
+    async function submitTrialDeactivate() {
+        var name = (document.getElementById('tdAgent').value || '').trim();
+        var err = document.getElementById('tdError');
+        if (!name) { err.textContent = 'Pick an agent.'; err.style.display = ''; return; }
         try {
             var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/deactivate-runtime', {
                 method: 'POST',
@@ -2886,13 +3131,16 @@
             });
             var j = await resp.json();
             if (!resp.ok) {
-                alert('Could not deactivate: ' + (j.detail || JSON.stringify(j)));
+                err.textContent = j.detail || ('HTTP ' + resp.status);
+                err.style.display = '';
                 return;
             }
-            alert(j.already_clear ? 'Nothing to clear - ' + name + ' had no platform-funded runtime.' : 'Deactivated. ' + name + ' is no longer using hosted Gemini Flash-Lite.');
+            closeTrialDeactivateModal();
+            _trialToast(j.already_clear ? 'Nothing to clear - ' + name + ' had no platform-funded runtime.' : name + ' deactivated. Hosted runtime removed.');
             loadTrialStatus();
         } catch (e) {
-            alert('Network error: ' + e.message);
+            err.textContent = 'Network error: ' + e.message;
+            err.style.display = '';
         }
     }
 
