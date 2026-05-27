@@ -2699,7 +2699,21 @@
                 headers: _whHeaders()
             });
             if (resp.status === 402) {
-                listEl.innerHTML = '<p style="color: var(--dark-500); font-size: 0.85rem;">Webhooks are a Builder Pro / Wallet tier feature. <a href="/pricing" style="color: var(--brand-400);">Upgrade</a> to subscribe to events.</p>';
+                // Product call 2026-05-26: webhooks are an Enterprise-grade
+                // integration. Free + Builder tier operators get in-product
+                // alerts (bell icon / email digest / push) instead and never
+                // need to leave goulburn.ai. Hide the card entirely so the
+                // affordance only shows for operators on Builder Pro + Wallet
+                // where webhooks are part of the value prop.
+                var wcard = document.getElementById('webhooksCard');
+                if (wcard) wcard.style.display = 'none';
+                return;
+            }
+            if (resp.status === 401 || resp.status === 403) {
+                // Same treatment for outright auth failure - don't show a
+                // broken card; the page session may have lapsed.
+                var wcard2 = document.getElementById('webhooksCard');
+                if (wcard2) wcard2.style.display = 'none';
                 return;
             }
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
