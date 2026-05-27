@@ -2717,7 +2717,11 @@
             var eligible = (typeof d.eligible_agents_count === 'number') ? d.eligible_agents_count : null;
             var totalAgents = (typeof d.total_agents_count === 'number') ? d.total_agents_count : null;
             var cardEl = document.getElementById('trialCard');
-            if (cardEl && d.state === 'never_started' && eligible === 0) {
+            // Post-Path-A 2026-05-26 late: hide only when the owner has zero
+            // agents AT ALL. Any active agent can be activated for hosted
+            // runtime via the activator below, so 'no endpoint set' is no
+            // longer a reason to hide the card.
+            if (cardEl && d.state === 'never_started' && (totalAgents === 0)) {
                 cardEl.style.display = 'none';
                 return;
             }
