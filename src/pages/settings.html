@@ -2727,6 +2727,24 @@
             }
             if (cardEl) {
                 cardEl.style.display = '';
+                // Apply the same 'live/cleared' green tint that the
+                // 'Operator identity cleared' tile uses, but only when
+                // the trial is alive (active or ready-to-start). For
+                // byok_overridden (paused) and expired states, fall
+                // back to the default dark card background.
+                if (d.state === 'active' || d.state === 'never_started') {
+                    cardEl.style.background = 'rgba(16, 185, 129, 0.08)';
+                    cardEl.style.borderLeft = '3px solid rgba(16, 185, 129, 0.50)';
+                } else if (d.state === 'byok_overridden') {
+                    cardEl.style.background = 'rgba(245, 158, 11, 0.06)';
+                    cardEl.style.borderLeft = '3px solid rgba(245, 158, 11, 0.40)';
+                } else if (d.state === 'expired_grace' || d.state === 'expired_suspended') {
+                    cardEl.style.background = 'rgba(239, 68, 68, 0.06)';
+                    cardEl.style.borderLeft = '3px solid rgba(239, 68, 68, 0.40)';
+                } else {
+                    cardEl.style.background = '';
+                    cardEl.style.borderLeft = '';
+                }
             }
             var pct = d.probes_cap > 0 ? Math.round((d.probes_used / d.probes_cap) * 100) : 0;
             var bar = '<div style="background:rgba(247,249,249,0.06); border-radius:4px; height:8px; margin:4px 0 8px 0; overflow:hidden;"><div style="background:#10b981; height:100%; width:' + pct + '%;"></div></div>';
