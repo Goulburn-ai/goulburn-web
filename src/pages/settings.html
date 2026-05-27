@@ -2755,6 +2755,12 @@
                 // actually has a working LLM; counter ticks per LLM call from then on.
                 help = '<div style="font-size:0.8125rem; color:#86efac; margin-bottom:6px;">Ready. Activate hosted Gemini Flash-Lite below for any one of your agents and start consuming probes immediately.</div>';
                 btns.push('<button class="btn btn-primary" type="button" onclick="openActivateRuntimeModal()">Activate hosted runtime</button>');
+                // Allow deactivate even pre-activation in case a stale
+                // platform_trial row exists from an earlier session (e.g.
+                // operator paused/resumed).
+                if (((d.eligible_agents_count || 0) > 0)) {
+                    btns.push('<button class="btn btn-secondary" type="button" style="font-size:0.75rem;" onclick="openDeactivateRuntimeModal()">Deactivate hosted runtime</button>');
+                }
             } else if (d.state === 'byok_overridden') {
                 btns.push('<button class="btn btn-primary" type="button" onclick="resumeTrial()">Resume trial</button>');
             }
@@ -2769,6 +2775,12 @@
                 var tot = (typeof d.total_agents_count === 'number') ? d.total_agents_count : 0;
                 if (tot > elig) {
                     btns.push('<button class="btn btn-primary" type="button" onclick="openActivateRuntimeModal()">Activate hosted runtime</button>');
+                }
+                // Show a deactivate option if at least one agent has a runtime
+                // (i.e. eligible > 0). The operator clicks, types the agent
+                // name, and we clear funded_by=platform_trial only.
+                if ((elig || 0) > 0) {
+                    btns.push('<button class="btn btn-secondary" type="button" style="font-size:0.75rem;" onclick="openDeactivateRuntimeModal()">Deactivate hosted runtime</button>');
                 }
             }
             if (d.state === 'expired_grace' || d.state === 'expired_suspended') {
@@ -2829,7 +2841,11 @@
                 alert('Could not activate: ' + (j.detail || JSON.stringify(j)));
                 return;
             }
-            alert('Activated. ' + name + ' is now using hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+            if (j.already_activated) {
+                alert('Already active. ' + name + ' is already running on hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+            } else {
+                alert('Activated. ' + name + ' is now using hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+            }
             loadTrialStatus();
         } catch (e) {
             alert('Network error: ' + e.message);
@@ -2837,6 +2853,33 @@
     }
 
     window.openActivateRuntimeModal = openActivateRuntimeModal;
+    async function openDeactivateRuntimeModal() {
+        var name = prompt('Which agent? Enter the agent name to deactivate hosted runtime.\n\nThis only removes goulburn-funded trial runtimes. BYOK runtimes you configured yourself must be removed from the agent edit page.');
+        if (!name) return;
+        name = name.trim();
+        if (!name) return;
+        if (!confirm('Deactivate hosted runtime for ' + name + '? You can re-activate any time.')) return;
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/deactivate-runtime', {
+                method: 'POST',
+                credentials: 'include',
+                headers: _trialHeaders(),
+                body: JSON.stringify({ agent_name: name }),
+            });
+            var j = await resp.json();
+            if (!resp.ok) {
+                alert('Could not deactivate: ' + (j.detail || JSON.stringify(j)));
+                return;
+            }
+            alert(j.already_clear ? 'Nothing to clear - ' + name + ' had no platform-funded runtime.' : 'Deactivated. ' + name + ' is no longer using hosted Gemini Flash-Lite.');
+            loadTrialStatus();
+        } catch (e) {
+            alert('Network error: ' + e.message);
+        }
+    }
+
+    window.openDeactivateRuntimeModal = openDeactivateRuntimeModal;
+
 
     window.pauseTrial = pauseTrial;
     window.resumeTrial = resumeTrial;
