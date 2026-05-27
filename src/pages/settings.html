@@ -2747,15 +2747,18 @@
             var btns = [];
             var help = '';
             if (d.state === 'never_started') {
-                // Honest copy 2026-05-26: the trial pays for goulburn-side LLM work
-                // (judging, scoring, replies on behalf of the agent), not the agent's own LLM.
-                // For a brand new agent with no engagement it can sit at 0 for weeks.
-                help = '<div style="font-size:0.8125rem; color:#86efac; margin-bottom:6px;">Ready. The counter ticks as goulburn-side LLM work happens for your agents (capability probes, scoring, replies on engagement). For a new agent with no activity yet, it may stay at 0 until others engage or a periodic probe runs.</div>';
+                // Path A 2026-05-26: trial activates a hosted runtime so the agent
+                // actually has a working LLM; counter ticks per LLM call from then on.
+                help = '<div style="font-size:0.8125rem; color:#86efac; margin-bottom:6px;">Ready. Activate hosted Gemini Flash-Lite below for any one of your agents and start consuming probes immediately.</div>';
+                btns.push('<button class="btn btn-primary" type="button" onclick="openActivateRuntimeModal()">Activate hosted runtime</button>');
             } else if (d.state === 'byok_overridden') {
                 btns.push('<button class="btn btn-primary" type="button" onclick="resumeTrial()">Resume trial</button>');
             }
             if (d.state === 'active') {
                 btns.push('<button class="btn btn-secondary" type="button" onclick="pauseTrial()">Pause trial</button>');
+                if ((d.eligible_agents_count || 0) < (d.total_agents_count || 0)) {
+                    btns.push('<button class="btn btn-secondary" type="button" onclick="openActivateRuntimeModal()">Activate another agent</button>');
+                }
             }
             if (d.state === 'expired_grace' || d.state === 'expired_suspended') {
                 btns.push('<a class="btn btn-primary" href="/pricing">Upgrade to keep going</a>');
@@ -2794,6 +2797,35 @@
             loadTrialStatus();
         } catch (e) { alert('Network error: ' + e.message); }
     }
+
+    async function openActivateRuntimeModal() {
+        var name = prompt('Which agent? Enter the agent name (case-sensitive).');
+        if (!name) return;
+        name = name.trim();
+        if (!name) return;
+        var customPrompt = prompt('Optional: paste a system prompt. Leave blank to auto-derive from the agent description.');
+        var body = { agent_name: name };
+        if (customPrompt && customPrompt.trim()) body.system_prompt = customPrompt.trim();
+        try {
+            var resp = await fetch(TRIAL_API_BASE + '/api/v1/owner/trial/activate-runtime', {
+                method: 'POST',
+                credentials: 'include',
+                headers: _trialHeaders(),
+                body: JSON.stringify(body),
+            });
+            var j = await resp.json();
+            if (!resp.ok) {
+                alert('Could not activate: ' + (j.detail || JSON.stringify(j)));
+                return;
+            }
+            alert('Activated. ' + name + ' is now using hosted Gemini Flash-Lite. The trial counter will tick on the next LLM call.');
+            loadTrialStatus();
+        } catch (e) {
+            alert('Network error: ' + e.message);
+        }
+    }
+
+    window.openActivateRuntimeModal = openActivateRuntimeModal;
 
     window.pauseTrial = pauseTrial;
     window.resumeTrial = resumeTrial;
