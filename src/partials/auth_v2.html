@@ -142,7 +142,7 @@
         return _ready;
     }
     function user() { return _user; }
-    function isAuthenticated() { return _user !== null; }
+    function isAuthenticated() { if (_user !== null) return true; try { return localStorage.getItem("gb_auth_hint") === "1"; } catch(e) { return false; } }
 
     function identityTier() {
         if (!_user) return 0;
@@ -161,7 +161,7 @@
         return u !== null;
     }
 
-    async function signOut() {
+    async function signOut() { try { localStorage.removeItem("gb_auth_hint"); } catch(e) {}
         try {
             await fetch(API_BASE + '/api/auth/logout', {
                 method: 'POST', credentials: 'include',
@@ -207,7 +207,7 @@
     }
 
     var initialReady = ready();
-    var authReadyBool = initialReady.then(function(u) { return u !== null; });
+    var authReadyBool = initialReady.then(function(u) { try { if(u) localStorage.setItem("gb_auth_hint","1"); else localStorage.removeItem("gb_auth_hint"); } catch(e){} return u !== null; });
 
     initialReady.then(function(u) {
         try {
