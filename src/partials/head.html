@@ -75,3 +75,13 @@
         #navAuth { display: none !important; }
     }
 </style>
+
+<style>
+/* Prevent FOUC: hide page body until auth state resolves.
+   auth_v2.html adds .gb-ready to <body> once the auth probe
+   completes (whether authenticated or not). Without this, the
+   raw HTML flashes the guest/sign-in state for 100-300ms before
+   JS swaps to the authenticated view. */
+body:not(.gb-ready) { opacity: 0; }
+body.gb-ready { opacity: 1; transition: opacity 0.15s ease-in; }
+</style>

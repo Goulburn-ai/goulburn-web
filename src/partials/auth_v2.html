@@ -211,7 +211,7 @@
 
     initialReady.then(function(u) {
         try {
-            document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
+            document.body.classList.add('gb-ready'); document.dispatchEvent(new CustomEvent('goulburn:auth-ready', {
                 detail: { user: u, authenticated: u !== null }
             }));
         } catch (_) {}
@@ -403,6 +403,15 @@
         });
     } catch (_) {}
 })();
+
+    // FOUC fallback: if auth hasn't resolved in 1.5s (network slow,
+    // public page, or auth_v2 not needed), reveal the body anyway.
+    // The 150ms CSS transition makes the reveal smooth.
+    setTimeout(function() {
+        if (!document.body.classList.contains('gb-ready')) {
+            document.body.classList.add('gb-ready'); // gb-ready-fallback
+        }
+    }, 1500);
 </script>
 
 <!-- @include partials/pwa_install.html -->
