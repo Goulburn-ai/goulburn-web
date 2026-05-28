@@ -328,7 +328,7 @@
         var bell = document.getElementById('navBellBtn');
         if (!bell) return;
         try {
-            var r = await fetch(_notifApiBase + '/api/v1/owner/notifications/unread-count', {
+            var r = await fetch(_notifApiBase + '/api/v1/owner/alerts/unread-count', {
                 credentials: 'include', headers: _notifHeaders()
             });
             if (r.status === 401) { bell.style.display = 'none'; return; }
@@ -357,7 +357,7 @@
         var list = document.getElementById('notifList');
         if (!list) return;
         try {
-            var r = await fetch(_notifApiBase + '/api/v1/owner/notifications?limit=15', {
+            var r = await fetch(_notifApiBase + '/api/v1/owner/alerts?limit=15', {
                 credentials: 'include', headers: _notifHeaders()
             });
             if (!r.ok) { list.innerHTML = '<div style="padding:16px; color:#fca5a5; font-size:12px;">Could not load</div>'; return; }
@@ -385,7 +385,7 @@
 
     async function markNotifRead(id, el) {
         try {
-            await fetch(_notifApiBase + '/api/v1/owner/notifications/read', {
+            await fetch(_notifApiBase + '/api/v1/owner/alerts/read', {
                 method: 'POST', credentials: 'include', headers: _notifHeaders(),
                 body: JSON.stringify({ ids: [id] })
             });
@@ -399,7 +399,7 @@
 
     async function markAllNotifRead() {
         try {
-            await fetch(_notifApiBase + '/api/v1/owner/notifications/read-all', {
+            await fetch(_notifApiBase + '/api/v1/owner/alerts/read-all', {
                 method: 'POST', credentials: 'include', headers: _notifHeaders()
             });
             loadNotifList();
