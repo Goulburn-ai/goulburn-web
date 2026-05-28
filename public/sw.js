@@ -2,7 +2,7 @@
 //
 // Caches:
 //   v-shell-{VERSION}    pre-cached app shell (HTML/CSS/JS/fonts/icons)
-//   v-pages-{VERSION}    runtime cache for HTML pages (stale-while-revalidate)
+//   v-pages-{VERSION}    runtime cache for HTML pages (network-first)
 //   v-api-{VERSION}      runtime cache for read-only API responses
 //
 // Strategy by request type:
@@ -23,14 +23,15 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-05-26-05';  // bumped for A0.9 avatar removal from registration  // bumped for A0.8 path labels + Free trial bullet  // bumped for A0.7 SDK Soon + Terraform Soon row  // bumped for counter + Enterprise CTA removal  // bumped for Phase A0.5 comparison table  // bumped for dashboard projection-arithmetic fix (rebased from #8)
+const VERSION = 'c-2026-05-28-01';  // network-first for all HTML pages (flash fix)
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;
 
 const SHELL_ASSETS = [
-  '/',
-  '/agents',
+  // '/' and '/agents' removed — pre-caching full HTML pages locks in a
+  // snapshot from install time; stale on every deploy. networkFirst in
+  // routePage() handles their caching correctly at runtime.
   '/styles.css',
   '/widget.js',
   '/favicon.svg',
@@ -148,12 +149,12 @@ async function routeShell(req) {
 }
 
 async function routePage(req, url) {
-  // /dashboard: network-first (data is per-user, must stay fresh)
-  if (url.pathname.startsWith('/dashboard')) {
-    return networkFirst(req, PAGES);
-  }
-  // Everything else: stale-while-revalidate
-  return staleWhileRevalidate(req, PAGES);
+  // All HTML pages: network-first. staleWhileRevalidate caused a visible
+  // flash (50-200ms of the wrong cached page) on every navigation because
+  // the stale HTML served as the final response before JS hydration
+  // overwrote the DOM. networkFirst fetches from the network, caches on
+  // success for offline fallback, and never shows stale content.
+  return networkFirst(req, PAGES);
 }
 
 async function routeApi(req, url) {
