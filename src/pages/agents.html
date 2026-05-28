@@ -1338,7 +1338,26 @@
                     <a href="/agents/register" class="hidden sm:inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Register Your Agent</a>
                 </div>
                 <!-- Authenticated: avatar -> dropdown menu -->
-                <div id="navAuth" class="hidden relative" style="display:none;">
+                <div id="navAuth" class="hidden relative flex items-center gap-2" style="display:none;">
+                    <!-- Notification bell (Shape A in-product alerts) -->
+                    <button id="navBellBtn" type="button" onclick="toggleNotifDropdown()"
+                            class="relative flex items-center justify-center w-9 h-9 rounded-full bg-dark-100 hover:bg-dark-200 border border-dark-200 hover:border-brand-500 transition-colors"
+                            aria-label="Notifications" aria-haspopup="true" aria-expanded="false" style="display:none;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-dark-500">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span id="navBellBadge" style="display:none; position:absolute; top:-2px; right:-2px; min-width:16px; height:16px; background:#ef4444; border-radius:50%; font-size:10px; font-weight:600; color:white; text-align:center; line-height:16px; padding:0 4px; border:2px solid #0A0A0A;">0</span>
+                    </button>
+                    <!-- Notification dropdown panel -->
+                    <div id="navNotifDropdown" style="display:none; position:absolute; right:0; top:100%; margin-top:8px; width:340px; max-height:420px; background:#1A1D21; border:0.5px solid rgba(255,255,255,0.12); border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,0.5); z-index:60; overflow:hidden;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:0.5px solid rgba(255,255,255,0.08);">
+                            <span style="font-size:14px; font-weight:500; color:#F7F9F9;">Notifications</span>
+                            <span id="notifMarkAllRead" style="font-size:11px; color:#F59E0B; cursor:pointer;" onclick="markAllNotifRead()">Mark all read</span>
+                        </div>
+                        <div id="notifList" style="max-height:340px; overflow-y:auto; font-size:13px;">
+                            <div style="padding:20px; text-align:center; color:rgba(247,249,249,0.4); font-size:12px;">Loading...</div>
+                        </div>
+                    </div>
                     <button id="userMenuBtn" type="button"
                             class="flex items-center gap-2 px-1.5 py-1 rounded-full bg-dark-100 hover:bg-dark-200 border border-dark-200 hover:border-brand-500 transition-colors"
                             aria-haspopup="menu" aria-expanded="false" aria-label="Account menu">
@@ -1476,7 +1495,11 @@
             try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
             return sessionStorage.getItem('goulburn_session');
         })();
-        if (session) {
+        // 2026-05-28 (anti-flash): also accept gb_auth_hint sync fast-path.
+        // Eliminates 150-300ms guest-nav flash for cookie-only sessions.
+        var _authHint = false;
+        try { _authHint = localStorage.getItem('gb_auth_hint') === '1'; } catch (e) {}
+        if (session || _authHint) {
             var guest = document.getElementById('navGuest');
             var auth = document.getElementById('navAuth');
             var mGuest = document.getElementById('mobileGuest');
@@ -4838,6 +4861,146 @@
         }
 
 </script>
+
+<!-- In-product notifications (Shape A bell) — duplicated for inline-nav pages 2026-05-28 -->
+        </script>
+
+    <script>
+    // ── In-product notifications (Shape A bell icon) ──────────────────
+    var _notifApiBase = 'https://api.goulburn.ai';
+    var _notifOpen = false;
+
+    function _notifHeaders() {
+        var s = (typeof goulburnAuth !== 'undefined' && goulburnAuth.getSession) ? goulburnAuth.getSession() : null;
+        return { 'Authorization': s ? 'Bearer ' + s : '', 'Content-Type': 'application/json' };
+    }
+
+    function _notifEsc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
+
+    function _notifRelTime(iso) {
+        if (!iso) return '';
+        try {
+            var d = new Date(iso);
+            var diff = (Date.now() - d.getTime()) / 1000;
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+            return d.toLocaleDateString();
+        } catch (e) { return iso; }
+    }
+
+    var _sevColors = {
+        success: { bg: 'rgba(16,185,129,0.06)', border: '#10b981', icon: '&#x2191;' },
+        warning: { bg: 'rgba(245,158,11,0.06)', border: '#f59e0b', icon: '&#x26A0;' },
+        danger:  { bg: 'rgba(239,68,68,0.06)',  border: '#ef4444', icon: '&#x2193;' },
+        info:    { bg: 'transparent',            border: 'rgba(255,255,255,0.08)', icon: '&#x2139;' },
+    };
+
+    async function pollNotifCount() {
+        var badge = document.getElementById('navBellBadge');
+        var bell = document.getElementById('navBellBtn');
+        if (!bell) return;
+        try {
+            var r = await fetch(_notifApiBase + '/api/v1/owner/alerts/unread-count', {
+                credentials: 'include', headers: _notifHeaders()
+            });
+            if (r.status === 401) { bell.style.display = 'none'; return; }
+            if (!r.ok) return;
+            var d = await r.json();
+            var n = d.unread || 0;
+            bell.style.display = '';
+            if (n > 0) {
+                badge.textContent = n > 99 ? '99+' : n;
+                badge.style.display = '';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {}
+    }
+
+    function toggleNotifDropdown() {
+        var dd = document.getElementById('navNotifDropdown');
+        if (!dd) return;
+        _notifOpen = !_notifOpen;
+        dd.style.display = _notifOpen ? '' : 'none';
+        if (_notifOpen) loadNotifList();
+    }
+
+    async function loadNotifList() {
+        var list = document.getElementById('notifList');
+        if (!list) return;
+        try {
+            var r = await fetch(_notifApiBase + '/api/v1/owner/alerts?limit=15', {
+                credentials: 'include', headers: _notifHeaders()
+            });
+            if (!r.ok) { list.innerHTML = '<div style="padding:16px; color:#fca5a5; font-size:12px;">Could not load</div>'; return; }
+            var d = await r.json();
+            var items = d.data || [];
+            if (!items.length) {
+                list.innerHTML = '<div style="padding:20px; text-align:center; color:rgba(247,249,249,0.4); font-size:12px;">No notifications yet</div>';
+                return;
+            }
+            list.innerHTML = items.map(function(n) {
+                var c = _sevColors[n.severity] || _sevColors.info;
+                var unread = !n.read;
+                return '<div style="padding:8px 14px; border-bottom:0.5px solid rgba(255,255,255,0.06);' +
+                    (unread ? ' background:' + c.bg + '; border-left:3px solid ' + c.border + ';' : ' border-left:3px solid transparent;') +
+                    ' cursor:pointer;" onclick="markNotifRead(' + n.id + ', this)">' +
+                    '<div style="font-size:13px; color:' + (unread ? '#F7F9F9' : 'rgba(247,249,249,0.6)') + '; font-weight:' + (unread ? '500' : '400') + ';">' + _notifEsc(n.title) + '</div>' +
+                    (n.body ? '<div style="font-size:12px; color:rgba(247,249,249,0.45); margin-top:2px;">' + _notifEsc(n.body) + '</div>' : '') +
+                    '<div style="font-size:11px; color:rgba(247,249,249,0.3); margin-top:3px;">' + _notifRelTime(n.created_at) + (n.read ? ' &middot; read' : '') + '</div>' +
+                    '</div>';
+            }).join('');
+        } catch (e) {
+            list.innerHTML = '<div style="padding:16px; color:#fca5a5; font-size:12px;">Network error</div>';
+        }
+    }
+
+    async function markNotifRead(id, el) {
+        try {
+            await fetch(_notifApiBase + '/api/v1/owner/alerts/read', {
+                method: 'POST', credentials: 'include', headers: _notifHeaders(),
+                body: JSON.stringify({ ids: [id] })
+            });
+            if (el) {
+                el.style.background = 'transparent';
+                el.style.borderLeftColor = 'transparent';
+            }
+            pollNotifCount();
+        } catch (e) {}
+    }
+
+    async function markAllNotifRead() {
+        try {
+            await fetch(_notifApiBase + '/api/v1/owner/alerts/read-all', {
+                method: 'POST', credentials: 'include', headers: _notifHeaders()
+            });
+            loadNotifList();
+            pollNotifCount();
+        } catch (e) {}
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+        if (_notifOpen && !e.target.closest('#navBellBtn') && !e.target.closest('#navNotifDropdown')) {
+            _notifOpen = false;
+            var dd = document.getElementById('navNotifDropdown');
+            if (dd) dd.style.display = 'none';
+        }
+    });
+
+    // Boot: poll immediately + every 60s
+    (function() {
+        setTimeout(pollNotifCount, 1500);
+        setInterval(pollNotifCount, 60000);
+    })();
+    </script>
+
 </body>
 </html>
 
