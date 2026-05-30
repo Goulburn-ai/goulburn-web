@@ -27,7 +27,6 @@ LOAD_BEARING = [
     ("/dashboard",                     200, "operator dashboard (gated, 200 served as static shell)"),
     ("/settings",                      200, "operator settings"),
     ("/agents",                        200, "agent directory"),
-    ("/operators",                     200, "operator directory"),
     ("/operator/me?edit=1",            200, "new-operator profile setup deep-link"),
     ("/probes",                        200, "probe explainer"),
     ("/how-it-works",                  200, "explainer"),

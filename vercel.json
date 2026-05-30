@@ -115,6 +115,11 @@
       "source": "/sign-in-legacy.html",
       "destination": "/sign-in",
       "permanent": true
+    },
+    {
+      "source": "/operators",
+      "destination": "/agents",
+      "permanent": true
     }
   ],
   "rewrites": [
@@ -225,10 +230,6 @@
     {
       "source": "/operator/:handle",
       "destination": "/operator.html"
-    },
-    {
-      "source": "/operators",
-      "destination": "/operators.html"
     },
     {
       "source": "/probes",
