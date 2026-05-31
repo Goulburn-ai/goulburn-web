@@ -256,3 +256,26 @@ if (fs.existsSync(PRICING)) {
     }
     console.log('Comparison-table guard: 4 tier columns present.');
 }
+
+
+// ─────────────────────────────────────────────────────────────────────
+// STEP 9: Tier 3 network-pro.js bundle-size gate (Phase 3, network-advanced)
+// ─────────────────────────────────────────────────────────────────────
+// 2026-05-31 — Tier 3 of the Network widget loads /static/network-pro.js
+// on first sustained hover. The senior-eng review required a hard CI gate
+// that fails the build if the gzipped bundle exceeds 60KB. Catches a
+// silent bloat from adding a heavy dep or kitchen-sink import.
+const NETWORK_PRO = path.join(OUT, 'network-pro.js');
+if (fs.existsSync(NETWORK_PRO)) {
+    const zlib = require('zlib');
+    const raw = fs.readFileSync(NETWORK_PRO);
+    const gz = zlib.gzipSync(raw);
+    console.log(`network-pro.js raw=${raw.length}B gzipped=${gz.length}B`);
+    const LIMIT = 60 * 1024; // 60KB gzipped
+    if (gz.length > LIMIT) {
+        console.error(`network-pro.js gzipped (${gz.length}B) exceeds ${LIMIT}B budget — aborting build.`);
+        process.exit(1);
+    }
+} else {
+    console.warn('network-pro.js missing from public/ — Phase 3 of network-advanced not in this build.');
+}

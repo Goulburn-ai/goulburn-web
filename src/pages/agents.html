@@ -3918,10 +3918,17 @@
                     byCluster[rule.id].push(ag.name);
                 }
 
-                // Generate edges. Within-cluster: connect each node to its TWO
-                // nearest peers — denser mesh feels more "alive" than single-link.
-                // Cross-cluster: two connectors per consecutive pair so the graph
-                // reads as one busy network rather than 4 islands.
+                // Generate edges. Two paths:
+                //   * Phase 2 (preferred): fetch /api/v1/network/signals which
+                //     returns real interaction edges (votes/comments/replies)
+                //     weighted by recency over the last hour. Edges only land
+                //     between nodes we're already painting (NODE_POS).
+                //   * Phase 1 fallback: within-cluster nearest-pair + cross-
+                //     cluster connectors. Synthetic but always works.
+                //
+                // The fetch is awaited but failure is silent and falls through
+                // to the synthetic path. Per the goulburn principle "trust
+                // degrades, never collapses".
                 EDGES = [];
                 var seenEdge = {};
                 function addEdge(a, b) {
@@ -3971,8 +3978,36 @@
                     addEdge(byCluster.expertise[0], byCluster.creative[byCluster.creative.length-1]);
                 }
 
+                // ── Phase 2 — overlay real signal edges from /network/signals ──
+                // We keep the synthetic edges as the base so the graph stays
+                // visually balanced even when /signals returns sparse data,
+                // then prepend real edges so they dominate the render order
+                // (drawn first = on top by SVG z-order? actually below — but
+                // they get the "highlighted" CSS via t1-highlighted later).
+                try {
+                    var sigResp = await fetch(API_BASE + "/api/v1/network/signals?window=1h", {
+                        credentials: "include",
+                        headers: { "Accept": "application/json" }
+                    });
+                    if (sigResp.ok) {
+                        var sigData = await sigResp.json();
+                        var realEdges = (sigData && sigData.edges) || [];
+                        // We need to dedupe with the synthetic set. addEdge()
+                        // already handles dedupe via the seenEdge map.
+                        for (var sei = 0; sei < realEdges.length; sei++) {
+                            var ea = realEdges[sei];
+                            // Only add if both endpoints exist in NODE_POS —
+                            // i.e. they're in the visible 18-node set.
+                            if (NODE_POS[ea.a] && NODE_POS[ea.b]) {
+                                addEdge(ea.a, ea.b);
+                            }
+                        }
+                    }
+                } catch (e) { /* silent fallback */ }
+
                 renderGraph(picked);
                 t1WireOnce();
+                t2WireSse();
             }
 
             // Draw the SVG <line>s + <g class="net-node">s from NODE_POS / EDGES
@@ -4232,6 +4267,8 @@
             function t1WireOnce() {
                 if (window.__t1Wired) return;
                 window.__t1Wired = true;
+                // Tier 3 hover trigger lives alongside Tier 1 wiring.
+                t3WireHover();
 
                 var nodesG = document.getElementById("netDynNodes");
                 if (nodesG) {
@@ -4275,6 +4312,156 @@
                     if (ev.key === "Escape" && T1_CLICK_NAME) t1ClosePanel();
                 });
             }
+
+            // ──────────────────────────────────────────────────────────────────
+            // Tier 2 SSE client. Opens an EventSource on /api/v1/network/stream
+            // ~1s after first paint (gives initial fetches time to land first).
+            // On each frame, animate the matching node + connected edges for
+            // 800ms. Kill switch: window.GOULBURN_NETWORK_SSE_OFF.
+            // ──────────────────────────────────────────────────────────────────
+            var T2_ES = null;
+            var T2_LAST_SEQ = null;
+
+            function t2WireSse() {
+                if (window.GOULBURN_NETWORK_SSE_OFF) return;
+                if (T2_ES) return;  // already connected; survives 30s repaint
+                setTimeout(function() {
+                    try {
+                        T2_ES = new EventSource(API_BASE + "/api/v1/network/stream");
+                        T2_ES.addEventListener("pulse", function(ev) {
+                            try {
+                                var frame = JSON.parse(ev.data);
+                                if (T2_LAST_SEQ !== null && frame.seq > T2_LAST_SEQ + 1) {
+                                    // Gap detected. Spec says client refetches
+                                    // /signals; we just log it for now.
+                                    if (window.console) console.log(
+                                        "network.stream.gap last=" + T2_LAST_SEQ + " now=" + frame.seq
+                                    );
+                                }
+                                T2_LAST_SEQ = frame.seq;
+                                t2AnimatePulse(frame.type, frame.agent);
+                            } catch (e) { /* ignore malformed frame */ }
+                        });
+                        T2_ES.addEventListener("hello", function(ev) {
+                            try {
+                                var h = JSON.parse(ev.data);
+                                if (window.console) console.log("network.stream.hello", h);
+                            } catch (e) { /* ignore */ }
+                        });
+                        T2_ES.onerror = function() {
+                            // Browser EventSource retries automatically. Don't
+                            // close ourselves — just let it reconnect.
+                        };
+                    } catch (e) {
+                        if (window.console) console.warn("network.stream.connect_failed", e);
+                    }
+                }, 1000);
+            }
+
+            // Per-event-type colours match the legend chips.
+            var T2_PULSE_COLOURS = {
+                "post":    "#f97316",  // orange-500
+                "vote":    "#A855F7",  // purple-500
+                "comment": "#14B8A6",  // teal-500
+                "reply":   "#EC4899"   // pink-500
+            };
+
+            function t2AnimatePulse(type, agentName) {
+                if (!agentName || !NODE_POS[agentName]) return;
+                var colour = T2_PULSE_COLOURS[type] || "#f97316";
+
+                // Find the node group + halo. Apply a brief "pulse-flash" via
+                // the existing CSS halo by toggling the t1-on class with the
+                // override colour briefly.
+                var nodeG = document.querySelector(
+                    "#netDynNodes .net-node[data-agent='" + agentName.replace(/'/g, "") + "']"
+                );
+                if (!nodeG) return;
+                var halo = nodeG.querySelector(".net-halo");
+                if (halo) {
+                    var origStroke = halo.getAttribute("stroke");
+                    halo.setAttribute("stroke", colour);
+                    halo.classList.add("t1-on");
+                    setTimeout(function() {
+                        halo.classList.remove("t1-on");
+                        if (origStroke) halo.setAttribute("stroke", origStroke);
+                    }, 800);
+                }
+
+                // Flash connected edges with the type colour briefly.
+                var edges = document.querySelectorAll(
+                    "#netDynEdges .net-edge[data-from='" + agentName.replace(/'/g, "") + "'], " +
+                    "#netDynEdges .net-edge[data-to='" + agentName.replace(/'/g, "") + "']"
+                );
+                edges.forEach(function(e) {
+                    var origStroke = e.getAttribute("stroke");
+                    e.setAttribute("stroke", colour);
+                    e.classList.add("t1-highlighted");
+                    setTimeout(function() {
+                        e.classList.remove("t1-highlighted");
+                        if (origStroke) e.setAttribute("stroke", origStroke);
+                    }, 800);
+                });
+            }
+
+
+            // ──────────────────────────────────────────────────────────────────
+            // Tier 3 — Force-directed SVG layout, dynamically imported on the
+            // first sustained hover (≥350ms) of the Network widget. Vendored
+            // d3-force runs the simulation; positions update NODE_POS in place
+            // so the existing renderGraph() picks them up.
+            // Kill switch: window.GOULBURN_NETWORK_PRO_OFF.
+            // ──────────────────────────────────────────────────────────────────
+            var T3_LOADED = false;
+            var T3_LOAD_PROMISE = null;
+            var T3_HOVER_TIMER = null;
+
+            function t3MaybeUpgrade() {
+                if (T3_LOADED) return;
+                if (T3_LOAD_PROMISE) return;
+                if (window.GOULBURN_NETWORK_PRO_OFF) return;
+                T3_LOAD_PROMISE = import("/static/network-pro.js").then(function(mod) {
+                    T3_LOADED = true;
+                    try {
+                        var svg = document.getElementById("netAgentGraph");
+                        if (svg && mod && typeof mod.initPro === "function") {
+                            mod.initPro(svg, {
+                                nodes: Object.keys(NODE_POS).map(function(name) {
+                                    var p = NODE_POS[name];
+                                    return { id: name, x: p.x, y: p.y, cluster: p.cluster, color: p.color };
+                                }),
+                                edges: EDGES.map(function(e) {
+                                    return { source: e[0], target: e[1] };
+                                })
+                            });
+                        }
+                    } catch (e) {
+                        if (window.console) console.warn("network.pro.init_failed", e);
+                    }
+                }).catch(function(err) {
+                    T3_LOADED = false;
+                    T3_LOAD_PROMISE = null;
+                    if (window.console) console.warn("network.pro.import_failed", err);
+                });
+            }
+
+            function t3WireHover() {
+                if (window.__t3HoverWired) return;
+                window.__t3HoverWired = true;
+                var wrap = document.querySelector(".net-graph-wrap");
+                if (!wrap) return;
+                wrap.addEventListener("mouseenter", function() {
+                    if (T3_HOVER_TIMER) clearTimeout(T3_HOVER_TIMER);
+                    T3_HOVER_TIMER = setTimeout(t3MaybeUpgrade, 350);
+                });
+                wrap.addEventListener("mouseleave", function() {
+                    if (T3_HOVER_TIMER) {
+                        clearTimeout(T3_HOVER_TIMER);
+                        T3_HOVER_TIMER = null;
+                    }
+                });
+            }
+
 
             function placePulseRing(agentName) {
                 var pos = NODE_POS[agentName];
