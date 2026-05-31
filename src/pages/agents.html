@@ -4194,6 +4194,12 @@
                 var panel = document.getElementById("netInfoPanel");
                 if (!panel) return;
                 panel.classList.add("t1-open");
+                // Belt-and-braces: also set transform inline. Diagnosed
+                // 2026-05-31 that the .t1-open CSS rule wasn't winning
+                // the cascade despite higher specificity. Inline + class
+                // both apply — class drives the transition timing, inline
+                // guarantees the end state.
+                panel.style.transform = "translateX(0)";
                 panel.setAttribute("aria-hidden", "false");
                 var nameEl = document.getElementById("netInfoPanelName");
                 var metaEl = document.getElementById("netInfoPanelMeta");
@@ -4231,6 +4237,7 @@
                 var panel = document.getElementById("netInfoPanel");
                 if (!panel) return;
                 panel.classList.remove("t1-open");
+                panel.style.transform = "translateX(110%)";
                 panel.setAttribute("aria-hidden", "true");
             }
 
