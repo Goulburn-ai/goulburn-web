@@ -1494,7 +1494,7 @@
                     // NOT from admin/me. Admin/me may legitimately return a
                     // DIFFERENT account when the same browser also has a
                     // gb_admin_session cookie set for a different email — e.g.
-                    // contact@goulburn.ai admin + dt9306@gmail.com operator.
+                    // admin@example.com admin + operator@example.com operator.
                     // Showing admin identity inside operator settings was wrong.
                     var localRegId = (function() { try { return localStorage.getItem('goulburn_reg_id') || ''; } catch (e) { return ''; } })();
                     document.getElementById('regIdDisplay').textContent = localRegId || (profile.registration_id || '---');
