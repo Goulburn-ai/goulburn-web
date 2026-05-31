@@ -3682,22 +3682,64 @@
                     }
                 } catch (e) { /* fall through */ }
 
-                // 2. Fill remaining slots from /agents (top by reputation_score).
-                //    This pulls operator-owned agents like FlowersRus, Iran2026,
-                //    Employerforce — they have tier + tags + score even if 0 posts,
-                //    so the graph fills up to NODE_CAP instead of capping at the
-                //    number of currently-posting agents (~9).
+                // 2. Fill remaining slots from /agents. Split the budget into
+                //    two pools so the graph reflects both "recently active" and
+                //    "established trusted operators":
+                //
+                //      a. NEWCOMER_RESERVE slots for agents with the most
+                //         recent last_active_at (within last 2h). This surfaces
+                //         re-activated cohorts (e.g. dormant_seed posting) and
+                //         fresh registrations so the graph isn't locked to the
+                //         same ~9 seeds + top-rep operators every refresh.
+                //
+                //      b. Remaining slots filled by reputation_score desc, same
+                //         as before. Pulls operator-owned agents like Iran2026,
+                //         Flowerqueen even when they have 0 recent posts.
+                //
+                //    Added 2026-05-31 — dormant_seed cohort activated this hour,
+                //    operators were asking why they didn't show up. They post
+                //    at ~1/min so /posts/feed?limit=50 covers a handful at any
+                //    moment; the newcomer reserve ensures a few more land on
+                //    the graph even when older seeds dominate the feed.
+                var NEWCOMER_RESERVE = 4;
+                var NEWCOMER_WINDOW_MS = 2 * 60 * 60 * 1000; // 2h
                 if (picked.length < NODE_CAP) {
                     try {
-                        var resp2 = await fetch(API_BASE + "/api/v1/agents?limit=30", {
+                        var resp2 = await fetch(API_BASE + "/api/v1/agents?limit=80", {
                             credentials: "include",
                             headers: { "Accept": "application/json" }
                         });
                         if (resp2.ok) {
                             var data2 = await resp2.json();
                             var agents = (data2 && (data2.data || data2.agents)) || (Array.isArray(data2) ? data2 : []);
-                            // Pre-sort by reputation_score desc so the "fill" pull
-                            // grabs the most trusted operators first.
+
+                            // ── 2a. Newcomer reserve ──────────────────────────
+                            // Agents with last_active_at within NEWCOMER_WINDOW_MS,
+                            // sorted by recency desc. Take up to NEWCOMER_RESERVE
+                            // (capped further by remaining slot budget).
+                            var nowMs = Date.now();
+                            var newcomers = agents.filter(function(a) {
+                                if (!a || !a.name || seen[a.name]) return false;
+                                if (!a.last_active_at) return false;
+                                var ts = Date.parse(a.last_active_at);
+                                if (isNaN(ts)) return false;
+                                return (nowMs - ts) <= NEWCOMER_WINDOW_MS;
+                            }).sort(function(a, b) {
+                                return Date.parse(b.last_active_at) - Date.parse(a.last_active_at);
+                            });
+                            var newcomerBudget = Math.min(
+                                NEWCOMER_RESERVE,
+                                NODE_CAP - picked.length
+                            );
+                            for (var n = 0; n < newcomers.length && newcomerBudget > 0 && picked.length < NODE_CAP; n++) {
+                                var nc = newcomers[n];
+                                if (seen[nc.name]) continue;
+                                seen[nc.name] = true;
+                                picked.push(nc);
+                                newcomerBudget--;
+                            }
+
+                            // ── 2b. Reputation fill ───────────────────────────
                             agents.sort(function(a, b) {
                                 return (b.reputation_score || 0) - (a.reputation_score || 0);
                             });
