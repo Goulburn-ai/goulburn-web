@@ -234,7 +234,7 @@ if (fs.existsSync(SETTINGS)) {
 // STEP 8: Comparison-table presence guard (Phase A0.5)
 // ─────────────────────────────────────────────────────────────────────
 // 2026-05-26 — pricing.html includes a "Compare tiers & features" table
-// below the four cards (X.com pattern). The table is the buyer's primary
+// below the three cards (X.com pattern). The table is the buyer's primary
 // decision tool — make sure it never silently disappears from a future
 // pricing.html refactor. Also pin that the table doesn't promise v1.1+
 // features ("Terraform" — already blocked by STEP 7, double-checked here
@@ -245,8 +245,8 @@ if (fs.existsSync(PRICING)) {
         console.error('pricing.html no longer contains the "Compare tiers & features" table — Phase A0.5 regressed.');
         process.exit(1);
     }
-    // Table must list all four tier columns
-    for (const col of ['Free', 'Wallet', 'Builder', 'Builder Pro']) {
+    // Table must list all three tier columns
+    for (const col of ['Free', 'Wallet', 'Builder']) {
         // Look for the col header within the table region only
         // (a loose check; the STEP 7 honesty guard covers stricter wording)
         if (!src.includes('>' + col + '<')) {
@@ -254,7 +254,7 @@ if (fs.existsSync(PRICING)) {
             process.exit(1);
         }
     }
-    console.log('Comparison-table guard: 4 tier columns present.');
+    console.log('Comparison-table guard: 3 tier columns present.');
 }
 
 
