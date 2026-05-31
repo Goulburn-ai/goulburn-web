@@ -672,7 +672,7 @@
         }
         .net-info-panel .nip-actions a:hover { text-decoration: underline; }
         .net-info-panel .nip-loading { color: rgba(247,249,250,0.45); font-style: italic; font-size: 10.5px; }
-        .net-graph-wrap { position: relative; }
+        .net-graph-wrap { position: relative; overflow: hidden; border-radius: 12px; }
         /* Halo behind highlighted node. JS adds this circle dynamically. */
         .net-halo {
             fill: none;
@@ -4321,6 +4321,8 @@
             // ──────────────────────────────────────────────────────────────────
             var T2_ES = null;
             var T2_LAST_SEQ = null;
+            // Phase 2 polish: expose on window for browser-debugging.
+            try { Object.defineProperty(window, "__GOULBURN_T2", { get: function() { return { es: T2_ES, lastSeq: T2_LAST_SEQ }; } }); } catch (e) {}
 
             function t2WireSse() {
                 if (window.GOULBURN_NETWORK_SSE_OFF) return;
