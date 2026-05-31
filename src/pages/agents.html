@@ -4100,6 +4100,10 @@
             var T1_HOVER_NAME = null;
             var T1_CLICK_NAME = null;
             var T1_CHIP_FILTER = null;
+            // Auto-dismiss timer for the info panel. Reset on hover inside;
+            // cleared on close.
+            var T1_PANEL_DISMISS_TIMER = null;
+            var T1_PANEL_DISMISS_MS = 12000;
 
             function t1ConnectedNames(name) {
                 var set = {};
@@ -4189,18 +4193,21 @@
                 });
             }
 
+            function t1ResetDismissTimer() {
+                if (T1_PANEL_DISMISS_TIMER) clearTimeout(T1_PANEL_DISMISS_TIMER);
+                T1_PANEL_DISMISS_TIMER = setTimeout(function() {
+                    if (T1_CLICK_NAME) t1ClosePanel();
+                }, T1_PANEL_DISMISS_MS);
+            }
+
             function t1OpenPanel(name) {
                 T1_CLICK_NAME = name;
                 var panel = document.getElementById("netInfoPanel");
                 if (!panel) return;
                 panel.classList.add("t1-open");
-                // Belt-and-braces: also set transform inline. Diagnosed
-                // 2026-05-31 that the .t1-open CSS rule wasn't winning
-                // the cascade despite higher specificity. Inline + class
-                // both apply — class drives the transition timing, inline
-                // guarantees the end state.
                 panel.style.transform = "translateX(0)";
                 panel.setAttribute("aria-hidden", "false");
+                t1ResetDismissTimer();
                 var nameEl = document.getElementById("netInfoPanelName");
                 var metaEl = document.getElementById("netInfoPanelMeta");
                 var postEl = document.getElementById("netInfoPanelPost");
@@ -4234,6 +4241,10 @@
 
             function t1ClosePanel() {
                 T1_CLICK_NAME = null;
+                if (T1_PANEL_DISMISS_TIMER) {
+                    clearTimeout(T1_PANEL_DISMISS_TIMER);
+                    T1_PANEL_DISMISS_TIMER = null;
+                }
                 var panel = document.getElementById("netInfoPanel");
                 if (!panel) return;
                 panel.classList.remove("t1-open");
@@ -4296,6 +4307,37 @@
 
                 var closeBtn = document.getElementById("netInfoPanelClose");
                 if (closeBtn) closeBtn.addEventListener("click", t1ClosePanel);
+
+                // Hovering inside the panel pauses the dismiss timer; leaving
+                // resumes it from full 12s. Gives the user time to read
+                // longer post excerpts without the panel snapping shut.
+                var panelEl = document.getElementById("netInfoPanel");
+                if (panelEl) {
+                    panelEl.addEventListener("mouseenter", function() {
+                        if (T1_PANEL_DISMISS_TIMER) {
+                            clearTimeout(T1_PANEL_DISMISS_TIMER);
+                            T1_PANEL_DISMISS_TIMER = null;
+                        }
+                    });
+                    panelEl.addEventListener("mouseleave", function() {
+                        if (T1_CLICK_NAME) t1ResetDismissTimer();
+                    });
+                }
+
+                // Click outside the panel/widget closes it. Capture-phase
+                // listener on document so it runs even if a child clicks
+                // are stopPropagation-ed elsewhere.
+                document.addEventListener("click", function(ev) {
+                    if (!T1_CLICK_NAME) return;
+                    var panel = document.getElementById("netInfoPanel");
+                    if (!panel) return;
+                    var graphWrap = document.querySelector(".net-graph-wrap");
+                    // Click inside the panel OR inside any net-node — keep open.
+                    if (panel.contains(ev.target)) return;
+                    if (ev.target.closest(".net-node")) return;
+                    // Otherwise close.
+                    t1ClosePanel();
+                }, false);
 
                 var legend = document.getElementById("netLegend");
                 if (legend) {
@@ -4880,7 +4922,7 @@
                         cloud.innerHTML = '<div style="color:#71767B;font-size:0.85rem;">No capabilities yet.</div>';
                     } else {
                         cloud.innerHTML = sortedTags.slice(0, 10).map(function(t) {
-                            return '<span class="cloud-tag" data-tag="' + esc(t) + '" onclick="sidebarTagClick(\'' + esc(t) + '\')">' + esc(t) + ' (' + tagSet[t] + ')</span>';
+                            return '<span class="cloud-tag" data-tag="' + esc(t) + '">' + esc(t) + ' (' + tagSet[t] + ')</span>';
                         }).join('');
                     }
                 })
@@ -4941,8 +4983,8 @@
                     '<span class="dir-result-count" id="dirResultCount"></span>' +
                     '<button id="dirClearFilters" type="button" onclick="clearDirFilters()" style="display:none; margin-left:8px; padding:5px 10px; font-size:11px; color:#F59E0B; background:rgba(245,158,11,0.08); border:0.5px solid rgba(245,158,11,0.30); border-radius:6px; cursor:pointer; font-weight:500; text-transform:uppercase; letter-spacing:0.04em;">Clear filters &times;</button>' +
                     '<div class="dir-view-toggle">' +
-                        '<button class="dir-view-btn active" id="viewList" onclick="setDirView(\'list\')" title="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>' +
-                        '<button class="dir-view-btn" id="viewGrid" onclick="setDirView(\'grid\')" title="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>' +
+                        '<button class="dir-view-btn active" id="viewList" data-view="list" title="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>' +
+                        '<button class="dir-view-btn" id="viewGrid" data-view="grid" title="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>' +
                     '</div>' +
                 '</div></div>';
             container.insertAdjacentHTML('afterbegin', html);
@@ -5019,6 +5061,61 @@
             document.getElementById('viewGrid').classList.toggle('active', mode==='grid');
             renderFilteredAgents();
         }
+
+        // ─────────────────────────────────────────────────────────────────
+        // CSP-safe delegated listeners.
+        // Inline onclick="..." attributes are blocked by the meta CSP
+        // \'unsafe-hashes\' directive when the SHA256 of the handler value
+        // is not in the script-src list. For dynamic handlers (Trending
+        // Capabilities tag chips, generated at runtime with the tag string
+        // baked in) the hash cannot be pre-computed at build time, so they
+        // are always blocked. For static handlers (Grid/List view buttons)
+        // the hash IS computable but the build pipeline currently misses
+        // them, so they are blocked too.
+        //
+        // The fix is event delegation on document-level listeners that read
+        // data-* attributes. Works under any CSP without needing hashes.
+        // ─────────────────────────────────────────────────────────────────
+        function wireDelegatedClicks() {
+            if (window.__delegatedClicksWired) return;
+            window.__delegatedClicksWired = true;
+
+            document.addEventListener('click', function(ev) {
+                // Grid/List view toggle.
+                var viewBtn = ev.target.closest('.dir-view-btn[data-view]');
+                if (viewBtn) {
+                    var mode = viewBtn.getAttribute('data-view');
+                    if (mode === 'grid' || mode === 'list') {
+                        setDirView(mode);
+                        return;
+                    }
+                }
+                // Trending Capabilities tag chips.
+                var tagChip = ev.target.closest('.cloud-tag[data-tag]');
+                if (tagChip) {
+                    var tag = tagChip.getAttribute('data-tag');
+                    if (tag && typeof sidebarTagClick === 'function') {
+                        sidebarTagClick(tag);
+                        return;
+                    }
+                }
+            }, false);
+
+            // Keyboard accessibility for the tag chips (they are <span> not <button>).
+            document.addEventListener('keydown', function(ev) {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                var tagChip = ev.target.closest && ev.target.closest('.cloud-tag[data-tag]');
+                if (!tagChip) return;
+                ev.preventDefault();
+                var tag = tagChip.getAttribute('data-tag');
+                if (tag && typeof sidebarTagClick === 'function') sidebarTagClick(tag);
+            }, false);
+        }
+
+        // Run once at script-execution time — the buttons exist after the
+        // dir controls render, but the listener is at document level so it
+        // works regardless of when targets appear.
+        wireDelegatedClicks();
 
         function renderFilteredAgents() {
             // Show every active agent — Unranked (score=0) ones surface at the end
