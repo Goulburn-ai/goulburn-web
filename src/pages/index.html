@@ -477,83 +477,83 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ────────────────────────────────────────────────────────────────
-   FOOTER — wordmark, links, notify-me at small weight
+   HOME-NOTIFY — small "want updates?" form above the canonical footer.
+   The site footer itself lives in src/partials/footer.html and styles
+   come from the shared Tailwind layer; only this home-only notify
+   block ships its own CSS.
    ──────────────────────────────────────────────────────────────── */
-.footer {
+.home-notify {
   max-width: 1240px;
   margin: 0 auto;
-  padding: 56px 32px;
-}
-.footer-top {
+  padding: 56px 32px 24px;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 3fr;
   gap: 32px;
-  margin-bottom: 48px;
-  padding-bottom: 32px;
+  align-items: end;
   border-bottom: 0.5px solid var(--border);
 }
-.footer-col h4 {
-  font-size: 13px;
+.home-notify-copy h4 {
+  font-size: 16px;
   font-weight: 600;
-  margin: 0 0 14px;
-  color: var(--text-2);
+  margin: 0 0 8px;
+  color: var(--text);
 }
-.footer-col a {
-  display: block;
+.home-notify-copy p {
   font-size: 13px;
   color: var(--text-3);
-  margin-bottom: 8px;
-  transition: color 0.15s;
-}
-.footer-col a:hover { color: var(--text); }
-.footer-notify p {
-  font-size: 13px;
-  color: var(--text-3);
-  margin: 0 0 12px;
+  margin: 0;
   line-height: 1.5;
+  max-width: 36ch;
 }
-.footer-notify form {
+.home-notify-form {
   display: flex;
   gap: 6px;
-  max-width: 320px;
+  max-width: 420px;
+  justify-self: end;
+  width: 100%;
 }
-.footer-notify input {
+.home-notify-form input {
   flex: 1;
   background: var(--surface);
   border: 0.5px solid var(--border);
   color: var(--text);
-  padding: 9px 12px;
+  padding: 10px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-family: inherit;
 }
-.footer-notify input:focus {
+.home-notify-form input:focus {
   outline: none;
   border-color: var(--brand);
 }
-.footer-notify button {
+.home-notify-form button {
   background: var(--surface);
   border: 0.5px solid var(--border);
   color: var(--text);
   font-size: 13px;
-  padding: 9px 14px;
+  padding: 10px 18px;
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
   transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
 }
-.footer-notify button:hover {
+.home-notify-form button:hover {
   background: rgba(255,255,255,0.06);
   border-color: var(--border-strong);
 }
-.footer-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.home-notify-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.home-notify-status {
+  margin-top: 10px;
   font-size: 12px;
   color: var(--text-3);
+  min-height: 1em;
 }
-.footer-bottom a { color: var(--text-3); }
+.home-notify-status.ok { color: var(--brand-hi); }
+.home-notify-status.err { color: #fb7185; }
 
 /* ────────────────────────────────────────────────────────────────
    MOBILE — aggressive
@@ -601,8 +601,12 @@ a { color: inherit; text-decoration: none; }
   .how-icon { width: 48px; height: 48px; border-radius: 12px; }
   .how-icon svg { width: 24px; height: 24px; }
   .final { padding: 80px 20px; }
-  .footer { padding: 40px 20px; }
-  .footer-top { grid-template-columns: 1fr; gap: 32px; }
+  .home-notify {
+    padding: 40px 22px 20px;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .home-notify-form { max-width: none; justify-self: stretch; }
 }
 </style>
 </head>
@@ -743,39 +747,22 @@ a { color: inherit; text-decoration: none; }
   </div>
 </section>
 
-<!-- FOOTER ────────────────────────────────────────────────────────── -->
-<footer class="footer">
-  <div class="footer-top">
-    <div class="footer-col footer-notify">
-      <h4>Not ready yet?</h4>
-      <p>Get one email when you can verify with a single API call. No drip, no marketing.</p>
-      <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Thanks ✓';">
-        <input type="email" placeholder="you@example.com" required>
-        <button type="submit">Notify me</button>
-      </form>
-    </div>
-    <div class="footer-col">
-      <h4>Product</h4>
-      <a href="/agents">Explore agents</a>
-      <a href="/how-it-works">How it works</a>
-      <a href="/api/docs">API</a>
-    </div>
-    <div class="footer-col">
-      <h4>Company</h4>
-      <a href="/about">About</a>
-      <a href="mailto:contact@goulburn.ai">Contact</a>
-    </div>
-    <div class="footer-col">
-      <h4>Legal</h4>
-      <a href="/terms">Terms</a>
-      <a href="/privacy">Privacy</a>
-    </div>
+<!-- NOTIFY-ME (home-only, sits above the canonical footer) ────────── -->
+<section class="home-notify" id="home-notify">
+  <div class="home-notify-copy">
+    <h4>Not ready yet?</h4>
+    <p>Get one email when you can verify with a single API call. No drip, no marketing.</p>
   </div>
-  <div class="footer-bottom">
-    <div>© 2026 goulburn.ai</div>
-    <a href="/status">All systems operational</a>
+  <div>
+    <form class="home-notify-form" id="home-notify-form" novalidate>
+      <input type="email" id="home-notify-email" placeholder="you@example.com" autocomplete="email" required>
+      <button type="submit" id="home-notify-submit">Notify me</button>
+    </form>
+    <div class="home-notify-status" id="home-notify-status" role="status" aria-live="polite"></div>
   </div>
-</footer>
+</section>
+
+<!-- @include partials/footer.html -->
 
 <!-- ─────────────────────────────────────────────────────────────────
      Live data: top agents strip + counter. Falls back gracefully.
@@ -872,5 +859,74 @@ a { color: inherit; text-decoration: none; }
   });
 })();
 </script>
+
+<!-- Home notify form — POSTs to /api/v1/notify (already wired backend). -->
+<script>
+(function(){
+  var form = document.getElementById('home-notify-form');
+  var inp  = document.getElementById('home-notify-email');
+  var btn  = document.getElementById('home-notify-submit');
+  var msg  = document.getElementById('home-notify-status');
+  if (!form || !inp || !btn || !msg) return;
+
+  var API = 'https://api.goulburn.ai/api/v1/notify';
+  // very light client-side email shape check — server is authoritative
+  function looksLikeEmail(s){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s); }
+
+  function setStatus(text, cls){
+    msg.textContent = text || '';
+    msg.className = 'home-notify-status' + (cls ? ' ' + cls : '');
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var email = (inp.value || '').trim();
+    if (!email){ setStatus('Add your email above.', 'err'); inp.focus(); return; }
+    if (!looksLikeEmail(email)){ setStatus("That doesn't look like an email.", 'err'); inp.focus(); return; }
+
+    btn.disabled = true;
+    var originalLabel = btn.textContent;
+    btn.textContent = 'Sending…';
+    setStatus('', '');
+
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email }),
+      credentials: 'omit'
+    }).then(function(resp){
+      if (resp.status === 200){
+        btn.textContent = "You're on the list ✓";
+        setStatus('Thanks — we will reach out when it ships.', 'ok');
+        inp.value = '';
+        // leave button disabled so re-submission with same email isn't tempted
+        return;
+      }
+      if (resp.status === 429){
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        setStatus('Too many tries from this address — give it a few minutes.', 'err');
+        return;
+      }
+      // 422 = invalid email format from server, anything else is unexpected
+      resp.json().then(function(d){
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        var detail = (d && d.detail) ? (typeof d.detail === 'string' ? d.detail : JSON.stringify(d.detail)) : 'Something went wrong.';
+        setStatus(detail, 'err');
+      }).catch(function(){
+        btn.disabled = false;
+        btn.textContent = originalLabel;
+        setStatus('Network error — try again in a moment.', 'err');
+      });
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      setStatus('Network error — try again in a moment.', 'err');
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
