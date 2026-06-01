@@ -4119,6 +4119,12 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 }).then(function(r){ return r.ok ? r.json() : null; }).then(function(me) {
                     if (!me) return;
                     if (window._tusSetTier && me.paid_tier) window._tusSetTier(me.paid_tier);
+                    window.__ownerPaidTier = me.paid_tier || 'free';
+                    // Re-render any agents already in the list so the
+                    // Trust Report CTA picks up the tier state.
+                    if (typeof renderAgents === 'function' && Array.isArray(dashboardAgents) && dashboardAgents.length) {
+                        renderAgents(dashboardAgents);
+                    }
                     if (!me.handle) return;
                     var link = document.getElementById('operatorProfileLink');
                     if (!link) return;
@@ -4453,6 +4459,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 '</div>' +
                 '<div class="agent-actions">' +
                     '<a href="/agents/' + name + '" class="btn-secondary">View Profile</a>' +
+                    trustReportBtnHtml(safeName) +
                 '</div>' +
             '</div>';
         }).join('');
@@ -4936,6 +4943,155 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
             console.error('Failed to copy:', err);
         });
     }
+
+    // ── Trust Report (Deep Trust Report — Builder paid-tier feature) ──
+    // 2026-06-01: when an operator on the Builder tier (or higher) clicks
+    // "Generate Trust Report" on an agent card, we POST to the backend,
+    // get back a public shareable URL, and surface a copy-to-clipboard
+    // modal. Free tier sees an upgrade prompt instead. Tier check reads
+    // window.__ownerPaidTier (set when /api/v1/operators/me resolves).
+    var TRUST_REPORT_PAID_TIERS = {
+        "builder": true, "builder_pro": true, "studio": true, "enterprise": true
+    };
+
+    function ownerHasBuilderTier() {
+        return !!TRUST_REPORT_PAID_TIERS[(window.__ownerPaidTier || "free").toLowerCase()];
+    }
+
+    function trustReportBtnHtml(safeName) {
+        if (ownerHasBuilderTier()) {
+            return '<button type="button" class="btn-secondary" ' +
+                'data-action="trust-report" data-agent="' + safeName + '" ' +
+                'style="background:rgba(245,158,11,0.12); color:#fbbf24; border-color:rgba(245,158,11,0.35);">' +
+                'Generate Trust Report' +
+                '</button>';
+        }
+        // Free tier — paywall stub.
+        return '<button type="button" class="btn-secondary" ' +
+            'data-action="trust-report-paywall" ' +
+            'title="Available on the Builder tier" ' +
+            'style="opacity:0.6; cursor:help;">Trust Report &middot; Builder</button>';
+    }
+
+    function tryCopy(text) {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+        } catch (e) { /* fall through */ }
+        // Fallback: textarea + execCommand.
+        return new Promise(function(resolve, reject) {
+            try {
+                var ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand("copy");
+                document.body.removeChild(ta);
+                resolve();
+            } catch (e) { reject(e); }
+        });
+    }
+
+    function showTrustReportModal(reportUrl, agentName) {
+        // Reuse a lightweight inline modal — no external dependency.
+        // Removes existing instance if a second click fires before the
+        // first one is dismissed.
+        var prev = document.getElementById("trustReportModal");
+        if (prev) prev.parentNode.removeChild(prev);
+        var modal = document.createElement("div");
+        modal.id = "trustReportModal";
+        modal.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;";
+        modal.innerHTML =
+            '<div style="background:#16181C; border:1px solid rgba(255,255,255,0.10); border-radius:12px; padding:24px 28px; max-width:520px; width:100%; color:#F7F9FA; font-size:14px; line-height:1.55;">' +
+                '<div style="font-size:18px; font-weight:600; margin-bottom:6px;">Trust Report generated</div>' +
+                '<div style="color:rgba(247,249,250,0.6); font-size:13px; margin-bottom:18px;">' +
+                    'A signed snapshot of <strong>' + agentName + "'s</strong> evidence, frozen at this moment. " +
+                    'Send the link below to anyone evaluating your agent. The recipient can re-verify against live data with one click.' +
+                '</div>' +
+                '<div style="display:flex; gap:8px; margin-bottom:14px;">' +
+                    '<input id="trustReportUrlInput" readonly value="' + reportUrl + '" ' +
+                        'style="flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.10); border-radius:8px; padding:10px 12px; color:#F7F9FA; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px;">' +
+                    '<button id="trustReportCopyBtn" type="button" ' +
+                        'style="padding:10px 16px; border-radius:8px; border:0; background:#F59E0B; color:#0A0A0A; font-weight:600; cursor:pointer;">Copy</button>' +
+                '</div>' +
+                '<div style="display:flex; justify-content:space-between; gap:12px;">' +
+                    '<a href="' + reportUrl + '" target="_blank" rel="noopener" ' +
+                        'style="color:#F59E0B; text-decoration:none; font-size:13px;">Open report &rarr;</a>' +
+                    '<button id="trustReportCloseBtn" type="button" ' +
+                        'style="background:transparent; color:rgba(247,249,250,0.6); border:0; cursor:pointer; font-size:13px;">Close</button>' +
+                '</div>' +
+            '</div>';
+        document.body.appendChild(modal);
+        modal.addEventListener("click", function(ev) {
+            if (ev.target === modal) modal.parentNode.removeChild(modal);
+        });
+        document.getElementById("trustReportCloseBtn").addEventListener("click", function() {
+            modal.parentNode.removeChild(modal);
+        });
+        document.getElementById("trustReportCopyBtn").addEventListener("click", function() {
+            tryCopy(reportUrl).then(function() {
+                var btn = document.getElementById("trustReportCopyBtn");
+                if (!btn) return;
+                var orig = btn.textContent;
+                btn.textContent = "Copied";
+                setTimeout(function() { btn.textContent = orig; }, 1400);
+            });
+        });
+    }
+
+    function showUpgradePrompt() {
+        showToast(
+            "Trust Reports are a Builder-tier feature. Reserve a founding spot at /pricing.",
+            "info"
+        );
+    }
+
+    async function generateTrustReport(agentName) {
+        if (!ownerHasBuilderTier()) {
+            showUpgradePrompt();
+            return;
+        }
+        var session = (window.goulburnAuth && window.goulburnAuth.getSession)
+            ? window.goulburnAuth.getSession() : null;
+        showToast("Generating Trust Report&hellip;");
+        try {
+            var resp = await fetch(API_BASE + "/api/v1/agents/" + encodeURIComponent(agentName) + "/trust-report/generate", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Authorization": (session ? "Bearer " + session : "") }
+            });
+            if (resp.status === 402) {
+                var d = await resp.json().catch(function() { return {}; });
+                showUpgradePrompt();
+                if (window.console) console.log("trust_report.paywall", d);
+                return;
+            }
+            if (!resp.ok) {
+                var err = await resp.json().catch(function() { return {}; });
+                showToast(err.detail || ("Failed (" + resp.status + ")"), "error");
+                return;
+            }
+            var data = await resp.json();
+            showTrustReportModal(data.report_url, data.agent_name || agentName);
+        } catch (e) {
+            showToast("Network error generating report", "error");
+        }
+    }
+
+    // Delegated click handler for the agent-card Trust Report button.
+    document.addEventListener("click", function(ev) {
+        var btn = ev.target.closest && ev.target.closest("[data-action=\"trust-report\"]");
+        if (btn) {
+            var name = btn.getAttribute("data-agent");
+            if (name) generateTrustReport(name);
+            return;
+        }
+        var paywall = ev.target.closest && ev.target.closest("[data-action=\"trust-report-paywall\"]");
+        if (paywall) showUpgradePrompt();
+    });
 
     function showToast(message, type) {
         var toast = document.getElementById('toast');

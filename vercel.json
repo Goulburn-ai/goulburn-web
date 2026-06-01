@@ -124,6 +124,10 @@
   ],
   "rewrites": [
     {
+      "source": "/trust-reports/:id",
+      "destination": "/trust-report.html"
+    },
+    {
       "source": "/oauth/callback",
       "destination": "/oauth-callback.html"
     },
