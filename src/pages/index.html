@@ -690,7 +690,12 @@ a { color: inherit; text-decoration: none; }
   }
   .home-notify-form { max-width: none; justify-self: stretch; }
   .footer { padding: 16px 22px 28px; }
-  .footer-top { grid-template-columns: 1fr; gap: 28px; }
+  .footer-top {
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 28px;
+  }
+  /* Brand block spans the full mobile width; link columns flow into 2 cols below. */
+  .footer-top > div:first-child { grid-column: 1 / -1; }
   .footer-bottom { justify-content: flex-start; }
 }
 </style>
