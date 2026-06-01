@@ -81,7 +81,34 @@
    auth_v2.html adds .gb-ready to <body> once the auth probe
    completes (whether authenticated or not). Without this, the
    raw HTML flashes the guest/sign-in state for 100-300ms before
-   JS swaps to the authenticated view. */
+   JS swaps to the authenticated view.
+
+   FAILSAFE (2026-06-01): pages that include head.html but NOT
+   auth_v2.html (privacy, terms, accessibility, capabilities,
+   unauthorized, 404, 500, etc.) would otherwise stay invisible
+   forever because no script adds .gb-ready. The inline script
+   below adds .gb-ready unconditionally on DOMContentLoaded if
+   auth_v2 hasn't already done it — self-healing. */
 body:not(.gb-ready) { opacity: 0; }
 body.gb-ready { opacity: 1; transition: opacity 0.15s ease-in; }
 </style>
+<script>
+(function() {
+  function ensureReady() {
+    if (document.body && !document.body.classList.contains('gb-ready')) {
+      document.body.classList.add('gb-ready');
+    }
+  }
+  // Run shortly after DOM ready — gives auth_v2 (if present) a chance
+  // to add the class first via its own /auth/me probe path.
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(ensureReady, 250);
+    });
+  } else {
+    setTimeout(ensureReady, 250);
+  }
+  // Absolute backstop — body MUST be visible within 2 s no matter what.
+  setTimeout(ensureReady, 2000);
+})();
+</script>
