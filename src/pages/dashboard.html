@@ -719,7 +719,7 @@
     .nav-beta-pill:hover { background: #fcc24c; border-color: rgba(245, 158, 11, 0.75); }
     @media (max-width: 639.98px) { .nav-beta-pill { display: none !important; } }
     /* Hide avatar dropdown on mobile — hamburger is the single mobile
-       menu surface. Daniel 2026-05-10. */
+       menu surface. 2026-05-10. */
     @media (max-width: 767.98px) {
         #navAuth { display: none !important; }
     }
@@ -994,7 +994,7 @@
         </div>
 
         <!-- ── Operator onboarding card — Variant B (image-led, single CTA) ──
-             Daniel approved 2026-05-09 over Variant A (multi-step grid).
+             Approved 2026-05-09 over Variant A (multi-step grid).
              Single hero illustration of a stylized operator profile card
              with the four missing pieces shown as floating thumbnails
              (orange add-marker, teal bio doc, purple swatches, blue text).
@@ -4074,7 +4074,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
         // for cookie-only v2 sessions returns false during the probe window
         // (probe hasn't resolved at DOMContentLoaded). Without this await
         // the entire bottom-of-page chain (Quick Stats, Recent Activity,
-        // Recent Logins) early-returned — Daniel saw zeros despite having
+        // Recent Logins) early-returned — saw zeros despite having
         // 18 agents.
         try {
             if (typeof goulburnAuth !== 'undefined' && goulburnAuth.ready) {
@@ -4324,7 +4324,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
         // Session-expired card takes priority over the "no agents yet" empty
         // state. Without this, a stale bearer token reads as "user has zero
-        // agents" — exactly the bug Daniel hit on 2026-05-05.
+        // agents" — exactly the bug hit on 2026-05-05.
         if (window.__sessionExpired && (!agents || agents.length === 0)) {
             container.innerHTML =
                 '<div class="empty-card" style="text-align:center; padding:2.5rem 1.5rem; background:rgba(245,158,11,0.06); border:0.5px solid rgba(245,158,11,0.30); border-radius:12px;">' +
@@ -4405,7 +4405,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
 
             // 48h grace-window: if deleted_at is set and within 48h, override
             // the status pill so the card visibly shows it's pending deletion
-            // with a live countdown. Daniel: countdown was invisible on the
+            // with a live countdown. Note: countdown was invisible on the
             // dashboard for agents in the grace window.
             var _delAt = agent.deleted_at ? new Date(agent.deleted_at) : null;
             var _gracePending = false;
@@ -4580,7 +4580,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 _renderProbePreviewCard();
         }
 
-        // Probe-preview card for cold-start dashboard. Daniel's 2026-05-08
+        // Probe-preview card for cold-start dashboard. 2026-05-08
         // friction-audit follow-up: rather than asking new operators to
         // click another agent to see what probes look like, render the
         // full trust-stack zero-state on their own dashboard so the

@@ -54,7 +54,7 @@
     .nav-beta-pill:hover { background: #fcc24c; border-color: rgba(245, 158, 11, 0.75); }
     @media (max-width: 639.98px) { .nav-beta-pill { display: none !important; } }
     /* Hide avatar dropdown on mobile — hamburger is the single mobile
-       menu surface. Daniel 2026-05-10. */
+       menu surface. 2026-05-10. */
     @media (max-width: 767.98px) {
         #navAuth { display: none !important; }
     }
@@ -1864,7 +1864,7 @@
         // 2026-05-10: credentials:'include' is REQUIRED for the gb_session cookie
         // to travel cross-origin. Without it, optional_owner resolves to None
         // server-side and the agent goes into the orphan pool (no owner_id).
-        // Caught 2026-05-10 — Daniel's FlowersRus registered via this API tab
+        // Caught 2026-05-10 — operator's FlowersRus registered via this API tab
         // landed as owner=None despite him being signed in (root cause: missing
         // credentials flag here, not in the Form-tab fetch on line 3048).
         fetch(apiBase + '/api/v1/agents/register', {
@@ -2788,7 +2788,7 @@ case 3:
                 $('emailVerifyDone').style.display = 'block';
                 // Persist for survival across registration flow + ACROSS TABS.
                 // localStorage (not sessionStorage) so a tab that completed verification
-                // can notify the original tab via storage events. Daniel 2026-05-14: bug
+                // can notify the original tab via storage events. 2026-05-14: bug
                 // where user typed "Iran2026" in tab A, verified in tab B, lost form state.
                 try {
                     var _stamp = JSON.stringify({ v: 1, email: email, token: token || '', t: Date.now() });
@@ -2938,7 +2938,7 @@ case 3:
             // Expose helpers for Step 3 wire-up + debugging
             window.emailVerifyUI = { setSentState: setSentState, setDoneState: setDoneState, setFormState: setFormState };
 
-            // ── Form-field persistence (Daniel 2026-05-14 fix) ────────────────────
+            // ── Form-field persistence (2026-05-14 fix) ────────────────────
             // Persist agent_name + description + endpoint URL + declared model to
             // localStorage on every input change so a user who hit the verify-email
             // link in a new tab still sees the fields they typed in the original tab.

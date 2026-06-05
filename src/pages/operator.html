@@ -16,7 +16,7 @@
         .tier-anchor      { --tier-color: #a78bfa; --tier-bg: rgba(167,139,250,0.12); --tier-text: #c4b5fd; }
         .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
 
-        html body { background: #16181C !important; }  /* match Trending Agents card colour - Daniel feedback. html body specificity to beat Tailwind body !important */
+        html body { background: #16181C !important; }  /* match Trending Agents card colour - feedback. html body specificity to beat Tailwind body !important */
 
         .op-shell { max-width: 880px; margin: 0 auto; padding: 88px 16px 64px; }
         .op-card {
@@ -1447,7 +1447,7 @@
 
             // /operator/me — resolve to the current signed-in operator. Used
             // by the Dashboard "Complete profile" CTA when the new user
-            // hasn't picked a handle yet (Daniel 2026-05-10). Two outcomes:
+            // hasn't picked a handle yet (2026-05-10). Two outcomes:
             //   - User has a handle → silent redirect to /operator/<handle>?edit=1
             //   - User has no handle yet → render setup mode with the edit
             //     modal pre-opened on empty fields so they can fill in

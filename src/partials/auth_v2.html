@@ -39,7 +39,7 @@
 
     // ── Bearer / reg-id storage helpers (legacy + v2-cookie sentinel) ──
     //
-    // 2026-05-10 (Daniel): the sentinel below closes a class of "every CTA
+    // 2026-05-10: the sentinel below closes a class of "every CTA
     // is broken for new operators" bugs. After auth_v2 cutover, users who
     // sign in via Google OAuth or magic-link only have the HttpOnly
     // gb_session cookie — no localStorage bearer. Many legacy handlers

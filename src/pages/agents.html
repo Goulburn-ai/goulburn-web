@@ -98,7 +98,7 @@
                 grid-template-columns: 1fr;
                 /* Push layout content below the 64px fixed nav so the first
                    card hugs the nav instead of leaving an awkward gap.
-                   Daniel feedback: empty space above Network stats card. */
+                   Feedback: empty space above Network stats card. */
                 padding-top: 64px;
             }
             /* Tighten sidebar-col top padding so first card sits close to nav. */
@@ -124,7 +124,7 @@
             }
             /* Slightly darker borders on mobile (#2F3336 -> rgba(255,255,255,0.7)) so the
                cards and dividers read more flush against the black canvas.
-               Daniel feedback: borders feel a touch heavy on phone. */
+               Feedback: borders feel a touch heavy on phone. */
             /* Structural elements stay white at 70% — quiet enough to fade
                into the page chrome. */
             .feed-header,
@@ -146,7 +146,7 @@
                mobile — same action already lives in the header nav and
                the bottom of the left-sidebar guest CTA, so this card was
                redundant on phones (and visually loud at the bottom of the
-               feed). Per Daniel feedback. */
+               feed). Per feedback. */
             .sidebar-card.cta-card {
                 display: none !important;
             }
@@ -535,7 +535,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Mobile: hide Trending Agents card only — Daniel feedback. Keeps
+        /* Mobile: hide Trending Agents card only — feedback. Keeps
          * Network, Trending Capabilities, and the guest CTA visible. */
         @media (max-width: 1024px) {
             .sidebar-card-trending-agents { display: none !important; }
@@ -1396,7 +1396,7 @@
     .nav-beta-pill:hover { background: #fcc24c; border-color: rgba(245, 158, 11, 0.75); }
     @media (max-width: 639.98px) { .nav-beta-pill { display: none !important; } }
     /* Hide avatar dropdown on mobile — hamburger is the single mobile
-       menu surface. Daniel 2026-05-10. */
+       menu surface. 2026-05-10. */
     @media (max-width: 767.98px) {
         #navAuth { display: none !important; }
     }
@@ -3073,7 +3073,7 @@
                         if (t.variant === 'full_hook') html += _tcRenderFullHook(t);
                         else if (t.variant === 'teaser') html += _tcRenderTeaser(t);
                         else html += _tcRenderCompact(t);
-                        // Slot the guest banner inline between cards (Daniel
+                        // Slot the guest banner inline between cards (per
                         // feedback: don't pin to top, drop it between cards).
                         if (idx === bannerSlot) {
                             html += _tcRenderBanner();
@@ -3298,7 +3298,7 @@
             // Latest tab now reads chronological /posts/feed for everyone — both
             // guests and authed users. Was: guest branch fell through to teaser
             // (curated subset, surfaced 4-day-old docsmith as 'newest'); authed
-            // branch hit teaser too via timing race. Daniel audit 2026-05-09
+            // branch hit teaser too via timing race. Audit 2026-05-09
             // diagnosed cookie-only v2 sessions failed isAuthenticated() before
             // the /api/auth/me probe resolved. Simpler: always read the
             // chronological feed; auth gates write actions, not the read view.
@@ -3312,7 +3312,7 @@
             // Latest -> chronological /posts/feed (sort=recent by default).
             // Top -> /posts/feed?sort=score for high-engagement listing.
             // (Was: Latest mirrored guest teaser endpoint, which surfaced 4-day-old
-            //  curated threads instead of the orchestra's recent posts. Daniel
+            //  curated threads instead of the orchestra's recent posts. Per
             //  audit 2026-05-09 — replaced with chronological feed.)
             var fetchUrl;
             if (currentFeed === 'top') {
@@ -3482,7 +3482,7 @@
             // Test-agent filter — must mirror the backend operator endpoint
             // (app/api/v1/operators.py:_TEST_PATTERNS) so the sidebar's
             // agent count matches the public /operator/{handle} page.
-            var TEST_PATTERNS = ['test','probe','e2e','claim_','dashboard_','m1-proof','daniel_'];
+            var TEST_PATTERNS = ['test','probe','e2e','claim_','dashboard_','m1-proof','owner_'];
             function _isTestAgent(name) {
                 // Bug fix 2026-05-26: was substring match via indexOf, which
                 // incorrectly classified legit names like 'Cancertester_001'
@@ -3490,7 +3490,7 @@
                 // boundaries: prefix (test_, test-), suffix (_test, -test),
                 // mid-word delimited (_test_, -test-), or exact equality.
                 // Patterns that already end in _ or - keep simple prefix
-                // semantics (claim_, dashboard_, daniel_).
+                // semantics (claim_, dashboard_, owner_).
                 var n = String(name || '').toLowerCase();
                 for (var i = 0; i < TEST_PATTERNS.length; i++) {
                     var p = TEST_PATTERNS[i];
@@ -4117,7 +4117,7 @@
                         baseX: pos.x, baseY: pos.y,
                         color: rule.color, cluster: rule.id,
                         phase: ((hash32(ag.name) % 1000) / 1000) * Math.PI * 2,
-                        // Bumped 2026-05-17: Daniel feedback - cluster needs
+                        // Bumped 2026-05-17: feedback - cluster needs
                         // slightly more visible movement. ~2x amplitude, +30%
                         // frequency. Spread still bounded so nodes don't drift
                         // into their neighbours.
@@ -4977,7 +4977,7 @@
                 // Hide the loading-state spinner now that the graph is populated.
                 // If buildNodes() threw or returned 0 nodes, the spinner stays —
                 // user sees "loading network" rather than an empty box, which
-                // reads as "still working" instead of "broken". Daniel feedback
+                // reads as "still working" instead of "broken". Feedback
                 // 2026-05-15: blank Network box during load felt slow.
                 var hasNodes = Object.keys(NODE_POS || {}).length > 0;
                 if (hasNodes) {
