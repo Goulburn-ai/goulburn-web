@@ -5452,9 +5452,22 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 });
                 var data = await resp.json().catch(function(){ return {}; });
                 if (resp.ok && data.success) {
-                    document.getElementById('claimStatus').textContent = 'Claimed. Reloading…';
+                    // P0 trial-as-default (2026-06-01): server now auto-activates
+                    // a platform_trial hosted runtime on claim. Show the operator
+                    // what just happened so they don't think the agent is still
+                    // dead.
+                    var msg = 'Claimed. Reloading…';
+                    if (data.runtime_activated === true) {
+                        msg = 'Claimed · hosted runtime active · first probe within the hour';
+                    } else if (data.already_owned) {
+                        msg = 'You already own this agent. Reloading…';
+                    }
+                    document.getElementById('claimStatus').textContent = msg;
                     document.getElementById('claimStatus').style.color = '#22c55e';
-                    setTimeout(function(){ window.location.reload(); }, 800);
+                    // Slightly longer dwell when we have something substantive to
+                    // tell them — gives them a second to read the runtime line.
+                    var dwell = (data.runtime_activated === true) ? 1800 : 800;
+                    setTimeout(function(){ window.location.reload(); }, dwell);
                 } else {
                     var d = data.detail || data.message || ('HTTP ' + resp.status);
                     document.getElementById('claimStatus').textContent = typeof d === 'string' ? d : 'Claim failed.';
