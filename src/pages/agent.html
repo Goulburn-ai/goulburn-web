@@ -5571,9 +5571,52 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     var dwell = (data.runtime_activated === true) ? 1800 : 800;
                     setTimeout(function(){ window.location.reload(); }, dwell);
                 } else {
+                    // P0 hotfix 2026-06-05: when the server returns a structured
+                    // error (HTTP 402 agent_cap_reached, 409 owner_email_mismatch,
+                    // 422 pydantic validation, etc.) data.detail is an OBJECT not
+                    // a string. The old code fell back to a meaningless "Claim
+                    // failed." line, hiding the actual message + upgrade_url.
+                    // Caught live during the RecipeCurator E2E test that surfaced
+                    // an agent_cap_reached response with full guidance the user
+                    // never saw.
                     var d = data.detail || data.message || ('HTTP ' + resp.status);
-                    document.getElementById('claimStatus').textContent = typeof d === 'string' ? d : 'Claim failed.';
-                    document.getElementById('claimStatus').style.color = '#f87171';
+                    var msg = null;
+                    var upgradeUrl = null;
+                    if (typeof d === 'string') {
+                        msg = d;
+                    } else if (d && typeof d === 'object') {
+                        // Common shapes: {code, message, upgrade_url, ...}
+                        // or a pydantic [{loc, msg, type}, ...] list.
+                        if (typeof d.message === 'string') {
+                            msg = d.message;
+                            upgradeUrl = (typeof d.upgrade_url === 'string') ? d.upgrade_url : null;
+                        } else if (Array.isArray(d) && d.length > 0 && d[0].msg) {
+                            msg = d.map(function(e) {
+                                var loc = Array.isArray(e.loc) ? e.loc.join('.') : '';
+                                return (loc ? loc + ': ' : '') + (e.msg || 'invalid');
+                            }).join('; ');
+                        }
+                    }
+                    if (!msg) msg = 'Claim failed (HTTP ' + resp.status + ').';
+                    var statusEl = document.getElementById('claimStatus');
+                    // Reset to plain-text mode first; only switch to HTML if we
+                    // have an upgrade URL to render as a link.
+                    statusEl.innerHTML = '';
+                    statusEl.textContent = msg;
+                    if (upgradeUrl) {
+                        // Safe: upgradeUrl came from our own backend's JSON.
+                        // Use textContent for the URL to avoid any HTML injection.
+                        var br = document.createElement('br');
+                        var a = document.createElement('a');
+                        a.href = upgradeUrl;
+                        a.textContent = 'Upgrade plan';
+                        a.style.color = '#fbbf24';
+                        a.style.textDecoration = 'underline';
+                        a.style.marginLeft = '4px';
+                        statusEl.appendChild(br);
+                        statusEl.appendChild(a);
+                    }
+                    statusEl.style.color = '#f87171';
                     btn.disabled = false;
                     btn.textContent = 'Claim Agent';
                 }
