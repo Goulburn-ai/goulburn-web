@@ -1424,6 +1424,28 @@
                         </div>
                     </a>
 
+                    <!-- Hosted-runtime fuel-gauge banner (P1 — 2026-06-01 hosted-runtime-as-default memo).
+                         Replaces the orange "No endpoint configured" warning for owners whose agent
+                         has an active platform_trial runtime. The trial counter is operator-aggregate
+                         (lifetime 500 probes), not per-agent — but showing it on the agent page is
+                         where operators actually wonder "is my agent working?". -->
+                    <div id="hostedRuntimeFuelGauge" style="display:none; margin-bottom:14px; padding:14px 16px; background:rgba(34,197,94,0.07); border:1px solid rgba(34,197,94,0.30); border-radius:10px;">
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                            </svg>
+                            <div style="flex:1; min-width:0;">
+                                <p style="margin:0 0 4px; font-size:13px; font-weight:600; color:#22c55e;" id="fuelGaugeTitle">Hosted runtime active</p>
+                                <p style="margin:0 0 8px; font-size:12px; color:rgba(247,249,249,0.70); line-height:1.5;" id="fuelGaugeSub">First probe runs within the hour. Trust signals accumulate automatically.</p>
+                                <!-- Bar -->
+                                <div style="position:relative; height:6px; background:rgba(247,249,249,0.08); border-radius:3px; overflow:hidden;">
+                                    <div id="fuelGaugeBar" style="position:absolute; inset:0 100% 0 0; background:linear-gradient(90deg,#22c55e,#86efac); transition:right 0.6s ease;"></div>
+                                </div>
+                                <p style="margin:6px 0 0; font-size:11px; color:rgba(247,249,249,0.55); line-height:1.4;" id="fuelGaugeMeter">— / — calls remaining</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Identity card -->
                     <article class="profile-id-card">
                         <header class="profile-id-row">
@@ -4055,6 +4077,14 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             // is at the Identified-tier ceiling (no endpoint = capability ~15).
             // We don't have endpoint_url in the public response (privacy), so
             // we infer from tier + capability score.
+            //
+            // 2026-06-01 (P1 fuel-gauge): if the viewer is the owner AND this
+            // agent has a platform_trial hosted runtime, we swap the warning
+            // for a green fuel-gauge ("Hosted runtime · N / 500 calls
+            // remaining"). The trial counter is operator-aggregate but it
+            // belongs on the agent page because that's where the operator
+            // wonders "is my agent working?". See:
+            // outputs/design-notes/trial-as-default-2026-06-01.md
             try {
                 var bn = document.getElementById('endpointMissingBanner');
                 var capScore = (agent.reputation_breakdown && agent.reputation_breakdown.capability) || 0;
@@ -4095,6 +4125,78 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                         setTimeout(checkOwner, 500);
                         setTimeout(checkOwner, 1500);
                     }
+
+                    // P1 fuel-gauge swap (2026-06-01). When the owner is
+                    // confirmed AND the agent has an active hosted runtime
+                    // funded by platform_trial, hide the orange warning and
+                    // surface a green fuel-gauge instead. Runs once per page
+                    // load; bails silently on any failure (warning stays).
+                    var fuelGaugeAttempted = false;
+                    var maybeSwapFuelGauge = function() {
+                        if (fuelGaugeAttempted) return;
+                        if (!bn.classList.contains('is-owner')) return;  // not the owner — keep warning
+                        fuelGaugeAttempted = true;
+                        var gauge = document.getElementById('hostedRuntimeFuelGauge');
+                        if (!gauge) return;
+                        var name = getAgentName();
+                        if (!name) return;
+                        // Race two requests: this agent's runtime config + the
+                        // operator-wide trial counter. Both are Bearer-gated.
+                        Promise.all([
+                            fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(name) + '/runtime', {
+                                credentials: 'include',
+                                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
+                            }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }),
+                            fetch(API_BASE + '/api/v1/owner/trial', {
+                                credentials: 'include',
+                                headers: { 'Authorization': (session ? 'Bearer ' + session : '') }
+                            }).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; })
+                        ]).then(function(results) {
+                            var rt = results[0];
+                            var tr = results[1];
+                            if (!rt) return;  // no runtime — keep warning, that's correct
+                            // ANY runtime (byok or platform_trial) means the
+                            // "no endpoint configured" warning is wrong: a
+                            // runtime is a valid probe destination. Hide it.
+                            bn.style.display = 'none';
+                            // For platform_trial, show the fuel-gauge with
+                            // remaining trial probes. For byok, no gauge —
+                            // operator pays so it's not our number to show.
+                            if (rt.funded_by !== 'platform_trial') return;
+                            if (!tr) {
+                                // Trial endpoint failed — show generic active
+                                // copy without numbers rather than nothing.
+                                document.getElementById('fuelGaugeTitle').textContent = 'Hosted runtime active';
+                                document.getElementById('fuelGaugeSub').textContent = 'First probe runs within the hour. Trust signals accumulate automatically.';
+                                gauge.style.display = 'block';
+                                return;
+                            }
+                            var cap = Math.max(1, tr.probes_cap || 500);
+                            var used = Math.max(0, Math.min(cap, tr.probes_used || 0));
+                            var remaining = Math.max(0, cap - used);
+                            var pctUsed = Math.round((used / cap) * 100);
+                            var title = 'Hosted runtime active';
+                            var sub = 'First probe runs within the hour. Trust signals accumulate automatically.';
+                            if (tr.state === 'expired_grace' || tr.state === 'expired_suspended') {
+                                title = 'Trial exhausted';
+                                sub = 'Add your own LLM key or upgrade to keep probing.';
+                            } else if (used > 0) {
+                                sub = 'Operator-wide trial counter — shared across your agents.';
+                            }
+                            document.getElementById('fuelGaugeTitle').textContent = title;
+                            document.getElementById('fuelGaugeSub').textContent = sub;
+                            document.getElementById('fuelGaugeMeter').textContent = used + ' / ' + cap + ' calls used (' + remaining + ' remaining)';
+                            // bar.right shrinks from 100% (empty) → 0% (full)
+                            // We want the GREEN bar to GROW as usage rises.
+                            var bar = document.getElementById('fuelGaugeBar');
+                            if (bar) bar.style.right = (100 - pctUsed) + '%';
+                            gauge.style.display = 'block';
+                        }).catch(function(){ /* fail-silent — warning stays visible */ });
+                    };
+                    // Try right after the owner-detection retries settle.
+                    setTimeout(maybeSwapFuelGauge, 600);
+                    setTimeout(maybeSwapFuelGauge, 1600);
+
                     // Owner click → open the inline edit panel + focus the endpoint field.
                     // Non-owner click → no-op (banner is informational only).
                     bn.addEventListener('click', function(e) {
