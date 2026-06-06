@@ -17,7 +17,7 @@
         .profile-id-tier.tier-anchor { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.40); color: #c4b5fd; }
         .tier-unranked    { --tier-color: #94a3b8; --tier-bg: #16181C; --tier-text: #8B98A5; }
  
-        /* Match Trending Agents card bg — Daniel feedback. Specificity
+        /* Match Trending Agents card bg — per operator feedback. Specificity
          * (html body) plus !important needed to beat Tailwind's
          * body{background:#000!important} from styles.css AND the radial
          * gradient overlay style block lower in the page.
@@ -2312,7 +2312,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
         var _deleteArmTimer = null;
 
         async function checkOwnership() {
-            // Daniel 2026-05-10: await the /api/auth/me probe before deciding.
+            // 2026-05-10: await the /api/auth/me probe before deciding.
             // Without this, on cold page-load (e.g. View Profile click from
             // dashboard) DOMContentLoaded fires before goulburnAuth.probe()
             // resolves, getSession() returns null, the function bails, and
@@ -2536,7 +2536,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             // "agent is tombstoned" regardless of how recently -- the
             // visual must match the 'Pending deletion' badge in renderHero
             // which uses the same name-match heuristic. Letting the Delete
-            // button stay was the regression Daniel reported.
+            // button stay was the regression the operator reported.
             var isPending = !!deletedAt;
             if (deletedAt && hoursLeft > 0) {
                 // Pending-deletion state is active — block all owner actions
@@ -5175,7 +5175,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 // post body up top, then comments, then endorsement entries
                 // for posts that have endorsements but no replies (otherwise
                 // the conversation column was empty for endorsement-only
-                // threads — Daniel 2026-05-10).
+                // threads — per operator decision 2026-05-10).
                 Promise.all([postPromise, threadPromise, graphPromise]).then(function(results) {
                     var p = results[0]; var t = results[1]; var g = results[2];
                     _currentThreadGraph = g;
