@@ -4126,11 +4126,20 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                         setTimeout(checkOwner, 1500);
                     }
 
-                    // P1 fuel-gauge swap (2026-06-01). When the owner is
-                    // confirmed AND the agent has an active hosted runtime
-                    // funded by platform_trial, hide the orange warning and
-                    // surface a green fuel-gauge instead. Runs once per page
-                    // load; bails silently on any failure (warning stays).
+                    // P1 fuel-gauge swap (2026-06-01, retimed 2026-06-05 #206).
+                    // When the owner is confirmed AND the agent has an active
+                    // hosted runtime funded by platform_trial, hide the orange
+                    // warning and surface a green fuel-gauge instead. Runs at
+                    // most once per page load; bails silently on any failure
+                    // (warning stays visible — that's a safe fallback).
+                    //
+                    // Owner-detection timing: originally polled checkOwner at
+                    // 0/500/1500ms which was too tight on real prod renders
+                    // (action row renders ~1.7-2s in). We replaced the polling
+                    // with a MutationObserver on the banner element so the
+                    // moment checkOwner() succeeds and adds the is-owner class,
+                    // the observer fires the swap. Plus a 6s safety retry in
+                    // case the MutationObserver itself misses the class flip.
                     var fuelGaugeAttempted = false;
                     var maybeSwapFuelGauge = function() {
                         if (fuelGaugeAttempted) return;
@@ -4193,9 +4202,33 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                             gauge.style.display = 'block';
                         }).catch(function(){ /* fail-silent — warning stays visible */ });
                     };
-                    // Try right after the owner-detection retries settle.
-                    setTimeout(maybeSwapFuelGauge, 600);
-                    setTimeout(maybeSwapFuelGauge, 1600);
+                    // Trigger the swap the moment the banner gets is-owner
+                    // (set by checkOwner inside the existing retry loop). This
+                    // is race-free with action-row render: the observer fires
+                    // whenever the class actually flips on, regardless of how
+                    // long the render took. Disconnect after one successful
+                    // swap to avoid leaking observers.
+                    try {
+                        var classObserver = new MutationObserver(function(records) {
+                            for (var i = 0; i < records.length; i++) {
+                                if (records[i].attributeName === 'class' &&
+                                    bn.classList.contains('is-owner')) {
+                                    maybeSwapFuelGauge();
+                                    if (fuelGaugeAttempted) {
+                                        classObserver.disconnect();
+                                        return;
+                                    }
+                                }
+                            }
+                        });
+                        classObserver.observe(bn, { attributes: true, attributeFilter: ['class'] });
+                    } catch (_ob_err) { /* observer unsupported — fall through to timer */ }
+                    // Belt-and-braces: an immediate attempt (covers the case
+                    // where is-owner was already set before the observer was
+                    // attached), plus one 6s safety retry for any edge cases
+                    // where the observer fails silently.
+                    maybeSwapFuelGauge();
+                    setTimeout(maybeSwapFuelGauge, 6000);
 
                     // Owner click → open the inline edit panel + focus the endpoint field.
                     // Non-owner click → no-op (banner is informational only).
