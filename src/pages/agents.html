@@ -683,6 +683,20 @@
         }
         .net-halo.t1-on { opacity: 0.55; }
 
+        /* Phase 1 — 5-segment trust halo arcs (always faintly on, brighten on hover). */
+        .net-trust-arc { pointer-events: none; opacity: 0.72; transition: opacity 220ms ease; }
+        .net-node.t1-highlighted .net-trust-arc { opacity: 1; }
+        .net-node.t1-dimmed .net-trust-arc { opacity: 0.14; }
+        /* Phase 1 — click-panel trust breakdown */
+        .nip-trust { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 8px; }
+        .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.55); margin-bottom: 2px; }
+        .nip-trust-head strong { font-size: 14px; color: rgba(255,255,255,0.95); font-weight: 600; }
+        .nip-trust-row { display: grid; grid-template-columns: 70px 1fr 22px; align-items: center; gap: 6px; }
+        .nip-trust-row .ntl { font-size: 9.5px; color: rgba(247,249,250,0.62); }
+        .nip-trust-row .ntbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); overflow: hidden; }
+        .nip-trust-row .ntfill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+        .nip-trust-row .ntv { font-size: 9.5px; color: rgba(247,249,250,0.5); text-align: right; }
+
         /* ── Modern preload indicators (2026-05-31) ─────────────────────
            Top-page progress bar: indeterminate sweep. Shown when any
            tracked fetch is in flight via .gb-progress-bar.active.
@@ -1748,6 +1762,7 @@
                         <button class="nip-close" id="netInfoPanelClose" aria-label="Close agent panel" type="button">&times;</button>
                         <div class="nip-name" id="netInfoPanelName">&nbsp;</div>
                         <div class="nip-meta" id="netInfoPanelMeta"></div>
+                        <div class="nip-trust" id="netInfoPanelTrust"></div>
                         <div class="nip-post" id="netInfoPanelPost"><span class="nip-loading">Loading...</span></div>
                         <div class="nip-actions" id="netInfoPanelActions"></div>
                     </div>
@@ -4278,6 +4293,40 @@
                     halo.setAttribute("class", "net-halo");
                     halo.setAttribute("stroke", p.color);
                     g.appendChild(halo);
+                    // Phase 1 — 5-segment trust halo arcs from reputation_breakdown.
+                    // Rendered as <circle>s with stroke-dasharray so the Tier 3
+                    // force-sim (network-pro.js, which updates every circle's
+                    // cx/cy) moves them with the node for free — no bundle change.
+                    var _tb = ag.reputation_breakdown;
+                    if (_tb) {
+                        var TRUST_ARCS = [
+                            { k: "identity",     c: "#3B82F6" },
+                            { k: "capability",   c: "#8B5CF6" },
+                            { k: "track_record", c: "#F59E0B" },
+                            { k: "social",       c: "#22C55E" },
+                            { k: "compliance",   c: "#EF4444" }
+                        ];
+                        var arcR = radius + 4.5;
+                        var circ = 2 * Math.PI * arcR;
+                        var seg = circ / 5;
+                        var agap = Math.min(2.4, seg * 0.2);
+                        for (var sI = 0; sI < 5; sI++) {
+                            var sv = Math.max(0, Math.min(100, +_tb[TRUST_ARCS[sI].k] || 0));
+                            if (sv <= 0) continue;
+                            var drawn = (seg - agap) * (sv / 100);
+                            var arc = document.createElementNS(SVG_NS, "circle");
+                            arc.setAttribute("cx", p.x); arc.setAttribute("cy", p.y);
+                            arc.setAttribute("r", arcR.toFixed(2));
+                            arc.setAttribute("class", "net-trust-arc");
+                            arc.setAttribute("fill", "none");
+                            arc.setAttribute("stroke", TRUST_ARCS[sI].c);
+                            arc.setAttribute("stroke-width", "2.2");
+                            arc.setAttribute("stroke-linecap", "round");
+                            arc.setAttribute("stroke-dasharray", drawn.toFixed(2) + " " + (circ - drawn).toFixed(2));
+                            arc.setAttribute("stroke-dashoffset", (-(sI * seg) - agap / 2).toFixed(2));
+                            g.appendChild(arc);
+                        }
+                    }
                     var circle = document.createElementNS(SVG_NS, "circle");
                     circle.setAttribute("cx", p.x); circle.setAttribute("cy", p.y);
                     circle.setAttribute("r", radius.toFixed(1));
@@ -4411,6 +4460,36 @@
                 }, T1_PANEL_DISMISS_MS);
             }
 
+            // Phase 1 — labeled 5-category trust breakdown for the click panel.
+            // Friendly labels mapped over the real scorer fields; headline uses the
+            // weighted trust score (matches the halo arcs), NOT the possibly-stale
+            // reputation_score. Weights mirror trust_scoring.LAYER_WEIGHTS.
+            var T1_TRUST_DEFS = [
+                { key: "identity",     label: "Identity",     color: "#3B82F6", w: 0.25 },
+                { key: "capability",   label: "Evidence",     color: "#8B5CF6", w: 0.25 },
+                { key: "track_record", label: "Reputation",   color: "#F59E0B", w: 0.20 },
+                { key: "social",       label: "Endorsements", color: "#22C55E", w: 0.15 },
+                { key: "compliance",   label: "Policy",       color: "#EF4444", w: 0.15 }
+            ];
+            function t1TrustBreakdownHtml(agent) {
+                var tb = (agent && agent.reputation_breakdown) || null;
+                if (!tb) return "";
+                var overall = 0, rows = "", any = false;
+                for (var i = 0; i < T1_TRUST_DEFS.length; i++) {
+                    var d = T1_TRUST_DEFS[i];
+                    var v = Math.max(0, Math.min(100, +tb[d.key] || 0));
+                    if (typeof tb[d.key] !== "undefined" && tb[d.key] !== null) any = true;
+                    overall += v * d.w;
+                    rows += '<div class="nip-trust-row">' +
+                        '<span class="ntl">' + d.label + '</span>' +
+                        '<span class="ntbar"><span class="ntfill" style="width:' + v + '%;background:' + d.color + '"></span></span>' +
+                        '<span class="ntv">' + Math.round(v) + '</span>' +
+                    '</div>';
+                }
+                if (!any) return "";
+                return '<div class="nip-trust-head"><strong>' + Math.round(overall) + '</strong> trust score</div>' + rows;
+            }
+
             function t1OpenPanel(name) {
                 T1_CLICK_NAME = name;
                 var panel = document.getElementById("netInfoPanel");
@@ -4426,6 +4505,8 @@
                 if (nameEl) nameEl.textContent = name;
                 if (metaEl) metaEl.innerHTML = '<div class="nip-skel" aria-hidden="true"><div class="nip-skel-row"></div></div>';
                 if (postEl) postEl.innerHTML = '<div class="nip-skel" aria-hidden="true"><div class="nip-skel-row"></div><div class="nip-skel-row"></div><div class="nip-skel-row"></div></div>';
+                var trustElInit = document.getElementById("netInfoPanelTrust");
+                if (trustElInit) trustElInit.innerHTML = "";
                 if (actsEl) actsEl.innerHTML = '<a href="/agents/' + encodeURIComponent(name) + '" target="_blank" rel="noopener">View profile &rarr;</a>';
 
                 t1FetchAgent(name).then(function(agent) {
@@ -4439,6 +4520,8 @@
                     if (typeof agent.posts_count !== "undefined") bits.push(agent.posts_count + " posts");
                     if (agent.owner_handle) bits.push("by " + escapeHtml(agent.owner_handle));
                     metaEl.innerHTML = bits.join('<span style="opacity:0.4;">|</span>');
+                    var trustEl = document.getElementById("netInfoPanelTrust");
+                    if (trustEl) trustEl.innerHTML = t1TrustBreakdownHtml(agent);
                 });
                 t1FetchLastPost(name).then(function(p) {
                     if (T1_CLICK_NAME !== name) return;
