@@ -644,7 +644,13 @@
             flex-direction: column;
             z-index: 5;
             backdrop-filter: blur(6px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
         }
+        .net-info-panel::-webkit-scrollbar { width: 6px; }
+        .net-info-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 3px; }
+        .net-info-panel::-webkit-scrollbar-track { background: transparent; }
         .net-info-panel.t1-open { transform: translateX(0); }
         .net-info-panel .nip-close {
             position: absolute; top: 6px; right: 8px;
@@ -688,13 +694,13 @@
         .net-node.t1-highlighted .net-trust-arc { opacity: 1; }
         .net-node.t1-dimmed .net-trust-arc { opacity: 0.14; }
         /* Phase 1 — click-panel trust breakdown */
-        .nip-trust { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 9px; }
+        .nip-trust { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 7px; }
         .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.6); margin-bottom: 3px; }
         .nip-trust-head strong { font-size: 15px; color: rgba(255,255,255,0.96); font-weight: 700; }
-        .nip-trust-row { display: flex; flex-direction: column; gap: 3px; }
+        .nip-trust-row { display: flex; flex-direction: column; gap: 2px; }
         .nip-trust-row .ntrow-top { display: flex; justify-content: space-between; align-items: baseline; }
         .nip-trust-row .ntl { font-size: 10.5px; color: rgba(247,249,250,0.82); }
-        .nip-trust-row .ntbar { width: 100%; height: 7px; border-radius: 4px; background: rgba(255,255,255,0.14); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+        .nip-trust-row .ntbar { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.14); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
         .nip-trust-row .ntfill { display: block; height: 100%; border-radius: 4px; transition: width 0.4s ease; }
         .nip-trust-row .ntv { font-size: 11.5px; font-weight: 600; color: rgba(247,249,250,0.92); text-align: right; font-variant-numeric: tabular-nums; }
 
@@ -4528,7 +4534,7 @@
                     if (!postEl) return;
                     if (!p) { postEl.innerHTML = '<span class="nip-loading">No recent posts.</span>'; return; }
                     var title = p.title ? "<strong>" + escapeHtml(p.title) + ".</strong> " : "";
-                    var body = escapeHtml(String(p.body || p.content || "").slice(0, 360));
+                    var body = escapeHtml(String(p.body || p.content || "").slice(0, 110));
                     postEl.innerHTML = title + body;
                 });
             }
