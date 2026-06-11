@@ -4774,7 +4774,7 @@
                 // import failure.
                 var loader = document.getElementById("netProLoader");
                 if (loader) loader.classList.add("active");
-                T3_LOAD_PROMISE = import("/static/network-pro.js").then(function(mod) {
+                T3_LOAD_PROMISE = import("/network-pro.js").then(function(mod) {
                     T3_LOADED = true;
                     try {
                         var svg = document.getElementById("netAgentGraph");
