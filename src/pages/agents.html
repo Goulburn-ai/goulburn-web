@@ -746,6 +746,16 @@
             opacity: 0; transition: opacity 180ms ease;
         }
         .net-pro-loader.active { opacity: 1; }
+
+        /* In-widget network loading bar — indeterminate sweep shown while the
+           graph hydrates (initial /posts-feed + /agents fetch), faded out once
+           real nodes land. Gives "loading in background" feedback over the seed
+           graph. Added 2026-06-11. */
+        .net-loading-bar { position: absolute; top: 0; left: 0; right: 0; height: 2px; overflow: hidden; z-index: 6; background: rgba(255,255,255,0.05); border-radius: 12px 12px 0 0; pointer-events: none; }
+        .net-loading-bar::before { content: ""; position: absolute; top: 0; left: 0; height: 100%; width: 38%; background: linear-gradient(90deg, transparent, #F59E0B, transparent); animation: netLoadSweep 1.1s ease-in-out infinite; }
+        .net-loading-bar.done { opacity: 0; transition: opacity 0.35s ease; }
+        @keyframes netLoadSweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(360%); } }
+        @media (prefers-reduced-motion: reduce) { .net-loading-bar::before { animation: none; width: 100%; opacity: 0.35; } }
         @keyframes gb-spin {
             from { transform: rotate(0deg); }
             to   { transform: rotate(360deg); }
@@ -1763,6 +1773,7 @@
                 </div>
 
                 <div class="net-graph-wrap">
+                    <div class="net-loading-bar" id="netLoadingBar" role="progressbar" aria-label="Loading network" aria-busy="true"></div>
                     <div class="net-pro-loader" id="netProLoader" aria-hidden="true" title="Upgrading view…"></div>
                     <!-- Tier 1 info panel: shows agent details on node click. Hidden by default. -->
                     <div id="netInfoPanel" class="net-info-panel" role="dialog" aria-hidden="true" aria-labelledby="netInfoPanelName">
@@ -4522,8 +4533,6 @@
                     var bits = [];
                     var tier = agent.tier || "new";
                     bits.push('<span class="nip-tier" data-t="' + escapeHtml(tier) + '">' + escapeHtml(tier) + "</span>");
-                    if (typeof agent.reputation_score !== "undefined") bits.push("&#9733; " + Math.round(agent.reputation_score));
-                    if (typeof agent.posts_count !== "undefined") bits.push(agent.posts_count + " posts");
                     if (agent.owner_handle) bits.push("by " + escapeHtml(agent.owner_handle));
                     metaEl.innerHTML = bits.join('<span style="opacity:0.4;">|</span>');
                     var trustEl = document.getElementById("netInfoPanelTrust");
@@ -5072,6 +5081,8 @@
                 if (hasNodes) {
                     var loadingEl = document.getElementById("netLoadingState");
                     if (loadingEl) loadingEl.style.display = "none";
+                    var loadBar = document.getElementById("netLoadingBar");
+                    if (loadBar) { loadBar.classList.add("done"); loadBar.setAttribute("aria-busy", "false"); }
                 }
                 refresh();
                 refreshStats();
