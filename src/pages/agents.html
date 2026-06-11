@@ -688,14 +688,14 @@
         .net-node.t1-highlighted .net-trust-arc { opacity: 1; }
         .net-node.t1-dimmed .net-trust-arc { opacity: 0.14; }
         /* Phase 1 — click-panel trust breakdown */
-        .nip-trust { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 8px; }
-        .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.55); margin-bottom: 2px; }
-        .nip-trust-head strong { font-size: 14px; color: rgba(255,255,255,0.95); font-weight: 600; }
-        .nip-trust-row { display: grid; grid-template-columns: 70px 1fr 22px; align-items: center; gap: 6px; }
-        .nip-trust-row .ntl { font-size: 9.5px; color: rgba(247,249,250,0.62); }
-        .nip-trust-row .ntbar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); overflow: hidden; }
-        .nip-trust-row .ntfill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
-        .nip-trust-row .ntv { font-size: 9.5px; color: rgba(247,249,250,0.5); text-align: right; }
+        .nip-trust { display: flex; flex-direction: column; gap: 6px; margin: 8px 0 9px; }
+        .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.6); margin-bottom: 3px; }
+        .nip-trust-head strong { font-size: 15px; color: rgba(255,255,255,0.96); font-weight: 700; }
+        .nip-trust-row { display: grid; grid-template-columns: 78px 1fr 28px; align-items: center; gap: 7px; }
+        .nip-trust-row .ntl { font-size: 10.5px; color: rgba(247,249,250,0.82); }
+        .nip-trust-row .ntbar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.14); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
+        .nip-trust-row .ntfill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+        .nip-trust-row .ntv { font-size: 12px; font-weight: 600; color: rgba(247,249,250,0.92); text-align: right; font-variant-numeric: tabular-nums; }
 
         /* ── Modern preload indicators (2026-05-31) ─────────────────────
            Top-page progress bar: indeterminate sweep. Shown when any
@@ -4300,11 +4300,11 @@
                     var _tb = ag.reputation_breakdown;
                     if (_tb) {
                         var TRUST_ARCS = [
-                            { k: "identity",     c: "#3B82F6" },
-                            { k: "capability",   c: "#8B5CF6" },
-                            { k: "track_record", c: "#F59E0B" },
-                            { k: "social",       c: "#22C55E" },
-                            { k: "compliance",   c: "#EF4444" }
+                            { k: "identity",     c: "#60A5FA" },
+                            { k: "capability",   c: "#A78BFA" },
+                            { k: "track_record", c: "#FBBF24" },
+                            { k: "social",       c: "#4ADE80" },
+                            { k: "compliance",   c: "#F87171" }
                         ];
                         var arcR = radius + 4.5;
                         var circ = 2 * Math.PI * arcR;
@@ -4465,11 +4465,11 @@
             // weighted trust score (matches the halo arcs), NOT the possibly-stale
             // reputation_score. Weights mirror trust_scoring.LAYER_WEIGHTS.
             var T1_TRUST_DEFS = [
-                { key: "identity",     label: "Identity",     color: "#3B82F6", w: 0.25 },
-                { key: "capability",   label: "Evidence",     color: "#8B5CF6", w: 0.25 },
-                { key: "track_record", label: "Reputation",   color: "#F59E0B", w: 0.20 },
-                { key: "social",       label: "Endorsements", color: "#22C55E", w: 0.15 },
-                { key: "compliance",   label: "Policy",       color: "#EF4444", w: 0.15 }
+                { key: "identity",     label: "Identity",     color: "#60A5FA", w: 0.25 },
+                { key: "capability",   label: "Evidence",     color: "#A78BFA", w: 0.25 },
+                { key: "track_record", label: "Reputation",   color: "#FBBF24", w: 0.20 },
+                { key: "social",       label: "Endorsements", color: "#4ADE80", w: 0.15 },
+                { key: "compliance",   label: "Policy",       color: "#F87171", w: 0.15 }
             ];
             function t1TrustBreakdownHtml(agent) {
                 var tb = (agent && agent.reputation_breakdown) || null;
@@ -4482,7 +4482,7 @@
                     overall += v * d.w;
                     rows += '<div class="nip-trust-row">' +
                         '<span class="ntl">' + d.label + '</span>' +
-                        '<span class="ntbar"><span class="ntfill" style="width:' + v + '%;background:' + d.color + '"></span></span>' +
+                        '<span class="ntbar"><span class="ntfill" style="width:' + v + '%;' + (v>0?'min-width:3px;':'') + 'background:' + d.color + '"></span></span>' +
                         '<span class="ntv">' + Math.round(v) + '</span>' +
                     '</div>';
                 }
