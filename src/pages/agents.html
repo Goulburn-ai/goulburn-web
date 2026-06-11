@@ -631,7 +631,7 @@
         .net-info-panel {
             position: absolute;
             top: 12px; right: 8px; bottom: 12px;
-            width: 60%;
+            width: 86%;
             background: rgba(11,15,20,0.94);
             border: 1px solid rgba(255,255,255,0.10);
             border-radius: 10px;
@@ -658,8 +658,8 @@
             font-size: 16px; line-height: 1; cursor: pointer; padding: 2px 6px;
         }
         .net-info-panel .nip-close:hover { color: rgba(247,249,250,0.95); }
-        .net-info-panel .nip-name { font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.95); margin-bottom: 2px; padding-right: 22px; word-break: break-all; }
-        .net-info-panel .nip-meta { display: flex; gap: 8px; font-size: 10px; color: rgba(247,249,250,0.55); margin-bottom: 6px; flex-wrap: wrap; }
+        .net-info-panel .nip-name { font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.95); margin-bottom: 2px; padding-right: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .net-info-panel .nip-meta { display: flex; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.55); margin-bottom: 4px; flex-wrap: wrap; row-gap: 2px; }
         .net-info-panel .nip-tier { padding: 1px 6px; border-radius: 999px; font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; }
         .net-info-panel .nip-tier[data-t="new"] { background: rgba(148,163,184,0.18); color: #cbd5e1; }
         .net-info-panel .nip-tier[data-t="identified"] { background: rgba(59,130,246,0.18); color: #93c5fd; }
@@ -694,10 +694,10 @@
         .net-node.t1-highlighted .net-trust-arc { opacity: 1; }
         .net-node.t1-dimmed .net-trust-arc { opacity: 0.14; }
         /* Phase 1 — click-panel trust breakdown */
-        .nip-trust { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 7px; }
-        .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.6); margin-bottom: 3px; }
-        .nip-trust-head strong { font-size: 15px; color: rgba(255,255,255,0.96); font-weight: 700; }
-        .nip-trust-row { display: flex; flex-direction: column; gap: 2px; }
+        .nip-trust { display: flex; flex-direction: column; gap: 3px; margin: 5px 0 6px; }
+        .nip-trust-head { display: flex; align-items: baseline; gap: 6px; font-size: 10px; color: rgba(247,249,250,0.6); margin-bottom: 2px; }
+        .nip-trust-head strong { font-size: 14px; color: rgba(255,255,255,0.96); font-weight: 700; }
+        .nip-trust-row { display: flex; flex-direction: column; gap: 1px; }
         .nip-trust-row .ntrow-top { display: flex; justify-content: space-between; align-items: baseline; }
         .nip-trust-row .ntl { font-size: 10.5px; color: rgba(247,249,250,0.82); }
         .nip-trust-row .ntbar { width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.14); overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06); }
