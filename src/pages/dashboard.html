@@ -755,7 +755,7 @@
                 <!-- Unauthenticated -->
                 <div id="navGuest" class="flex items-center gap-3">
                     <a href="/sign-in" class="hidden sm:inline-block text-sm font-medium text-dark-600 hover:text-dark-900 transition-colors">Sign In</a>
-                    <a href="/agents/register" class="hidden sm:inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Register Your Agent</a>
+                    <a href="/agents/register" class="hidden sm:inline-flex items-center px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">Get your agent verified</a>
                 </div>
                 <!-- Authenticated: avatar -> dropdown menu -->
                 <div id="navAuth" class="hidden relative flex items-center gap-2" style="display:none;">
@@ -810,7 +810,7 @@
         <!-- Mobile menu -->
         <div id="mobileMenu" class="hidden md:hidden border-t border-dark-200 px-6 py-4 flex flex-col gap-3 bg-dark-100">
             <a href="/how-it-works" class="text-sm text-dark-600 hover:text-dark-900">How It Works</a>
-            <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900" id="mobileNavRegisterLink">Register Your Agent</a>
+            <a href="/agents/register" class="text-sm text-dark-600 hover:text-dark-900" id="mobileNavRegisterLink">Get your agent verified</a>
             <div id="mobileGuest">
                 <a href="/sign-in" class="text-sm text-dark-600 hover:text-dark-900 block py-1">Sign In</a>
             </div>
@@ -3332,7 +3332,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                         if (window.__sessionExpired) {
                             p2.innerHTML='Your session expired. <a href="/sign-in?redirect=' + encodeURIComponent(location.pathname + location.search) + '" style="color:#F59E0B;">Sign in again</a> to see your agents.';
                         } else {
-                            p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Register your first agent</a> to start building trust.';
+                            p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Get your first agent verified</a> to start building trust.';
                         }
                     }
                     return;
@@ -3407,7 +3407,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 <span class="count-badge" id="agentCount">0</span>
             </h2>
             <div class="section-actions">
-                <a href="/agents/register" class="btn btn-primary">+ Register New Agent</a>
+                <a href="/agents/register" class="btn btn-primary">+ Get a new agent verified</a>
             </div>
         </div>
 
@@ -3551,7 +3551,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 <h4 class="text-sm font-semibold text-dark-900 mb-3">Platform</h4>
                 <div class="flex flex-col gap-2">
                     <a href="/agents" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Explore Agents</a>
-                    <a href="/agents/register" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Register Agent</a>
+                    <a href="/agents/register" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Get your agent verified</a>
                     <a href="/pricing" class="text-sm text-dark-500 hover:text-dark-900 transition-colors">Upgrade</a>
                 </div>
             </div>
@@ -4622,7 +4622,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 probeRow('#3B82F6', 'Peer endorsements', '0') +
                 '<div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(247,249,249,0.06); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">' +
                     '<span style="color:rgba(247,249,249,0.5); font-size:0.8125rem;">Probes start within minutes of registration. Trust score rebuilds itself from real signals.</span>' +
-                    '<a href="/agents/register" style="padding:8px 16px; background:#F59E0B; color:#0A0A0A; text-decoration:none; border-radius:8px; font-size:0.8125rem; font-weight:600; white-space:nowrap;">Register your first agent →</a>' +
+                    '<a href="/agents/register" style="padding:8px 16px; background:#F59E0B; color:#0A0A0A; text-decoration:none; border-radius:8px; font-size:0.8125rem; font-weight:600; white-space:nowrap;">Get your first agent verified →</a>' +
                 '</div>' +
             '</div>';
         }

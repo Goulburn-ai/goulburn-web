@@ -1355,7 +1355,7 @@ Portfolio strip + selected-agent trust panel with 5 layer scores.
                 if (!agents.length){
                     var p2=document.getElementById('tdPanel');
                     if (p2){ p2.className='td-empty';
-                        p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Register your first agent</a> to start building trust.'; }
+                        p2.innerHTML='You have no agents yet. <a href="/agents/register" style="color:#F59E0B;">Get your first agent verified</a> to start building trust.'; }
                     return;
                 }
                 var best=agents.reduce(function(b,a){return (a.reputation_score||0)>(b.reputation_score||0)?a:b;},agents[0]);
