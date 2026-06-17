@@ -23,7 +23,7 @@
 // can show a 'New version available — Refresh' toast that postMessages
 // SKIP_WAITING when the user clicks.
 
-const VERSION = 'c-2026-06-14-9';  // network-first for all HTML pages (flash fix)
+const VERSION = 'c-2026-06-14-10';  // network-first for all HTML pages (flash fix)
 const SHELL = `goulburn-shell-${VERSION}`;
 const PAGES = `goulburn-pages-${VERSION}`;
 const API = `goulburn-api-${VERSION}`;

@@ -39,7 +39,7 @@
     { head: "Get your agent verified.",               sub: "Free to register — no card required." }
   ];
   // Scene durations (ms), trimmed ~20% for a snappier pace. Last scene holds.
-  var DUR = [9000, 8500, 9500, 10500, 8500, Infinity];
+  var DUR = [4200, 4200, 5000, 5800, 4600, Infinity];
 
   // ========================================================================
   // SVG scene art
@@ -200,7 +200,7 @@
   ".gt-art{position:relative;flex:1;min-height:300px;display:flex;align-items:center;justify-content:center;padding:18px 18px 4px;}" +
   ".gt-art::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(245,158,11,.07),transparent 62%);}" +
   ".gt-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;" +
-  "padding:18px 24px;opacity:0;visibility:hidden;transform:translateY(10px) scale(.99);transition:opacity .42s " + E1 + ",transform .42s " + E1 + ",visibility .42s;}" +
+  "padding:18px 24px;opacity:0;visibility:hidden;transform:translateY(10px) scale(.99);transition:opacity .34s " + E1 + ",transform .34s " + E1 + ",visibility .34s;}" +
   ".gt-scene.gt-active{opacity:1;visibility:visible;transform:none;}" +
   ".gt-art-svg{width:100%;max-width:560px;max-height:300px;height:auto;}" +
   ".gt-art-svg.gt-ring{max-width:330px;filter:drop-shadow(0 0 10px rgba(245,158,11,.12));}" +
@@ -223,13 +223,13 @@
   ".gt-legend{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin-top:2px;}" +
   ".gt-leg{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:" + C.text2 + ";opacity:0;transform:translateY(5px);}" +
   ".gt-dot{width:9px;height:9px;border-radius:2px;display:inline-block;box-shadow:0 0 6px currentColor;}" +
-  ".gt-scene.gt-active .gt-leg{animation:gtFadeUp .5s " + E1 + " forwards;}" +
-  ".gt-active .gt-leg0{animation-delay:.45s}.gt-active .gt-leg1{animation-delay:.66s}.gt-active .gt-leg2{animation-delay:.87s}.gt-active .gt-leg3{animation-delay:1.08s}.gt-active .gt-leg4{animation-delay:1.29s}" +
+  ".gt-scene.gt-active .gt-leg{animation:gtFadeUp .42s " + E1 + " forwards;}" +
+  ".gt-active .gt-leg0{animation-delay:.3s}.gt-active .gt-leg1{animation-delay:.46s}.gt-active .gt-leg2{animation-delay:.62s}.gt-active .gt-leg3{animation-delay:.78s}.gt-active .gt-leg4{animation-delay:.94s}" +
   ".gt-trigger{cursor:pointer;}" +
   // entrances
   ".gt-pop{opacity:0;transform:translateY(10px) scale(.62);transform-box:fill-box;transform-origin:center;}" +
-  ".gt-scene.gt-active .gt-pop{animation:gtPop .5s " + SPR + " forwards;}" +
-  ".gt-d0{animation-delay:.04s}.gt-d1{animation-delay:.12s}.gt-d2{animation-delay:.2s}.gt-d3{animation-delay:.28s}.gt-d4{animation-delay:.36s}.gt-d5{animation-delay:.44s}.gt-d6{animation-delay:.52s}" +
+  ".gt-scene.gt-active .gt-pop{animation:gtPop .42s " + SPR + " forwards;}" +
+  ".gt-d0{animation-delay:.03s}.gt-d1{animation-delay:.09s}.gt-d2{animation-delay:.15s}.gt-d3{animation-delay:.21s}.gt-d4{animation-delay:.27s}.gt-d5{animation-delay:.33s}.gt-d6{animation-delay:.39s}" +
   ".gt-float{transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-f0{animation:gtFloat 4.4s ease-in-out infinite .3s}.gt-scene.gt-active .gt-f1{animation:gtFloat 5.2s ease-in-out infinite .6s}" +
   ".gt-scene.gt-active .gt-f2{animation:gtFloat 4.8s ease-in-out infinite .1s}.gt-scene.gt-active .gt-f3{animation:gtFloat 5.6s ease-in-out infinite .4s}" +
@@ -238,28 +238,28 @@
   ".gt-scene.gt-active .gt-breathe{animation:gtBreathe 3.2s ease-in-out infinite;}" +
   ".gt-claim{opacity:0;transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-claim{animation:gtPopIn .42s " + SPR + " forwards;}" +
-  ".gt-active .gt-cd0{animation-delay:.15s}.gt-active .gt-cd1{animation-delay:.38s}.gt-active .gt-cd2{animation-delay:.61s}.gt-active .gt-cd3{animation-delay:.84s}" +
+  ".gt-active .gt-cd0{animation-delay:.1s}.gt-active .gt-cd1{animation-delay:.28s}.gt-active .gt-cd2{animation-delay:.46s}.gt-active .gt-cd3{animation-delay:.64s}" +
   ".gt-strike{stroke-dasharray:100;stroke-dashoffset:100;}" +
-  ".gt-scene.gt-active .gt-strike{animation:gtDraw .38s " + E1 + " forwards 1.7s;}" +
+  ".gt-scene.gt-active .gt-strike{animation:gtDraw .38s " + E1 + " forwards 1.2s;}" +
   // scene 3
   ".gt-probe{opacity:0;filter:drop-shadow(0 0 7px rgba(245,158,11,.95));}" +
-  ".gt-scene.gt-active .gt-probe{animation:gtProbe 1.3s " + SMO + " forwards .8s;}" +
-  ".gt-req,.gt-res{opacity:0;}.gt-scene.gt-active .gt-req{animation:gtFade .4s ease forwards .8s;}" +
-  ".gt-scene.gt-active .gt-res{animation:gtFade .4s ease forwards 1.7s;}" +
+  ".gt-scene.gt-active .gt-probe{animation:gtProbe 1s " + SMO + " forwards .5s;}" +
+  ".gt-req,.gt-res{opacity:0;}.gt-scene.gt-active .gt-req{animation:gtFade .4s ease forwards .5s;}" +
+  ".gt-scene.gt-active .gt-res{animation:gtFade .4s ease forwards 1.2s;}" +
   ".gt-ripple{opacity:0;transform-box:fill-box;transform-origin:center;}" +
-  ".gt-scene.gt-active .gt-ripple{animation:gtRipple .7s ease-out 2.1s;}" +
+  ".gt-scene.gt-active .gt-ripple{animation:gtRipple .7s ease-out 1.5s;}" +
   ".gt-check{opacity:0;transform-box:fill-box;transform-origin:center;}" +
-  ".gt-scene.gt-active .gt-check{animation:gtPop .5s " + SPR + " forwards 2.2s;}" +
+  ".gt-scene.gt-active .gt-check{animation:gtPop .42s " + SPR + " forwards 1.7s;}" +
   // scene 4 arcs
   ".gt-arc{stroke-dasharray:100;stroke-dashoffset:100;}" +
-  ".gt-scene.gt-active .gt-arc{animation:gtDraw .7s " + SMO + " forwards;}" +
-  ".gt-active .gt-a0{animation-delay:.22s}.gt-active .gt-a1{animation-delay:.44s}.gt-active .gt-a2{animation-delay:.66s}.gt-active .gt-a3{animation-delay:.88s}.gt-active .gt-a4{animation-delay:1.1s}" +
-  ".gt-scene.gt-active .gt-core{animation:gtPop .5s " + SPR + " forwards,gtCore 1s ease 1.7s;}" +
+  ".gt-scene.gt-active .gt-arc{animation:gtDraw .55s " + SMO + " forwards;}" +
+  ".gt-active .gt-a0{animation-delay:.15s}.gt-active .gt-a1{animation-delay:.3s}.gt-active .gt-a2{animation-delay:.45s}.gt-active .gt-a3{animation-delay:.6s}.gt-active .gt-a4{animation-delay:.75s}" +
+  ".gt-scene.gt-active .gt-core{animation:gtPop .42s " + SPR + " forwards,gtCore .9s ease 1.3s;}" +
   // scene 5 links
   ".gt-link{stroke-dashoffset:100;opacity:.9;}" +
-  ".gt-scene.gt-active .gt-link{animation:gtDraw .6s " + E1 + " forwards;}" +
-  ".gt-active .gt-ld0{animation-delay:.32s}.gt-active .gt-ld1{animation-delay:.5s}.gt-active .gt-ld2{animation-delay:.68s}.gt-active .gt-ld3{animation-delay:.86s}.gt-active .gt-ld4{animation-delay:1.04s}" +
-  ".gt-fullring{stroke-dashoffset:440;}.gt-scene.gt-active .gt-fullring{animation:gtRing 1.1s " + E1 + " forwards .25s;}" +
+  ".gt-scene.gt-active .gt-link{animation:gtDraw .5s " + E1 + " forwards;}" +
+  ".gt-active .gt-ld0{animation-delay:.22s}.gt-active .gt-ld1{animation-delay:.36s}.gt-active .gt-ld2{animation-delay:.5s}.gt-active .gt-ld3{animation-delay:.64s}.gt-active .gt-ld4{animation-delay:.78s}" +
+  ".gt-fullring{stroke-dashoffset:440;}.gt-scene.gt-active .gt-fullring{animation:gtRing .9s " + E1 + " forwards .2s;}" +
   "@keyframes gtPop{to{opacity:1;transform:none;}}" +
   "@keyframes gtPopIn{0%{opacity:0;transform:translateY(6px) scale(.8)}to{opacity:1;transform:none}}" +
   "@keyframes gtFade{to{opacity:1;}}" +
@@ -308,7 +308,7 @@
     root.className = "gt-root";
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
-    root.setAttribute("aria-label", "How goulburn works — a 60 second tour");
+    root.setAttribute("aria-label", "How goulburn works — a 30 second tour");
 
     var prog = '<div class="gt-prog">';
     for (var i = 0; i < SCENES.length; i++) prog += '<button class="gt-seg" data-i="' + i + '" aria-label="Go to step ' + (i + 1) + '"><span class="gt-seg-fill"></span></button>';
@@ -365,7 +365,7 @@
     if (!el) return;
     el.textContent = "0";
     if (reduce) { el.textContent = SCORE; return; }
-    var t0 = null, dur = 1300, delay = 400, started = null, raf = 0;
+    var t0 = null, dur = 1000, delay = 250, started = null, raf = 0;
     function ease(p) { return 1 - Math.pow(1 - p, 3); }
     function step(ts) {
       if (idx !== 3) return;
