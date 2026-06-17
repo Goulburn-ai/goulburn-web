@@ -200,8 +200,8 @@
   ".gt-art{position:relative;flex:1;min-height:300px;display:flex;align-items:center;justify-content:center;padding:18px 18px 4px;}" +
   ".gt-art::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(245,158,11,.07),transparent 62%);}" +
   ".gt-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;" +
-  "padding:18px 24px;opacity:0;visibility:hidden;transform:translateY(10px) scale(.99);transition:opacity .28s " + E1 + ",transform .28s " + E1 + ",visibility .28s;}" +
-  ".gt-scene.gt-active{opacity:1;visibility:visible;transform:none;}" +
+  "padding:18px 24px;opacity:0;visibility:hidden;transform:scale(.99);filter:blur(7px);transition:opacity .55s " + E1 + ",transform .55s " + E1 + ",filter .55s " + E1 + ",visibility .55s;}" +
+  ".gt-scene.gt-active{opacity:1;visibility:visible;transform:none;filter:blur(0);}" +
   ".gt-art-svg{width:100%;max-width:560px;max-height:300px;height:auto;}" +
   ".gt-art-svg.gt-ring{max-width:330px;filter:drop-shadow(0 0 10px rgba(245,158,11,.12));}" +
   ".gt-lift{filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));}" +
@@ -227,8 +227,8 @@
   ".gt-active .gt-leg0{animation-delay:.2s}.gt-active .gt-leg1{animation-delay:.32s}.gt-active .gt-leg2{animation-delay:.44s}.gt-active .gt-leg3{animation-delay:.56s}.gt-active .gt-leg4{animation-delay:.68s}" +
   ".gt-trigger{cursor:pointer;}" +
   // entrances
-  ".gt-pop{opacity:0;transform:translateY(10px) scale(.62);transform-box:fill-box;transform-origin:center;}" +
-  ".gt-scene.gt-active .gt-pop{animation:gtPop .42s " + SPR + " forwards;}" +
+  ".gt-pop{opacity:0;transform:scale(.84);transform-box:fill-box;transform-origin:center;}" +
+  ".gt-scene.gt-active .gt-pop{animation:gtPop .5s " + E1 + " forwards;}" +
   ".gt-d0{animation-delay:.03s}.gt-d1{animation-delay:.09s}.gt-d2{animation-delay:.15s}.gt-d3{animation-delay:.21s}.gt-d4{animation-delay:.27s}.gt-d5{animation-delay:.33s}.gt-d6{animation-delay:.39s}" +
   ".gt-float{transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-f0{animation:gtFloat 4.4s ease-in-out infinite .3s}.gt-scene.gt-active .gt-f1{animation:gtFloat 5.2s ease-in-out infinite .6s}" +
@@ -237,7 +237,7 @@
   ".gt-breathe{transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-breathe{animation:gtBreathe 3.2s ease-in-out infinite;}" +
   ".gt-claim{opacity:0;transform-box:fill-box;transform-origin:center;}" +
-  ".gt-scene.gt-active .gt-claim{animation:gtPopIn .42s " + SPR + " forwards;}" +
+  ".gt-scene.gt-active .gt-claim{animation:gtPopIn .45s " + E1 + " forwards;}" +
   ".gt-active .gt-cd0{animation-delay:.1s}.gt-active .gt-cd1{animation-delay:.28s}.gt-active .gt-cd2{animation-delay:.46s}.gt-active .gt-cd3{animation-delay:.64s}" +
   ".gt-strike{stroke-dasharray:100;stroke-dashoffset:100;}" +
   ".gt-scene.gt-active .gt-strike{animation:gtDraw .38s " + E1 + " forwards .95s;}" +
@@ -272,7 +272,7 @@
   "@keyframes gtRipple{0%{opacity:.65;transform:scale(.6)}100%{opacity:0;transform:scale(2.3)}}" +
   "@keyframes gtProbe{0%{opacity:1;transform:translateX(178px)}80%{opacity:1;transform:translateX(466px)}100%{opacity:0;transform:translateX(466px)}}" +
   "@media (max-width:560px){.gt-head{font-size:21px}.gt-sub{font-size:13.5px}.gt-art{min-height:240px}.gt-art-svg{max-height:230px}.gt-stage{width:94vw}}" +
-  "@media (prefers-reduced-motion:reduce){.gt-root,.gt-stage,.gt-scene{transition:opacity .2s linear!important;transform:none!important;}" +
+  "@media (prefers-reduced-motion:reduce){.gt-root,.gt-stage,.gt-scene{transition:opacity .2s linear!important;transform:none!important;filter:none!important;}" +
   ".gt-pop,.gt-claim,.gt-q,.gt-check,.gt-req,.gt-res,.gt-leg,.gt-probe,.gt-ripple{opacity:1!important;transform:none!important;animation:none!important;}" +
   ".gt-arc,.gt-strike,.gt-link{stroke-dashoffset:0!important;animation:none!important;}.gt-fullring{stroke-dashoffset:0!important;animation:none!important;}" +
   ".gt-float,.gt-breathe,.gt-core{animation:none!important;}}";
