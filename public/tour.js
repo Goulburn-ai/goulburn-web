@@ -435,17 +435,21 @@
   function countUp() {
     var el = stage.querySelector("#gtScore");
     if (!el) return;
+    el.textContent = "0";
     if (reduce) { el.textContent = SCORE; return; }
-    var t0 = null, dur = 1500, delay = 600, started = null;
+    var t0 = null, dur = 1500, delay = 600, started = null, rafScore = 0;
     function step(ts) {
+      if (idx !== 3) return;
       if (started === null) started = ts;
       if (ts - started < delay) { rafScore = requestAnimationFrame(step); return; }
       if (t0 === null) t0 = ts;
       var p = Math.min(1, (ts - t0) / dur);
       el.textContent = Math.round(p * SCORE);
-      if (p < 1 && idx === 3) { rafScore = requestAnimationFrame(step); } else { el.textContent = SCORE; }
+      if (p < 1) { rafScore = requestAnimationFrame(step); } else { el.textContent = SCORE; }
     }
-    var rafScore = requestAnimationFrame(step);
+    rafScore = requestAnimationFrame(step);
+    // safety net: guarantee the final value even if rAF is throttled (background tab)
+    setTimeout(function () { if (idx === 3) el.textContent = SCORE; }, delay + dur + 500);
   }
 
   function go(n) {
