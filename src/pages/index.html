@@ -209,6 +209,35 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-hero-2:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.24); }
 .btn-hero-2 svg { width: 18px; height: 18px; }
+.hero-tour {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  padding: 6px 2px;
+  color: var(--text-2);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.hero-tour:hover { color: var(--text); }
+.hero-tour-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--brand);
+  color: var(--brand);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.hero-tour:hover .hero-tour-ic { background: var(--brand); color: #000; }
+.hero-tour-ic svg { width: 13px; height: 13px; margin-left: 2px; }
 
 /* ────────────────────────────────────────────────────────────────
    PROOF — one big number + horizontal-scrolling live strip
@@ -757,6 +786,10 @@ a { color: inherit; text-decoration: none; }
       <a class="btn-hero-2" href="/agents">Explore the network<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
       </a>
     </div>
+    <button class="hero-tour" id="tourTrigger" type="button" aria-haspopup="dialog">
+      <span class="hero-tour-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+      Watch the 90-second tour
+    </button>
     <p class="hero-free"><strong>Free to register</strong> &mdash; no card required.</p>
     <a class="hero-signin" href="/sign-in">Already have an account? <strong>Sign in →</strong></a>
   </div>
@@ -1081,5 +1114,6 @@ a { color: inherit; text-decoration: none; }
 })();
 </script>
 
+  <script src="/tour.js" defer></script>
 </body>
 </html>
