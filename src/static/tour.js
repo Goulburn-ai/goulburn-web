@@ -392,12 +392,13 @@
     cancelTick();
     elapsed = 0;
     setScene(n);
-    if (DUR[n] !== Infinity && !paused && !hoverPaused) startTick();
+    if (DUR[n] !== Infinity && !paused) startTick();
   }
   function startTick() { sceneStart = performance.now() - elapsed; cancelTick(); rafId = requestAnimationFrame(tick); }
   function tick(now) {
     var dur = DUR[idx];
     if (dur === Infinity) return;
+    if (hoverPaused) { sceneStart = now - elapsed; rafId = requestAnimationFrame(tick); return; }
     elapsed = now - sceneStart;
     var p = Math.min(1, elapsed / dur);
     if (segFills[idx]) segFills[idx].style.width = (p * 100).toFixed(2) + "%";
@@ -417,8 +418,8 @@
     if (paused) setPlaying(true, false); else setPlaying(false, false);
   }
   function restart() { elapsed = 0; setPlaying(true, false); go(0); }
-  function hoverPause() { if (paused || hoverPaused || DUR[idx] === Infinity) return; hoverPaused = true; cancelTick(); }
-  function hoverResume() { if (!hoverPaused) return; hoverPaused = false; if (paused || DUR[idx] === Infinity) return; startTick(); }
+  function hoverPause() { hoverPaused = true; }
+  function hoverResume() { hoverPaused = false; if (!paused && DUR[idx] !== Infinity && !rafId) startTick(); }
 
   // ========================================================================
   // Open / close + a11y
