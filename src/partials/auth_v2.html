@@ -18,9 +18,9 @@
     // legacy compat
     .API_BASE             -> 'https://api.goulburn.ai'
     .ADMIN_BASE           -> 'https://admin.goulburn.ai'
-    .getSession()         -> bearer-or-null from localStorage/sessionStorage
-    .setSession(t, opts)  -> persist bearer (callers from old sign-in)
-    .clearSession()       -> wipe bearer + reg id
+    .getSession()         -> 'gb:cookie' sentinel when cookie-authed, else null
+    .setSession(t, opts)  -> no-op storage shim; re-probes the gb_session cookie
+    .clearSession()       -> wipe any legacy bearer + reg id
     .getRegId()           -> registration_id from user or cache
     .setRegId(id)         -> persist registration_id
     .requireAuth()        -> redirects to /sign-in if probe resolves null
@@ -37,49 +37,41 @@
     var _user  = null;
     var _ready = null;
 
-    // ── Bearer / reg-id storage helpers (legacy + v2-cookie sentinel) ──
+    // One-time migration (2026-06-22 auth review): proactively wipe any bearer
+    // token left in storage by the pre-cookie code path, so no session token
+    // lingers anywhere XSS could read it. Cookie-only auth never writes it again.
+    try { localStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
+    try { sessionStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
+
+    // ── Auth session helpers — cookie-only (no client-side bearer) ──
     //
-    // 2026-05-10: the sentinel below closes a class of "every CTA
-    // is broken for new operators" bugs. After auth_v2 cutover, users who
-    // sign in via Google OAuth or magic-link only have the HttpOnly
-    // gb_session cookie — no localStorage bearer. Many legacy handlers
-    // gate on `if (goulburnAuth.getSession()) { ... }` for truthiness;
-    // returning null treated those users as guests despite a valid cookie
-    // (Run probe → "SIGN IN REQUIRED", agent.html ?edit=runtime → guest banner).
+    // 2026-06-22 (auth review): sessions live ONLY in the HttpOnly, Secure
+    // gb_session cookie set server-side. We never read or write a bearer token
+    // in localStorage/sessionStorage — a stored token is XSS-readable, and the
+    // cutover to Google-OAuth + magic-link made it dead weight. Any stale token
+    // from the old code path is proactively wiped on load (see migration above).
     //
-    // Fix: when the /api/auth/me probe has confirmed a v2 cookie, return
-    // the sentinel string 'gb:cookie' so legacy `if (session)` checks pass.
-    // Bearer-construction sites send `Authorization: Bearer gb:cookie` —
-    // goulburn-api's get_human_owner / auth deps check cookie FIRST, so
-    // the fake bearer is ignored and the cookie validates the request.
+    // The sentinel stays load-bearing: when the /api/auth/me probe confirms the
+    // cookie, getSession() returns 'gb:cookie' so the many legacy
+    // `if (goulburnAuth.getSession()) { ... }` truthiness gates still pass —
+    // returning null treated cookie users as guests (the "every CTA broken for
+    // new operators" bug class, 2026-05-10). Bearer-construction sites send
+    // `Authorization: Bearer gb:cookie`; goulburn-api checks the cookie FIRST
+    // and ignores the sentinel bearer, so the cookie validates the request.
     var GB_V2_COOKIE_SENTINEL = 'gb:cookie';
     function getSession() {
-        try {
-            var v = localStorage.getItem(SESSION_LS_KEY);
-            if (v) return v;
-        } catch (_) {}
-        try {
-            var v2 = sessionStorage.getItem(SESSION_LS_KEY);
-            if (v2) return v2;
-        } catch (_) {}
-        // v2-cookie path: no bearer, but probe confirmed gb_session is alive
-        if (_user) return GB_V2_COOKIE_SENTINEL;
-        return null;
+        // Cookie-only: no bearer is ever stored client-side. Return the sentinel
+        // once the probe has confirmed the gb_session cookie, else null.
+        return _user ? GB_V2_COOKIE_SENTINEL : null;
     }
     function setSession(token, opts) {
-        opts = opts || {};
-        try {
-            if (opts.remember === false) {
-                sessionStorage.setItem(SESSION_LS_KEY, token);
-                localStorage.removeItem(SESSION_LS_KEY);
-            } else {
-                localStorage.setItem(SESSION_LS_KEY, token);
-                sessionStorage.removeItem(SESSION_LS_KEY);
-            }
-        } catch (_) {}
+        // No-op storage shim (2026-06-22): sign-in sets the HttpOnly gb_session
+        // cookie server-side, never a localStorage bearer. Kept on the public API
+        // so any legacy caller still resolves — it just re-probes the cookie.
         _ready = probe();
     }
     function clearSession() {
+        // Wipe any legacy bearer (defensive — nothing writes it anymore) + reg id.
         try { localStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
         try { sessionStorage.removeItem(SESSION_LS_KEY); } catch (_) {}
         try { localStorage.removeItem(REG_ID_LS_KEY); } catch (_) {}
@@ -111,28 +103,9 @@
             }
         } catch (_) {}
 
-        var bearer = getSession();
-        if (bearer) {
-            try {
-                var r2 = await fetch(API_BASE + '/api/v1/auth/me', {
-                    headers: { 'Authorization': 'Bearer ' + bearer },
-                    credentials: 'include',
-                    cache: 'no-store',
-                });
-                if (r2.ok) {
-                    var body2 = await r2.json();
-                    var legacyUser = body2 && body2.user ? body2.user
-                                   : (body2 && body2.email ? body2 : null);
-                    if (legacyUser) {
-                        _user = legacyUser;
-                        if (legacyUser.registration_id) setRegId(legacyUser.registration_id);
-                        return _user;
-                    }
-                }
-                if (r2.status === 401) clearSession();
-            } catch (_) {}
-        }
-
+        // Cookie-only: no bearer fallback. If the /api/auth/me probe above did
+        // not return a user, the visitor is a guest. (The legacy /api/v1/auth/me
+        // bearer fallback was removed 2026-06-22 — no token is stored to send.)
         _user = null;
         return null;
     }

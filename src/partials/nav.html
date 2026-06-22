@@ -115,7 +115,7 @@
         // Phase B (2026-05-05): the bearer in localStorage is no longer the
         // sole source of truth — cookie-only sessions are first-class. We:
         //   1. Render guest UI by default (avoid an auth-flash for true guests)
-        //   2. Flip to auth UI synchronously if a bearer is present (fast path)
+        //   2. Flip to auth UI synchronously via gb_auth_hint (fast path)
         //   3. Otherwise, listen for goulburn:auth-ready (fired by auth_v2.html
         //      partial after its /auth/me probe completes) and flip if the
         //      cookie-only session is alive.
@@ -137,10 +137,8 @@
             // links (defined in #mobileAuth). Avatar dropdown coexists for
             // quick account access (email, profile).
         }
-        var _bearerSession = (function() {
-            try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
-            return sessionStorage.getItem('goulburn_session');
-        })();
+        // 2026-06-22: cookie-only — the localStorage bearer read was removed.
+        // The synchronous fast-path below relies on gb_auth_hint only.
         // 2026-05-28 (anti-flash): use gb_auth_hint as a synchronous fast-path.
         // The hint is set by auth_v2 after a successful /api/auth/me probe.
         // Without this, cookie-only sessions render guest nav for 150-300ms
@@ -151,7 +149,7 @@
         // before probe corrects it. Acceptable trade for the common case.
         var _authHint = false;
         try { _authHint = localStorage.getItem('gb_auth_hint') === '1'; } catch (e) {}
-        if (_bearerSession || _authHint) {
+        if (_authHint) {
             _flipNavToAuth();
         } else {
             // Cookie-only path — handle two timing cases:
