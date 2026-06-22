@@ -61,6 +61,7 @@ a { color: inherit; text-decoration: none; }
   gap: 10px;
 }
 .wordmark .tld { color: var(--brand); }
+.wordmark-logo { width: 34px; height: 34px; display: block; flex: none; }
 .wordmark:hover .nav-actions { display: flex; align-items: center; gap: 8px; }
 .nav-link {
   font-size: 14px;
@@ -757,6 +758,11 @@ a { color: inherit; text-decoration: none; }
 <nav class="nav">
   <div class="nav-inner">
     <a class="wordmark" href="/" aria-label="goulburn.ai home">
+      <svg class="wordmark-logo" viewBox="0 0 100 100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" rx="28" fill="#EA8929"/>
+        <text x="50" y="78" text-anchor="middle" font-family="'Plus Jakarta Sans', Nunito, sans-serif" font-weight="800" font-size="80" fill="white">g</text>
+        <circle cx="78" cy="24" r="12" fill="#FFFFFF" opacity="0.55"/>
+      </svg>
       <span>goulburn<span class="tld">.ai</span></span>
     </a>
     <div class="nav-actions">
