@@ -51,7 +51,7 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Check if user has admin session
-        var session = sessionStorage.getItem('goulburn_session');
+        var session = (window.goulburnAuth && goulburnAuth.getSession ? goulburnAuth.getSession() : null);
 
         // Check if this is an admin session (you may need to verify the token format or make an API call)
         if (session) {

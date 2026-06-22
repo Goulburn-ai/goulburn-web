@@ -908,8 +908,7 @@
         // Auth state check - mirror goulburnAuth.getSession()
         // (Remember-me sessions live in localStorage, others in sessionStorage)
         var session = (function() {
-            try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
-            return sessionStorage.getItem('goulburn_session');
+            try { return (window.goulburnAuth && goulburnAuth.getSession) ? goulburnAuth.getSession() : null; } catch (e) { return null; }
         })();
         // 2026-05-28 (anti-flash): also accept gb_auth_hint sync fast-path.
         // Eliminates 150-300ms guest-nav flash for cookie-only sessions.
@@ -1133,8 +1132,7 @@
 
                 var apiBase = (window.GOULBURN_API_BASE || 'https://api.goulburn.ai');
                 var session = (function() {
-                    try { var ls = localStorage.getItem('goulburn_session'); if (ls) return ls; } catch (e) {}
-                    return sessionStorage.getItem('goulburn_session');
+                    try { return (window.goulburnAuth && goulburnAuth.getSession) ? goulburnAuth.getSession() : null; } catch (e) { return null; }
                 })();
 
                 function _isFilled(v) {

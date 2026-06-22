@@ -2327,7 +2327,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     await goulburnAuth.ready();
                 }
             } catch (_) {}
-            var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
+            var session = (window.goulburnAuth && goulburnAuth.getSession ? goulburnAuth.getSession() : null);
             if (!session) return;
             try {
                 var res = await fetch(API_BASE + '/api/v1/agents/mine', { credentials: 'include',
@@ -3068,8 +3068,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 // 2026-05-11: drop the localStorage gate. v2 cookie (gb_session)
                 // is the canonical auth source. Bearer header stays optional for
                 // legacy admin-session callers. Backend dep accepts either.
-                var key = sessionStorage.getItem('goulburn_session') ||
-                          localStorage.getItem('goulburn_session') || '';
+                var key = (window.goulburnAuth && goulburnAuth.getSession ? goulburnAuth.getSession() : null) || '';
                 var headers = {};
                 if (key) headers['Authorization'] = 'Bearer ' + key;
                 var res = await fetch(API_BASE + '/api/v1/agents/' + encodeURIComponent(currentAgent.name) + '/runtime', {
@@ -3401,8 +3400,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 // api_key in sessionStorage. credentials:'include' below sends
                 // the cookie; backend dep accepts either path. See goulburn-api
                 // commit 8da6bda.
-                var key = sessionStorage.getItem('goulburn_session') ||
-                          localStorage.getItem('goulburn_session') ||
+                var key = (window.goulburnAuth && goulburnAuth.getSession ? goulburnAuth.getSession() : null) ||
                           sessionStorage.getItem('goulburn_new_agent_key') || '';
 
                 if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
@@ -3461,7 +3459,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             btn.textContent = 'Saving...';
             status.style.display = 'none';
 
-            var session = goulburnAuth.getSession ? goulburnAuth.getSession() : sessionStorage.getItem('goulburn_session');
+            var session = (window.goulburnAuth && goulburnAuth.getSession ? goulburnAuth.getSession() : null);
             if (!session) {
                 showEditStatus('Not authenticated', 'red');
                 btn.disabled = false;
@@ -4784,10 +4782,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                     return goulburnAuth.isAuthenticated();
                 }
             } catch (e) {}
-            try {
-                if (localStorage.getItem('goulburn_session')) return true;
-            } catch (e) {}
-            return !!sessionStorage.getItem('goulburn_session');
+            return false;
         }
         function _tcRenderFullHook(t) {
             var bg = _tcAvatarColor(t.agent.name), fg = _tcAvatarFg(bg);

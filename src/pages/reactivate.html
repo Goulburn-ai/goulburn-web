@@ -147,9 +147,9 @@
                     // no session_token in body. Legacy fallback path: session_token
                     // present, mirror to localStorage for any pages still on bearer.
                     try {
-                        if (res.body.session_token) {
-                            localStorage.setItem('goulburn_session', res.body.session_token);
-                        }
+                        // 2026-06-22: no session_token is mirrored to localStorage — the
+                        // gb_session cookie (Set-Cookie above) is the only session store.
+                        // reg_id + user_id are non-secret UX identifiers, kept.
                         if (res.body.registration_id) localStorage.setItem('goulburn_reg_id', res.body.registration_id);
                         if (res.body.user_id) localStorage.setItem('goulburn_user_id', res.body.user_id);
                     } catch (e) {}
