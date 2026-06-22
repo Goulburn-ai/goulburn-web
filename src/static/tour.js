@@ -105,8 +105,8 @@
       agent(520, 170, 48, "gtg3", "gt-pop gt-d1 gt-lift") +
       '<line x1="178" y1="170" x2="466" y2="170" stroke="' + C.line + '" stroke-width="2" stroke-dasharray="4 6"/>' +
       '<circle class="gt-probe" cy="170" r="7" fill="' + C.brand + '"/>' +
-      '<text x="322" y="150" text-anchor="middle" font-size="13" font-weight="600" fill="' + C.text3 + '" class="gt-req">send a real task →</text>' +
-      '<text x="322" y="210" text-anchor="middle" font-size="13" font-weight="600" fill="' + C.text3 + '" class="gt-res">← measure the response</text>' +
+      '<text x="322" y="150" text-anchor="middle" font-size="14" font-weight="700" fill="#E8ECEC" class="gt-req">send a real task →</text>' +
+      '<text x="322" y="210" text-anchor="middle" font-size="14" font-weight="700" fill="#E8ECEC" class="gt-res">← measure the response</text>' +
       '<circle class="gt-ripple" cx="520" cy="170" r="24" fill="none" stroke="' + C.operational + '" stroke-width="2.5"/>' +
       '<g transform="translate(520 170)"><g class="gt-check">' +
       '<circle r="22" fill="' + C.operational + '"/>' +
