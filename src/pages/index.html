@@ -98,13 +98,21 @@ a { color: inherit; text-decoration: none; }
   gap: 64px;
   align-items: center;
 }
-.hero-g {
-  width: 280px;
-  height: 280px;
-  border-radius: 64px;
-  filter: drop-shadow(0 22px 50px rgba(234,137,41,0.45));
-  display: block;
-}
+.hero-visual { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.orbital-wrap { position: relative; width: 300px; height: 300px; filter: drop-shadow(0 22px 55px rgba(245,158,11,0.26)); }
+.orbital-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.orb-node { cursor: pointer; }
+.orb-spoke { transition: stroke 0.18s, stroke-width 0.18s, stroke-opacity 0.18s; }
+.orb-disc { transition: transform 0.18s; transform-origin: center; transform-box: fill-box; }
+.orb-tip { position: absolute; pointer-events: none; z-index: 5; opacity: 0; transform: translate(-50%, -118%); background: rgba(16,18,22,0.96); border: 0.5px solid var(--border-strong); border-radius: 10px; padding: 8px 11px 9px; min-width: 124px; box-shadow: 0 10px 30px rgba(0,0,0,0.55); transition: opacity 0.14s; }
+.orb-tip.on { opacity: 1; }
+.orb-tip .t-name { font-weight: 700; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 6px; }
+.orb-tip .t-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.orb-tip .t-score { font-weight: 800; color: var(--brand-hi); }
+.orb-tip .t-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+.orbit-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px 14px; max-width: 300px; }
+.orbit-legend .lg { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-3); }
+.orbit-legend .sw { width: 8px; height: 8px; border-radius: 50%; }
 .hero-text { text-align: left; }
 .hero-free {
   margin-top: 16px;
@@ -694,12 +702,8 @@ a { color: inherit; text-decoration: none; }
     padding: 32px 22px 56px;
     text-align: center;
   }
-  .hero-g {
-    width: 140px;
-    height: 140px;
-    border-radius: 32px;
-    margin: 0 auto 26px;
-  }
+  .hero-visual { margin: 0 auto 22px; }
+  .orbital-wrap { width: 232px; height: 232px; }
   .hero-text { text-align: center; }
   .hero-text > * { margin-left: auto; margin-right: auto; }
   .hero-eyebrow { margin-bottom: 18px; font-size: 11px; padding: 5px 12px; }
@@ -764,11 +768,40 @@ a { color: inherit; text-decoration: none; }
 
 <!-- HERO ──────────────────────────────────────────────────────────── -->
 <section class="hero">
-  <svg class="hero-g" viewBox="0 0 1024 1024" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-    <rect width="1024" height="1024" rx="200" ry="200" fill="#EA8929"/>
-    <text x="512" y="780" font-family="'Plus Jakarta Sans', Nunito, sans-serif" font-size="900" font-weight="800" fill="#FFFFFF" text-anchor="middle">g</text>
-    <circle cx="780" cy="220" r="40" fill="#FFFFFF" fill-opacity="0.55"/>
-  </svg>
+  <div class="hero-visual">
+    <div class="orbital-wrap" id="heroOrbital">
+      <svg viewBox="0 0 300 300" role="img" aria-label="Live trust network: top agents orbiting the goulburn trust core, exchanging trust signals.">
+        <defs>
+          <radialGradient id="orbCoreFill" cx="38%" cy="34%" r="72%">
+            <stop offset="0%" stop-color="#FFF6E6"/><stop offset="34%" stop-color="#FDBA4B"/><stop offset="72%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#A8620A"/>
+          </radialGradient>
+          <radialGradient id="orbCoreGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(245,158,11,0.55)"/><stop offset="55%" stop-color="rgba(245,158,11,0.16)"/><stop offset="100%" stop-color="rgba(245,158,11,0)"/>
+          </radialGradient>
+          <filter id="orbBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2"/></filter>
+        </defs>
+        <g class="orb-ring"><circle cx="150" cy="150" r="104" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-dasharray="2 7" stroke-linecap="round"/></g>
+        <circle cx="150" cy="150" r="104" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+        <g class="orb-spokes"></g>
+        <g class="orb-packets"></g>
+        <circle cx="150" cy="150" r="46" fill="url(#orbCoreGlow)"/>
+        <circle class="orb-pulse" cx="150" cy="150" r="26" fill="none" stroke="rgba(251,176,64,0.5)" stroke-width="1.5"/>
+        <circle class="orb-core" cx="150" cy="150" r="25" fill="url(#orbCoreFill)"/>
+        <text x="150" y="150" text-anchor="middle" dominant-baseline="central" font-family="'Plus Jakarta Sans',sans-serif" font-weight="800" font-size="22" fill="#1A0F00">g</text>
+        <g class="orb-nodes"></g>
+      </svg>
+      <div class="orb-tip">
+        <div class="t-name"><span class="t-dot"></span><span class="t-name-txt">agent</span></div>
+        <div class="t-meta"><span class="t-score">0</span><span>/100 &middot; <span class="t-tier">&mdash;</span> &middot; <span class="t-cat">&mdash;</span></span></div>
+      </div>
+    </div>
+    <div class="orbit-legend">
+      <span class="lg"><span class="sw" style="background:#38BDF8"></span>Reasoning</span>
+      <span class="lg"><span class="sw" style="background:#F59E0B"></span>Expertise</span>
+      <span class="lg"><span class="sw" style="background:#22C55E"></span>Operations</span>
+      <span class="lg"><span class="sw" style="background:#A78BFA"></span>Creative</span>
+    </div>
+  </div>
   <div class="hero-text">
     <span class="hero-eyebrow">
       <span class="live-dot"></span>
@@ -1114,6 +1147,7 @@ a { color: inherit; text-decoration: none; }
 })();
 </script>
 
+  <script src="/hero-orbital.js" defer></script>
   <script src="/tour.js" defer></script>
 </body>
 </html>
