@@ -157,7 +157,7 @@
   function scene6() {
     var r = 70, cferc = 2 * Math.PI * r;
     var inner = defs("gtg6") +
-      '<circle cx="160" cy="150" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="12"/>' +
+      '<circle cx="160" cy="150" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="12"/>' +
       '<circle class="gt-fullring" cx="160" cy="150" r="' + r + '" fill="none" stroke="' + C.brand + '" stroke-width="12" ' +
       'stroke-linecap="round" stroke-dasharray="' + cferc + '" stroke-dashoffset="' + cferc + '" transform="rotate(-90 160 150)"/>' +
       '<g class="gt-pop gt-d0 gt-lift">' + agent(160, 150, 46, "gtg6") + '</g>' +
@@ -191,24 +191,25 @@
   "transform:translateY(14px) scale(.97);transition:transform .42s " + SPR + ";}" +
   ".gt-root.gt-open .gt-stage{transform:none;}" +
   ".gt-prog{display:flex;gap:6px;padding:14px 16px 0;}" +
-  ".gt-seg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.14);overflow:hidden;cursor:pointer;border:none;padding:0;}" +
-  ".gt-seg:hover{background:rgba(255,255,255,.24);}" +
+  ".gt-seg{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.16);overflow:hidden;cursor:pointer;border:none;padding:0;transition:transform .15s ease,background .15s;transform-origin:center;}" +
+  ".gt-seg:hover,.gt-seg:focus-visible{background:rgba(255,255,255,.42);transform:scaleY(1.8);outline:none;}" +
   ".gt-seg-fill{display:block;height:100%;width:0;background:" + C.brand + ";border-radius:3px;box-shadow:0 0 8px rgba(245,158,11,.55);}" +
   ".gt-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;z-index:3;" +
   "background:rgba(255,255,255,.08);color:" + C.text + ";font-size:20px;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .15s;}" +
   ".gt-close:hover{background:rgba(255,255,255,.16);transform:scale(1.06);}" +
   ".gt-art{position:relative;flex:1;min-height:300px;display:flex;align-items:center;justify-content:center;padding:18px 18px 4px;}" +
-  ".gt-art::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(245,158,11,.07),transparent 62%);}" +
+  ".gt-art::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 42%,rgba(245,158,11,.12),transparent 64%);}" +
   ".gt-scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;" +
   "padding:18px 24px;opacity:0;visibility:hidden;transform:scale(.99);filter:blur(7px);transition:opacity .6s cubic-bezier(.45,.05,.55,.95),transform .6s cubic-bezier(.45,.05,.55,.95),filter .6s cubic-bezier(.45,.05,.55,.95),visibility .6s;}" +
   ".gt-scene.gt-active{opacity:1;visibility:visible;transform:none;filter:blur(0);}" +
-  ".gt-art-svg{width:100%;max-width:560px;max-height:300px;height:auto;}" +
-  ".gt-art-svg.gt-ring{max-width:330px;filter:drop-shadow(0 0 10px rgba(245,158,11,.12));}" +
+  ".gt-art-svg{width:100%;max-width:560px;max-height:300px;height:auto;filter:brightness(1.12) contrast(1.04);}" +
+  ".gt-art-svg.gt-ring{max-width:330px;filter:drop-shadow(0 0 10px rgba(245,158,11,.18)) brightness(1.1);}" +
   ".gt-lift{filter:drop-shadow(0 6px 16px rgba(0,0,0,.55));}" +
   ".gt-cap{padding:6px 26px 4px;text-align:center;}" +
   ".gt-head{margin:0;font-size:25px;line-height:1.2;font-weight:800;letter-spacing:-.01em;color:" + C.text + ";}" +
   ".gt-sub{margin:8px 0 0;font-size:15px;line-height:1.45;font-weight:500;color:" + C.text2 + ";min-height:22px;}" +
   ".gt-ctrls{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px 18px 18px;}" +
+  ".gt-sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}" +
   ".gt-btn{width:42px;height:42px;border-radius:50%;border:1px solid " + C.line + ";background:rgba(255,255,255,.04);color:" + C.text + ";" +
   "cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s,transform .15s;}" +
   ".gt-btn:hover{background:rgba(255,255,255,.10);border-color:" + C.lineStrong + ";transform:scale(1.06);}" +
@@ -280,7 +281,7 @@
   // ========================================================================
   // Build DOM
   // ========================================================================
-  var root, stage, segFills = [], sceneEls = [], headEl, subEl, btnPlay, countEl, lastFocus = null;
+  var root, stage, segFills = [], sceneEls = [], headEl, subEl, btnPlay, countEl, srEl, lastFocus = null;
 
   function icon(name) {
     if (name === "play") return '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
@@ -323,7 +324,8 @@
       '<button class="gt-close" aria-label="Close tour">✕</button>' +
       prog +
       '<div class="gt-art">' + scenesHtml + "</div>" +
-      '<div class="gt-cap"><h2 class="gt-head"></h2><p class="gt-sub" aria-live="polite"></p></div>' +
+      '<div class="gt-cap"><h2 class="gt-head"></h2><p class="gt-sub"></p></div>' +
+      '<span class="gt-sr" aria-live="polite" aria-atomic="true"></span>' +
       '<div class="gt-ctrls"><button class="gt-btn gt-play" aria-label="Pause">' + icon("pause") + '</button><span class="gt-count"></span></div>';
     root.appendChild(stage);
     document.body.appendChild(root);
@@ -334,6 +336,7 @@
     subEl = stage.querySelector(".gt-sub");
     countEl = stage.querySelector(".gt-count");
     btnPlay = stage.querySelector(".gt-play");
+    srEl = stage.querySelector(".gt-sr");
 
     stage.querySelector(".gt-close").addEventListener("click", close);
     btnPlay.addEventListener("click", togglePlay);
@@ -341,12 +344,14 @@
     for (var s = 0; s < segs.length; s++) (function (n) { segs[n].addEventListener("click", function () { go(n); }); })(s);
     root.addEventListener("click", function (e) { if (e.target === root) close(); });
     root.addEventListener("keydown", onKey);
+    stage.addEventListener("mouseenter", hoverPause);
+    stage.addEventListener("mouseleave", hoverResume);
   }
 
   // ========================================================================
   // Timeline
   // ========================================================================
-  var idx = 0, paused = false, rafId = null, sceneStart = 0, elapsed = 0, isOpen = false;
+  var idx = 0, paused = false, rafId = null, sceneStart = 0, elapsed = 0, isOpen = false, hoverPaused = false;
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function setScene(n) {
@@ -355,6 +360,7 @@
     headEl.textContent = SCENES[n].head;
     subEl.textContent = SCENES[n].sub;
     countEl.textContent = (n + 1) + " / " + SCENES.length;
+    if (srEl) srEl.textContent = "Step " + (n + 1) + " of " + SCENES.length + ". " + SCENES[n].head + " " + SCENES[n].sub;
     for (var s = 0; s < segFills.length; s++) segFills[s].style.width = s < n ? "100%" : "0%";
     if (n === 3) countUp();
     if (DUR[n] === Infinity) setPlaying(false, true);
@@ -386,7 +392,7 @@
     cancelTick();
     elapsed = 0;
     setScene(n);
-    if (DUR[n] !== Infinity && !paused) startTick();
+    if (DUR[n] !== Infinity && !paused && !hoverPaused) startTick();
   }
   function startTick() { sceneStart = performance.now() - elapsed; cancelTick(); rafId = requestAnimationFrame(tick); }
   function tick(now) {
@@ -411,6 +417,8 @@
     if (paused) setPlaying(true, false); else setPlaying(false, false);
   }
   function restart() { elapsed = 0; setPlaying(true, false); go(0); }
+  function hoverPause() { if (paused || hoverPaused || DUR[idx] === Infinity) return; hoverPaused = true; cancelTick(); }
+  function hoverResume() { if (!hoverPaused) return; hoverPaused = false; if (paused || DUR[idx] === Infinity) return; startTick(); }
 
   // ========================================================================
   // Open / close + a11y
@@ -422,7 +430,7 @@
     lastFocus = document.activeElement;
     document.documentElement.style.overflow = "hidden";
     root.classList.add("gt-open");
-    paused = false; elapsed = 0;
+    paused = false; elapsed = 0; hoverPaused = false;
     setScene(0);
     setPlaying(true, false);
     setTimeout(function () { stage.querySelector(".gt-close").focus(); }, 60);
