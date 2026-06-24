@@ -99,8 +99,9 @@
     var inner =
       defs("gtg3") +
       '<g class="gt-pop gt-d0 gt-lift">' +
-      '<circle cx="120" cy="170" r="50" fill="#16181C" stroke="' + C.brand + '" stroke-width="2"/>' +
-      '<text x="120" y="185" text-anchor="middle" font-size="44" font-weight="800" fill="' + C.brand + '" font-family="Nunito, sans-serif">g</text>' +
+      '<rect x="70" y="120" width="100" height="100" rx="28" fill="#EA8929"/>' +
+      '<text x="120" y="198" text-anchor="middle" font-family="\'Plus Jakarta Sans\', Nunito, sans-serif" font-weight="800" font-size="80" fill="#FFFFFF">g</text>' +
+      '<circle cx="148" cy="144" r="12" fill="#FFFFFF" opacity="0.55"/>' +
       '</g>' +
       agent(520, 170, 48, "gtg3", "gt-pop gt-d1 gt-lift") +
       '<line x1="178" y1="170" x2="466" y2="170" stroke="' + C.line + '" stroke-width="2" stroke-dasharray="4 6"/>' +
