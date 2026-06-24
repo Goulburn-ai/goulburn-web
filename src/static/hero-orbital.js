@@ -79,10 +79,6 @@
       tipTier = tip.querySelector('.t-tier'), tipCat = tip.querySelector('.t-cat'), tipDot = tip.querySelector('.t-dot');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // glassy rotating sheen on the core
-  var sheen = mk('ellipse', { cx: CX, cy: CY - 11, rx: 15, ry: 8, fill: 'rgba(255,255,255,0.26)', filter: 'url(#orbBlur)', opacity: 0.9 });
-  if (core && core.parentNode) core.parentNode.insertBefore(sheen, core.nextSibling);
-
   var slots = [], pool = [], rest = [];
   var tiltX = new Spr(0, 90, 15), tiltY = new Spr(0, 90, 15), paraX = new Spr(0, 70, 14), paraY = new Spr(0, 70, 14), coreB = new Spr(0, 120, 16);
   var mvx = CX, mvy = CY, lastMove = -9999, t0 = performance.now();
@@ -157,10 +153,6 @@
     gS.setAttribute('transform', par); gP.setAttribute('transform', par); gN.setAttribute('transform', par);
     if (ring) ring.setAttribute('transform', 'rotate(' + (t * 5).toFixed(2) + ' ' + CX + ' ' + CY + ') translate(' + (px * 0.4).toFixed(2) + ' ' + (py * 0.4).toFixed(2) + ')');
     if (ringDash) ringDash.setAttribute('stroke-dashoffset', (-t * 9).toFixed(1));
-    if (core) core.setAttribute('r', (CORE + Math.sin(t * 1.9) * 0.7 + cb * 1.6).toFixed(2));
-    if (bloom) bloom.setAttribute('r', (46 + cb * 9).toFixed(1));
-    if (pulse) { var pp = (t % 2.4) / 2.4; pulse.setAttribute('r', (27 + pp * 20).toFixed(1)); pulse.setAttribute('stroke', 'rgba(251,176,64,' + (0.5 * (1 - pp)).toFixed(3) + ')'); }
-    sheen.setAttribute('transform', 'rotate(' + (t * 36).toFixed(1) + ' ' + CX + ' ' + CY + ')');
 
     slots.forEach(function (s) {
       if (now < s.start) { s.appear.x = 0; s.appear.v = 0; }
