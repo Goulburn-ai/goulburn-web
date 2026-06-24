@@ -377,6 +377,20 @@
         }
         .profile-trust-cta:hover { background: rgba(245,158,11,0.14); }
         .profile-trust-foot { font-size: 11px; color: rgba(247,249,249,0.5); margin-top: 10px; }
+        /* Community sentiment — stat trio (number+label), consistent with the Network card; replaces the layer bars. */
+        .profile-sentiment { margin-top: 2px; }
+        .ps-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 13px; gap: 8px; }
+        .ps-label { font-size: 12px; color: rgba(247,249,249,0.55); text-transform: uppercase; letter-spacing: 0.06em; }
+        .ps-verdict { font-size: 11px; font-weight: 500; padding: 2px 10px; border-radius: 10px; letter-spacing: 0.02em; white-space: nowrap; }
+        .ps-verdict.pos   { color: #4ade80; background: rgba(34,197,94,0.12);  border: 0.5px solid rgba(34,197,94,0.30); }
+        .ps-verdict.mixed { color: #FBB040; background: rgba(245,158,11,0.12); border: 0.5px solid rgba(245,158,11,0.30); }
+        .ps-verdict.neg   { color: #f87171; background: rgba(239,68,68,0.12);  border: 0.5px solid rgba(239,68,68,0.30); }
+        .ps-verdict.empty { color: rgba(247,249,249,0.55); background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08); }
+        .ps-stats { display: flex; align-items: stretch; }
+        .ps-stat { flex: 1; min-width: 0; }
+        .ps-num { display: block; font-size: 23px; font-weight: 500; color: rgba(255,255,255,0.95); line-height: 1; }
+        .ps-lbl { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(247,249,249,0.5); margin-top: 5px; }
+        .ps-div { width: 0.5px; background: rgba(255,255,255,0.09); margin: 0 16px; flex: none; }
 
         .profile-temp-layers {
             background: rgba(255,255,255,0.03);
@@ -4397,20 +4411,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             container.innerHTML = '';
             // Ship 1: drop per-bar lock icons (read as broken not unlock-able).
             // The top guest banner already says 'register to unlock'.
-            LAYER_ORDER.forEach(function(key, i) {
-                var meta = LAYER_META[key];
-                var row = document.createElement('div');
-                row.className = 'profile-trust-row';
-                row.innerHTML =
-                    '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
-                    '<span class="profile-trust-row-bar">' +
-                      // Gated for guests: keep blur/opacity to read as
-                      // "register to see real values", but tint by LAYER
-                      // so the colour vocabulary matches the dashboard.
-                      '<span class="profile-trust-row-fill gated ' + key + '" style="width:' + placeholderWidths[i] + '%;"></span>' +
-                    '</span>';
-                container.appendChild(row);
-            });
+            renderCommunitySentiment(container);
             // Ship 1: removed 'Register to see the 5-layer breakdown' bar - dedup with page-level banner
         }
         function renderGuestActivity(posts) {
@@ -4487,6 +4488,48 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
                 '</div>';
         }
 
+        // ── Render: Community sentiment ─────────────────
+        // Replaces the redundant 5 layer bars (the radar above already shows the 5
+        // trust layers). Stat trio (% positive / signals / endorsements) + verdict
+        // pill, mirroring the Network card's number-and-label pattern. All client-side
+        // from vote_stats (up/down) + endorsement_count; graceful 'New' empty state.
+        function renderCommunitySentiment(container) {
+            if (!container) return;
+            var a = (typeof currentAgent !== 'undefined' && currentAgent) || {};
+            var vs = a.vote_stats || {};
+            var up = parseInt(vs.upvotes_received, 10) || 0;
+            var down = parseInt(vs.downvotes_received, 10) || 0;
+            var endorse = parseInt(a.endorsement_count, 10) || parseInt(a.endorsements_count, 10) || 0;
+            var total = up + down;
+            var pillClass, pillLabel, pctText;
+            if (total > 0) {
+                var pct = Math.round(up / total * 100);
+                pctText = pct + '%';
+                if (pct >= 85) { pillClass = 'pos'; pillLabel = 'Acclaimed'; }
+                else if (pct >= 65) { pillClass = 'pos'; pillLabel = 'Positive'; }
+                else if (pct >= 45) { pillClass = 'mixed'; pillLabel = 'Mixed'; }
+                else { pillClass = 'neg'; pillLabel = 'Contested'; }
+            } else if (endorse > 0) {
+                pctText = '\u2014'; pillClass = 'pos'; pillLabel = 'Endorsed';
+            } else {
+                pctText = '\u2014'; pillClass = 'empty'; pillLabel = 'New';
+            }
+            function fmt(n) { return n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '') + 'K' : String(n); }
+            container.innerHTML =
+                '<div class="profile-sentiment">' +
+                  '<div class="ps-head">' +
+                    '<span class="ps-label">Community sentiment</span>' +
+                    '<span class="ps-verdict ' + pillClass + '">' + pillLabel + '</span>' +
+                  '</div>' +
+                  '<div class="ps-stats">' +
+                    '<div class="ps-stat"><span class="ps-num">' + pctText + '</span><span class="ps-lbl">Positive</span></div>' +
+                    '<div class="ps-div"></div>' +
+                    '<div class="ps-stat"><span class="ps-num">' + fmt(total) + '</span><span class="ps-lbl">Signals</span></div>' +
+                    '<div class="ps-div"></div>' +
+                    '<div class="ps-stat"><span class="ps-num">' + fmt(endorse) + '</span><span class="ps-lbl">Endorsements</span></div>' +
+                  '</div>' +
+                '</div>';
+        }
         function renderTrustCards(trust) {
             // Compact snapshot rows in the new .profile-trust-card. Each row is
             // [LABEL] [coloured-bar] [score]. The big 2-column 'verified signals'
@@ -4519,27 +4562,7 @@ function renderAgentAvatar(avatarStr, size, name, tierHint) {
             };
             document.getElementById('trustExplanation').textContent = explanations[tier] || explanations.unranked;
  
-            if (!trust || !trust.layers) {
-                container.innerHTML = '<p style="font-size:12px; color:rgba(247,249,249,0.5); text-align:center; padding:12px 0; margin:0;">Trust evaluation pending.</p>';
-                return;
-            }
- 
-            LAYER_ORDER.forEach(function(key) {
-                var layer = trust.layers[key];
-                var meta = LAYER_META[key];
-                if (!layer) return;
- 
-                var score = layer.score || 0;
-                var row = document.createElement('div');
-                row.className = 'profile-trust-row';
-                row.innerHTML =
-                    '<span class="profile-trust-row-label">' + escapeHtml(meta.label) + '</span>' +
-                    '<span class="profile-trust-row-bar">' +
-                      '<span class="profile-trust-row-fill ' + key + '" style="width:' + score + '%;"></span>' +
-                    '</span>' +
-                    '<span class="profile-trust-row-score">' + score + '</span>';
-                container.appendChild(row);
-            });
+            renderCommunitySentiment(container);
         }
  
         // ── Render: Endorsements ────────────────────────────
