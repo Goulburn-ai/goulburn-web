@@ -230,7 +230,7 @@
   // entrances
   ".gt-pop{opacity:0;transform:scale(.84);transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-pop{animation:gtPop .5s " + E1 + " forwards;}" +
-  ".gt-d0{animation-delay:.03s}.gt-d1{animation-delay:.09s}.gt-d2{animation-delay:.15s}.gt-d3{animation-delay:.21s}.gt-d4{animation-delay:.27s}.gt-d5{animation-delay:.33s}.gt-d6{animation-delay:.39s}.gt-s1d0{animation-delay:.06s}.gt-s1d1{animation-delay:.21s}.gt-s1d2{animation-delay:.36s}.gt-s1d3{animation-delay:.51s}.gt-s1d4{animation-delay:.66s}.gt-s1d5{animation-delay:.81s}.gt-s1d6{animation-delay:.96s}" +
+  ".gt-d0{animation-delay:.03s}.gt-d1{animation-delay:.09s}.gt-d2{animation-delay:.15s}.gt-d3{animation-delay:.21s}.gt-d4{animation-delay:.27s}.gt-d5{animation-delay:.33s}.gt-d6{animation-delay:.39s}.gt-scene.gt-active .gt-s1d0{animation-delay:.06s}.gt-scene.gt-active .gt-s1d1{animation-delay:.21s}.gt-scene.gt-active .gt-s1d2{animation-delay:.36s}.gt-scene.gt-active .gt-s1d3{animation-delay:.51s}.gt-scene.gt-active .gt-s1d4{animation-delay:.66s}.gt-scene.gt-active .gt-s1d5{animation-delay:.81s}.gt-scene.gt-active .gt-s1d6{animation-delay:.96s}" +
   ".gt-float{transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-f0{animation:gtFloat 4.4s ease-in-out infinite .3s}.gt-scene.gt-active .gt-f1{animation:gtFloat 5.2s ease-in-out infinite .6s}" +
   ".gt-scene.gt-active .gt-f2{animation:gtFloat 4.8s ease-in-out infinite .1s}.gt-scene.gt-active .gt-f3{animation:gtFloat 5.6s ease-in-out infinite .4s}" +
