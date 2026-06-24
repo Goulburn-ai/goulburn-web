@@ -39,7 +39,7 @@
     { head: "Get your agent verified.",               sub: "Free to register — no card required." }
   ];
   // Scene durations (ms), trimmed ~20% for a snappier pace. Last scene holds.
-  var DUR = [2400, 2000, 2000, 2000, 2000, Infinity];
+  var DUR = [2400, 2000, 2000, 2000, 2600, Infinity];
 
   // ========================================================================
   // SVG scene art
@@ -143,7 +143,7 @@
     for (var i = 0; i < sat.length; i++) {
       lines += '<line class="gt-link gt-ld' + i + '" x1="320" y1="170" x2="' + sat[i][0] + '" y2="' + sat[i][1] + '" ' +
         'stroke="' + C.brand + '" stroke-width="2" stroke-dasharray="100" pathLength="100"/>';
-      nodes += '<g class="gt-pop gt-d' + (i + 1) + '">' +
+      nodes += '<g class="gt-pop gt-s5n' + i + '">' +
         '<circle cx="' + sat[i][0] + '" cy="' + sat[i][1] + '" r="22" fill="#16181C" stroke="' + C.line + '"/>' +
         agent(sat[i][0], sat[i][1], 15, "gtg5") +
         '<circle cx="' + sat[i][0] + '" cy="' + sat[i][1] + '" r="22" fill="none" stroke="' + C.brand + '" stroke-width="2.5" ' +
@@ -260,7 +260,7 @@
   // scene 5 links
   ".gt-link{stroke-dashoffset:100;opacity:.9;}" +
   ".gt-scene.gt-active .gt-link{animation:gtDraw .5s " + E1 + " forwards;}" +
-  ".gt-active .gt-ld0{animation-delay:.22s}.gt-active .gt-ld1{animation-delay:.36s}.gt-active .gt-ld2{animation-delay:.5s}.gt-active .gt-ld3{animation-delay:.64s}.gt-active .gt-ld4{animation-delay:.78s}" +
+  ".gt-scene.gt-active .gt-ld0{animation-delay:.55s}.gt-scene.gt-active .gt-ld1{animation-delay:.68s}.gt-scene.gt-active .gt-ld2{animation-delay:.81s}.gt-scene.gt-active .gt-ld3{animation-delay:.94s}.gt-scene.gt-active .gt-ld4{animation-delay:1.07s}.gt-scene.gt-active .gt-s5n0{animation-delay:.81s}.gt-scene.gt-active .gt-s5n1{animation-delay:.94s}.gt-scene.gt-active .gt-s5n2{animation-delay:1.07s}.gt-scene.gt-active .gt-s5n3{animation-delay:1.2s}.gt-scene.gt-active .gt-s5n4{animation-delay:1.33s}" +
   ".gt-fullring{stroke-dashoffset:440;}.gt-scene.gt-active .gt-fullring{animation:gtRing .9s " + E1 + " forwards .2s;}" +
   "@keyframes gtPop{to{opacity:1;transform:none;}}" +
   "@keyframes gtPopIn{0%{opacity:0;transform:translateY(6px) scale(.8)}to{opacity:1;transform:none}}" +
