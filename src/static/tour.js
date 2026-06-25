@@ -226,12 +226,12 @@
   ".gt-leg{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:" + C.text2 + ";opacity:0;transform:translateY(5px);}" +
   ".gt-dot{width:9px;height:9px;border-radius:2px;display:inline-block;box-shadow:0 0 6px currentColor;}" +
   ".gt-scene.gt-active .gt-leg{animation:gtFadeUp .42s " + E1 + " forwards;}" +
-  ".gt-active .gt-leg0{animation-delay:.2s}.gt-active .gt-leg1{animation-delay:.32s}.gt-active .gt-leg2{animation-delay:.44s}.gt-active .gt-leg3{animation-delay:.56s}.gt-active .gt-leg4{animation-delay:.68s}" +
+  ".gt-scene.gt-active .gt-leg0{animation-delay:.2s}.gt-scene.gt-active .gt-leg1{animation-delay:.32s}.gt-scene.gt-active .gt-leg2{animation-delay:.44s}.gt-scene.gt-active .gt-leg3{animation-delay:.56s}.gt-scene.gt-active .gt-leg4{animation-delay:.68s}" +
   ".gt-trigger{cursor:pointer;}" +
   // entrances
   ".gt-pop{opacity:0;transform:scale(.84);transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-pop{animation:gtPop .5s " + E1 + " forwards;}" +
-  ".gt-d0{animation-delay:.03s}.gt-d1{animation-delay:.09s}.gt-d2{animation-delay:.15s}.gt-d3{animation-delay:.21s}.gt-d4{animation-delay:.27s}.gt-d5{animation-delay:.33s}.gt-d6{animation-delay:.39s}.gt-scene.gt-active .gt-s1d0{animation-delay:.06s}.gt-scene.gt-active .gt-s1d1{animation-delay:.21s}.gt-scene.gt-active .gt-s1d2{animation-delay:.36s}.gt-scene.gt-active .gt-s1d3{animation-delay:.51s}.gt-scene.gt-active .gt-s1d4{animation-delay:.66s}.gt-scene.gt-active .gt-s1d5{animation-delay:.81s}.gt-scene.gt-active .gt-s1d6{animation-delay:.96s}" +
+  ".gt-scene.gt-active .gt-d0{animation-delay:.03s}.gt-scene.gt-active .gt-d1{animation-delay:.09s}.gt-scene.gt-active .gt-d2{animation-delay:.15s}.gt-scene.gt-active .gt-d3{animation-delay:.21s}.gt-scene.gt-active .gt-d4{animation-delay:.27s}.gt-scene.gt-active .gt-d5{animation-delay:.33s}.gt-scene.gt-active .gt-d6{animation-delay:.39s}.gt-scene.gt-active .gt-s1d0{animation-delay:.06s}.gt-scene.gt-active .gt-s1d1{animation-delay:.21s}.gt-scene.gt-active .gt-s1d2{animation-delay:.36s}.gt-scene.gt-active .gt-s1d3{animation-delay:.51s}.gt-scene.gt-active .gt-s1d4{animation-delay:.66s}.gt-scene.gt-active .gt-s1d5{animation-delay:.81s}.gt-scene.gt-active .gt-s1d6{animation-delay:.96s}" +
   ".gt-float{transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-f0{animation:gtFloat 4.4s ease-in-out infinite .3s}.gt-scene.gt-active .gt-f1{animation:gtFloat 5.2s ease-in-out infinite .6s}" +
   ".gt-scene.gt-active .gt-f2{animation:gtFloat 4.8s ease-in-out infinite .1s}.gt-scene.gt-active .gt-f3{animation:gtFloat 5.6s ease-in-out infinite .4s}" +
@@ -240,7 +240,7 @@
   ".gt-scene.gt-active .gt-breathe{animation:gtBreathe 3.2s ease-in-out infinite;}" +
   ".gt-claim{opacity:0;transform-box:fill-box;transform-origin:center;}" +
   ".gt-scene.gt-active .gt-claim{animation:gtPopIn .45s " + E1 + " forwards;}" +
-  ".gt-active .gt-cd0{animation-delay:.1s}.gt-active .gt-cd1{animation-delay:.28s}.gt-active .gt-cd2{animation-delay:.46s}.gt-active .gt-cd3{animation-delay:.64s}" +
+  ".gt-scene.gt-active .gt-cd0{animation-delay:.1s}.gt-scene.gt-active .gt-cd1{animation-delay:.28s}.gt-scene.gt-active .gt-cd2{animation-delay:.46s}.gt-scene.gt-active .gt-cd3{animation-delay:.64s}" +
   ".gt-strike{stroke-dasharray:100;stroke-dashoffset:100;}" +
   ".gt-scene.gt-active .gt-strike{animation:gtDraw .38s " + E1 + " forwards .95s;}" +
   // scene 3
@@ -255,7 +255,7 @@
   // scene 4 arcs
   ".gt-arc{stroke-dasharray:100;stroke-dashoffset:100;}" +
   ".gt-scene.gt-active .gt-arc{animation:gtDraw .45s " + SMO + " forwards;}" +
-  ".gt-active .gt-a0{animation-delay:.08s}.gt-active .gt-a1{animation-delay:.18s}.gt-active .gt-a2{animation-delay:.28s}.gt-active .gt-a3{animation-delay:.38s}.gt-active .gt-a4{animation-delay:.48s}" +
+  ".gt-scene.gt-active .gt-a0{animation-delay:.08s}.gt-scene.gt-active .gt-a1{animation-delay:.18s}.gt-scene.gt-active .gt-a2{animation-delay:.28s}.gt-scene.gt-active .gt-a3{animation-delay:.38s}.gt-scene.gt-active .gt-a4{animation-delay:.48s}" +
   ".gt-scene.gt-active .gt-core{animation:gtPop .42s " + SPR + " forwards,gtCore .9s ease 1.3s;}" +
   // scene 5 links
   ".gt-link{stroke-dashoffset:100;opacity:.9;}" +
