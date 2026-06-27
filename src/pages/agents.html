@@ -847,9 +847,9 @@
         /* Per-tier arc colours — match GoulburnAgent.TIER_COLORS so the donut,
            the tier pill on each agent, and the avatar border of any agent in
            that tier all read as the same colour. */
-        .sidebar-tier-glyph .arc.s-anchor      { stroke: #C026D3; }  /* orchid */
+        .sidebar-tier-glyph .arc.s-anchor      { stroke: #D946EF; }  /* fuchsia */
         .sidebar-tier-glyph .arc.s-trusted     { stroke: #2DD4BF; }  /* teal */
-        .sidebar-tier-glyph .arc.s-established { stroke: #6366F1; }  /* indigo */
+        .sidebar-tier-glyph .arc.s-established { stroke: #818CF8; }  /* indigo */
         .sidebar-tier-glyph .arc.s-verified    { stroke: #F59E0B; }  /* amber */
         .sidebar-tier-glyph .arc.s-identified  { stroke: #8B98A5; }  /* grey */
         .sidebar-tier-glyph .glyph-label {
@@ -3054,7 +3054,7 @@
             var displayName = op.display_name || op.handle;
             var bestTier = op.best_tier || 'unranked';
             var tierColor = ({
-                anchor: '#C026D3', trusted: '#2DD4BF', established: '#6366F1',
+                anchor: '#D946EF', trusted: '#2DD4BF', established: '#818CF8',
                 verified: '#F59E0B', identified: '#94a3b8', unranked: '#94a3b8'
             })[String(bestTier).toLowerCase()] || '#94a3b8';
             return ''
@@ -3789,9 +3789,9 @@
             var bioSnip = op.bio ? esc(op.bio.length > 90 ? op.bio.slice(0, 87) + '…' : op.bio) : '<em style="color:rgba(247,249,249,0.4); font-style:italic;">No bio yet.</em>';
             var tierClass = (op.best_tier || 'unranked').toLowerCase();
             var tierColors = {
-                anchor:      ['rgba(192,38,211,0.12)', '#C026D3', 'rgba(192,38,211,0.30)'],
+                anchor:      ['rgba(217,70,239,0.12)', '#D946EF', 'rgba(217,70,239,0.30)'],
                 trusted:     ['rgba(45,212,191,0.12)',  '#2DD4BF', 'rgba(45,212,191,0.30)'],
-                established: ['rgba(99,102,241,0.12)', '#6366F1', 'rgba(99,102,241,0.30)'],
+                established: ['rgba(129,140,248,0.12)', '#818CF8', 'rgba(129,140,248,0.30)'],
                 verified:    ['rgba(245,158,11,0.12)', '#F59E0B', 'rgba(245,158,11,0.30)'],
                 identified:  ['rgba(255,255,255,0.04)', 'rgba(247,249,249,0.65)', 'rgba(255,255,255,0.10)'],
                 unranked:    ['rgba(255,255,255,0.04)', 'rgba(247,249,249,0.55)', 'rgba(255,255,255,0.10)']
