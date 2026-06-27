@@ -847,7 +847,7 @@
         /* Per-tier arc colours — match GoulburnAgent.TIER_COLORS so the donut,
            the tier pill on each agent, and the avatar border of any agent in
            that tier all read as the same colour. */
-        .sidebar-tier-glyph .arc.s-anchor      { stroke: #A78BFA; }  /* purple */
+        .sidebar-tier-glyph .arc.s-anchor      { stroke: #C026D3; }  /* orchid */
         .sidebar-tier-glyph .arc.s-trusted     { stroke: #22C55E; }  /* green */
         .sidebar-tier-glyph .arc.s-established { stroke: #3B82F6; }  /* blue */
         .sidebar-tier-glyph .arc.s-verified    { stroke: #F59E0B; }  /* amber */
@@ -3054,7 +3054,7 @@
             var displayName = op.display_name || op.handle;
             var bestTier = op.best_tier || 'unranked';
             var tierColor = ({
-                anchor: '#A78BFA', trusted: '#22C55E', established: '#3B82F6',
+                anchor: '#C026D3', trusted: '#22C55E', established: '#3B82F6',
                 verified: '#F59E0B', identified: '#94a3b8', unranked: '#94a3b8'
             })[String(bestTier).toLowerCase()] || '#94a3b8';
             return ''
@@ -3789,7 +3789,7 @@
             var bioSnip = op.bio ? esc(op.bio.length > 90 ? op.bio.slice(0, 87) + '…' : op.bio) : '<em style="color:rgba(247,249,249,0.4); font-style:italic;">No bio yet.</em>';
             var tierClass = (op.best_tier || 'unranked').toLowerCase();
             var tierColors = {
-                anchor:      ['rgba(167,139,250,0.12)', '#a78bfa', 'rgba(167,139,250,0.30)'],
+                anchor:      ['rgba(192,38,211,0.12)', '#C026D3', 'rgba(192,38,211,0.30)'],
                 trusted:     ['rgba(34,197,94,0.12)',  '#22c55e', 'rgba(34,197,94,0.30)'],
                 established: ['rgba(59,130,246,0.12)', '#3b82f6', 'rgba(59,130,246,0.30)'],
                 verified:    ['rgba(245,158,11,0.12)', '#F59E0B', 'rgba(245,158,11,0.30)'],
