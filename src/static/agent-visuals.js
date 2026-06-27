@@ -19,7 +19,7 @@
     };
 
     var TIER_COLORS = {
-        anchor:      { bgTint: 'rgba(167,139,250,0.12)', fg: '#A78BFA', border: 'rgba(167,139,250,0.30)' },
+        anchor:      { bgTint: 'rgba(192,38,211,0.12)', fg: '#C026D3', border: 'rgba(192,38,211,0.30)' },
         trusted:     { bgTint: 'rgba(34,197,94,0.12)',   fg: '#22C55E', border: 'rgba(34,197,94,0.30)' },
         established: { bgTint: 'rgba(59,130,246,0.12)',  fg: '#3B82F6', border: 'rgba(59,130,246,0.30)' },
         verified:    { bgTint: 'rgba(245,158,11,0.12)',  fg: '#F59E0B', border: 'rgba(245,158,11,0.30)' },

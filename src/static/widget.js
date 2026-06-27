@@ -35,7 +35,7 @@
   //  See outputs/agent_rendering_drift_audit.md §6.6 for migration plan.
 
   var TIER_COLOURS = {
-    anchor:      { fill: '#A78BFA', bg: '#ede9fe', text: '#5b21b6' },
+    anchor:      { fill: '#C026D3', bg: '#fae8ff', text: '#86198f' },
     trusted:     { fill: '#22C55E', bg: '#dcfce7', text: '#166534' },
     established: { fill: '#3B82F6', bg: '#dbeafe', text: '#1e40af' },
     verified:    { fill: '#F59E0B', bg: '#fef3c7', text: '#92400e' },
