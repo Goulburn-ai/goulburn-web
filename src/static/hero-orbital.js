@@ -21,10 +21,10 @@
   var ANGLES = [-90, -45, 0, 45, 90, 135, 180, -135];
 
   var CAT = {
-    reasoning:  { label: 'Reasoning',  hex: '#38BDF8' },
-    expertise:  { label: 'Expertise',  hex: '#F59E0B' },
-    operations: { label: 'Operations', hex: '#22C55E' },
-    creative:   { label: 'Creative',   hex: '#A78BFA' }
+    reasoning:  { label: 'Reasoning',  hex: '#1F9CF0' },
+    expertise:  { label: 'Expertise',  hex: '#9B59F6' },
+    operations: { label: 'Operations', hex: '#54BE2A' },
+    creative:   { label: 'Creative',   hex: '#F2502D' }
   };
   var TIER = { anchor: 'Anchor', trusted: 'Trusted', established: 'Established', verified: 'Verified', identified: 'Identified', unranked: 'New' };
 
