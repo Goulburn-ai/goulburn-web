@@ -545,7 +545,7 @@
                                 Choose image
                             </button>
                             <input type="file" id="opAvatarUploadInput" accept="image/*" style="display:none;">
-                            <div class="op-field-help" id="opAvatarUploadStatus">PNG, JPEG, WebP, or GIF. Resized to 256&times;256, JPEG-compressed locally before saving.</div>
+                            <div class="op-field-help" id="opAvatarUploadStatus">PNG, JPEG, WebP, or GIF. Resized to 400&times;400, stored as a hosted JPEG.</div>
                         </div>
 
                     </div>
@@ -568,7 +568,7 @@
                                 Choose image
                             </button>
                             <input type="file" id="opBannerUploadInput" accept="image/*" style="display:none;">
-                            <div class="op-field-help" id="opBannerUploadStatus">PNG, JPEG, WebP, or GIF. Cover-cropped to 1200&times;300, JPEG-compressed locally before saving.</div>
+                            <div class="op-field-help" id="opBannerUploadStatus">PNG, JPEG, WebP, or GIF. Cover-cropped to 1584&times;396, stored as a hosted JPEG.</div>
                         </div>
 
                     </div>
@@ -1024,8 +1024,8 @@
                             document.getElementById('opEditModal').classList.add('show');
                             buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
                             buildBannerPickers(document.getElementById('opEditBanner').value || '');
-                            _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', _resizeAvatar, applyAvatarSelection);
-                            _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', _resizeBanner, applyBannerSelection);
+                            _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', 'avatar', applyAvatarSelection);
+                            _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', 'banner', applyBannerSelection);
                             setTimeout(function() {
                                 var p = document.getElementById('opAvatarPortraits');
                                 if (p) p.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1164,16 +1164,25 @@
 
         // ─────────────────────────────────────────────────────────
         // Image upload — client-side resize + JPEG compress to data URL.
-        // No backend storage; the data URL is saved straight into the avatar
-        // or banner field via PATCH /me/settings (TEXT column on Postgres).
+        // Uploads go to object storage (Cloudflare R2) via POST /me/{avatar,banner};
+        // the returned https URL is written into the hidden field and saved on Save.
+        // If storage is unconfigured (503) we fall back to an inline data URL.
         // ─────────────────────────────────────────────────────────
-        var MAX_INPUT_BYTES = 5 * 1024 * 1024; // 5MB raw input cap
+        var MAX_INPUT_BYTES = 8 * 1024 * 1024; // 8MB raw input cap
+
+        // Per-kind upload spec: canonical dimensions + endpoint. The server
+        // re-crops/re-encodes to these same dimensions, so the preview the
+        // operator sees matches what gets stored.
+        var UPLOAD_SPECS = {
+            avatar: { square: 400, quality: 0.92, endpoint: '/api/v1/operators/me/avatar' },
+            banner: { tw: 1584, th: 396, quality: 0.88, endpoint: '/api/v1/operators/me/banner' }
+        };
 
         function _readFileAsImage(file) {
             return new Promise(function(resolve, reject) {
                 if (!file) return reject(new Error('No file selected.'));
                 if (!/^image\//.test(file.type)) return reject(new Error('Please choose an image file (PNG, JPEG, WebP, GIF).'));
-                if (file.size > MAX_INPUT_BYTES) return reject(new Error('Image is larger than 5MB. Please pick a smaller file.'));
+                if (file.size > MAX_INPUT_BYTES) return reject(new Error('Image is larger than 8MB. Please pick a smaller file.'));
                 var reader = new FileReader();
                 reader.onload = function() {
                     var img = new Image();
@@ -1186,50 +1195,63 @@
             });
         }
 
-        function _resizeAvatar(img) {
-            // Square 256x256, contain-fit (centre-crop the longer dimension).
-            var TARGET = 256;
+        // Square centre-crop -> canvas (avatar). Black-filled like the server.
+        function _avatarCanvas(img, target) {
             var canvas = document.createElement('canvas');
-            canvas.width = TARGET; canvas.height = TARGET;
+            canvas.width = target; canvas.height = target;
             var ctx = canvas.getContext('2d');
-            // Centre-crop a square from the source then draw to target.
             var srcSize = Math.min(img.width, img.height);
-            var sx = (img.width - srcSize) / 2;
-            var sy = (img.height - srcSize) / 2;
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, TARGET, TARGET);
-            ctx.drawImage(img, sx, sy, srcSize, srcSize, 0, 0, TARGET, TARGET);
-            return canvas.toDataURL('image/jpeg', 0.85);
+            var sx = (img.width - srcSize) / 2, sy = (img.height - srcSize) / 2;
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, target, target);
+            ctx.drawImage(img, sx, sy, srcSize, srcSize, 0, 0, target, target);
+            return canvas;
         }
 
-        function _resizeBanner(img) {
-            // Banner 1200x300 cover-crop. Source aspect kept; cropped to 4:1.
-            var TW = 1200, TH = 300;
+        // Cover-crop to tw x th (banner). Keeps aspect, crops the overflow.
+        function _bannerCanvas(img, tw, th) {
             var canvas = document.createElement('canvas');
-            canvas.width = TW; canvas.height = TH;
+            canvas.width = tw; canvas.height = th;
             var ctx = canvas.getContext('2d');
-            // Compute cover-fit dest dimensions
-            var srcAspect = img.width / img.height;
-            var dstAspect = TW / TH;
+            var srcAspect = img.width / img.height, dstAspect = tw / th;
             var sx = 0, sy = 0, sw = img.width, sh = img.height;
-            if (srcAspect > dstAspect) {
-                // Source is wider than 4:1 -> crop sides
-                sw = img.height * dstAspect;
-                sx = (img.width - sw) / 2;
-            } else {
-                // Source is taller -> crop top/bottom
-                sh = img.width / dstAspect;
-                sy = (img.height - sh) / 2;
-            }
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, TW, TH);
-            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, TW, TH);
-            return canvas.toDataURL('image/jpeg', 0.80);
+            if (srcAspect > dstAspect) { sw = img.height * dstAspect; sx = (img.width - sw) / 2; }
+            else { sh = img.width / dstAspect; sy = (img.height - sh) / 2; }
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, tw, th);
+            ctx.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+            return canvas;
         }
 
-        function _wireUpload(btnId, inputId, statusId, processor, applyFn) {
+        function _canvasToBlob(canvas, quality) {
+            return new Promise(function(resolve, reject) {
+                if (canvas.toBlob) {
+                    canvas.toBlob(function(b) { b ? resolve(b) : reject(new Error('Could not encode image.')); }, 'image/jpeg', quality);
+                } else {
+                    try {
+                        var parts = canvas.toDataURL('image/jpeg', quality).split(',');
+                        var bin = atob(parts[1]), arr = new Uint8Array(bin.length);
+                        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                        resolve(new Blob([arr], { type: 'image/jpeg' }));
+                    } catch (e) { reject(e); }
+                }
+            });
+        }
+
+        // Build the kind-appropriate canvas at the given spec.
+        function _canvasFor(kind, img, spec) {
+            return kind === 'avatar'
+                ? _avatarCanvas(img, spec.square || 400)
+                : _bannerCanvas(img, spec.tw || 1584, spec.th || 396);
+        }
+
+        // Upload to object storage; on success the returned URL is applied.
+        // If the backend reports storage unconfigured (503), fall back to a
+        // small inline data URL so uploads keep working before R2 is wired.
+        function _wireUpload(btnId, inputId, statusId, kind, applyFn) {
             var btn = document.getElementById(btnId);
             var input = document.getElementById(inputId);
             var status = document.getElementById(statusId);
             if (!btn || !input) return;
+            var spec = UPLOAD_SPECS[kind];
             btn.onclick = function() { input.click(); };
             input.onchange = function() {
                 var file = input.files && input.files[0];
@@ -1237,21 +1259,44 @@
                 status.textContent = 'Processing image…';
                 status.style.color = 'rgba(247,249,249,0.55)';
                 _readFileAsImage(file).then(function(img) {
-                    var dataUrl = processor(img);
-                    var sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
-                    if (sizeKB > 240) {
-                        // Past our 256KB column tolerance — refuse rather than
-                        // saving and letting the backend reject.
-                        throw new Error('Compressed image is still too large (' + sizeKB + 'KB). Try a smaller crop.');
+                    var canvas = _canvasFor(kind, img, spec);
+                    return _canvasToBlob(canvas, spec.quality).then(function(blob) {
+                        status.textContent = 'Uploading…';
+                        var session = getSession();
+                        var headers = session ? { 'Authorization': 'Bearer ' + session } : {};
+                        var fd = new FormData();
+                        fd.append('file', blob, kind + '.jpg');
+                        return fetch(API_BASE + spec.endpoint, {
+                            method: 'POST', credentials: 'include', headers: headers, body: fd
+                        }).then(function(r) {
+                            if (r.ok) return r.json().then(function(j) { return { mode: 'url', url: j.url, kb: Math.round((j.bytes || blob.size) / 1024) }; });
+                            if (r.status === 503 || r.status === 404 || r.status === 501) return { mode: 'fallback' };
+                            return r.json().catch(function() { return {}; }).then(function(j) {
+                                throw new Error((j && j.detail) || ('Upload failed (HTTP ' + r.status + ')'));
+                            });
+                        });
+                    });
+                }).then(function(res) {
+                    if (res && res.mode === 'url') {
+                        applyFn(res.url);
+                        status.textContent = '✓ Uploaded (' + res.kb + 'KB). Click Save to keep it.';
+                        status.style.color = '#22C55E';
+                        return;
                     }
-                    applyFn(dataUrl);
-                    status.textContent = '✓ Uploaded (' + sizeKB + 'KB). Click Save to keep it.';
-                    status.style.color = '#22C55E';
+                    // Fallback: storage not configured -> legacy inline data URL.
+                    return _readFileAsImage(file).then(function(img2) {
+                        var small = kind === 'avatar' ? _avatarCanvas(img2, 256) : _bannerCanvas(img2, 1200, 300);
+                        var dataUrl = small.toDataURL('image/jpeg', kind === 'avatar' ? 0.85 : 0.8);
+                        var sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
+                        if (sizeKB > 240) throw new Error('Compressed image is still too large (' + sizeKB + 'KB). Try a smaller crop.');
+                        applyFn(dataUrl);
+                        status.textContent = '✓ Added (' + sizeKB + 'KB inline). Click Save to keep it.';
+                        status.style.color = '#22C55E';
+                    });
                 }).catch(function(err) {
-                    status.textContent = err.message;
+                    status.textContent = err.message || 'Upload failed.';
                     status.style.color = '#F87171';
                 }).then(function() {
-                    // Always reset so picking the same file again retriggers
                     input.value = '';
                 });
             };
@@ -1304,8 +1349,8 @@
                 errEl.style.display = 'none';
                 buildAvatarPickers(document.getElementById('opEditAvatar').value || '');
                 buildBannerPickers(document.getElementById('opEditBanner').value || '');
-                _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', _resizeAvatar, applyAvatarSelection);
-                _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', _resizeBanner, applyBannerSelection);
+                _wireUpload('opAvatarUploadBtn', 'opAvatarUploadInput', 'opAvatarUploadStatus', 'avatar', applyAvatarSelection);
+                _wireUpload('opBannerUploadBtn', 'opBannerUploadInput', 'opBannerUploadStatus', 'banner', applyBannerSelection);
             });
 
             // Auto-open the edit modal when the page is loaded with ?edit=1
