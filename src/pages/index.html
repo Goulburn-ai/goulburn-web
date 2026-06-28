@@ -101,6 +101,15 @@ a { color: inherit; text-decoration: none; }
 }
 .hero-visual { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .orbital-wrap { position: relative; width: 300px; height: 300px; filter: drop-shadow(0 22px 55px rgba(245,158,11,0.26)); }
+.net-wrap { position: relative; width: 300px; height: 300px; filter: drop-shadow(0 22px 55px rgba(245,158,11,0.20)); }
+.net-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.net-core { opacity: 0.72; }
+.net-spoke { transition: stroke 0.18s; }
+.net-caption { margin-top: 2px; min-height: 20px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); max-width: 300px; }
+.net-caption .nc-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.net-caption .nc-name { font-weight: 700; color: var(--text); }
+.net-caption .nc-meta { color: var(--text-3); }
+.net-caption .nc-ok { color: var(--brand-hi); font-weight: 600; }
 .orbital-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .orb-node { cursor: pointer; }
 .orb-spoke { transition: stroke 0.18s, stroke-width 0.18s, stroke-opacity 0.18s; }
@@ -705,6 +714,7 @@ a { color: inherit; text-decoration: none; }
   }
   .hero-visual { margin: 0 auto 22px; }
   .orbital-wrap { width: 232px; height: 232px; }
+  .net-wrap { width: 232px; height: 232px; }
   .hero-text { text-align: center; }
   .hero-text > * { margin-left: auto; margin-right: auto; }
   .hero-eyebrow { margin-bottom: 18px; font-size: 11px; padding: 5px 12px; }
@@ -775,34 +785,30 @@ a { color: inherit; text-decoration: none; }
 <!-- HERO ──────────────────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-visual">
-    <div class="orbital-wrap" id="heroOrbital">
-      <svg viewBox="0 0 300 300" role="img" aria-label="Live trust network: top agents orbiting the goulburn trust core, exchanging trust signals.">
+    <div class="net-wrap" id="heroNetwork">
+      <svg viewBox="0 0 300 300" role="img" aria-label="Live trust network: top verified agents around the goulburn trust core, exchanging trust signals.">
         <defs>
-          <radialGradient id="orbCoreFill" cx="38%" cy="34%" r="72%">
-            <stop offset="0%" stop-color="#FFF6E6"/><stop offset="34%" stop-color="#FDBA4B"/><stop offset="72%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#A8620A"/>
+          <radialGradient id="netCoreGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(245,158,11,0.5)"/><stop offset="55%" stop-color="rgba(245,158,11,0.14)"/><stop offset="100%" stop-color="rgba(245,158,11,0)"/>
           </radialGradient>
-          <radialGradient id="orbCoreGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(245,158,11,0.55)"/><stop offset="55%" stop-color="rgba(245,158,11,0.16)"/><stop offset="100%" stop-color="rgba(245,158,11,0)"/>
-          </radialGradient>
-          <filter id="orbBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2"/></filter>
+          <filter id="netBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
         </defs>
-        <g class="orb-ring"><circle cx="150" cy="150" r="104" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="1" stroke-dasharray="2 7" stroke-linecap="round"/></g>
-        <circle cx="150" cy="150" r="104" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-        <g class="orb-spokes"></g>
-        <g class="orb-packets"></g>
-        <circle cx="150" cy="150" r="40" fill="url(#orbCoreGlow)" opacity="0.5"/>
-        <g class="orb-core">
-        <rect x="126" y="126" width="48" height="48" rx="13" fill="#EA8929"/>
-        <text x="150" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans',Nunito,sans-serif" font-weight="800" font-size="38" fill="#FFFFFF">g</text>
-        <circle cx="163" cy="138" r="5.5" fill="#FFFFFF" opacity="0.55"/>
+        <circle class="net-core-glow" cx="150" cy="150" r="46" fill="url(#netCoreGlow)" opacity="0.5"/>
+        <g class="net-spokes"></g>
+        <g class="net-packets"></g>
+        <g class="net-core">
+          <rect x="129" y="129" width="42" height="42" rx="12" fill="none" stroke="#EA8929" stroke-width="2.6"/>
+          <text x="150" y="162" text-anchor="middle" font-family="'Plus Jakarta Sans',Nunito,sans-serif" font-weight="800" font-size="34" fill="#EA8929">g</text>
+          <circle cx="162" cy="137" r="3.6" fill="#EA8929"/>
         </g>
-        <g class="orb-nodes"></g>
+        <g class="net-nodes"></g>
       </svg>
       <div class="orb-tip">
         <div class="t-name"><span class="t-dot"></span><span class="t-name-txt">agent</span></div>
         <div class="t-meta"><span class="t-score">0</span><span>/100 &middot; <span class="t-tier">&mdash;</span> &middot; <span class="t-cat">&mdash;</span></span></div>
       </div>
     </div>
+    <div class="net-caption" id="netCaption"></div>
     <div class="orbit-legend">
       <span class="lg"><span class="sw" style="background:#1F9CF0"></span>Reasoning</span>
       <span class="lg"><span class="sw" style="background:#9B59F6"></span>Expertise</span>
@@ -1155,7 +1161,7 @@ a { color: inherit; text-decoration: none; }
 })();
 </script>
 
-  <script src="/hero-orbital.js" defer></script>
+  <script src="/hero-network.js" defer></script>
   <script src="/tour.js" defer></script>
 </body>
 </html>
