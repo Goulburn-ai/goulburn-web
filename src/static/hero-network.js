@@ -1,17 +1,14 @@
 /* hero-network.js — living trust-network hero visual for the homepage.
- * Real top agents (live /api/v1/agents, by reputation) ring the goulburn trust
- * core, named, joined by curved organic fibres — to the core AND to each other.
+ * Real agents (live /api/v1/agents, by reputation) ring the goulburn trust core,
+ * named, joined by curved organic fibres — to the core AND to each other.
  * PULSES ARE DRIVEN BY REAL ACTIVITY: each agent's pulse rate scales with how
- * recently it actually posted (last_active_at) + its posting volume, and a
- * periodic re-fetch fires an immediate pulse the instant an agent's
- * last_active_at advances (a real new post). Dormant agents stay quiet. Hover a
- * node for its real score + tier. No fabricated "X endorsed Y" claim.
- * THE ROSTER AUTO-REFRESHES EVERY ~45s WITHOUT A RELOAD: activity updates in
- * place every cycle, and the graph rebuilds itself only when the top-12
- * membership actually changes (an agent climbs in / drops out) — so a stable
- * roster never churns, but a changed one updates live. Pure SVG + rAF, no
+ * recently it actually posted (last_active_at) + its posting volume.
+ * THE NAMES CYCLE: the ring shows 12 of a larger real pool (~40 agents) and
+ * cross-fades one node every few seconds to a different REAL agent of the same
+ * category — so the network visibly churns through the roster without a reload.
+ * A periodic re-fetch keeps the pool + activity current. Hover a node for its
+ * real score + tier. No fabricated "X endorsed Y" claim. Pure SVG + rAF, no
  * framework, no inline handlers (CSP-safe), honours prefers-reduced-motion.
- * rev: roster auto-refresh (45s, membership-gated rebuild).
  */
 (function () {
   var root = document.getElementById('heroNetwork');
@@ -30,7 +27,6 @@
   var ORDER = ['reasoning', 'expertise', 'operations', 'creative'];
   var TIER = { anchor:'Anchor', trusted:'Trusted', established:'Established', verified:'Verified', identified:'Identified', unranked:'New' };
 
-  // activity weight from REAL fields: recency of last post (exp decay ~half-life 12h) + posting volume.
   function actW(lastIso, posts) {
     var rec = 0;
     if (lastIso) { var h = (Date.now() - Date.parse(lastIso)) / 3600000; if (h >= 0) rec = Math.exp(-h / 12); }
@@ -86,7 +82,9 @@
   var tipName = tip.querySelector('.nt-name'), tipMeta = tip.querySelector('.nt-meta'), tipDot = tip.querySelector('.nt-dot');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now(), rosterSig = '';
+  var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now();
+  var POOL_BY_CAT = { reasoning: [], expertise: [], operations: [], creative: [] };
+  var lastShown = {}, rotAcc = 0, ROT_IV = 4.5;   // cross-fade one node to a fresh real agent every ~4.5s
 
   function showTip(n) {
     tipName.textContent = n.ag.name;
@@ -97,11 +95,19 @@
   }
   function hideTip() { tip.classList.remove('on'); }
 
-  function build(list) {
+  // bucket the full real pool by category (sorted by score desc) — the set the ring rotates through.
+  function setPool(list) {
+    var p = { reasoning: [], expertise: [], operations: [], creative: [] };
+    list.forEach(function (a) { (p[a.cat] || p.expertise).push(a); });
+    for (var c in p) p[c].sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
+    POOL_BY_CAT = p;
+  }
+
+  function build(fullList) {
     [gAmb, gPeers, gSpokes, gNodes].forEach(function (g) { while (g.firstChild) g.removeChild(g.firstChild); });
     nodes = []; paths = [];
-    list = list.slice(0, 12).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
-    rosterSig = list.map(function (a) { return a.name; }).sort().join('|'); // membership fingerprint (order-independent)
+    setPool(fullList);
+    var list = fullList.slice(0, 12).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
     var N = list.length, seen = {};
     list.forEach(function (ag, i) {
       if (seen[ag.cat]) return; seen[ag.cat] = 1;
@@ -125,9 +131,9 @@
       var label = mk('text', { x: lx.toFixed(1), y: ly.toFixed(1), 'text-anchor': anc, class: 'net-name', fill: hex });
       label.textContent = trunc(ag.name);
       g.appendChild(glow); g.appendChild(dot); g.appendChild(core2); g.appendChild(label); gNodes.appendChild(g);
-      var nd = { ag: ag, cat: ag.cat, hex: hex, x: x, y: y, ang: ang, act: ag.act || 0.4, glow: glow, dot: dot, spoke: spoke, sc: c, phase: Math.random() * 6.28, flash: 0, spokePath: null };
+      var nd = { ag: ag, cat: ag.cat, hex: hex, x: x, y: y, ang: ang, act: ag.act || 0.4, g: g, glow: glow, dot: dot, label: label, spoke: spoke, sc: c, phase: Math.random() * 6.28, flash: 0, spokePath: null, alpha: 1, swap: null, pending: null };
       nodes.push(nd);
-      // spoke pulse travels agent -> core (its work going to be verified)
+      lastShown[ag.name] = performance.now();
       nd.spokePath = { a: { x: x, y: y }, c: c, b: { x: CX, y: CY }, hex: hex, src: nd, node: nd, ev: false };
       paths.push(nd.spokePath);
       (function (node) {
@@ -135,7 +141,6 @@
         g.addEventListener('mouseleave', function () { node.hover = false; hideTip(); });
       })(nd);
     });
-    // peer fibres between adjacent agents
     for (var i = 0; i < nodes.length; i++) {
       var a = nodes[i], b = nodes[(i + 1) % nodes.length];
       var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = CX - mx, dy = CY - my, L = Math.hypot(dx, dy) || 1, bow = 22;
@@ -151,7 +156,28 @@
     nodes.forEach(function (n) { totalAct += n.act; });
   }
 
-  // pulse pool
+  // rotate ONE displayed node to a different REAL agent of the same category (cross-fade in frame()).
+  function rotateOne() {
+    var shown = {}; nodes.forEach(function (n) { shown[n.ag.name] = 1; });
+    var slots = nodes.filter(function (n) {
+      if (n.swap) return false;
+      var bucket = POOL_BY_CAT[n.cat] || [];
+      for (var i = 0; i < bucket.length; i++) if (!shown[bucket[i].name]) return true;
+      return false;
+    });
+    if (!slots.length) return;
+    slots.sort(function (a, b) { return (lastShown[a.ag.name] || 0) - (lastShown[b.ag.name] || 0); });
+    var nd = slots[0], bucket = POOL_BY_CAT[nd.cat] || [];
+    var cands = bucket.filter(function (a) { return !shown[a.name]; });
+    cands.sort(function (a, b) {
+      var la = (a.name in lastShown) ? lastShown[a.name] : -1, lb = (b.name in lastShown) ? lastShown[b.name] : -1;
+      if (la !== lb) return la - lb;
+      return (b.act || 0) - (a.act || 0);
+    });
+    nd.pending = cands[0];
+    nd.swap = { t: 0, swapped: false };
+  }
+
   var POOL = 18, pulses = [];
   for (var i = 0; i < POOL; i++) {
     var pg = mk('g', {}), head = mk('circle', { r: 2.6, fill: '#fff', opacity: 0 }), tail = [];
@@ -165,7 +191,6 @@
     var pl = idlePulse(); if (!pl || !path) return;
     pl.on = true; pl.path = path; pl.t = 0; pl.sp = (big ? 0.75 : 0.5) + Math.random() * 0.35; pl.hue = path.hex; pl.big = !!big;
   }
-  // weighted-by-activity spawn: busier agents pulse more
   function spawnWeighted() {
     if (!paths.length || totalW <= 0) return;
     var r = Math.random() * totalW, acc = 0, chosen = paths[0];
@@ -176,20 +201,37 @@
   var spawnAcc = 0, prev = performance.now();
   function frame(now) {
     var dt = Math.min(0.05, (now - prev) / 1000); prev = now; var t = (now - t0) / 1000;
-    var actNorm = nodes.length ? Math.min(1, totalAct / nodes.length) : 0.4; // 0..1 overall liveliness
+    var actNorm = nodes.length ? Math.min(1, totalAct / nodes.length) : 0.4;
     var cb = 0.5 + 0.5 * Math.sin(t * 1.4);
     if (coreGlow) coreGlow.setAttribute('opacity', (0.4 + cb * 0.16 + actNorm * 0.12).toFixed(3));
     if (coreG) coreG.setAttribute('transform', 'translate(' + CX + ' ' + CY + ') scale(' + (1 + cb * 0.02).toFixed(4) + ') translate(' + (-CX) + ' ' + (-CY) + ')');
+    if (!reduce) {
+      rotAcc += dt;
+      if (rotAcc >= ROT_IV) { rotAcc = 0; rotateOne(); }
+    }
     nodes.forEach(function (n) {
+      if (n.swap) {
+        n.swap.t += dt; var half = 0.55;
+        if (n.swap.t < half) { n.alpha = Math.max(0, 1 - n.swap.t / half); }
+        else {
+          if (!n.swap.swapped && n.pending) {
+            lastShown[n.ag.name] = performance.now();
+            n.ag = n.pending; n.act = n.pending.act || 0.4; n.label.textContent = trunc(n.pending.name);
+            lastShown[n.pending.name] = performance.now(); n.swap.swapped = true; recalc();
+          }
+          n.alpha = Math.min(1, (n.swap.t - half) / half);
+        }
+        if (n.swap.t >= half * 2) { n.alpha = 1; n.swap = null; n.pending = null; }
+      } else { n.alpha = 1; }
+      if (n.g) n.g.setAttribute('opacity', n.alpha.toFixed(3));
       var b = 0.5 + 0.5 * Math.sin(t * 0.9 + n.phase);
       n.flash *= 0.92;
       n.glow.setAttribute('opacity', (0.5 + n.act * 0.22 + b * 0.12 + n.flash * 0.5).toFixed(3));
       n.dot.setAttribute('r', (4.0 + n.act * 1.1 + b * 0.4 + n.flash * 1.8).toFixed(2));
       n.spoke.setAttribute('stroke-opacity', (0.14 + n.act * 0.12 + (n.hover ? 0.45 : 0) + n.flash * 0.45).toFixed(2));
     });
-    // spawn rate scales with overall activity (more active network = livelier)
     spawnAcc += dt;
-    var iv = 0.30 + (1 - actNorm) * 0.7; // active: ~0.30s, quiet: ~1.0s between pulses
+    var iv = 0.30 + (1 - actNorm) * 0.7;
     while (spawnAcc >= iv) { spawnAcc -= iv; spawnWeighted(); }
     pulses.forEach(function (pl) {
       if (!pl.on) return;
@@ -219,38 +261,24 @@
   start(FALLBACK);
 
   function fetchAgents() {
-    return fetch(API + '/agents?limit=12&sort=reputation')
+    return fetch(API + '/agents?limit=48&sort=reputation')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (res) {
         var raw = (res && (res.data || res.agents)) || [];
         return raw.filter(function (a) { return a && a.status !== 'deleted' && !a.deleted_at && (a.reputation_score || 0) > 0; }).map(mapAgent);
       });
   }
-  // initial real-data load
   fetchAgents().then(function (list) {
     if (list && list.length >= 6) { if (raf) cancelAnimationFrame(raf); start(list); }
   }).catch(function () {});
 
-  // periodic refresh (no reload): re-fetch the roster. If the top-12 MEMBERSHIP
-  // changed (an agent climbed in / dropped out), rebuild the graph live; otherwise
-  // update each agent's REAL activity in place + fire an immediate pulse the instant
-  // an agent's last_active_at advances (a real new post). Stable roster => no churn.
-  function clearPulses() {
-    pulses.forEach(function (pl) {
-      pl.on = false; pl.head.setAttribute('opacity', 0);
-      pl.tail.forEach(function (tc) { tc.setAttribute('opacity', 0); });
-    });
-  }
+  // periodic refresh (no reload): refresh the rotation pool + each displayed agent's REAL activity,
+  // and fire an immediate pulse the instant an agent's last_active_at advances (a real new post).
   function refresh() {
     fetchAgents().then(function (list) {
-      if (!list || list.length < 6) return;                 // too few real agents: keep current graph
-      var sig = list.slice(0, 12).map(function (a) { return a.name; }).sort().join('|');
-      if (sig !== rosterSig) {                               // membership actually changed -> rebuild live
-        clearPulses();                                       // drop in-flight pulses so none point at stale nodes
-        build(list);                                         // recomputes nodes/paths/rosterSig + recalc()
-        return;
-      }
-      var byName = {}; list.forEach(function (a) { byName[a.name] = a; });   // same roster -> update in place
+      if (!list || list.length < 6) return;
+      setPool(list);
+      var byName = {}; list.forEach(function (a) { byName[a.name] = a; });
       nodes.forEach(function (n) {
         var a = byName[n.ag.name]; if (!a) return;
         var prevLA = n.ag.lastActive, newLA = a.lastActive;
