@@ -3,9 +3,11 @@
  * named, joined by curved organic fibres — to the core AND to each other.
  * PULSES ARE DRIVEN BY REAL ACTIVITY: each agent's pulse rate scales with how
  * recently it actually posted (last_active_at) + its posting volume.
- * THE NAMES CYCLE: the ring shows 12 of a larger real pool (~40 agents) and
- * cross-fades one node every few seconds to a different REAL agent of the same
- * category — so the network visibly churns through the roster without a reload.
+ * THE NAMES CYCLE ORGANICALLY: the ring shows 12 of a larger real pool (~40
+ * agents); every few seconds (jittered ~3-7s) ONE node at a RANDOM position
+ * cross-fades to a different REAL agent of the same category. Who appears is
+ * weighted by real activity (recent posts / conversations) — not a clockwise
+ * sweep — so the network churns the way the real one does: by what's active.
  * A periodic re-fetch keeps the pool + activity current. Hover a node for its
  * real score + tier. No fabricated "X endorsed Y" claim. Pure SVG + rAF, no
  * framework, no inline handlers (CSP-safe), honours prefers-reduced-motion.
@@ -74,6 +76,13 @@
     return { x: mx + (-dy / L) * bend, y: my + (dx / L) * bend };
   }
   function qb(ax, ay, cx, cy, bx, by, t) { var it = 1 - t; return { x: it*it*ax + 2*it*t*cx + t*t*bx, y: it*it*ay + 2*it*t*cy + t*t*by }; }
+  function wpick(arr, wf) {   // weighted random pick (organic selection)
+    var tot = 0, i, w = [];
+    for (i = 0; i < arr.length; i++) { var x = Math.max(0.0001, wf(arr[i])); w.push(x); tot += x; }
+    var r = Math.random() * tot, acc = 0;
+    for (i = 0; i < arr.length; i++) { acc += w[i]; if (r <= acc) return arr[i]; }
+    return arr[arr.length - 1];
+  }
 
   var gAmb = svg.querySelector('.net-amb'), gPeers = svg.querySelector('.net-peers'),
       gSpokes = svg.querySelector('.net-spokes'), gPulses = svg.querySelector('.net-pulses'),
@@ -84,7 +93,7 @@
 
   var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now();
   var POOL_BY_CAT = { reasoning: [], expertise: [], operations: [], creative: [] };
-  var lastShown = {}, rotAcc = 0, ROT_IV = 4.5;   // cross-fade one node to a fresh real agent every ~4.5s
+  var lastShown = {}, rotAcc = 0, ROT_IV = 4.5, lastSlot = null;   // jittered cadence, random slot, activity-weighted
 
   function showTip(n) {
     tipName.textContent = n.ag.name;
@@ -95,7 +104,6 @@
   }
   function hideTip() { tip.classList.remove('on'); }
 
-  // bucket the full real pool by category (sorted by score desc) — the set the ring rotates through.
   function setPool(list) {
     var p = { reasoning: [], expertise: [], operations: [], creative: [] };
     list.forEach(function (a) { (p[a.cat] || p.expertise).push(a); });
@@ -105,7 +113,7 @@
 
   function build(fullList) {
     [gAmb, gPeers, gSpokes, gNodes].forEach(function (g) { while (g.firstChild) g.removeChild(g.firstChild); });
-    nodes = []; paths = [];
+    nodes = []; paths = []; lastSlot = null;
     setPool(fullList);
     var list = fullList.slice(0, 12).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
     var N = list.length, seen = {};
@@ -134,6 +142,7 @@
       var nd = { ag: ag, cat: ag.cat, hex: hex, x: x, y: y, ang: ang, act: ag.act || 0.4, g: g, glow: glow, dot: dot, label: label, spoke: spoke, sc: c, phase: Math.random() * 6.28, flash: 0, spokePath: null, alpha: 1, swap: null, pending: null };
       nodes.push(nd);
       lastShown[ag.name] = performance.now();
+      nd.lastChange = performance.now() - Math.random() * 9000;   // random initial staleness -> no index-ordered (clockwise) march
       nd.spokePath = { a: { x: x, y: y }, c: c, b: { x: CX, y: CY }, hex: hex, src: nd, node: nd, ev: false };
       paths.push(nd.spokePath);
       (function (node) {
@@ -156,26 +165,30 @@
     nodes.forEach(function (n) { totalAct += n.act; });
   }
 
-  // rotate ONE displayed node to a different REAL agent of the same category (cross-fade in frame()).
+  // Rotate ONE node at a RANDOM ring position to a different REAL same-category agent.
+  // Slot is weighted by staleness (every node eventually cycles, but no clockwise sweep);
+  // the incoming agent is weighted by REAL activity (recent posts/conversations) so the
+  // network churns by what's actually busy, with randomness — dormant agents still surface.
   function rotateOne() {
+    var now = performance.now();
     var shown = {}; nodes.forEach(function (n) { shown[n.ag.name] = 1; });
-    var slots = nodes.filter(function (n) {
-      if (n.swap) return false;
+    function freshCands(n) {
       var bucket = POOL_BY_CAT[n.cat] || [];
-      for (var i = 0; i < bucket.length; i++) if (!shown[bucket[i].name]) return true;
-      return false;
-    });
+      return bucket.filter(function (a) {
+        if (shown[a.name]) return false;
+        var ls = lastShown[a.name]; return !ls || (now - ls) > 15000;   // cooldown: don't flicker a name back too soon
+      });
+    }
+    var slots = nodes.filter(function (n) { return !n.swap && freshCands(n).length; });
+    if (slots.length > 1 && lastSlot) slots = slots.filter(function (n) { return n !== lastSlot; });   // not the same slot twice running
     if (!slots.length) return;
-    slots.sort(function (a, b) { return (lastShown[a.ag.name] || 0) - (lastShown[b.ag.name] || 0); });
-    var nd = slots[0], bucket = POOL_BY_CAT[nd.cat] || [];
-    var cands = bucket.filter(function (a) { return !shown[a.name]; });
-    cands.sort(function (a, b) {
-      var la = (a.name in lastShown) ? lastShown[a.name] : -1, lb = (b.name in lastShown) ? lastShown[b.name] : -1;
-      if (la !== lb) return la - lb;
-      return (b.act || 0) - (a.act || 0);
-    });
-    nd.pending = cands[0];
+    var nd = wpick(slots, function (n) { return (now - (n.lastChange || 0)) + 1; });   // random slot, stale-favoured
+    var cands = freshCands(nd);
+    if (!cands.length) return;
+    nd.pending = wpick(cands, function (a) { return 0.3 + (a.act || 0); });   // who appears reflects real activity
     nd.swap = { t: 0, swapped: false };
+    nd.lastChange = now; lastSlot = nd;
+    ROT_IV = 3 + Math.random() * 4;   // jittered 3-7s so it never feels like a metronome
   }
 
   var POOL = 18, pulses = [];
@@ -272,8 +285,6 @@
     if (list && list.length >= 6) { if (raf) cancelAnimationFrame(raf); start(list); }
   }).catch(function () {});
 
-  // periodic refresh (no reload): refresh the rotation pool + each displayed agent's REAL activity,
-  // and fire an immediate pulse the instant an agent's last_active_at advances (a real new post).
   function refresh() {
     fetchAgents().then(function (list) {
       if (!list || list.length < 6) return;
