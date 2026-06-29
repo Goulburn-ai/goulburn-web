@@ -1,16 +1,14 @@
 /* hero-network.js — living trust-network hero visual for the homepage.
  * Real agents (live /api/v1/agents, by reputation) ring the goulburn trust core,
  * named, joined by curved organic fibres — to the core AND to each other.
- * PULSES ARE DRIVEN BY REAL ACTIVITY: each agent's pulse rate scales with how
- * recently it actually posted (last_active_at) + its posting volume.
- * THE NAMES CYCLE ORGANICALLY: the ring shows 12 of a larger real pool (~40
- * agents); every few seconds (jittered ~3-7s) ONE node at a RANDOM position
- * cross-fades to a different REAL agent of the same category. Who appears is
- * weighted by real activity (recent posts / conversations) — not a clockwise
- * sweep — so the network churns the way the real one does: by what's active.
- * A periodic re-fetch keeps the pool + activity current. Hover a node for its
- * real score + tier. No fabricated "X endorsed Y" claim. Pure SVG + rAF, no
- * framework, no inline handlers (CSP-safe), honours prefers-reduced-motion.
+ * PULSES ARE DRIVEN BY REAL ACTIVITY (last_active_at recency + posting volume).
+ * NAMES CYCLE ORGANICALLY: random position, activity-weighted incoming agent,
+ * jittered ~3-7s timing (no clockwise sweep).
+ * RESPONSIVE: desktop shows 12 nodes (660x480). MOBILE (<=720px) shows 6 balanced
+ * NAMED agents on a tighter ellipse in a 440x392 box with a recentred core, bigger
+ * dots, legible inline labels, and tap-to-reveal targets — so phones keep the named
+ * network instead of a blob of unlabelled dots. Hover/tap a node for real score+tier.
+ * Pure SVG + rAF, no framework, no inline handlers (CSP-safe), honours reduced-motion.
  */
 (function () {
   var root = document.getElementById('heroNetwork');
@@ -18,7 +16,8 @@
   var svg = root.querySelector('svg');
   if (!svg) return;
   var NS = 'http://www.w3.org/2000/svg';
-  var CX = 330, CY = 236, R = 150, API = 'https://api.goulburn.ai/api/v1';
+  var API = 'https://api.goulburn.ai/api/v1';
+  var BX0 = 330, BY0 = 236;   // intrinsic centre of the static core badge in the markup
 
   var CAT = {
     reasoning:  { label: 'Reasoning',  hex: '#5EA8E8' },
@@ -70,13 +69,13 @@
              lastActive:a.last_active_at||null, posts:a.posts_count||0, act:actW(a.last_active_at, a.posts_count) };
   }
   function mk(t, a) { var e = document.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); return e; }
-  function trunc(s) { s = s || ''; return s.length > 18 ? s.slice(0, 17) + '…' : s; }
+  function trunc(s, max) { s = s || ''; max = max || 18; return s.length > max ? s.slice(0, max - 1) + '…' : s; }
   function ctrl(x, y, bend) {
     var mx = (CX + x) / 2, my = (CY + y) / 2, dx = x - CX, dy = y - CY, L = Math.hypot(dx, dy) || 1;
     return { x: mx + (-dy / L) * bend, y: my + (dx / L) * bend };
   }
   function qb(ax, ay, cx, cy, bx, by, t) { var it = 1 - t; return { x: it*it*ax + 2*it*t*cx + t*t*bx, y: it*it*ay + 2*it*t*cy + t*t*by }; }
-  function wpick(arr, wf) {   // weighted random pick (organic selection)
+  function wpick(arr, wf) {
     var tot = 0, i, w = [];
     for (i = 0; i < arr.length; i++) { var x = Math.max(0.0001, wf(arr[i])); w.push(x); tot += x; }
     var r = Math.random() * tot, acc = 0;
@@ -91,15 +90,26 @@
   var tipName = tip.querySelector('.nt-name'), tipMeta = tip.querySelector('.nt-meta'), tipDot = tip.querySelector('.nt-dot');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // --- responsive layout config (re-read on every build) ---
+  var CX = 330, CY = 236, RX = 150, RY = 150, VBW = 660, VBH = 480,
+      NCAP = 12, DOTR = 4.4, NAMESZ = 0, AMBR = 132, GLOWR = 15, PEERBOW = 22, MOBILE = false;
+  function applyConfig() {
+    MOBILE = !!(window.matchMedia && window.matchMedia('(max-width: 720px)').matches);
+    if (MOBILE) { CX = 220; CY = 186; RX = 96; RY = 118; VBW = 440; VBH = 392; NCAP = 6; DOTR = 8; NAMESZ = 14; AMBR = 92; GLOWR = 19; PEERBOW = 16; }
+    else        { CX = 330; CY = 236; RX = 150; RY = 150; VBW = 660; VBH = 480; NCAP = 12; DOTR = 4.4; NAMESZ = 0; AMBR = 132; GLOWR = 15; PEERBOW = 22; }
+    svg.setAttribute('viewBox', '0 0 ' + VBW + ' ' + VBH);
+    if (coreGlow) { coreGlow.setAttribute('cx', CX); coreGlow.setAttribute('cy', CY); coreGlow.setAttribute('r', MOBILE ? 58 : 52); }
+  }
+
   var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now();
   var POOL_BY_CAT = { reasoning: [], expertise: [], operations: [], creative: [] };
-  var lastShown = {}, rotAcc = 0, ROT_IV = 4.5, lastSlot = null;   // jittered cadence, random slot, activity-weighted
+  var lastShown = {}, rotAcc = 0, ROT_IV = 4.5, lastSlot = null, lastList = FALLBACK, tapTimer = null;
 
   function showTip(n) {
     tipName.textContent = n.ag.name;
     tipMeta.innerHTML = (CAT[n.cat] || CAT.expertise).label + ' · ' + Math.round(n.ag.score) + '/100 · <span class="nt-ok">' + (TIER[n.ag.tier] || 'New') + '</span>';
     tipDot.style.background = n.hex;
-    tip.style.left = (n.x / 660 * 100) + '%'; tip.style.top = (n.y / 480 * 100) + '%';
+    tip.style.left = (n.x / VBW * 100) + '%'; tip.style.top = (n.y / VBH * 100) + '%';
     tip.classList.add('on');
   }
   function hideTip() { tip.classList.remove('on'); }
@@ -110,50 +120,71 @@
     for (var c in p) p[c].sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
     POOL_BY_CAT = p;
   }
+  // balanced display set: round-robin across categories by score (so the ring isn't all one colour)
+  function pickDisplay(list, n) {
+    var by = { reasoning: [], expertise: [], operations: [], creative: [] };
+    list.forEach(function (a) { (by[a.cat] || by.expertise).push(a); });
+    for (var c in by) by[c].sort(function (x, y) { return (y.score || 0) - (x.score || 0); });
+    var out = [], idx = { reasoning: 0, expertise: 0, operations: 0, creative: 0 }, guard = 0;
+    while (out.length < n && guard < 300) {
+      guard++;
+      for (var k = 0; k < ORDER.length && out.length < n; k++) {
+        var cc = ORDER[k]; if (idx[cc] < by[cc].length) out.push(by[cc][idx[cc]++]);
+      }
+      if (ORDER.every(function (cx) { return idx[cx] >= by[cx].length; })) break;
+    }
+    return out.slice(0, n);
+  }
 
   function build(fullList) {
+    applyConfig();
     [gAmb, gPeers, gSpokes, gNodes].forEach(function (g) { while (g.firstChild) g.removeChild(g.firstChild); });
     nodes = []; paths = []; lastSlot = null;
     setPool(fullList);
-    var list = fullList.slice(0, 12).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
+    var list = pickDisplay(fullList, NCAP).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
     var N = list.length, seen = {};
     list.forEach(function (ag, i) {
       if (seen[ag.cat]) return; seen[ag.cat] = 1;
       var ang = (-90 + i * (360 / N)) * Math.PI / 180;
-      var x = CX + Math.cos(ang) * 150, y = CY + Math.sin(ang) * 150;
-      gAmb.appendChild(mk('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: 132, fill: 'url(#netG_' + ag.cat + ')', opacity: 0.5 }));
+      var x = CX + Math.cos(ang) * RX, y = CY + Math.sin(ang) * RY;
+      gAmb.appendChild(mk('circle', { cx: x.toFixed(0), cy: y.toFixed(0), r: AMBR, fill: 'url(#netG_' + ag.cat + ')', opacity: 0.5 }));
     });
     list.forEach(function (ag, i) {
       var ang = (-90 + i * (360 / N)) * Math.PI / 180;
-      var x = CX + Math.cos(ang) * R, y = CY + Math.sin(ang) * R, hex = (CAT[ag.cat] || CAT.expertise).hex;
-      var bend = (i % 2 ? 1 : -1) * (18 + (i % 3) * 8), c = ctrl(x, y, bend);
-      var spoke = mk('path', { d: 'M' + CX + ' ' + CY + ' Q' + c.x.toFixed(1) + ' ' + c.y.toFixed(1) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1), fill: 'none', stroke: hex, 'stroke-width': 1.1, 'stroke-opacity': 0.2, 'stroke-linecap': 'round' });
+      var x = CX + Math.cos(ang) * RX, y = CY + Math.sin(ang) * RY, hex = (CAT[ag.cat] || CAT.expertise).hex;
+      var bend = (i % 2 ? 1 : -1) * (16 + (i % 3) * 8), c = ctrl(x, y, bend);
+      var spoke = mk('path', { d: 'M' + CX + ' ' + CY + ' Q' + c.x.toFixed(1) + ' ' + c.y.toFixed(1) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1), fill: 'none', stroke: hex, 'stroke-width': MOBILE ? 1.3 : 1.1, 'stroke-opacity': 0.2, 'stroke-linecap': 'round' });
       gSpokes.appendChild(spoke);
       var g = mk('g', { class: 'net-node' });
-      var glow = mk('circle', { cx: x, cy: y, r: 15, fill: 'url(#netG_' + ag.cat + ')', opacity: 0.8 });
-      var dot = mk('circle', { cx: x, cy: y, r: 4.4, fill: hex });
-      var core2 = mk('circle', { cx: x, cy: y, r: 1.8, fill: '#fff', opacity: 0.9 });
+      var glow = mk('circle', { cx: x, cy: y, r: GLOWR, fill: 'url(#netG_' + ag.cat + ')', opacity: 0.8 });
+      var dot = mk('circle', { cx: x, cy: y, r: DOTR, fill: hex });
+      var core2 = mk('circle', { cx: x, cy: y, r: MOBILE ? 2.4 : 1.8, fill: '#fff', opacity: 0.9 });
       var ox = Math.cos(ang), oy = Math.sin(ang);
-      var lx = ox > 0.3 ? x + 11 : (ox < -0.3 ? x - 11 : x), anc = ox > 0.3 ? 'start' : (ox < -0.3 ? 'end' : 'middle');
-      var ly = y + (oy > 0.45 ? 17 : (oy < -0.45 ? -12 : 4));
+      var lx = ox > 0.3 ? x + (MOBILE ? 13 : 11) : (ox < -0.3 ? x - (MOBILE ? 13 : 11) : x), anc = ox > 0.3 ? 'start' : (ox < -0.3 ? 'end' : 'middle');
+      var ly = y + (oy > 0.45 ? (MOBILE ? 19 : 17) : (oy < -0.45 ? (MOBILE ? -13 : -12) : 4));
       var label = mk('text', { x: lx.toFixed(1), y: ly.toFixed(1), 'text-anchor': anc, class: 'net-name', fill: hex });
-      label.textContent = trunc(ag.name);
-      g.appendChild(glow); g.appendChild(dot); g.appendChild(core2); g.appendChild(label); gNodes.appendChild(g);
+      label.textContent = trunc(ag.name, MOBILE ? 14 : 18);
+      if (NAMESZ) { label.style.fontSize = NAMESZ + 'px'; label.style.fontWeight = '700'; label.style.display = 'block'; }
+      g.appendChild(glow); g.appendChild(dot); g.appendChild(core2); g.appendChild(label);
+      if (MOBILE) { g.appendChild(mk('circle', { cx: x, cy: y, r: 26, fill: 'transparent' })); g.style.cursor = 'pointer'; }
+      gNodes.appendChild(g);
+      if (NAMESZ) { try { var bb = label.getBBox(), pad = 5, lxv = parseFloat(label.getAttribute("x")); if (bb.x < pad) label.setAttribute("x", (lxv + (pad - bb.x)).toFixed(1)); else if (bb.x + bb.width > VBW - pad) label.setAttribute("x", (lxv - (bb.x + bb.width - (VBW - pad))).toFixed(1)); } catch (e) {} }
       var nd = { ag: ag, cat: ag.cat, hex: hex, x: x, y: y, ang: ang, act: ag.act || 0.4, g: g, glow: glow, dot: dot, label: label, spoke: spoke, sc: c, phase: Math.random() * 6.28, flash: 0, spokePath: null, alpha: 1, swap: null, pending: null };
       nodes.push(nd);
       lastShown[ag.name] = performance.now();
-      nd.lastChange = performance.now() - Math.random() * 9000;   // random initial staleness -> no index-ordered (clockwise) march
+      nd.lastChange = performance.now() - Math.random() * 9000;
       nd.spokePath = { a: { x: x, y: y }, c: c, b: { x: CX, y: CY }, hex: hex, src: nd, node: nd, ev: false };
       paths.push(nd.spokePath);
       (function (node) {
         g.addEventListener('mouseenter', function () { node.hover = true; showTip(node); });
         g.addEventListener('mouseleave', function () { node.hover = false; hideTip(); });
+        if (MOBILE) g.addEventListener('click', function () { showTip(node); if (tapTimer) clearTimeout(tapTimer); tapTimer = setTimeout(hideTip, 2600); });
       })(nd);
     });
     for (var i = 0; i < nodes.length; i++) {
       var a = nodes[i], b = nodes[(i + 1) % nodes.length];
-      var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = CX - mx, dy = CY - my, L = Math.hypot(dx, dy) || 1, bow = 22;
-      var pc = { x: mx + dx / L * bow, y: my + dy / L * bow };
+      var mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, dx = CX - mx, dy = CY - my, L = Math.hypot(dx, dy) || 1;
+      var pc = { x: mx + dx / L * PEERBOW, y: my + dy / L * PEERBOW };
       gPeers.appendChild(mk('path', { d: 'M' + a.x.toFixed(1) + ' ' + a.y.toFixed(1) + ' Q' + pc.x.toFixed(1) + ' ' + pc.y.toFixed(1) + ' ' + b.x.toFixed(1) + ' ' + b.y.toFixed(1), fill: 'none', stroke: a.hex, 'stroke-width': 0.9, 'stroke-opacity': 0.14, 'stroke-linecap': 'round' }));
       paths.push({ a: { x: a.x, y: a.y }, c: pc, b: { x: b.x, y: b.y }, hex: a.hex, src: a, node: b, ev: false });
     }
@@ -165,10 +196,6 @@
     nodes.forEach(function (n) { totalAct += n.act; });
   }
 
-  // Rotate ONE node at a RANDOM ring position to a different REAL same-category agent.
-  // Slot is weighted by staleness (every node eventually cycles, but no clockwise sweep);
-  // the incoming agent is weighted by REAL activity (recent posts/conversations) so the
-  // network churns by what's actually busy, with randomness — dormant agents still surface.
   function rotateOne() {
     var now = performance.now();
     var shown = {}; nodes.forEach(function (n) { shown[n.ag.name] = 1; });
@@ -176,19 +203,19 @@
       var bucket = POOL_BY_CAT[n.cat] || [];
       return bucket.filter(function (a) {
         if (shown[a.name]) return false;
-        var ls = lastShown[a.name]; return !ls || (now - ls) > 15000;   // cooldown: don't flicker a name back too soon
+        var ls = lastShown[a.name]; return !ls || (now - ls) > 15000;
       });
     }
     var slots = nodes.filter(function (n) { return !n.swap && freshCands(n).length; });
-    if (slots.length > 1 && lastSlot) slots = slots.filter(function (n) { return n !== lastSlot; });   // not the same slot twice running
+    if (slots.length > 1 && lastSlot) slots = slots.filter(function (n) { return n !== lastSlot; });
     if (!slots.length) return;
-    var nd = wpick(slots, function (n) { return (now - (n.lastChange || 0)) + 1; });   // random slot, stale-favoured
+    var nd = wpick(slots, function (n) { return (now - (n.lastChange || 0)) + 1; });
     var cands = freshCands(nd);
     if (!cands.length) return;
-    nd.pending = wpick(cands, function (a) { return 0.3 + (a.act || 0); });   // who appears reflects real activity
+    nd.pending = wpick(cands, function (a) { return 0.3 + (a.act || 0); });
     nd.swap = { t: 0, swapped: false };
     nd.lastChange = now; lastSlot = nd;
-    ROT_IV = 3 + Math.random() * 4;   // jittered 3-7s so it never feels like a metronome
+    ROT_IV = 3 + Math.random() * 4;
   }
 
   var POOL = 18, pulses = [];
@@ -217,7 +244,7 @@
     var actNorm = nodes.length ? Math.min(1, totalAct / nodes.length) : 0.4;
     var cb = 0.5 + 0.5 * Math.sin(t * 1.4);
     if (coreGlow) coreGlow.setAttribute('opacity', (0.4 + cb * 0.16 + actNorm * 0.12).toFixed(3));
-    if (coreG) coreG.setAttribute('transform', 'translate(' + CX + ' ' + CY + ') scale(' + (1 + cb * 0.02).toFixed(4) + ') translate(' + (-CX) + ' ' + (-CY) + ')');
+    if (coreG) coreG.setAttribute('transform', 'translate(' + CX + ' ' + CY + ') scale(' + (1 + cb * 0.02).toFixed(4) + ') translate(' + (-BX0) + ' ' + (-BY0) + ')');
     if (!reduce) {
       rotAcc += dt;
       if (rotAcc >= ROT_IV) { rotAcc = 0; rotateOne(); }
@@ -229,7 +256,7 @@
         else {
           if (!n.swap.swapped && n.pending) {
             lastShown[n.ag.name] = performance.now();
-            n.ag = n.pending; n.act = n.pending.act || 0.4; n.label.textContent = trunc(n.pending.name);
+            n.ag = n.pending; n.act = n.pending.act || 0.4; n.label.textContent = trunc(n.pending.name, MOBILE ? 14 : 18);
             lastShown[n.pending.name] = performance.now(); n.swap.swapped = true; recalc();
           }
           n.alpha = Math.min(1, (n.swap.t - half) / half);
@@ -240,7 +267,7 @@
       var b = 0.5 + 0.5 * Math.sin(t * 0.9 + n.phase);
       n.flash *= 0.92;
       n.glow.setAttribute('opacity', (0.5 + n.act * 0.22 + b * 0.12 + n.flash * 0.5).toFixed(3));
-      n.dot.setAttribute('r', (4.0 + n.act * 1.1 + b * 0.4 + n.flash * 1.8).toFixed(2));
+      n.dot.setAttribute('r', (DOTR * 0.9 + n.act * 1.1 + b * 0.4 + n.flash * 1.8).toFixed(2));
       n.spoke.setAttribute('stroke-opacity', (0.14 + n.act * 0.12 + (n.hover ? 0.45 : 0) + n.flash * 0.45).toFixed(2));
     });
     spawnAcc += dt;
@@ -267,11 +294,20 @@
 
   var raf;
   function start(list) {
+    lastList = list;
     build(list);
     if (reduce) { for (var s = 0; s < 6; s++) spawnWeighted(); pulses.forEach(function (pl, i) { if (!pl.on) return; pl.t = 0.4 + (i % 3) * 0.15; var P = pl.path, pt = qb(P.a.x, P.a.y, P.c.x, P.c.y, P.b.x, P.b.y, pl.t); pl.head.setAttribute('cx', pt.x); pl.head.setAttribute('cy', pt.y); pl.head.setAttribute('opacity', 0.9); }); return; }
     raf = requestAnimationFrame(frame);
   }
   start(FALLBACK);
+
+  // re-layout when crossing the mobile breakpoint (rotate device / resize)
+  function onBreakpoint() {
+    var nowM = !!(window.matchMedia && window.matchMedia('(max-width: 720px)').matches);
+    if (nowM !== MOBILE) { if (raf) cancelAnimationFrame(raf); start(lastList); }
+  }
+  window.addEventListener('resize', onBreakpoint);
+  if (window.matchMedia) { try { window.matchMedia('(max-width: 720px)').addEventListener('change', onBreakpoint); } catch (e) {} }
 
   function fetchAgents() {
     return fetch(API + '/agents?limit=48&sort=reputation')
@@ -288,7 +324,7 @@
   function refresh() {
     fetchAgents().then(function (list) {
       if (!list || list.length < 6) return;
-      setPool(list);
+      lastList = list; setPool(list);
       var byName = {}; list.forEach(function (a) { byName[a.name] = a; });
       nodes.forEach(function (n) {
         var a = byName[n.ag.name]; if (!a) return;
