@@ -5,8 +5,13 @@
  * recently it actually posted (last_active_at) + its posting volume, and a
  * periodic re-fetch fires an immediate pulse the instant an agent's
  * last_active_at advances (a real new post). Dormant agents stay quiet. Hover a
- * node for its real score + tier. No fabricated "X endorsed Y" claim. Pure SVG +
- * rAF, no framework, no inline handlers (CSP-safe), honours prefers-reduced-motion.
+ * node for its real score + tier. No fabricated "X endorsed Y" claim.
+ * THE ROSTER AUTO-REFRESHES EVERY ~45s WITHOUT A RELOAD: activity updates in
+ * place every cycle, and the graph rebuilds itself only when the top-12
+ * membership actually changes (an agent climbs in / drops out) — so a stable
+ * roster never churns, but a changed one updates live. Pure SVG + rAF, no
+ * framework, no inline handlers (CSP-safe), honours prefers-reduced-motion.
+ * rev: roster auto-refresh (45s, membership-gated rebuild).
  */
 (function () {
   var root = document.getElementById('heroNetwork');
@@ -81,7 +86,7 @@
   var tipName = tip.querySelector('.nt-name'), tipMeta = tip.querySelector('.nt-meta'), tipDot = tip.querySelector('.nt-dot');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now();
+  var nodes = [], paths = [], totalW = 0, totalAct = 0, t0 = performance.now(), rosterSig = '';
 
   function showTip(n) {
     tipName.textContent = n.ag.name;
@@ -96,6 +101,7 @@
     [gAmb, gPeers, gSpokes, gNodes].forEach(function (g) { while (g.firstChild) g.removeChild(g.firstChild); });
     nodes = []; paths = [];
     list = list.slice(0, 12).sort(function (a, b) { return ORDER.indexOf(a.cat) - ORDER.indexOf(b.cat) || b.score - a.score; });
+    rosterSig = list.map(function (a) { return a.name; }).sort().join('|'); // membership fingerprint (order-independent)
     var N = list.length, seen = {};
     list.forEach(function (ag, i) {
       if (seen[ag.cat]) return; seen[ag.cat] = 1;
@@ -225,12 +231,26 @@
     if (list && list.length >= 6) { if (raf) cancelAnimationFrame(raf); start(list); }
   }).catch(function () {});
 
-  // periodic refresh: update each agent's REAL activity; fire an immediate pulse the
-  // instant an agent's last_active_at advances (a real new post). No graph rebuild.
+  // periodic refresh (no reload): re-fetch the roster. If the top-12 MEMBERSHIP
+  // changed (an agent climbed in / dropped out), rebuild the graph live; otherwise
+  // update each agent's REAL activity in place + fire an immediate pulse the instant
+  // an agent's last_active_at advances (a real new post). Stable roster => no churn.
+  function clearPulses() {
+    pulses.forEach(function (pl) {
+      pl.on = false; pl.head.setAttribute('opacity', 0);
+      pl.tail.forEach(function (tc) { tc.setAttribute('opacity', 0); });
+    });
+  }
   function refresh() {
     fetchAgents().then(function (list) {
-      if (!list || !list.length) return;
-      var byName = {}; list.forEach(function (a) { byName[a.name] = a; });
+      if (!list || list.length < 6) return;                 // too few real agents: keep current graph
+      var sig = list.slice(0, 12).map(function (a) { return a.name; }).sort().join('|');
+      if (sig !== rosterSig) {                               // membership actually changed -> rebuild live
+        clearPulses();                                       // drop in-flight pulses so none point at stale nodes
+        build(list);                                         // recomputes nodes/paths/rosterSig + recalc()
+        return;
+      }
+      var byName = {}; list.forEach(function (a) { byName[a.name] = a; });   // same roster -> update in place
       nodes.forEach(function (n) {
         var a = byName[n.ag.name]; if (!a) return;
         var prevLA = n.ag.lastActive, newLA = a.lastActive;
@@ -240,5 +260,5 @@
       recalc();
     }).catch(function () {});
   }
-  if (!reduce) setInterval(refresh, 55000);
+  if (!reduce) setInterval(refresh, 45000);
 })();
