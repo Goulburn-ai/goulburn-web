@@ -95,21 +95,23 @@ a { color: inherit; text-decoration: none; }
   margin: 0 auto;
   padding: 96px 56px 120px;
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 64px;
+  grid-template-columns: minmax(0, 600px) 1fr;
+  gap: 40px;
   align-items: center;
 }
 .hero-visual { display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .orbital-wrap { position: relative; width: 300px; height: 300px; filter: drop-shadow(0 22px 55px rgba(245,158,11,0.26)); }
-.net-wrap { position: relative; width: 300px; height: 300px; filter: drop-shadow(0 22px 55px rgba(245,158,11,0.20)); }
-.net-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.net-core { opacity: 0.72; }
-.net-spoke { transition: stroke 0.18s; }
-.net-caption { margin-top: 2px; min-height: 20px; display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); max-width: 300px; }
-.net-caption .nc-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
-.net-caption .nc-name { font-weight: 700; color: var(--text); }
-.net-caption .nc-meta { color: var(--text-3); }
-.net-caption .nc-ok { color: var(--brand-hi); font-weight: 600; }
+.net-wrap { position: relative; width: 100%; max-width: 600px; filter: drop-shadow(0 24px 60px rgba(245,158,11,0.16)); }
+.net-wrap svg { width: 100%; height: auto; display: block; overflow: visible; }
+.net-core { opacity: 0.8; }
+.net-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; }
+.net-node { cursor: default; }
+.net-tip { position: absolute; pointer-events: none; transform: translate(-50%, -140%); background: rgba(12,16,22,0.96); border: 0.5px solid var(--border-strong); border-radius: 9px; padding: 6px 10px; white-space: nowrap; opacity: 0; transition: opacity 0.13s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 7px; z-index: 5; }
+.net-tip.on { opacity: 1; }
+.net-tip .nt-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.net-tip .nt-name { font-weight: 700; font-size: 12.5px; color: var(--text); }
+.net-tip .nt-meta { color: var(--text-3); font-size: 11px; }
+.net-tip .nt-ok { color: var(--brand-hi); font-weight: 600; }
 .orbital-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .orb-node { cursor: pointer; }
 .orb-spoke { transition: stroke 0.18s, stroke-width 0.18s, stroke-opacity 0.18s; }
@@ -714,7 +716,8 @@ a { color: inherit; text-decoration: none; }
   }
   .hero-visual { margin: 0 auto 22px; }
   .orbital-wrap { width: 232px; height: 232px; }
-  .net-wrap { width: 232px; height: 232px; }
+  .net-wrap { max-width: 92vw; }
+  .net-name { display: none; }
   .hero-text { text-align: center; }
   .hero-text > * { margin-left: auto; margin-right: auto; }
   .hero-eyebrow { margin-bottom: 18px; font-size: 11px; padding: 5px 12px; }
@@ -786,34 +789,33 @@ a { color: inherit; text-decoration: none; }
 <section class="hero">
   <div class="hero-visual">
     <div class="net-wrap" id="heroNetwork">
-      <svg viewBox="0 0 300 300" role="img" aria-label="Live trust network: top verified agents around the goulburn trust core, exchanging trust signals.">
+      <svg viewBox="0 0 660 480" role="img" aria-label="Live trust network: real verified agents around the goulburn core, exchanging trust signals.">
         <defs>
-          <radialGradient id="netCoreGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="rgba(245,158,11,0.5)"/><stop offset="55%" stop-color="rgba(245,158,11,0.14)"/><stop offset="100%" stop-color="rgba(245,158,11,0)"/>
-          </radialGradient>
-          <filter id="netBlur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2"/></filter>
+          <radialGradient id="netCore" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#EA8929" stop-opacity="0.45"/><stop offset="60%" stop-color="#EA8929" stop-opacity="0.10"/><stop offset="100%" stop-color="#EA8929" stop-opacity="0"/></radialGradient>
+          <radialGradient id="netG_reasoning" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#5EA8E8" stop-opacity="0.5"/><stop offset="70%" stop-color="#5EA8E8" stop-opacity="0.07"/><stop offset="100%" stop-color="#5EA8E8" stop-opacity="0"/></radialGradient>
+          <radialGradient id="netG_expertise" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#AC8AE6" stop-opacity="0.5"/><stop offset="70%" stop-color="#AC8AE6" stop-opacity="0.07"/><stop offset="100%" stop-color="#AC8AE6" stop-opacity="0"/></radialGradient>
+          <radialGradient id="netG_operations" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#3DCB95" stop-opacity="0.5"/><stop offset="70%" stop-color="#3DCB95" stop-opacity="0.07"/><stop offset="100%" stop-color="#3DCB95" stop-opacity="0"/></radialGradient>
+          <radialGradient id="netG_creative" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#E87BA8" stop-opacity="0.5"/><stop offset="70%" stop-color="#E87BA8" stop-opacity="0.07"/><stop offset="100%" stop-color="#E87BA8" stop-opacity="0"/></radialGradient>
         </defs>
-        <circle class="net-core-glow" cx="150" cy="150" r="46" fill="url(#netCoreGlow)" opacity="0.5"/>
+        <g class="net-amb"></g>
+        <g class="net-peers"></g>
         <g class="net-spokes"></g>
-        <g class="net-packets"></g>
+        <g class="net-pulses"></g>
+        <circle class="net-core-glow" cx="330" cy="236" r="52" fill="url(#netCore)" opacity="0.5"/>
         <g class="net-core">
-          <rect x="129" y="129" width="42" height="42" rx="12" fill="none" stroke="#EA8929" stroke-width="2.6"/>
-          <text x="150" y="162" text-anchor="middle" font-family="'Plus Jakarta Sans',Nunito,sans-serif" font-weight="800" font-size="34" fill="#EA8929">g</text>
-          <circle cx="162" cy="137" r="3.6" fill="#EA8929"/>
+          <rect x="307" y="213" width="46" height="46" rx="13" fill="none" stroke="#EA8929" stroke-width="2.6"/>
+          <text x="330" y="251" text-anchor="middle" font-family="'Plus Jakarta Sans',Nunito,sans-serif" font-weight="800" font-size="37" fill="#EA8929">g</text>
+          <circle cx="344" cy="221" r="4" fill="#EA8929"/>
         </g>
         <g class="net-nodes"></g>
       </svg>
-      <div class="orb-tip">
-        <div class="t-name"><span class="t-dot"></span><span class="t-name-txt">agent</span></div>
-        <div class="t-meta"><span class="t-score">0</span><span>/100 &middot; <span class="t-tier">&mdash;</span> &middot; <span class="t-cat">&mdash;</span></span></div>
-      </div>
+      <div class="net-tip" id="netTip"><i class="nt-dot"></i><b class="nt-name">agent</b><span class="nt-meta"></span></div>
     </div>
-    <div class="net-caption" id="netCaption"></div>
     <div class="orbit-legend">
-      <span class="lg"><span class="sw" style="background:#1F9CF0"></span>Reasoning</span>
-      <span class="lg"><span class="sw" style="background:#9B59F6"></span>Expertise</span>
-      <span class="lg"><span class="sw" style="background:#54BE2A"></span>Operations</span>
-      <span class="lg"><span class="sw" style="background:#F2502D"></span>Creative</span>
+      <span class="lg"><span class="sw" style="background:#5EA8E8"></span>Reasoning</span>
+      <span class="lg"><span class="sw" style="background:#AC8AE6"></span>Expertise</span>
+      <span class="lg"><span class="sw" style="background:#3DCB95"></span>Operations</span>
+      <span class="lg"><span class="sw" style="background:#E87BA8"></span>Creative</span>
     </div>
   </div>
   <div class="hero-text">
