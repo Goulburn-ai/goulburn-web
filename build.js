@@ -279,3 +279,100 @@ if (fs.existsSync(NETWORK_PRO)) {
 } else {
     console.warn('network-pro.js missing from public/ — Phase 3 of network-advanced not in this build.');
 }
+
+// ══════════════════════════════════════════════════════════════════════════
+// SEO (2026-07-02): build-time, API-driven sitemap + prerendered agent profiles.
+// Replaces the hand-maintained sitemap (which had gone 89% stale — 17/19 listed
+// agents 404'd) with one generated from the LIVE API, and prerenders
+// public/agents/<slug>/index.html per real agent so crawlers + social scrapers get
+// correct per-agent <title>/description/canonical/OG instead of the generic
+// template. Vercel serves these static files BEFORE the /agents/:name→agent.html
+// rewrite, so real agents get the prerendered page and everything else falls back
+// to the client-rendered template. FAIL-SAFE: any API/network error writes a clean
+// static-pages-only sitemap and skips prerender — the build never fails, and never
+// ships dead agent URLs.
+// ══════════════════════════════════════════════════════════════════════════
+(function () {
+  var SEO_ORIGIN = 'https://goulburn.ai';
+  var SEO_API = 'https://api.goulburn.ai/api/v1/agents';
+  var SEO_STATIC = ['/', '/agents', '/about', '/pricing', '/agents/register', '/register', '/api/docs', '/changelog', '/privacy', '/terms', '/accessibility'];
+  var SAFE = /^[a-zA-Z0-9._-]{1,80}$/;
+
+  function esc(s) { return String(s).replace(/[<>&'"]/g, function (c) { return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]; }); }
+  function pretty(slug) { return String(slug).replace(/[-_]+/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); }).replace(/\bAi\b/g, 'AI'); }
+  function trunc(s, n) { s = String(s || '').replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s; }
+  function indexable(a) {
+    if (!a || a.deleted_at) return false;
+    if (!SAFE.test(a.name || '')) return false;
+    if (String(a.description || '').trim().length < 20) return false;
+    var tier = String(a.tier || '').toLowerCase();
+    var score = Number(a.reputation_score) || 0;
+    return tier === 'established' || (tier === 'verified' && score >= 45);
+  }
+  function staticRows(today) {
+    return SEO_STATIC.map(function (p) {
+      return '  <url><loc>' + esc(SEO_ORIGIN + p) + '</loc><lastmod>' + today + '</lastmod><changefreq>weekly</changefreq><priority>' + (p === '/' ? '1.0' : '0.8') + '</priority></url>';
+    });
+  }
+  function writeSitemap(rows) {
+    fs.writeFileSync(path.join(OUT, 'sitemap.xml'), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + rows.join('\n') + '\n</urlset>\n', 'utf8');
+  }
+
+  async function fetchAgents() {
+    var out = [], cursor = null, pages = 0;
+    do {
+      var url = SEO_API + '?limit=100&sort=reputation' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '');
+      var r = await fetch(url, { headers: { accept: 'application/json' } });
+      if (!r.ok) throw new Error('API ' + r.status);
+      var j = await r.json();
+      var arr = Array.isArray(j) ? j : (j.data || []);
+      for (var i = 0; i < arr.length; i++) out.push(arr[i]);
+      cursor = (j && j.next_cursor) || null;
+      pages++;
+    } while (cursor && pages < 25);
+    return out;
+  }
+
+  async function run() {
+    var raw = await fetchAgents();
+    var seen = Object.create(null), uniq = [];
+    raw.forEach(function (a) { var n = a && a.name; if (n && !seen[n]) { seen[n] = 1; uniq.push(a); } });
+    var agents = uniq.filter(indexable)
+      .sort(function (a, b) { return (Number(b.reputation_score) || 0) - (Number(a.reputation_score) || 0); })
+      .slice(0, 80);
+    if (!agents.length) throw new Error('no indexable agents returned');
+
+    var today = new Date().toISOString().slice(0, 10);
+    var rows = staticRows(today);
+    agents.forEach(function (a) {
+      var lm = String(a.last_active_at || a.created_at || today).slice(0, 10);
+      rows.push('  <url><loc>' + esc(SEO_ORIGIN + '/agents/' + a.name) + '</loc><lastmod>' + lm + '</lastmod><changefreq>weekly</changefreq><priority>0.6</priority></url>');
+    });
+    writeSitemap(rows);
+
+    var tpl = fs.readFileSync(path.join(OUT, 'agent.html'), 'utf8');
+    var made = 0;
+    agents.forEach(function (a) {
+      var slug = a.name, nice = pretty(slug), canon = SEO_ORIGIN + '/agents/' + slug;
+      var title = nice + ' — AI agent trust profile · goulburn.ai';
+      var descRaw = String(a.description || '').trim();
+      var metaDesc = trunc(descRaw + ' — verified trust profile for AI agent ' + slug + ' on goulburn.ai.', 160);
+      var html = tpl
+        .replace(/<title>Agent Profile[^<]*<\/title>/, '<title>' + esc(title) + '</title>')
+        .replace(/<meta name="description" content="Agent profile on goulburn\.ai[^"]*">/, '<meta name="description" content="' + esc(metaDesc) + '">\n    <link rel="canonical" href="' + canon + '">')
+        .replace(/<meta property="og:title" content="Agent Profile[^"]*">/, '<meta property="og:title" content="' + esc(nice + ' · goulburn.ai') + '">')
+        .replace(/<meta property="og:description" content="View this AI agent[^"]*">/, '<meta property="og:description" content="' + esc(trunc(descRaw, 200)) + '">\n    <meta property="og:url" content="' + canon + '">');
+      var dir = path.join(OUT, 'agents', slug);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'index.html'), html, 'utf8');
+      made++;
+    });
+    console.log('[seo] sitemap=' + rows.length + ' urls; prerendered ' + made + ' agent profiles');
+  }
+
+  run().catch(function (e) {
+    console.warn('[seo] agent step skipped:', e.message);
+    try { writeSitemap(staticRows(new Date().toISOString().slice(0, 10))); console.warn('[seo] wrote static-only fallback sitemap'); }
+    catch (e2) { console.warn('[seo] fallback sitemap failed:', e2.message); }
+  });
+})();
