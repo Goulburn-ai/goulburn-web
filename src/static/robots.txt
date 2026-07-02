@@ -1,11 +1,19 @@
 # goulburn.ai — robots.txt
 #
-# Human search engines (Googlebot, Bingbot, DuckDuckBot, Applebot, etc.) use the
-# default "*" group below and remain ALLOWED, so normal SEO is unaffected.
-# AI/LLM training + scraping crawlers are disallowed in the dedicated group
-# further down. These bots honour robots.txt; note that robots.txt is advisory —
-# it stops well-behaved crawlers, not malicious ones (that needs a network-layer
-# block: Cloudflare proxy or the Vercel firewall).
+# Three groups below:
+#   1. "*"                 — human search engines (Googlebot, Bingbot, Applebot,
+#                            DuckDuckBot, etc.) stay ALLOWED so SEO is unaffected.
+#   2. AI answer engines   — ChatGPT Search, Perplexity, and Claude's user- and
+#                            search-facing bots stay ALLOWED so goulburn.ai remains
+#                            citable in AI answers. These are ALSO allowed at the
+#                            network layer (Vercel firewall).
+#   3. AI training/scrapers — fully DISALLOWED. These crawlers harvest content for
+#                            model training or bulk scraping; they are also blocked
+#                            at the network layer (Vercel firewall rule
+#                            "Block AI training + scraping crawlers" → 403).
+#
+# robots.txt is advisory — it stops well-behaved crawlers, not malicious ones.
+# The network-layer Vercel firewall is the enforcement backstop.
 
 User-agent: *
 Allow: /
@@ -19,21 +27,39 @@ Disallow: /unauthorized
 Disallow: /maintenance
 
 # ────────────────────────────────────────────────────────────────────────
-# AI / LLM crawlers — fully disallowed.
-# Google-Extended and Applebot-Extended block ONLY AI-training use; Google
-# Search (Googlebot) and Apple search (Applebot) indexing are unaffected.
-# NOTE: this group also blocks AI *answer engines* (ChatGPT search, Perplexity)
-# from citing goulburn.ai — remove OAI-SearchBot / ChatGPT-User / Perplexity*
-# from this list if you want to stay citable by AI while still blocking training.
+# AI answer / search engines — ALLOWED (kept citable).
+# User-triggered fetchers (ChatGPT-User, Perplexity-User, Claude-User) and
+# answer-index crawlers (OAI-SearchBot, PerplexityBot, Claude-SearchBot) may
+# crawl public pages so goulburn.ai stays citable in ChatGPT, Perplexity and
+# Claude. Private/authenticated areas remain disallowed below.
+# These UAs are intentionally EXCLUDED from the Vercel firewall block.
 # ────────────────────────────────────────────────────────────────────────
-User-agent: GPTBot
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+Allow: /
+
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /capabilities
+Disallow: /verify
+Disallow: /unauthorized
+Disallow: /maintenance
+
+# ────────────────────────────────────────────────────────────────────────
+# AI training / scraping crawlers — fully DISALLOWED.
+# Google-Extended and Applebot-Extended block ONLY AI-training use; Google
+# Search (Googlebot) and Apple search (Applebot) indexing are unaffected.
+# These crawlers are also hard-blocked (403) at the Vercel firewall.
+# ────────────────────────────────────────────────────────────────────────
+User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: anthropic-ai
 User-agent: Claude-Web
-User-agent: Claude-User
-User-agent: Claude-SearchBot
 User-agent: Google-Extended
 User-agent: GoogleOther
 User-agent: Applebot-Extended
@@ -42,8 +68,6 @@ User-agent: Bytespider
 User-agent: Meta-ExternalAgent
 User-agent: meta-externalagent
 User-agent: FacebookBot
-User-agent: PerplexityBot
-User-agent: Perplexity-User
 User-agent: CCBot
 User-agent: Diffbot
 User-agent: Omgilibot
